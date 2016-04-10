@@ -1,0 +1,12 @@
+font {
+	start_char : 32
+	end_char : 128
+	char_height : 14
+	grid_height : 21
+	start_x : 0
+	start_y : 300
+	width : 405
+	height : 168
+	padding : 6
+	texture_size : 1024
+}

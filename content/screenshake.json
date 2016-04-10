@@ -1,0 +1,5 @@
+settings {
+	ttl : 0.3
+	frequency : 2.0
+	amplitude : 10
+}

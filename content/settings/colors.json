@@ -1,0 +1,18 @@
+"settings" {
+
+	"flash_ttl" : "0.6" ,
+	"flash_scale_start" : "0.9" ,
+	"flash_scale" : "0.2" ,
+	"flash_rect" : "680,320,52,52" ,
+	"tweening_ttl" : "2.0" ,
+	"tweening_y_offset" : "60" ,
+	"tweening_y_add" : "1000" ,
+	"dropping_ttl" : "0.3" ,
+	"gray_scale_factor" : "2.0" ,
+	"shake_period" : "15" ,
+	"shake_amount" : "3" ,
+	"timer_pos" : "750,680" ,
+	"score_pos" : "125,680" ,
+	"percentage_pos" : "512,50"
+
+}

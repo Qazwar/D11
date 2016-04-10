@@ -1,0 +1,8 @@
+MainMenu {
+	id : 1
+	file : "MainMenu"
+}
+GameOver {
+	id : 3
+	file : "GameOver"
+}

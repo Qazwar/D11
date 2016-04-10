@@ -1,0 +1,37 @@
+basic_settings {
+	name : "Stuff"
+	screen_width : 1024
+	screen_height : 768
+	clear_color : 16,16,16,255
+	initialize_editor : false 
+	full_screen : false
+	synched : true 
+	mode : 1
+	reporting_directory : "reports"
+}		
+
+init_actions {
+	textures : "TextureArray" 
+	fonts {
+		xscale {
+			file : "xscale"
+			texture : "TextureArray"
+		}
+	}
+	use_text_system {
+		font : "xscale"
+		texture : "TextureArray"
+	}
+	load_dialogs : true 
+	initialize_imgui {
+		font : "xscale"
+		texture : "gui"
+	}
+	load_particles : false
+	load_sprite_templates : true
+	initialize_editor : true
+	load_behaviors : false
+	start_server : false
+	server_port : 9000
+	load_postfx : true
+}

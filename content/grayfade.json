@@ -1,0 +1,5 @@
+settings {
+	ttl : 1.5
+	mode : 0
+	tweening_type : 0
+}

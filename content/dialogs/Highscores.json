@@ -1,0 +1,120 @@
+"text" { 
+    "id" : "1" , 
+    "pos" : "150,450" , 
+    "color" : "255,255,255,255" , 
+    "centered" : "false" , 
+    "scale" : "1.00" , 
+    "text" : "1."    
+}
+"text" { 
+    "id" : "2" , 
+    "pos" : "150,400" , 
+    "color" : "255,255,255,255" , 
+    "centered" : "false" , 
+    "scale" : "1.00" , 
+    "text" : "2."    
+}
+"text" { 
+    "id" : "3" , 
+    "pos" : "150,350" , 
+    "color" : "255,255,255,255" , 
+    "centered" : "false" , 
+    "scale" : "1.00" , 
+    "text" : "3."    
+}
+"text" { 
+    "id" : "4" , 
+    "pos" : "150,300" , 
+    "color" : "255,255,255,255" , 
+    "centered" : "false" , 
+    "scale" : "1.00" , 
+    "text" : "4."    
+}
+"text" { 
+    "id" : "5" , 
+    "pos" : "150,250" , 
+    "color" : "255,255,255,255" , 
+    "centered" : "false" , 
+    "scale" : "1.00" , 
+    "text" : "5."    
+}
+"text" { 
+    "id" : "10" , 
+    "pos" : "200,450" , 
+    "color" : "255,255,255,255" , 
+    "centered" : "false" , 
+    "scale" : "1.00" , 
+    "text" : "First place"    
+}
+"text" { 
+    "id" : "11" , 
+    "pos" : "200,400" , 
+    "color" : "255,255,255,255" , 
+    "centered" : "false" , 
+    "scale" : "1.00" , 
+    "text" : "Second place"    
+}
+"text" { 
+    "id" : "12" , 
+    "pos" : "200,350" , 
+    "color" : "255,255,255,255" , 
+    "centered" : "false" , 
+    "scale" : "1.00" , 
+    "text" : "Third place"    
+}
+"text" { 
+    "id" : "13" , 
+    "pos" : "200,300" , 
+    "color" : "255,255,255,255" , 
+    "centered" : "false" , 
+    "scale" : "1.00" , 
+    "text" : "Fourth place"    
+}
+"text" { 
+    "id" : "14" , 
+    "pos" : "200,250" , 
+    "color" : "255,255,255,255" , 
+    "centered" : "false" , 
+    "scale" : "1.00" , 
+    "text" : "Some Kind of long na"    
+}
+"text" { 
+    "id" : "20" , 
+    "pos" : "700,450" , 
+    "color" : "255,255,255,255" , 
+    "centered" : "false" , 
+    "scale" : "1.00" , 
+    "text" : "000000"    
+}
+"numbers" { 
+    "id" : "21" , 
+    "pos" : "700,400" , 
+    "color" : "255,255,255,255" , 
+    "centered" : "false" , 
+    "scale" : "1.00" , 
+    "length" : "6"    
+}
+"numbers" { 
+    "id" : "22" , 
+    "pos" : "700,350" , 
+    "color" : "255,255,255,255" , 
+    "centered" : "false" , 
+    "scale" : "1.00" , 
+    "length" : "6"    
+}
+"numbers" { 
+    "id" : "23" , 
+    "pos" : "700,300" , 
+    "color" : "255,255,255,255" , 
+    "centered" : "false" , 
+    "scale" : "1.00" , 
+    "length" : "6"       
+}
+"numbers" { 
+    "id" : "24" , 
+    "pos" : "700,250" , 
+    "color" : "255,255,255,255" , 
+    "centered" : "false" , 
+    "scale" : "1.00" , 
+    "length" : "6"    
+}

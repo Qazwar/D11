@@ -1,0 +1,878 @@
+font {
+    start_x : 680
+    start_y : 720
+    texture_size : 1024 
+}
+item {
+	id : 0
+	x : 202
+	y : 205
+	width : 21
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 10
+	x : 0
+	y : 0
+	width : 0
+	height : 0
+	xoffset : -1
+	yoffset : 0
+}
+item {
+	id : 32
+	x : 0
+	y : 0
+	width : 0
+	height : 0
+	xoffset : -1
+	yoffset : 0
+}
+item {
+	id : 33
+	x : 175
+	y : 123
+	width : 12
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 34
+	x : 232
+	y : 82
+	width : 16
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 35
+	x : 109
+	y : 205
+	width : 24
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 36
+	x : 0
+	y : 205
+	width : 22
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 37
+	x : 22
+	y : 205
+	width : 37
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 38
+	x : 152
+	y : 205
+	width : 29
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 39
+	x : 210
+	y : 123
+	width : 10
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 40
+	x : 12
+	y : 164
+	width : 14
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 41
+	x : 26
+	y : 164
+	width : 14
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 42
+	x : 0
+	y : 0
+	width : 0
+	height : 0
+	xoffset : -1
+	yoffset : 0
+}
+item {
+	id : 43
+	x : 59
+	y : 205
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 44
+	x : 230
+	y : 123
+	width : 11
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 45
+	x : 239
+	y : 164
+	width : 14
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 46
+	x : 220
+	y : 123
+	width : 10
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 47
+	x : 145
+	y : 164
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 48
+	x : 150
+	y : 123
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 49
+	x : 157
+	y : 82
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 50
+	x : 182
+	y : 82
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 51
+	x : 207
+	y : 82
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 52
+	x : 0
+	y : 123
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 53
+	x : 25
+	y : 123
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 54
+	x : 50
+	y : 123
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 55
+	x : 75
+	y : 123
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 56
+	x : 100
+	y : 123
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 57
+	x : 125
+	y : 123
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 58
+	x : 0
+	y : 164
+	width : 12
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 59
+	x : 241
+	y : 123
+	width : 12
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 60
+	x : 94
+	y : 164
+	width : 21
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 61
+	x : 84
+	y : 205
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 62
+	x : 115
+	y : 164
+	width : 21
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 63
+	x : 187
+	y : 123
+	width : 23
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 64
+	x : 170
+	y : 164
+	width : 32
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 65
+	x : 0
+	y : 0
+	width : 26
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 66
+	x : 26
+	y : 0
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 67
+	x : 51
+	y : 0
+	width : 23
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 68
+	x : 74
+	y : 0
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 69
+	x : 99
+	y : 0
+	width : 23
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 70
+	x : 122
+	y : 0
+	width : 23
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 71
+	x : 145
+	y : 0
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 72
+	x : 170
+	y : 0
+	width : 26
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 73
+	x : 196
+	y : 0
+	width : 11
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 74
+	x : 207
+	y : 0
+	width : 14
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 75
+	x : 221
+	y : 0
+	width : 24
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 76
+	x : 0
+	y : 41
+	width : 22
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 77
+	x : 22
+	y : 41
+	width : 33
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 78
+	x : 55
+	y : 41
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 79
+	x : 80
+	y : 41
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 80
+	x : 105
+	y : 41
+	width : 24
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 81
+	x : 129
+	y : 41
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 82
+	x : 154
+	y : 41
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 83
+	x : 179
+	y : 41
+	width : 23
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 84
+	x : 202
+	y : 41
+	width : 20
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 85
+	x : 222
+	y : 41
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 86
+	x : 0
+	y : 82
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 87
+	x : 25
+	y : 82
+	width : 34
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 88
+	x : 59
+	y : 82
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 89
+	x : 84
+	y : 82
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 90
+	x : 109
+	y : 82
+	width : 23
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 91
+	x : 40
+	y : 164
+	width : 12
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 92
+	x : 202
+	y : 164
+	width : 14
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 93
+	x : 52
+	y : 164
+	width : 12
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 94
+	x : 216
+	y : 164
+	width : 23
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 95
+	x : 133
+	y : 205
+	width : 19
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 96
+	x : 245
+	y : 0
+	width : 9
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 97
+	x : 0
+	y : 0
+	width : 26
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 98
+	x : 26
+	y : 0
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 99
+	x : 51
+	y : 0
+	width : 23
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 100
+	x : 74
+	y : 0
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 101
+	x : 99
+	y : 0
+	width : 23
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 102
+	x : 122
+	y : 0
+	width : 23
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 103
+	x : 145
+	y : 0
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 104
+	x : 170
+	y : 0
+	width : 26
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 105
+	x : 196
+	y : 0
+	width : 11
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 106
+	x : 207
+	y : 0
+	width : 14
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 107
+	x : 221
+	y : 0
+	width : 24
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 108
+	x : 0
+	y : 41
+	width : 22
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 109
+	x : 22
+	y : 41
+	width : 33
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 110
+	x : 55
+	y : 41
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 111
+	x : 80
+	y : 41
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 112
+	x : 105
+	y : 41
+	width : 24
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 113
+	x : 129
+	y : 41
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 114
+	x : 154
+	y : 41
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 115
+	x : 179
+	y : 41
+	width : 23
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 116
+	x : 202
+	y : 41
+	width : 20
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 117
+	x : 132
+	y : 82
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 118
+	x : 0
+	y : 82
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 119
+	x : 25
+	y : 82
+	width : 34
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 120
+	x : 59
+	y : 82
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 121
+	x : 84
+	y : 82
+	width : 25
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 122
+	x : 109
+	y : 82
+	width : 23
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 123
+	x : 64
+	y : 164
+	width : 15
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 124
+	x : 136
+	y : 164
+	width : 9
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 125
+	x : 79
+	y : 164
+	width : 15
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}
+item {
+	id : 126
+	x : 181
+	y : 205
+	width : 21
+	height : 41
+	xoffset : -1
+	yoffset : -1
+}

@@ -1,0 +1,28 @@
+"dialog" { 
+	"name" : "Credits" 
+}
+"image" { "id" : "10" , "pos" : "200,710" , "rect" : "204,0,502,94" }
+
+"image" { "id" : "11" , "pos" : "400,490" , "rect" : "230,510,400,40" , "centered" : "false" }
+"image" { "id" : "12" , "pos" : "400,280" , "rect" : "272,510,400,40" , "centered" : "false" }
+"image" { "id" : "13" , "pos" : "203,385" , "rect" : "316,510,6,170" , "centered" : "false" }
+"image" { "id" : "14" , "pos" : "847,385" , "rect" : "316,510,6,170" , "centered" : "false" }
+"image" { "id" : "15" , "pos" : "725,490" , "rect" : "230,760,250,40" , "centered" : "false" }
+"image" { "id" : "16" , "pos" : "725,280" , "rect" : "272,760,250,40" , "centered" : "false" }
+
+"text" { 
+	"id" : "3" , "pos" : "400,700" , "text" : "Credits" , "color" : "255,255,255,255" , "scale" : "1.5" 
+}
+"text" { "id" : "4" , "pos" : "250,450" , "text" : "Code:" , "centered" : "false"  }
+"text" { "id" : "5" , "pos" : "250,400" , "text" : "Graphics:"  , "centered" : "false" }
+"text" { "id" : "6" , "pos" : "250,350" , "text" : "Sounds:"  , "centered" : "false" }
+"text" { "id" : "7" , "pos" : "250,300" , "text" : "Font:"  , "centered" : "false" }
+
+"text" { "id" : "20" , "pos" : "500,450" , "text" : "Andreas Mecky" , "centered" : "false"  }
+"text" { "id" : "21" , "pos" : "500,400" , "text" : "Andreas Mecky"  , "centered" : "false" }
+"text" { "id" : "22" , "pos" : "500,350" , "text" : "freesounds.org"  , "centered" : "false" }
+"text" { "id" : "23" , "pos" : "500,300" , "text" : "XScale"  , "centered" : "false" }
+
+"button" { "id" : "1" , "pos" : "400,120" , "text" : "Main Menu" , "rect" : "510,0,340,50" }
+
+

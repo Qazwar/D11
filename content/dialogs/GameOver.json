@@ -1,0 +1,47 @@
+text { 
+	id : 2 
+	pos : 320,500 
+	text : "Points:"
+	centered : false 
+	scale : 1.25
+}
+text { 
+	id : 3 
+	pos : 512,500 
+	text : "012324"
+	centered : false 
+	scale : 1.25
+}
+text { 
+	id : 4 
+	pos : 365,450 
+	text : "Time:"
+	centered : false 
+	scale : 1.25
+}
+text { 
+	id : 5 
+	pos : 512,450 
+	text : "01:30"
+	centered : false 
+	scale : 1.25
+}
+text { 
+	id : 6 
+	pos : 280,400 
+	text : "Cleared:"
+	centered : false 
+	scale : 1.25
+}
+text { 
+	id : 7 
+	pos : 512,400 
+	text : "32"
+	centered : false 
+	scale : 1.25
+}
+image_button { 
+	id : 1 
+	pos : 400,300 	
+	rect : 70,0,260,60
+}

@@ -1,0 +1,21 @@
+image_button { 
+	id : 1 
+	pos : 400,520 	
+	rect : 70,0,260,60
+}
+image_button { 
+	id : 2 
+	pos : 400,200 
+	rect : 130,270,260,60
+}
+image_button { 
+	id : 3 
+	pos : 400,420 
+	rect : 70,270,260,60
+}
+image_button { 
+	id : 4 
+	pos : 400,320 
+	rect : 130,0,260,60
+}
+
