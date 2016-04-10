@@ -4,6 +4,7 @@
 #include "utils\Log.h"
 #include <vector>
 
+
 namespace graphics {
 
 	struct GraphicContext {
@@ -18,8 +19,16 @@ namespace graphics {
 		IDXGISwapChain* swapChain;
 		ID3D11RenderTargetView* backBufferTarget;
 
+		XMMATRIX viewMatrix;
+		XMMATRIX worldMatrix;
+		XMMATRIX projectionMaxtrix;
+		XMMATRIX viewProjectionMaxtrix;
+
 		std::vector<ID3D11Buffer*> indexBuffers;
 		std::vector<ID3D11BlendState*> blendStates;
+		std::vector<ID3D11InputLayout*> layouts;
+		std::vector<Shader*> shaders;
+		std::vector<ID3D11ShaderResourceView*> shaderResourceViews;
 	};
 
 	static GraphicContext* _context;
@@ -221,9 +230,17 @@ namespace graphics {
 		viewport.TopLeftY = 0.0f;
 
 		_context->d3dContext->RSSetViewports(1, &viewport);
+
+		_context->viewMatrix = XMMatrixIdentity();
+		_context->projectionMaxtrix = XMMatrixOrthographicOffCenterLH(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height), 0.1f, 100.0f);
+		_context->viewProjectionMaxtrix = XMMatrixMultiply(_context->viewMatrix, _context->projectionMaxtrix);
+
 		return true;
 	}
 
+	// ------------------------------------------------------
+	// shutdown
+	// ------------------------------------------------------
 	void shutdown() {
 		if (_context != 0) {
 			if (_context->backBufferTarget) _context->backBufferTarget->Release();
@@ -237,12 +254,78 @@ namespace graphics {
 			for (size_t i = 0; i < _context->blendStates.size(); ++i) {
 				_context->blendStates[i]->Release();
 			}
-
+			for (size_t i = 0; i < _context->layouts.size(); ++i) {
+				_context->layouts[i]->Release();
+			}
+			for (size_t i = 0; i < _context->shaders.size(); ++i) {
+				Shader* shader = _context->shaders[i];
+				if (shader->vertexShader != 0) {
+					shader->vertexShader->Release();
+				}
+				if (shader->pixelShader != 0) {
+					shader->pixelShader->Release();
+				}
+				if (shader->vertexShaderBuffer != 0) {
+					shader->vertexShaderBuffer->Release();
+				}
+				if (shader->samplerState != 0) {
+					shader->samplerState->Release();
+				}
+				delete _context->shaders[i];
+			}
+			for (size_t i = 0; i < _context->shaderResourceViews.size(); ++i) {
+				_context->shaderResourceViews[i]->Release();
+			}
 			_context->backBufferTarget = 0;
 			_context->swapChain = 0;
 			_context->d3dContext = 0;
 			_context->d3dDevice = 0;
 		}
+	}
+
+	int compileShader(char* fileName) {
+		Shader* s = new Shader;
+		int idx = _context->shaders.size();
+		s->vertexShaderBuffer = 0;
+		bool compileResult = compileShader(fileName, "VS_Main", "vs_4_0", &s->vertexShaderBuffer);
+		if (!compileResult)	{
+			DXTRACE_MSG("Error compiling the vertex shader!");
+			return -1;
+		}
+		HRESULT d3dResult;
+
+		if (!createVertexShader(s->vertexShaderBuffer, &s->vertexShader)) {
+			DXTRACE_MSG("Error creating the vertex shader!");
+			return -1;
+		}
+		ID3DBlob* psBuffer = 0;
+		compileResult = compileShader(fileName, "PS_Main", "ps_4_0", &psBuffer);
+		if (!compileResult)	{
+			DXTRACE_MSG("Error compiling pixel shader!");
+			return -1;
+		}
+
+		if (!createPixelShader(psBuffer, &s->pixelShader)) {
+			DXTRACE_MSG("Error creating pixel shader!");
+			return -1;
+		}
+		psBuffer->Release();
+		D3D11_SAMPLER_DESC colorMapDesc;
+		ZeroMemory(&colorMapDesc, sizeof(colorMapDesc));
+		colorMapDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+		colorMapDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+		colorMapDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+		colorMapDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+		colorMapDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+		colorMapDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+		d3dResult = _context->d3dDevice->CreateSamplerState(&colorMapDesc, &s->samplerState);
+		if (FAILED(d3dResult)) {
+			DXTRACE_MSG("Failed to create SamplerState!");
+			return -1;
+		}
+		_context->shaders.push_back(s);
+		return idx;
 	}
 
 	bool compileShader(char* filePath, char* entry, char* shaderModel, ID3DBlob** buffer) {
@@ -307,13 +390,31 @@ namespace graphics {
 		return true;
 	}
 
-	bool loadTexture(const char* name, ID3D11ShaderResourceView** srv) {
-		HRESULT d3dResult = D3DX11CreateShaderResourceViewFromFile(_context->d3dDevice,name, 0, 0, srv, 0);
+	int createInputLayout(int shaderIndex, D3D11_INPUT_ELEMENT_DESC* descriptors, uint32_t num) {
+		int idx = _context->layouts.size();
+		ID3D11InputLayout* layout = 0;
+		Shader* s = _context->shaders[shaderIndex];
+		HRESULT d3dResult = _context->d3dDevice->CreateInputLayout(descriptors, num, s->vertexShaderBuffer->GetBufferPointer(), s->vertexShaderBuffer->GetBufferSize(), &layout);
+		if (d3dResult < 0) {
+			//if (buffer) {
+				//buffer->Release();
+			//}
+			return -1;
+		}
+		_context->layouts.push_back(layout);
+		return idx;
+	}
+
+	int loadTexture(const char* name) {
+		int idx = _context->shaderResourceViews.size();
+		ID3D11ShaderResourceView* srv = 0;
+		HRESULT d3dResult = D3DX11CreateShaderResourceViewFromFile(_context->d3dDevice,name, 0, 0, &srv, 0);
 		if (FAILED(d3dResult)) {
 			DXTRACE_MSG("Failed to load the texture image!");
-			return false;
+			return -1;
 		}
-		return true;
+		_context->shaderResourceViews.push_back(srv);
+		return idx;
 	}
 
 	bool createSamplerState(ID3D11SamplerState** sampler) {
@@ -431,6 +532,10 @@ namespace graphics {
 		return idx;
 	}
 
+	const XMMATRIX& getViewProjectionMaxtrix() {
+		return _context->viewProjectionMaxtrix;
+	}
+
 	void beginRendering() {
 		float clearColor[4] = { 0.0f, 0.0f, 0.25f, 1.0f };
 		_context->d3dContext->ClearRenderTargetView(_context->backBufferTarget, clearColor);
@@ -438,6 +543,27 @@ namespace graphics {
 
 	void setIndexBuffer(int index) {
 		_context->d3dContext->IASetIndexBuffer(_context->indexBuffers[index], DXGI_FORMAT_R32_UINT, 0);
+	}
+
+	void setShader(int shaderIndex) {
+		Shader* s = _context->shaders[shaderIndex];
+		if (s->vertexShader != 0) {
+			_context->d3dContext->VSSetShader(s->vertexShader, 0, 0);
+		}
+		if (s->pixelShader != 0) {
+			_context->d3dContext->PSSetShader(s->pixelShader, 0, 0);
+		}
+		_context->d3dContext->PSSetSamplers(0, 1, &s->samplerState);
+	}
+
+	void setInputLayout(int layoutIndex) {
+		ID3D11InputLayout* layout = _context->layouts[layoutIndex];
+		_context->d3dContext->IASetInputLayout(layout);
+	}
+
+	void setPixelShaderResourceView(int index, uint32_t slot) {
+		ID3D11ShaderResourceView* srv = _context->shaderResourceViews[index];
+		_context->d3dContext->PSSetShaderResources(slot, 1, &srv);
 	}
 
 	void endRendering() {

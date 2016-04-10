@@ -3,12 +3,25 @@
 #include <d3d11.h>
 #include <d3dx11.h>
 #include <DxErr.h>
+#include <xnamath.h>
 
 namespace graphics {
+
+	struct Shader {
+		ID3D11VertexShader* vertexShader;
+		ID3D11PixelShader* pixelShader;
+		ID3DBlob* vertexShaderBuffer;
+		ID3D11SamplerState* samplerState;
+
+		Shader() : vertexShader(0), pixelShader(0), vertexShaderBuffer(0) , samplerState(0) {}
+
+	};
 
 	bool initialize(HINSTANCE hInstance, HWND hwnd);
 
 	ID3D11DeviceContext* getContext();
+
+	int compileShader(char* fileName);
 
 	bool compileShader(char* filePath, char* entry, char* shaderModel, ID3DBlob** buffer);
 
@@ -18,11 +31,15 @@ namespace graphics {
 
 	bool createInputLayout(ID3DBlob* buffer, D3D11_INPUT_ELEMENT_DESC* descriptors, uint32_t num, ID3D11InputLayout** layout);
 
-	bool loadTexture(const char* name, ID3D11ShaderResourceView** srv);
+	int createInputLayout(int shaderIndex, D3D11_INPUT_ELEMENT_DESC* descriptors, uint32_t num);
+
+	int loadTexture(const char* name);
 
 	bool createSamplerState(ID3D11SamplerState** sampler);
 
 	bool createBlendState(ID3D11BlendState** state);
+
+	const XMMATRIX& getViewProjectionMaxtrix();
 
 	void setBlendState(int index);
 
@@ -37,6 +54,12 @@ namespace graphics {
 	void beginRendering();
 
 	void setIndexBuffer(int index);
+
+	void setShader(int shaderIndex);
+
+	void setInputLayout(int layoutIndex);
+
+	void setPixelShaderResourceView(int index, uint32_t slot = 0);
 
 	void endRendering();
 

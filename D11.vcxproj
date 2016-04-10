@@ -77,6 +77,7 @@
     <ClCompile Include="graphics.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="math\math.cpp" />
+    <ClCompile Include="renderer\sprites.cpp" />
     <ClCompile Include="utils\Log.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -84,6 +85,7 @@
     <ClInclude Include="graphics.h" />
     <ClInclude Include="math\math.h" />
     <ClInclude Include="renderer\render_types.h" />
+    <ClInclude Include="renderer\sprites.h" />
     <ClInclude Include="utils\Log.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
