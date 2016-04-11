@@ -4,6 +4,18 @@
 #include <d3dx11.h>
 #include <DxErr.h>
 #include <xnamath.h>
+#include <Vector.h>
+
+struct VertexPos {
+	v3 pos;
+	v2 tex0;
+
+	VertexPos() {}
+
+	VertexPos(const v3& p, const v2& t) : pos(p), tex0(t) {}
+};
+
+
 class Demo {
 
 public:
@@ -16,14 +28,17 @@ private:
 
 	int _shaderIndex;
 	int _inputLayout;
-	ID3D11Buffer* _vertexBuffer;
+	//ID3D11Buffer* _vertexBuffer;
+	int _vertexBuffer;
 	int _indexBuffer;
 
 	int _colorMap;
 	int _alphaBlendState;
 
+	VertexPos _vertices[16 * 4];
+
 	ID3D11Buffer* _mvpCB;
 
-	XMFLOAT2 _positions[2];
+	v2 _positions[2];
 };
 

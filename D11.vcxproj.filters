@@ -37,7 +37,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="renderer\sprites.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -57,7 +57,7 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="renderer\sprites.h">
-      <Filter>Header Files</Filter>
+      <Filter>renderer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

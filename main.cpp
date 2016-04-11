@@ -32,7 +32,7 @@ int WINAPI WinMain(HINSTANCE hThisInst, HINSTANCE hLastInst, LPSTR lpszCmdLine, 
 	if (!RegisterClassEx(&wndClass)) {
 		return -1;
 	}
-	RECT rc = { 0, 0, 800, 600 };
+	RECT rc = { 0, 0, 1280, 720};
 	AdjustWindowRect(&rc, WS_OVERLAPPED, FALSE);
 	HWND hwnd = CreateWindowA("Diesel11", "Hello", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hThisInst, NULL);
 	if (!hwnd) {

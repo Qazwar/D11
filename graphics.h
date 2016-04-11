@@ -47,13 +47,21 @@ namespace graphics {
 
 	int createIndexBuffer(uint32_t num, uint32_t* data);
 
-	bool createBuffer(D3D11_BUFFER_DESC vertexDesc, D3D11_SUBRESOURCE_DATA resourceData, ID3D11Buffer** buffer);
+	int createBuffer(uint32_t bufferSize, D3D11_SUBRESOURCE_DATA resourceData);
+
+	int createBuffer(uint32_t bufferSize);
+
+	bool createBuffer(D3D11_BUFFER_DESC bufferDesciption, D3D11_SUBRESOURCE_DATA resourceData, ID3D11Buffer** buffer);
 
 	bool createBuffer(D3D11_BUFFER_DESC bufferDesciption, ID3D11Buffer** buffer);
 
 	void beginRendering();
 
 	void setIndexBuffer(int index);
+
+	void setVertexBuffer(int index, uint32_t* stride, uint32_t* offset);
+
+	void mapData(int bufferIndex, void* data, uint32_t size);
 
 	void setShader(int shaderIndex);
 

@@ -25,6 +25,7 @@ namespace graphics {
 		XMMATRIX viewProjectionMaxtrix;
 
 		std::vector<ID3D11Buffer*> indexBuffers;
+		std::vector<ID3D11Buffer*> vertexBuffers;
 		std::vector<ID3D11BlendState*> blendStates;
 		std::vector<ID3D11InputLayout*> layouts;
 		std::vector<Shader*> shaders;
@@ -232,7 +233,9 @@ namespace graphics {
 		_context->d3dContext->RSSetViewports(1, &viewport);
 
 		_context->viewMatrix = XMMatrixIdentity();
-		_context->projectionMaxtrix = XMMatrixOrthographicOffCenterLH(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height), 0.1f, 100.0f);
+		//D3DXMatrixOrthoLH(&m_orthoMatrix, (float)screenWidth, (float)screenHeight, screenNear, screenDepth);
+		_context->projectionMaxtrix = XMMatrixOrthographicLH(static_cast<float>(width), static_cast<float>(height), 0.1f, 100.0f);
+		//_context->projectionMaxtrix = XMMatrixOrthographicOffCenterLH(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height), 0.1f, 100.0f);
 		_context->viewProjectionMaxtrix = XMMatrixMultiply(_context->viewMatrix, _context->projectionMaxtrix);
 
 		return true;
@@ -275,6 +278,9 @@ namespace graphics {
 			}
 			for (size_t i = 0; i < _context->shaderResourceViews.size(); ++i) {
 				_context->shaderResourceViews[i]->Release();
+			}
+			for (size_t i = 0; i < _context->vertexBuffers.size(); ++i) {
+				_context->vertexBuffers[i]->Release();
 			}
 			_context->backBufferTarget = 0;
 			_context->swapChain = 0;
@@ -506,6 +512,42 @@ namespace graphics {
 		return true;
 	}
 
+	int createBuffer(uint32_t bufferSize, D3D11_SUBRESOURCE_DATA resourceData) {
+		D3D11_BUFFER_DESC bufferDesciption;
+		ZeroMemory(&bufferDesciption, sizeof(bufferDesciption));
+		bufferDesciption.Usage = D3D11_USAGE_DYNAMIC;
+		bufferDesciption.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		bufferDesciption.ByteWidth = bufferSize;
+		bufferDesciption.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		ID3D11Buffer* buffer = 0;
+		HRESULT d3dResult = _context->d3dDevice->CreateBuffer(&bufferDesciption, &resourceData, &buffer);
+		if (FAILED(d3dResult))	{
+			DXTRACE_MSG("Failed to create buffer!");
+			return -1;
+		}
+		int idx = _context->vertexBuffers.size();
+		_context->vertexBuffers.push_back(buffer);
+		return idx;
+	}
+
+	int createBuffer(uint32_t bufferSize) {
+		D3D11_BUFFER_DESC bufferDesciption;
+		ZeroMemory(&bufferDesciption, sizeof(bufferDesciption));
+		bufferDesciption.Usage = D3D11_USAGE_DYNAMIC;
+		bufferDesciption.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		bufferDesciption.ByteWidth = bufferSize;
+		bufferDesciption.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		ID3D11Buffer* buffer = 0;
+		HRESULT d3dResult = _context->d3dDevice->CreateBuffer(&bufferDesciption, 0, &buffer);
+		if (FAILED(d3dResult))	{
+			DXTRACE_MSG("Failed to create buffer!");
+			return -1;
+		}
+		int idx = _context->vertexBuffers.size();
+		_context->vertexBuffers.push_back(buffer);
+		return idx;
+	}
+
 	int createIndexBuffer(uint32_t num,uint32_t* data) {
 		int idx = _context->indexBuffers.size();
 		D3D11_BUFFER_DESC bufferDesc;
@@ -556,6 +598,22 @@ namespace graphics {
 		_context->d3dContext->PSSetSamplers(0, 1, &s->samplerState);
 	}
 
+	void mapData(int bufferIndex, void* data, uint32_t size) {
+		ID3D11Buffer* buffer = _context->vertexBuffers[bufferIndex];
+		D3D11_MAPPED_SUBRESOURCE resource;
+		HRESULT hResult = _context->d3dContext->Map(buffer, 0,D3D11_MAP_WRITE_DISCARD, 0, &resource);
+		// This will be S_OK
+		if (hResult == S_OK) {
+			void* ptr = resource.pData;
+			// Copy the data into the vertex buffer.
+			memcpy(ptr, data, size);
+			_context->d3dContext->Unmap(buffer, 0);
+		}
+		else {
+			LOG << "ERROR mapping data";
+		}
+	}
+
 	void setInputLayout(int layoutIndex) {
 		ID3D11InputLayout* layout = _context->layouts[layoutIndex];
 		_context->d3dContext->IASetInputLayout(layout);
@@ -564,6 +622,11 @@ namespace graphics {
 	void setPixelShaderResourceView(int index, uint32_t slot) {
 		ID3D11ShaderResourceView* srv = _context->shaderResourceViews[index];
 		_context->d3dContext->PSSetShaderResources(slot, 1, &srv);
+	}
+
+	void setVertexBuffer(int index, uint32_t* stride, uint32_t* offset) {
+		_context->d3dContext->IASetVertexBuffers(0, 1, &_context->vertexBuffers[index], stride, offset);
+		_context->d3dContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
 
 	void endRendering() {
