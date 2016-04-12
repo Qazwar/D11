@@ -7,7 +7,29 @@
 
 namespace graphics {
 
-	struct GraphicContext {
+	struct InputElementDescriptor {
+
+		const char* semantic;
+		uint32_t semanticIndex;
+		DXGI_FORMAT format;
+		uint32_t size;
+
+		InputElementDescriptor(const char* sem, uint32_t index, DXGI_FORMAT f, uint32_t s) :
+			semantic(sem), semanticIndex(index), format(f), size(s) {
+		}
+	};
+
+	static const InputElementDescriptor INPUT_ELEMENT_DESCRIPTIONS[] = {
+
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    12 },
+		{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 12 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,        8 },
+		{ "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT,        8 },
+		{ "TEXCOORD", 2, DXGI_FORMAT_R32G32_FLOAT,        8 },
+		{ "TEXCOORD", 3, DXGI_FORMAT_R32G32_FLOAT,        8 },
+	};
+
+	__declspec(align(16)) struct GraphicContext {
 		HINSTANCE hInstance;
 		HWND hwnd;
 
@@ -388,33 +410,47 @@ namespace graphics {
 		}
 		return true;
 	}
-
-	bool createInputLayout(ID3DBlob* buffer, D3D11_INPUT_ELEMENT_DESC* descriptors, uint32_t num, ID3D11InputLayout** layout) {
-		HRESULT d3dResult = _context->d3dDevice->CreateInputLayout(descriptors, num,buffer->GetBufferPointer(), buffer->GetBufferSize(), layout);
-		if (d3dResult < 0) {
-			if (buffer) {
-				buffer->Release();
-			}
-			return false;
+	
+	// ------------------------------------------------------
+	// create input layout
+	// ------------------------------------------------------
+	int createInputLayout(int shaderIndex, Attribute* attribute) {		
+		Attribute* ptr = attribute;
+		uint32_t total = 0;
+		while (*ptr != Attribute::End) {
+			++total;
+			++ptr;
 		}
-		return true;
-	}
-
-	int createInputLayout(int shaderIndex, D3D11_INPUT_ELEMENT_DESC* descriptors, uint32_t num) {
+		D3D11_INPUT_ELEMENT_DESC* descriptors = new D3D11_INPUT_ELEMENT_DESC[total];
+		uint32_t index = 0;
+		uint32_t counter = 0;
+		ptr = attribute;
+		while ( *ptr != Attribute::End) {
+			const InputElementDescriptor& d = INPUT_ELEMENT_DESCRIPTIONS[*ptr];
+			D3D11_INPUT_ELEMENT_DESC& descriptor = descriptors[counter++];
+			descriptor.SemanticName = d.semantic;
+			descriptor.SemanticIndex = d.semanticIndex;
+			descriptor.Format = d.format;
+			descriptor.InputSlot = 0;
+			descriptor.AlignedByteOffset = index;
+			descriptor.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+			descriptor.InstanceDataStepRate = 0;
+			index += d.size;
+			++ptr;
+			assert(counter < 16);
+		}
 		int idx = _context->layouts.size();
 		ID3D11InputLayout* layout = 0;
 		Shader* s = _context->shaders[shaderIndex];
-		HRESULT d3dResult = _context->d3dDevice->CreateInputLayout(descriptors, num, s->vertexShaderBuffer->GetBufferPointer(), s->vertexShaderBuffer->GetBufferSize(), &layout);
+		HRESULT d3dResult = _context->d3dDevice->CreateInputLayout(descriptors, total, s->vertexShaderBuffer->GetBufferPointer(), s->vertexShaderBuffer->GetBufferSize(), &layout);
 		if (d3dResult < 0) {
-			//if (buffer) {
-				//buffer->Release();
-			//}
 			return -1;
 		}
+		delete[] descriptors;
 		_context->layouts.push_back(layout);
 		return idx;
 	}
-
+	
 	int loadTexture(const char* name) {
 		int idx = _context->shaderResourceViews.size();
 		ID3D11ShaderResourceView* srv = 0;
@@ -445,6 +481,9 @@ namespace graphics {
 		return true;
 	}
 
+	// ------------------------------------------------------
+	// create blend state
+	// ------------------------------------------------------
 	int createBlendState(D3D11_BLEND srcBlend, D3D11_BLEND destBlend) {
 		int idx = _context->blendStates.size();
 		D3D11_BLEND_DESC blendDesc;
@@ -469,35 +508,9 @@ namespace graphics {
 		return idx;
 	}
 
-	void setBlendState(int index) {
-		float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-		_context->d3dContext->OMSetBlendState(_context->blendStates[index], blendFactor, 0xFFFFFFFF);
-	}
-
-	bool createBlendState(ID3D11BlendState** state) {
-		// return pImpl->CreateBlendState(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA, pResult);
-		D3D11_BLEND_DESC blendDesc;
-		ZeroMemory(&blendDesc, sizeof(blendDesc));
-		blendDesc.RenderTarget[0].BlendEnable = TRUE;
-		blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-		blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-		blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-		blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-		blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_SRC_ALPHA;
-		blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
-		blendDesc.RenderTarget[0].RenderTargetWriteMask = 0x0F;
-
-		float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-
-		HRESULT d3dResult = _context->d3dDevice->CreateBlendState(&blendDesc, state);
-		if (FAILED(d3dResult)) {
-			DXTRACE_MSG("Failed to create blendstate!");
-			return false;
-		}
-		_context->d3dContext->OMSetBlendState(*state, blendFactor, 0xFFFFFFFF);
-		return true;
-	}
-
+	// ------------------------------------------------------
+	// create constant buffer
+	// ------------------------------------------------------
 	int createConstantBuffer(uint32_t size) {
 		int index = _context->constantBuffers.size();
 		D3D11_BUFFER_DESC constDesc;
@@ -514,12 +527,7 @@ namespace graphics {
 		_context->constantBuffers.push_back(buffer);
 		return index;
 	}
-
-	void updateConstantBuffer(int index, void* data) {
-		ID3D11Buffer* buffer = _context->constantBuffers[index];
-		_context->d3dContext->UpdateSubresource(buffer, 0, 0, data, 0, 0);
-	}
-
+	
 	bool createBuffer(D3D11_BUFFER_DESC vertexDesc, D3D11_SUBRESOURCE_DATA resourceData, ID3D11Buffer** buffer) {
 		HRESULT d3dResult = _context->d3dDevice->CreateBuffer(&vertexDesc, &resourceData, buffer);
 		if (FAILED(d3dResult))	{
@@ -574,6 +582,46 @@ namespace graphics {
 		return idx;
 	}
 
+	int createQuadIndexBuffer(uint32_t numQuads) {
+		int idx = _context->indexBuffers.size();
+		D3D11_BUFFER_DESC bufferDesc;
+		bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+		bufferDesc.ByteWidth = sizeof(uint32_t) * numQuads * 6;
+		bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+		bufferDesc.CPUAccessFlags = 0;
+		bufferDesc.MiscFlags = 0;
+
+		uint32_t* data = new uint32_t[numQuads * 6];
+		int base = 0;
+		int cnt = 0;
+		for (int i = 0; i < numQuads; ++i) {
+			data[base] = cnt;
+			data[base + 1] = cnt + 1;
+			data[base + 2] = cnt + 3;
+			data[base + 3] = cnt + 1;
+			data[base + 4] = cnt + 2;
+			data[base + 5] = cnt + 3;
+			base += 6;
+			cnt += 4;
+		}
+		// Define the resource data.
+		D3D11_SUBRESOURCE_DATA InitData;
+		InitData.pSysMem = data;
+		InitData.SysMemPitch = 0;
+		InitData.SysMemSlicePitch = 0;
+		// Create the buffer with the device.
+		ID3D11Buffer* buffer;
+		HRESULT hr = _context->d3dDevice->CreateBuffer(&bufferDesc, &InitData, &buffer);
+		if (FAILED(hr)) {
+			delete[] data;
+			DXTRACE_MSG("Failed to create index buffer!");
+			return -1;
+		}
+		delete[] data;
+		_context->indexBuffers.push_back(buffer);
+		return idx;
+	}
+
 	int createIndexBuffer(uint32_t num,uint32_t* data) {
 		int idx = _context->indexBuffers.size();
 		D3D11_BUFFER_DESC bufferDesc;
@@ -604,15 +652,40 @@ namespace graphics {
 		return _context->viewProjectionMaxtrix;
 	}
 
+	// ------------------------------------------------------
+	// begin rendering
+	// ------------------------------------------------------
 	void beginRendering() {
 		float clearColor[4] = { 0.0f, 0.0f, 0.25f, 1.0f };
 		_context->d3dContext->ClearRenderTargetView(_context->backBufferTarget, clearColor);
 	}
 
+	// ------------------------------------------------------
+	// set index buffer
+	// ------------------------------------------------------
 	void setIndexBuffer(int index) {
 		_context->d3dContext->IASetIndexBuffer(_context->indexBuffers[index], DXGI_FORMAT_R32_UINT, 0);
 	}
 
+	// ------------------------------------------------------
+	// set blend state
+	// ------------------------------------------------------
+	void setBlendState(int index) {
+		float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+		_context->d3dContext->OMSetBlendState(_context->blendStates[index], blendFactor, 0xFFFFFFFF);
+	}
+
+	// ------------------------------------------------------
+	// update constant buffer
+	// ------------------------------------------------------
+	void updateConstantBuffer(int index, void* data) {
+		ID3D11Buffer* buffer = _context->constantBuffers[index];
+		_context->d3dContext->UpdateSubresource(buffer, 0, 0, data, 0, 0);
+	}
+
+	// ------------------------------------------------------
+	// set shader
+	// ------------------------------------------------------
 	void setShader(int shaderIndex) {
 		Shader* s = _context->shaders[shaderIndex];
 		if (s->vertexShader != 0) {
@@ -624,6 +697,9 @@ namespace graphics {
 		_context->d3dContext->PSSetSamplers(0, 1, &s->samplerState);
 	}
 
+	// ------------------------------------------------------
+	// map data to vertex buffer
+	// ------------------------------------------------------
 	void mapData(int bufferIndex, void* data, uint32_t size) {
 		ID3D11Buffer* buffer = _context->vertexBuffers[bufferIndex];
 		D3D11_MAPPED_SUBRESOURCE resource;
@@ -640,6 +716,9 @@ namespace graphics {
 		}
 	}
 
+	// ------------------------------------------------------
+	// set input layout
+	// ------------------------------------------------------
 	void setInputLayout(int layoutIndex) {
 		ID3D11InputLayout* layout = _context->layouts[layoutIndex];
 		_context->d3dContext->IASetInputLayout(layout);
@@ -664,6 +743,9 @@ namespace graphics {
 		_context->d3dContext->DrawIndexed(num * 6, 0, 0);
 	}
 
+	// ------------------------------------------------------
+	// end rendering
+	// ------------------------------------------------------
 	void endRendering() {
 		_context->swapChain->Present(0, 0);
 	}

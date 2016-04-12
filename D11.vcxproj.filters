@@ -19,6 +19,9 @@
     <Filter Include="renderer">
       <UniqueIdentifier>{9fd97b4f-3f97-4004-970a-b33a399b1872}</UniqueIdentifier>
     </Filter>
+    <Filter Include="base">
+      <UniqueIdentifier>{89dc0097-eca2-4350-9399-cd1990468d8d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -39,6 +42,12 @@
     <ClCompile Include="renderer\sprites.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
+    <ClCompile Include="utils\Color.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="base\BaseApp.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="graphics.h">
@@ -58,6 +67,12 @@
     </ClInclude>
     <ClInclude Include="renderer\sprites.h">
       <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\Color.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="base\BaseApp.h">
+      <Filter>base</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

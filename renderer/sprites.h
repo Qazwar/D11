@@ -1,26 +1,30 @@
 #pragma once
 #include <stdint.h>
 #include "render_types.h"
+#include "..\utils\Color.h"
 
 class SpriteBuffer {
 
 	struct Sprite {
 		v2 position;
 		Texture texture;
+		Color color;
 	};
 
 	struct SpriteVertex {
 		v3 position;
 		v2 texture;
+		Color color;
+
 		SpriteVertex() : position(0, 0, 0) {}
-		SpriteVertex(const v3& p, const v2& t) : position(p), texture(t) {}
-		SpriteVertex(const v2& p, const v2& t) : position(p,1.0f), texture(t) {}
+		SpriteVertex(const v3& p, const v2& t, const Color& c) : position(p), texture(t) , color(c) {}
+		SpriteVertex(const v2& p, const v2& t, const Color& c) : position(p,1.0f), texture(t) , color(c) {}
 	};
 
 public:
 	SpriteBuffer(int maxSprites);
 	~SpriteBuffer();
-	void draw(const v2& position, const Texture& texture);
+	void draw(const v2& position, const Texture& texture, const Color& color = Color(255,255,255,255));
 	void begin();
 	void end();
 private:
