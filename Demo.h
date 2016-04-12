@@ -18,6 +18,8 @@ public:
 private:
 	SpriteBuffer* _spriteBuffer;
 	v2 _positions[256];
+	v2 _scales[256];
+	float _rotations[256];
 	int _num;
 	//int _shaderIndex;
 	//int _inputLayout;

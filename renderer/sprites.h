@@ -6,6 +6,8 @@ class SpriteBuffer {
 
 	struct Sprite {
 		v2 position;
+		float rotation;
+		v2 scale;
 		Texture texture;
 	};
 
@@ -20,7 +22,7 @@ class SpriteBuffer {
 public:
 	SpriteBuffer(int maxSprites);
 	~SpriteBuffer();
-	void draw(const v2& position, const Texture& texture);
+	void draw(const v2& position, const Texture& texture, float rotation = 0.0f, const v2& scale = v2(1,1));
 	void begin();
 	void end();
 private:

@@ -1,6 +1,29 @@
 #include "sprites.h"
 #include "..\graphics.h"
 
+const v2 ARRAY[] = { v2(-0.5f, 0.5f), v2(0.5f, 0.5f), v2(0.5f, -0.5f), v2(-0.5f, -0.5f) };
+
+v2 srt(const v2& v, const v2& u, float scaleX, float scaleY, float rotation) {
+	float sx = u.x * scaleX;
+	float sy = u.y * scaleY;
+
+	// rotation clock wise
+	//float xt = cosf(rotation) * sx + sinf(rotation) * sy;
+	//float yt = -sinf(rotation) * sx + cosf(rotation) * sy;
+
+	// rotation counter clock wise
+	//float xt = cosf(rotation) * sx - sinf(rotation) * sy;
+	//float yt = sinf(rotation) * sx + cosf(rotation) * sy;
+
+	float xt = cos(rotation) * sx -sin(rotation) * sy;
+	float yt = sin(rotation) * sx + cos(rotation) * sy;
+
+	xt += v.x;
+	yt += v.y;
+
+	return Vector2f(xt, yt);
+}
+
 SpriteBuffer::SpriteBuffer(int maxSprites) : _maxSprites(maxSprites) , _index(0) , _started(false) {
 	// create indexbuffer
 	int size = maxSprites * 6;
@@ -46,7 +69,7 @@ SpriteBuffer::SpriteBuffer(int maxSprites) : _maxSprites(maxSprites) , _index(0)
 SpriteBuffer::~SpriteBuffer() {
 }
 
-void SpriteBuffer::draw(const v2& position, const Texture& texture) {
+void SpriteBuffer::draw(const v2& position, const Texture& texture, float rotation, const v2& scale) {
 	if (_started) {
 		if (_index >= _maxSprites) {
 			flush();
@@ -54,6 +77,8 @@ void SpriteBuffer::draw(const v2& position, const Texture& texture) {
 		Sprite& sprite = _sprites[_index++];
 		sprite.position = position;
 		sprite.texture = texture;
+		sprite.scale = scale;
+		sprite.rotation = rotation;
 	}
 }
 
@@ -87,8 +112,18 @@ void SpriteBuffer::flush() {
 
 	for (int i = 0; i < _index; i++) {
 		const Sprite& sprite = _sprites[i];
-		float halfWidth = sprite.texture.dim.x * 0.5f;
-		float halfHeight = sprite.texture.dim.y * 0.5f;
+		float halfWidth = sprite.texture.dim.x;// *0.5f;
+		float halfHeight = sprite.texture.dim.y;// *0.5f;
+		for (int j = 0; j < 4; ++j) {
+			v2 start = ARRAY[j];
+			start.x *= halfWidth;
+			start.y *= halfHeight;
+			v2 sp = sprite.position;
+			sp -= v2(640, 360);
+			v2 p = srt(sp, start, sprite.scale.x, sprite.scale.y, sprite.rotation);
+			_vertices[i * 4 + j] = SpriteVertex(p, sprite.texture.getUV(j));
+		}
+		/*
 		v2 p = sprite.position;
 		float left = (float)((1280 / 2) * -1) + p.x - halfWidth;
 		float right = left + sprite.texture.dim.x;
@@ -98,6 +133,7 @@ void SpriteBuffer::flush() {
 		_vertices[i * 4 + 1] = SpriteVertex(v2(right, top), sprite.texture.getUV(1));
 		_vertices[i * 4 + 2] = SpriteVertex(v2(right, bottom), sprite.texture.getUV(2));
 		_vertices[i * 4 + 3] = SpriteVertex(v2(left, bottom), sprite.texture.getUV(3));
+		*/
 	}
 
 	graphics::mapData(_vertexBuffer, _vertices, _index * 4 * sizeof(SpriteVertex));
