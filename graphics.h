@@ -21,6 +21,10 @@ namespace graphics {
 
 	ID3D11DeviceContext* getContext();
 
+	int createConstantBuffer(uint32_t size);
+
+	void updateConstantBuffer(int index, void* data);
+
 	int compileShader(char* fileName);
 
 	bool compileShader(char* filePath, char* entry, char* shaderModel, ID3DBlob** buffer);
@@ -68,6 +72,10 @@ namespace graphics {
 	void setInputLayout(int layoutIndex);
 
 	void setPixelShaderResourceView(int index, uint32_t slot = 0);
+
+	void setVertexShaderConstantBuffer(int bufferIndex);
+
+	void drawIndexed(int num);
 
 	void endRendering();
 

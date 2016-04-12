@@ -26,6 +26,7 @@ namespace graphics {
 
 		std::vector<ID3D11Buffer*> indexBuffers;
 		std::vector<ID3D11Buffer*> vertexBuffers;
+		std::vector<ID3D11Buffer*> constantBuffers;
 		std::vector<ID3D11BlendState*> blendStates;
 		std::vector<ID3D11InputLayout*> layouts;
 		std::vector<Shader*> shaders;
@@ -282,6 +283,9 @@ namespace graphics {
 			for (size_t i = 0; i < _context->vertexBuffers.size(); ++i) {
 				_context->vertexBuffers[i]->Release();
 			}
+			for (size_t i = 0; i < _context->constantBuffers.size(); ++i) {
+				_context->constantBuffers[i]->Release();
+			}
 			_context->backBufferTarget = 0;
 			_context->swapChain = 0;
 			_context->d3dContext = 0;
@@ -494,6 +498,28 @@ namespace graphics {
 		return true;
 	}
 
+	int createConstantBuffer(uint32_t size) {
+		int index = _context->constantBuffers.size();
+		D3D11_BUFFER_DESC constDesc;
+		ZeroMemory(&constDesc, sizeof(constDesc));
+		constDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		constDesc.ByteWidth = size;
+		constDesc.Usage = D3D11_USAGE_DEFAULT;
+		ID3D11Buffer* buffer = 0;
+		HRESULT d3dResult = _context->d3dDevice->CreateBuffer(&constDesc, 0, &buffer);
+		if (FAILED(d3dResult))	{
+			DXTRACE_MSG("Failed to create constant buffer!");
+			return -1;
+		}
+		_context->constantBuffers.push_back(buffer);
+		return index;
+	}
+
+	void updateConstantBuffer(int index, void* data) {
+		ID3D11Buffer* buffer = _context->constantBuffers[index];
+		_context->d3dContext->UpdateSubresource(buffer, 0, 0, data, 0, 0);
+	}
+
 	bool createBuffer(D3D11_BUFFER_DESC vertexDesc, D3D11_SUBRESOURCE_DATA resourceData, ID3D11Buffer** buffer) {
 		HRESULT d3dResult = _context->d3dDevice->CreateBuffer(&vertexDesc, &resourceData, buffer);
 		if (FAILED(d3dResult))	{
@@ -627,6 +653,15 @@ namespace graphics {
 	void setVertexBuffer(int index, uint32_t* stride, uint32_t* offset) {
 		_context->d3dContext->IASetVertexBuffers(0, 1, &_context->vertexBuffers[index], stride, offset);
 		_context->d3dContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	}
+
+	void setVertexShaderConstantBuffer(int bufferIndex) {
+		ID3D11Buffer* buffer = _context->constantBuffers[bufferIndex];
+		_context->d3dContext->VSSetConstantBuffers(0, 1, &buffer);
+	}
+
+	void drawIndexed(int num) {
+		_context->d3dContext->DrawIndexed(num * 6, 0, 0);
 	}
 
 	void endRendering() {
