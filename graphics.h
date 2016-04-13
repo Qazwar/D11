@@ -6,6 +6,18 @@
 #define _XM_NO_INTRINSICS_
 #include <xnamath.h>
 
+enum ResourceType {
+	SHADER,
+	TEXTURE,
+	VERTEXBUFFER,
+	INDEXBUFFER,
+	UNKNOWN
+};
+
+typedef uint32_t RID;
+
+const RID INVALID_RID = 0;
+
 struct Access{
 
 	enum ENUM {

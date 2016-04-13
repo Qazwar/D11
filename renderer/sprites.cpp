@@ -77,28 +77,17 @@ void SpriteBuffer::flush() {
 	unsigned int stride = sizeof(SpriteVertex);
 	unsigned int offset = 0;
 
-	
-	BindShaderCall* shaderCall = renderQueue::createBindShaderCall();
-	graphics::setShader(_shaderIndex);
-	graphics::setPixelShaderResourceView(_colorMap);
-	renderQueue::submit(shaderCall);
-
-	XMMATRIX world = XMMatrixIdentity();
-	XMMATRIX mvp = XMMatrixMultiply(world, graphics::getViewProjectionMaxtrix());
-	mvp = XMMatrixTranspose(mvp);
-	graphics::updateConstantBuffer(_mvpCB, &mvp);
-	graphics::setVertexShaderConstantBuffer(_mvpCB);
-
-	//UpdateConstantBufferCall
-
-	//MapDataCall
-
 	graphics::setInputLayout(_layoutIndex);
 	graphics::setVertexBuffer(_vertexBuffer, &stride, &offset);
 	graphics::setIndexBuffer(_indexBuffer);
 	graphics::setBlendState(_alphaBlendState);
 	
+	graphics::setShader(_shaderIndex);
+	graphics::setPixelShaderResourceView(_colorMap);
 
+	XMMATRIX world = XMMatrixIdentity();
+	XMMATRIX mvp = XMMatrixMultiply(world, graphics::getViewProjectionMaxtrix());
+	mvp = XMMatrixTranspose(mvp);
 	
 
 	for (int i = 0; i < _index; i++) {
@@ -116,14 +105,16 @@ void SpriteBuffer::flush() {
 
 	graphics::mapData(_vertexBuffer, _vertices, _index * 4 * sizeof(SpriteVertex));
 	
+	graphics::updateConstantBuffer(_mvpCB, &mvp);
+	graphics::setVertexShaderConstantBuffer(_mvpCB);
 
 	graphics::drawIndexed(_index * 6);
-
+	/*
 	IndexedDrawCall* dc = renderQueue::createIndexedDrawCall();
 	dc->indexBuffer = _indexBuffer;
 	dc->vertexBuffer = _vertexBuffer;
 	dc->layout = _layoutIndex;
 	renderQueue::submit(dc);
-
+	*/
 	_index = 0;
 }

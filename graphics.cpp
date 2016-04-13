@@ -7,6 +7,16 @@
 
 namespace graphics {
 
+	static void split(RID rid, uint16_t* id, uint16_t* index) {
+		*index = rid >> 16;
+		*id = rid & 0xFFFF;
+	}
+
+	static RID combine(uint16_t id, uint16_t index) {
+		RID rid = index << 16 | id;
+		return rid;
+	}
+
 	struct InputElementDescriptor {
 
 		const char* semantic;
@@ -448,6 +458,12 @@ namespace graphics {
 		}
 		delete[] descriptors;
 		_context->layouts.push_back(layout);
+
+		RID r = combine(2, 8);
+		uint16_t id;
+		uint16_t ix;
+		split(r, &id, &ix);
+		LOG << "id: " << id << " index: " << ix;
 		return idx;
 	}
 	

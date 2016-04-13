@@ -51,6 +51,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -64,6 +65,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -76,23 +78,49 @@
     <ClCompile Include="base\BaseApp.cpp" />
     <ClCompile Include="Demo.cpp" />
     <ClCompile Include="graphics.cpp" />
+    <ClCompile Include="io\DataFile.cpp" />
+    <ClCompile Include="io\FileRepository.cpp" />
+    <ClCompile Include="io\json.cpp" />
+    <ClCompile Include="io\ReportWriter.cpp" />
+    <ClCompile Include="io\TextCompressor.cpp" />
+    <ClCompile Include="lib\BlockArray.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="math\math.cpp" />
+    <ClCompile Include="memory\DefaultAllocator.cpp" />
     <ClCompile Include="renderer\sprites.cpp" />
     <ClCompile Include="renderer\renderQueue.cpp" />
     <ClCompile Include="utils\Color.cpp" />
+    <ClCompile Include="utils\FileUtils.cpp" />
+    <ClCompile Include="utils\GlobalStringBuffer.cpp" />
     <ClCompile Include="utils\Log.cpp" />
+    <ClCompile Include="utils\Profiler.cpp" />
+    <ClCompile Include="utils\StringUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="base\BaseApp.h" />
+    <ClInclude Include="Common.h" />
     <ClInclude Include="Demo.h" />
     <ClInclude Include="graphics.h" />
+    <ClInclude Include="io\DataFile.h" />
+    <ClInclude Include="io\FileRepository.h" />
+    <ClInclude Include="io\json.h" />
+    <ClInclude Include="io\ReportWriter.h" />
+    <ClInclude Include="io\TextCompressor.h" />
+    <ClInclude Include="lib\BlockArray.h" />
+    <ClInclude Include="lib\collection_types.h" />
+    <ClInclude Include="lib\DataArray.h" />
     <ClInclude Include="math\math.h" />
+    <ClInclude Include="memory\DefaultAllocator.h" />
+    <ClInclude Include="memory\memory_types.h" />
     <ClInclude Include="renderer\renderQueue.h" />
     <ClInclude Include="renderer\render_types.h" />
     <ClInclude Include="renderer\sprites.h" />
     <ClInclude Include="utils\Color.h" />
+    <ClInclude Include="utils\FileUtils.h" />
+    <ClInclude Include="utils\GlobalStringBuffer.h" />
     <ClInclude Include="utils\Log.h" />
+    <ClInclude Include="utils\Profiler.h" />
+    <ClInclude Include="utils\StringUtils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
