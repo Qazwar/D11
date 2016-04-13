@@ -73,19 +73,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="base\BaseApp.cpp" />
     <ClCompile Include="Demo.cpp" />
     <ClCompile Include="graphics.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="math\math.cpp" />
     <ClCompile Include="renderer\sprites.cpp" />
+    <ClCompile Include="utils\Color.cpp" />
     <ClCompile Include="utils\Log.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="base\BaseApp.h" />
     <ClInclude Include="Demo.h" />
     <ClInclude Include="graphics.h" />
     <ClInclude Include="math\math.h" />
     <ClInclude Include="renderer\render_types.h" />
     <ClInclude Include="renderer\sprites.h" />
+    <ClInclude Include="utils\Color.h" />
     <ClInclude Include="utils\Log.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

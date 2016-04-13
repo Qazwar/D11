@@ -3,7 +3,28 @@
 #include <d3d11.h>
 #include <d3dx11.h>
 #include <DxErr.h>
+#define _XM_NO_INTRINSICS_
 #include <xnamath.h>
+
+struct Access{
+
+	enum ENUM {
+		Read,
+		Write,
+		ReadWrite,
+		Count
+	};
+};
+
+enum Attribute {
+	Position,
+	Color0,
+	Texcoord0,
+	Texcoord1,
+	Texcoord2,
+	Texcoord3,
+	End
+};
 
 namespace graphics {
 
@@ -33,15 +54,11 @@ namespace graphics {
 
 	bool createPixelShader(ID3DBlob* buffer, ID3D11PixelShader** shader);
 
-	bool createInputLayout(ID3DBlob* buffer, D3D11_INPUT_ELEMENT_DESC* descriptors, uint32_t num, ID3D11InputLayout** layout);
-
-	int createInputLayout(int shaderIndex, D3D11_INPUT_ELEMENT_DESC* descriptors, uint32_t num);
+	int createInputLayout(int shaderIndex, Attribute* attribute);
 
 	int loadTexture(const char* name);
 
 	bool createSamplerState(ID3D11SamplerState** sampler);
-
-	bool createBlendState(ID3D11BlendState** state);
 
 	const XMMATRIX& getViewProjectionMaxtrix();
 
@@ -50,6 +67,8 @@ namespace graphics {
 	int createBlendState(D3D11_BLEND srcBlend, D3D11_BLEND destBlend);
 
 	int createIndexBuffer(uint32_t num, uint32_t* data);
+
+	int createQuadIndexBuffer(uint32_t numQuads);
 
 	int createBuffer(uint32_t bufferSize, D3D11_SUBRESOURCE_DATA resourceData);
 

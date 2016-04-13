@@ -6,30 +6,21 @@
 #include <xnamath.h>
 #include <Vector.h>
 #include "renderer\sprites.h"
+#include "utils\Color.h"
+#include "base\BaseApp.h"
 
-class Demo {
+class Demo : public BaseApp {
 
 public:
 	Demo();
 	~Demo();
 	bool initialize();
 	void render();
-	void shutdown();
+	void update(float dt);
 private:
 	SpriteBuffer* _spriteBuffer;
 	v2 _positions[256];
-	v2 _scales[256];
-	float _rotations[256];
+	Color _colors[256];
 	int _num;
-	//int _shaderIndex;
-	//int _inputLayout;
-	//ID3D11Buffer* _vertexBuffer;
-	//int _vertexBuffer;
-	//int _indexBuffer;
-	//int _colorMap;
-	//int _alphaBlendState;
-	//VertexPos _vertices[16 * 4];
-	//ID3D11Buffer* _mvpCB;
-	//v2 _positions[2];
 };
 
