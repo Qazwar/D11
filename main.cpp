@@ -41,17 +41,8 @@ int WINAPI WinMain(HINSTANCE hThisInst, HINSTANCE hLastInst, LPSTR lpszCmdLine, 
 	HWND hwnd = CreateWindowA("Diesel11", "Hello", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hThisInst, NULL);
 	if (!hwnd) {
 		return -1;
-	}
-	// http://gafferongames.com/game-physics/fix-your-timestep/
-	float dt = 1.0f / 60.0f;
-	DWORD _lastTime = GetTickCount();
-	DWORD delta = 0;
-	float accu = 0.0f;
-	int frames = 0;
-	int fps = 0;
+	}	
 	app->prepare(hThisInst, hwnd);
-	//Demo demo;
-	//demo.initialize();
 	app->initialize();
 	ShowWindow(hwnd, SW_SHOW);
 	MSG msg = { 0 };
@@ -60,27 +51,8 @@ int WINAPI WinMain(HINSTANCE hThisInst, HINSTANCE hLastInst, LPSTR lpszCmdLine, 
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		DWORD now = GetTickCount();
-		delta += (now - _lastTime);
-		float elapsed = (float)((now - _lastTime) * 0.001);
-
-		_lastTime = now;
-		accu += elapsed;
-		if (delta > 1000) {
-			delta = 0;
-			fps = frames;
-			frames = 0;
-			LOG << "FPS:" << fps;
-		}
-		while (accu >= dt) {
-			app->update(dt);
-			accu -= dt;
-		}
-		
-		graphics::beginRendering();
-		app->render();
-		graphics::endRendering();
-		++frames;
+		app->tick();
+		app->renderFrame();
 	}
 	delete app;
 	graphics::shutdown();

@@ -3,13 +3,15 @@
 #include "render_types.h"
 #include "..\utils\Color.h"
 
-class SpriteBuffer {
+struct Sprite {
+	v2 position;
+	float rotation;
+	v2 scale;
+	Texture texture;
+	Color color;
+};
 
-	struct Sprite {
-		v2 position;
-		Texture texture;
-		Color color;
-	};
+class SpriteBuffer {
 
 	struct SpriteVertex {
 		v3 position;
@@ -24,7 +26,8 @@ class SpriteBuffer {
 public:
 	SpriteBuffer(int maxSprites);
 	~SpriteBuffer();
-	void draw(const v2& position, const Texture& texture, const Color& color = Color(255,255,255,255));
+	void draw(const v2& position, const Texture& texture, float rotation = 0.0f, const v2& scale = v2(1, 1), const Color& color = Color(255, 255, 255, 255));
+	void draw(const Sprite& sprite);
 	void begin();
 	void end();
 private:

@@ -19,8 +19,8 @@ public:
 	void update(float dt);
 private:
 	SpriteBuffer* _spriteBuffer;
-	v2 _positions[256];
-	Color _colors[256];
+	Sprite _sprites[256];
+	float _timer;
 	int _num;
 };
 

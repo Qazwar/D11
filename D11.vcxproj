@@ -79,6 +79,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="math\math.cpp" />
     <ClCompile Include="renderer\sprites.cpp" />
+    <ClCompile Include="renderer\renderQueue.cpp" />
     <ClCompile Include="utils\Color.cpp" />
     <ClCompile Include="utils\Log.cpp" />
   </ItemGroup>
@@ -87,6 +88,7 @@
     <ClInclude Include="Demo.h" />
     <ClInclude Include="graphics.h" />
     <ClInclude Include="math\math.h" />
+    <ClInclude Include="renderer\renderQueue.h" />
     <ClInclude Include="renderer\render_types.h" />
     <ClInclude Include="renderer\sprites.h" />
     <ClInclude Include="utils\Color.h" />
