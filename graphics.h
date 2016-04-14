@@ -6,22 +6,8 @@
 #include "base\Settings.h"
 #include "math\math_types.h"
 #include "resources\ResourceDescriptors.h"
-
-const uint32_t MAX_RESOURCES = 1024;
-
-enum ResourceType {
-	SHADER,
-	TEXTURE,
-	VERTEXBUFFER,
-	INDEXBUFFER,
-	CONSTANTBUFFER,
-	BLENDSTATE,
-	UNKNOWN
-};
-
-typedef uint32_t RID;
-
-const RID INVALID_RID = UINT32_MAX;
+#include "Common.h"
+#include "renderer\Bitmapfont.h"
 
 struct Access{
 
@@ -33,63 +19,29 @@ struct Access{
 	};
 };
 
-enum Attribute {
-	Position,
-	Color0,
-	Texcoord0,
-	Texcoord1,
-	Texcoord2,
-	Texcoord3,
-	End
-};
+
+namespace ds {
+
+	class ResourceContainer;
+}
 
 namespace graphics {
-
-	struct Shader {
-		ID3D11VertexShader* vertexShader;
-		ID3D11PixelShader* pixelShader;
-		ID3DBlob* vertexShaderBuffer;
-		ID3D11SamplerState* samplerState;
-
-		Shader() : vertexShader(0), pixelShader(0), vertexShaderBuffer(0) , samplerState(0) {}
-
-	};
-
+	
 	bool initialize(HINSTANCE hInstance, HWND hwnd, const ds::Settings& settings);
+
+	void setResourceContainer(ds::ResourceContainer* container);
 
 	ID3D11DeviceContext* getContext();
 
-	RID createConstantBuffer(const ConstantBufferDescriptor& descriptor);
+	ID3D11Device* getDevice();
 
 	void updateConstantBuffer(RID rid, void* data);
 
-	RID createShader(const ShaderDescriptor& descriptor);
-	
-	bool compileShader(const char* filePath, const char* entry, const char* shaderModel, ID3DBlob** buffer);
-
-	bool createVertexShader(ID3DBlob* buffer, ID3D11VertexShader** shader);
-
-	bool createPixelShader(ID3DBlob* buffer, ID3D11PixelShader** shader);
-
-	int createInputLayout(RID shaderRID, Attribute* attribute);
-
-	int loadTexture(const char* name);
+	ds::Bitmapfont* getFont(RID rid);
 
 	bool createSamplerState(ID3D11SamplerState** sampler);
 
 	const ds::mat4& getViewProjectionMaxtrix();
-	
-	int createBlendState(D3D11_BLEND srcBlend, D3D11_BLEND destBlend);
-
-	RID createBlendState(const BlendStateDescriptor& descriptor);
-
-	int findBlendState(const char* text);
-
-	RID createIndexBuffer(const IndexBufferDescriptor& descriptor);
-
-	RID createQuadIndexBuffer(const QuadIndexBufferDescriptor& descriptor);
-
-	RID createVertexBuffer(const VertexBufferDescriptor& descriptor);
 
 	void beginRendering(const Color& color);
 
@@ -101,15 +53,15 @@ namespace graphics {
 
 	void setShader(RID rid);
 
-	void setInputLayout(int layoutIndex);
+	void setInputLayout(RID rid);
 
-	void setPixelShaderResourceView(int index, uint32_t slot = 0);
+	void setPixelShaderResourceView(RID rid, uint32_t slot = 0);
 
 	void setVertexShaderConstantBuffer(RID rid);
 
 	void setBlendState(RID rid);
 
-	void drawIndexed(int num);
+	void drawIndexed(uint32_t num);
 
 	void endRendering();
 

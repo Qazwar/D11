@@ -38,6 +38,7 @@ namespace ds {
 		repository::shutdown();
 		perf::shutdown();
 		delete gStringBuffer;
+		delete _resources;
 		//gDefaultMemory->printOpenAllocations();
 		delete gDefaultMemory;
 	}
@@ -45,58 +46,9 @@ namespace ds {
 
 	bool BaseApp::prepare(HINSTANCE hInstance, HWND hwnd) {
 		if (graphics::initialize(hInstance, hwnd, _settings)) {
-			JSONReader reader;
-			bool ret = reader.parse("content\\resources.json");
-			assert(ret);
-			int children[256];
-			int num = reader.get_categories(children, 256);
-			for (int i = 0; i < num; ++i) {
-				if (reader.matches(children[i], "quad_index_buffer")) {
-					QuadIndexBufferDescriptor descriptor;
-					reader.get(children[i], "id", &descriptor.id);
-					reader.get(children[i], "size", &descriptor.size);
-					graphics::createQuadIndexBuffer(descriptor);
-				}
-				else if (reader.matches(children[i], "constant_buffer")) {
-					ConstantBufferDescriptor descriptor;
-					reader.get(children[i], "id", &descriptor.id);
-					reader.get(children[i], "size", &descriptor.size);
-					graphics::createConstantBuffer(descriptor);
-				}
-				else if (reader.matches(children[i], "vertex_buffer")) {
-					VertexBufferDescriptor descriptor;
-					reader.get(children[i], "id", &descriptor.id);
-					reader.get(children[i], "size", &descriptor.size);
-					reader.get(children[i], "dynamic", &descriptor.dynamic);
-					reader.get(children[i], "layout", &descriptor.layout);
-					graphics::createVertexBuffer(descriptor);
-				}
-				else if (reader.matches(children[i], "shader")) {
-					ShaderDescriptor descriptor;
-					reader.get(children[i], "id", &descriptor.id);
-					descriptor.file = reader.get_string(children[i], "file");
-					descriptor.vertexShader = reader.get_string(children[i], "vertex_shader");
-					descriptor.pixelShader = reader.get_string(children[i], "pixel_shader");
-					descriptor.model = reader.get_string(children[i], "shader_model");
-					graphics::createShader(descriptor);
-				}
-				else if (reader.matches(children[i], "blendstate")) {
-					// FIXME: assert that every entry is != -1
-					BlendStateDescriptor descriptor;
-					reader.get(children[i], "id", &descriptor.id);
-					const char* entry = reader.get_string(children[i], "src_blend");
-					descriptor.srcBlend = graphics::findBlendState(entry);
-					entry = reader.get_string(children[i], "dest_blend");
-					descriptor.destBlend = graphics::findBlendState(entry);
-					entry = reader.get_string(children[i], "src_blend_alpha");
-					descriptor.srcAlphaBlend = graphics::findBlendState(entry);
-					entry = reader.get_string(children[i], "dest_blend_alpha");
-					descriptor.destAlphaBlend = graphics::findBlendState(entry);
-					reader.get(children[i], "alpha_enabled", &descriptor.alphaEnabled);
-					graphics::createBlendState(descriptor);
-				}
-				
-			}
+			_resources = new ResourceContainer(graphics::getDevice());
+			_resources->parseJSONFile();
+			graphics::setResourceContainer(_resources);
 			return true;
 		}
 		return false;

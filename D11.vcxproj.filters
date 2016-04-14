@@ -32,6 +32,9 @@
     <Filter Include="resources">
       <UniqueIdentifier>{85cfbf4a-6631-48e0-a65e-6458fd431b49}</UniqueIdentifier>
     </Filter>
+    <Filter Include="content\resources">
+      <UniqueIdentifier>{a4b9e98e-c614-4e38-a6d1-331966f8c28d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="utils\Log.cpp">
@@ -90,6 +93,12 @@
     <ClCompile Include="graphics.cpp" />
     <ClCompile Include="math\matrix.cpp">
       <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\ResourceContainer.cpp">
+      <Filter>resources</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\Bitmapfont.cpp">
+      <Filter>renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -171,6 +180,12 @@
     <ClInclude Include="resources\ResourceDescriptors.h">
       <Filter>resources</Filter>
     </ClInclude>
+    <ClInclude Include="resources\ResourceContainer.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\Bitmapfont.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="content\engine_settings.json">
@@ -178,6 +193,9 @@
     </None>
     <None Include="content\resources.json">
       <Filter>content</Filter>
+    </None>
+    <None Include="content\resources\xscale.json">
+      <Filter>content\resources</Filter>
     </None>
   </ItemGroup>
 </Project>

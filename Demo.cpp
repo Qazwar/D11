@@ -43,5 +43,6 @@ void Demo::render() {
 	for (int i = 0; i < _num; ++i) {
 		_spriteBuffer->draw(_sprites[i]);
 	}
+	_spriteBuffer->drawText(7, 10, 600, "Hello world!");
 	_spriteBuffer->end();
 }

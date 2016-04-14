@@ -3,9 +3,18 @@ quad_index_buffer {
 	name : "SpriteQuadBuffer"
 	size : 6144
 }
+shader {
+	id : 3
+	name : "SpriteShader"
+	file : "TextureMap.fx"
+	vertex_shader : "VS_Main"
+	pixel_shader : "PS_Main"
+	shader_model : "4_0"
+}
 input_layout {
-	id : 0
-	attributes : "Position3,Texcoord,Color0"
+	id : 6
+	attributes : "POSITION,TEXCOORD,COLOR"
+	shader : 3
 }
 shader_resource_view {
 	id : 0
@@ -14,7 +23,7 @@ shader_resource_view {
 vertex_buffer {
 	id : 2
 	name : "SpriteVertexBuffer"
-	layout : 0
+	layout : 6
 	size : 147456
 	dynamic : true
 }
@@ -27,16 +36,17 @@ blendstate {
 	src_blend_alpha : "SRC_ALPHA"
 	dest_blend_alpha : "INV_SRC_ALPHA"
 }
-shader {
-	id : 3
-	name : "SpriteShader"
-	file : "TextureMap.fx"
-	vertex_shader : "VS_Main"
-	pixel_shader : "PS_Main"
-	shader_model : "4_0"
-}
 constant_buffer {
 	id : 1
 	name : "MVP_CB"
 	size : 64
+}
+texture {
+	id : 5
+	name : "TextureArray" 
+	file : "TextureArray.png"
+}
+font {
+	id : 7
+	file : "xscale.json"
 }

@@ -88,8 +88,10 @@
     <ClCompile Include="math\math.cpp" />
     <ClCompile Include="math\matrix.cpp" />
     <ClCompile Include="memory\DefaultAllocator.cpp" />
+    <ClCompile Include="renderer\Bitmapfont.cpp" />
     <ClCompile Include="renderer\sprites.cpp" />
     <ClCompile Include="renderer\renderQueue.cpp" />
+    <ClCompile Include="resources\ResourceContainer.cpp" />
     <ClCompile Include="utils\Color.cpp" />
     <ClCompile Include="utils\FileUtils.cpp" />
     <ClCompile Include="utils\GlobalStringBuffer.cpp" />
@@ -116,9 +118,11 @@
     <ClInclude Include="math\matrix.h" />
     <ClInclude Include="memory\DefaultAllocator.h" />
     <ClInclude Include="memory\memory_types.h" />
+    <ClInclude Include="renderer\Bitmapfont.h" />
     <ClInclude Include="renderer\renderQueue.h" />
     <ClInclude Include="renderer\render_types.h" />
     <ClInclude Include="renderer\sprites.h" />
+    <ClInclude Include="resources\ResourceContainer.h" />
     <ClInclude Include="resources\ResourceDescriptors.h" />
     <ClInclude Include="utils\Color.h" />
     <ClInclude Include="utils\FileUtils.h" />
@@ -130,6 +134,7 @@
   <ItemGroup>
     <None Include="content\engine_settings.json" />
     <None Include="content\resources.json" />
+    <None Include="content\resources\xscale.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

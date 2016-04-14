@@ -1,6 +1,7 @@
 #pragma once
 #include <Windows.h>
 #include "Settings.h"
+#include "..\resources\ResourceContainer.h"
 
 namespace ds {
 
@@ -23,6 +24,7 @@ namespace ds {
 		int _frames;
 		int _fps;
 		Settings _settings;
+		ResourceContainer* _resources;
 	};
 
 }

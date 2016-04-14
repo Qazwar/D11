@@ -1,5 +1,7 @@
 #pragma once
 #include <stdint.h>
+#include <d3d11.h>
+#include "..\Common.h"
 
 struct IndexBufferDescriptor {
 	uint16_t id;
@@ -33,16 +35,6 @@ struct VertexBufferDescriptor {
 	uint32_t layout;
 };
 
-/*
-shader {
-id : 3
-name : "SpriteShader"
-file : "TextureMap.fx"
-vertex_shader : "VS_Main"
-pixel_shader : "PS_Main"
-shader_model : "4_0"
-}
-*/
 struct ShaderDescriptor {
 	uint16_t id;
 	const char* vertexShader;
@@ -59,19 +51,30 @@ struct BlendStateDescriptor {
 	int srcAlphaBlend;
 	int destAlphaBlend;
 };
-/*
-input_layout {
-id : 0
-attributes : "Position3,Texcoord,Color0"
-}
-shader_resource_view {
-id : 0
-texture : "TextureArray.png"
-}
-blend_state {
-id : 0
-alpha_enabled : true
-src_blend : "SRC_ALPHA"
-dest_blend : "INV_SRC_ALPHA"
-}
-*/
+
+struct TextureDescriptor {
+	uint16_t id;
+	const char* name;
+};
+
+struct Shader {
+	ID3D11VertexShader* vertexShader;
+	ID3D11PixelShader* pixelShader;
+	ID3DBlob* vertexShaderBuffer;
+	ID3D11SamplerState* samplerState;
+
+	Shader() : vertexShader(0), pixelShader(0), vertexShaderBuffer(0), samplerState(0) {}
+
+};
+
+struct InputLayoutDescriptor {
+	uint16_t id;
+	uint16_t indices[16];
+	uint16_t num;
+	RID shader;
+};
+
+struct BitmapfontDescriptor {
+	uint16_t id;
+	const char* name;
+};

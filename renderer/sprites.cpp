@@ -9,6 +9,7 @@
 
 const v2 ARRAY[] = { v2(-0.5f, 0.5f), v2(0.5f, 0.5f), v2(0.5f, -0.5f), v2(-0.5f, -0.5f) };
 
+
 v2 srt(const v2& v, const v2& u, float scaleX, float scaleY, float rotation) {
 	float sx = u.x * scaleX;
 	float sy = u.y * scaleY;
@@ -25,19 +26,13 @@ v2 srt(const v2& v, const v2& u, float scaleX, float scaleY, float rotation) {
 
 SpriteBuffer::SpriteBuffer(int maxSprites) : _maxSprites(maxSprites) , _index(0) , _started(false) {
 	_indexBuffer = 0;
-	// create shader
 	_shaderIndex = 3;
-	// create input layout
-	Attribute desc[] = { Attribute::Position, Attribute::Texcoord0, Attribute::Color0 , Attribute::End };
-	_layoutIndex = graphics::createInputLayout(_shaderIndex, desc);
-	assert(_layoutIndex != -1);
-	// load texture
-	_colorMap = graphics::loadTexture("content\\textures\\TextureArray.png");
-
+	_layoutIndex = 6;
+	_colorMap = 5;
 	_vertexBuffer = 2;
 	_mvpCB = 1;
-	// create blend state
-	_alphaBlendState = 4;// graphics::createBlendState(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA);
+	_alphaBlendState = 4;
+
 	// create data
 	_sprites = new Sprite[maxSprites];
 	_vertices = new SpriteVertex[4 * maxSprites];
@@ -50,7 +45,7 @@ void SpriteBuffer::draw(const Sprite& sprite) {
 	draw(sprite.position, sprite.texture, sprite.rotation, sprite.scale, sprite.color);
 }
 
-void SpriteBuffer::draw(const v2& position, const Texture& texture, float rotation, const v2& scale, const Color& color) {
+void SpriteBuffer::draw(const v2& position, const ds::Texture& texture, float rotation, const v2& scale, const Color& color) {
 	if (_started) {
 		if (_index >= _maxSprites) {
 			flush();
@@ -61,6 +56,19 @@ void SpriteBuffer::draw(const v2& position, const Texture& texture, float rotati
 		sprite.color = color;
 		sprite.scale = scale;
 		sprite.rotation = rotation;
+	}
+}
+
+void SpriteBuffer::drawText(RID fontID, int x, int y, const char* text, int padding, float scaleX, float scaleY, const Color& color) {
+	ds::Bitmapfont* font = graphics::getFont(fontID);
+	int len = strlen(text);
+	for (int cnt = 0; cnt < len; ++cnt) {
+		char c = text[cnt];
+		const ds::Texture& t = font->get(c);
+		float dimX = t.dim.x * scaleX;
+		float dimY = t.dim.y * scaleY;
+		draw(v2(x + dimX * 0.5f, y + dimY * 0.5f), t, 0.0f, v2(scaleX, scaleY), color);
+		x += dimX + padding;
 	}
 }
 
@@ -86,7 +94,6 @@ void SpriteBuffer::flush() {
 	graphics::setShader(_shaderIndex);
 	graphics::setPixelShaderResourceView(_colorMap);
 
-	//XMMATRIX world = XMMatrixIdentity();
 	ds::mat4 mvp = graphics::getViewProjectionMaxtrix();
 	mvp = ds::matrix::mat4Transpose(mvp);
 	

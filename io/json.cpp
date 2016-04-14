@@ -530,7 +530,7 @@ bool JSONReader::get_color(int category_id, const char* name, Color* ret) const 
 // -------------------------------------------
 // get rect
 // -------------------------------------------
-bool JSONReader::get_rect(int category_id, const char* name, Rect* ret) const {
+bool JSONReader::get(int category_id, const char* name, Rect* ret) const {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
 		ret->top = get(_data_indices[idx]);

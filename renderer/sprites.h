@@ -8,7 +8,7 @@ struct Sprite {
 	v2 position;
 	float rotation;
 	v2 scale;
-	Texture texture;
+	ds::Texture texture;
 	Color color;
 };
 
@@ -27,8 +27,9 @@ class SpriteBuffer {
 public:
 	SpriteBuffer(int maxSprites);
 	~SpriteBuffer();
-	void draw(const v2& position, const Texture& texture, float rotation = 0.0f, const v2& scale = v2(1, 1), const Color& color = Color(255, 255, 255, 255));
+	void draw(const v2& position, const ds::Texture& texture, float rotation = 0.0f, const v2& scale = v2(1, 1), const Color& color = Color(255, 255, 255, 255));
 	void draw(const Sprite& sprite);
+	void drawText(RID fontID, int x, int y, const char* text, int padding = 4, float scaleX = 1.0f, float scaleY = 1.0f, const Color& color = Color(255, 255, 255, 255));
 	void begin();
 	void end();
 private:

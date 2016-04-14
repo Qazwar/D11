@@ -2,7 +2,7 @@
 
 namespace math {
 
-	v4 getTextureCoordinates(const Rect& textureRect, float textureWidth, float textureHeight) {
+	v4 getTextureCoordinates(const ds::Rect& textureRect, float textureWidth, float textureHeight) {
 		v4 ret;
 		ret.x = textureRect.left / textureWidth;
 		ret.z = textureRect.right / textureWidth;
@@ -22,9 +22,9 @@ namespace math {
 		return ret;
 	}
 
-	Texture buildTexture(float top, float left, float width, float height, float textureWidth, float textureHeight) {
-		Texture ret;
-		Rect r(top, left, width, height);
+	ds::Texture buildTexture(float top, float left, float width, float height, float textureWidth, float textureHeight) {
+		ds::Texture ret;
+		ds::Rect r(top, left, width, height);
 		ret.rect = r;
 		ret.uv = getTextureCoordinates(r, textureWidth, textureHeight);
 		ret.textureID = 0;
@@ -34,8 +34,8 @@ namespace math {
 		return ret;
 	}
 
-	Texture buildTexture(const Rect& r, float textureWidth, float textureHeight, bool useHalfTexel) {
-		Texture ret;
+	ds::Texture buildTexture(const ds::Rect& r, float textureWidth, float textureHeight) {
+		ds::Texture ret;
 		ret.rect = r;
 		ret.uv = getTextureCoordinates(r, textureWidth, textureHeight);
 		ret.textureID = 0;
