@@ -86,6 +86,7 @@
     <ClCompile Include="lib\BlockArray.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="math\math.cpp" />
+    <ClCompile Include="math\matrix.cpp" />
     <ClCompile Include="memory\DefaultAllocator.cpp" />
     <ClCompile Include="renderer\sprites.cpp" />
     <ClCompile Include="renderer\renderQueue.cpp" />
@@ -98,6 +99,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="base\BaseApp.h" />
+    <ClInclude Include="base\Settings.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="Demo.h" />
     <ClInclude Include="graphics.h" />
@@ -110,17 +112,24 @@
     <ClInclude Include="lib\collection_types.h" />
     <ClInclude Include="lib\DataArray.h" />
     <ClInclude Include="math\math.h" />
+    <ClInclude Include="math\math_types.h" />
+    <ClInclude Include="math\matrix.h" />
     <ClInclude Include="memory\DefaultAllocator.h" />
     <ClInclude Include="memory\memory_types.h" />
     <ClInclude Include="renderer\renderQueue.h" />
     <ClInclude Include="renderer\render_types.h" />
     <ClInclude Include="renderer\sprites.h" />
+    <ClInclude Include="resources\ResourceDescriptors.h" />
     <ClInclude Include="utils\Color.h" />
     <ClInclude Include="utils\FileUtils.h" />
     <ClInclude Include="utils\GlobalStringBuffer.h" />
     <ClInclude Include="utils\Log.h" />
     <ClInclude Include="utils\Profiler.h" />
     <ClInclude Include="utils\StringUtils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="content\engine_settings.json" />
+    <None Include="content\resources.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

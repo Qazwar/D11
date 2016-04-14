@@ -9,7 +9,7 @@
 #include "utils\Color.h"
 #include "base\BaseApp.h"
 
-class Demo : public BaseApp {
+class Demo : public ds::BaseApp {
 
 public:
 	Demo();

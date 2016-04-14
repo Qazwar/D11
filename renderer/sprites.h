@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include "render_types.h"
 #include "..\utils\Color.h"
+#include "..\graphics.h"
 
 struct Sprite {
 	v2 position;
@@ -38,11 +39,11 @@ private:
 	int _maxSprites;
 	bool _started;
 	// resources
-	int _indexBuffer;
+	RID _indexBuffer;
 	int _vertexBuffer;
 	int _layoutIndex;
 	int _shaderIndex;
 	int _colorMap;
 	int _alphaBlendState;
-	int _mvpCB;
+	RID _mvpCB;
 };

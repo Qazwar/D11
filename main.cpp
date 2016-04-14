@@ -4,7 +4,7 @@
 #include "utils\Log.h"
 #include "base\BaseApp.h"
 
-extern BaseApp* app;
+extern ds::BaseApp* app;
 
 LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	PAINTSTRUCT paintStruct;
@@ -31,14 +31,14 @@ int WINAPI WinMain(HINSTANCE hThisInst, HINSTANCE hLastInst, LPSTR lpszCmdLine, 
 	wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wndClass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	wndClass.lpszMenuName = NULL;
-	wndClass.lpszClassName = "Diesel11";
+	wndClass.lpszClassName = "D11";
 
 	if (!RegisterClassEx(&wndClass)) {
 		return -1;
 	}
 	RECT rc = { 0, 0, 1280, 720};
 	AdjustWindowRect(&rc, WS_OVERLAPPED, FALSE);
-	HWND hwnd = CreateWindowA("Diesel11", "Hello", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hThisInst, NULL);
+	HWND hwnd = CreateWindowA("D11", "Hello", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hThisInst, NULL);
 	if (!hwnd) {
 		return -1;
 	}	

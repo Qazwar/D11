@@ -388,7 +388,7 @@ bool JSONReader::matches(int category_id, const char* name) const {
 // -------------------------------------------
 // get bool
 // ------------------------------------------- 
-bool JSONReader::get_bool(int category_id, const char* name, bool* ret) const {
+bool JSONReader::get(int category_id, const char* name, bool* ret) const {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
 		int v = static_cast<int>(get(_data_indices[idx]));
@@ -419,6 +419,30 @@ bool JSONReader::get_int(int category_id, const char* name, int* ret) const {
 // get uint
 // -------------------------------------------
 bool JSONReader::get_uint(int category_id, const char* name, uint32_t* ret) const {
+	int idx = get_index(category_id, name);
+	if (idx != -1) {
+		*ret = static_cast<uint32_t>(get(_data_indices[idx]));
+		return true;
+	}
+	return false;
+}
+
+// -------------------------------------------
+// get uint
+// -------------------------------------------
+bool JSONReader::get(int category_id, const char* name, uint16_t* ret) const {
+	int idx = get_index(category_id, name);
+	if (idx != -1) {
+		*ret = static_cast<uint16_t>(get(_data_indices[idx]));
+		return true;
+	}
+	return false;
+}
+
+// -------------------------------------------
+// get uint
+// -------------------------------------------
+bool JSONReader::get(int category_id, const char* name, uint32_t* ret) const {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
 		*ret = static_cast<uint32_t>(get(_data_indices[idx]));

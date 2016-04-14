@@ -3,7 +3,7 @@
 #include <assert.h>
 #include "utils\Log.h"
 #include <vector>
-
+#include "math\matrix.h"
 
 namespace graphics {
 
@@ -16,6 +16,12 @@ namespace graphics {
 		RID rid = index << 16 | id;
 		return rid;
 	}
+
+	struct ResourceIndex {
+		RID id;
+		uint32_t index;
+		ResourceType type;
+	};
 
 	struct InputElementDescriptor {
 
@@ -39,7 +45,7 @@ namespace graphics {
 		{ "TEXCOORD", 3, DXGI_FORMAT_R32G32_FLOAT,        8 },
 	};
 
-	__declspec(align(16)) struct GraphicContext {
+	struct GraphicContext {
 		HINSTANCE hInstance;
 		HWND hwnd;
 
@@ -51,10 +57,10 @@ namespace graphics {
 		IDXGISwapChain* swapChain;
 		ID3D11RenderTargetView* backBufferTarget;
 
-		XMMATRIX viewMatrix;
-		XMMATRIX worldMatrix;
-		XMMATRIX projectionMaxtrix;
-		XMMATRIX viewProjectionMaxtrix;
+		ds::mat4 viewMatrix;
+		ds::mat4 worldMatrix;
+		ds::mat4 projectionMatrix;
+		ds::mat4 viewProjectionMatrix;
 
 		std::vector<ID3D11Buffer*> indexBuffers;
 		std::vector<ID3D11Buffer*> vertexBuffers;
@@ -63,6 +69,9 @@ namespace graphics {
 		std::vector<ID3D11InputLayout*> layouts;
 		std::vector<Shader*> shaders;
 		std::vector<ID3D11ShaderResourceView*> shaderResourceViews;
+
+		uint32_t resourceIndex;
+		ResourceIndex resourceTable[MAX_RESOURCES];
 	};
 
 	static GraphicContext* _context;
@@ -165,11 +174,17 @@ namespace graphics {
 	}
 
 
-	bool initialize(HINSTANCE hInstance, HWND hwnd) {
+	bool initialize(HINSTANCE hInstance, HWND hwnd, const ds::Settings& settings) {
 		_context = new GraphicContext;
 		_context->hInstance = hInstance;
 		_context->hwnd = hwnd;
-
+		_context->resourceIndex = 0;
+		for (uint32_t i = 0; i < MAX_RESOURCES; ++i) {
+			ResourceIndex& index = _context->resourceTable[i];
+			index.id = INVALID_RID;
+			index.index = 0;
+			index.type = ResourceType::UNKNOWN;
+		}
 		RECT dimensions;
 		GetClientRect(hwnd, &dimensions);
 
@@ -265,11 +280,9 @@ namespace graphics {
 
 		_context->d3dContext->RSSetViewports(1, &viewport);
 
-		_context->viewMatrix = XMMatrixIdentity();
-		//D3DXMatrixOrthoLH(&m_orthoMatrix, (float)screenWidth, (float)screenHeight, screenNear, screenDepth);
-		_context->projectionMaxtrix = XMMatrixOrthographicLH(static_cast<float>(width), static_cast<float>(height), 0.1f, 100.0f);
-		//_context->projectionMaxtrix = XMMatrixOrthographicOffCenterLH(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height), 0.1f, 100.0f);
-		_context->viewProjectionMaxtrix = XMMatrixMultiply(_context->viewMatrix, _context->projectionMaxtrix);
+		_context->viewMatrix = ds::matrix::m4identity();
+		_context->projectionMatrix = ds::matrix::mat4OrthoLH(static_cast<float>(width), static_cast<float>(height), 0.1f, 100.0f);
+		_context->viewProjectionMatrix = _context->viewMatrix * _context->projectionMatrix;
 
 		return true;
 	}
@@ -325,6 +338,56 @@ namespace graphics {
 		}
 	}
 
+	RID createShader(const ShaderDescriptor& descriptor) {
+		ResourceIndex& ri = _context->resourceTable[descriptor.id];
+		assert(ri.type == ResourceType::UNKNOWN);
+		Shader* s = new Shader;
+		int idx = _context->shaders.size();
+		s->vertexShaderBuffer = 0;
+		bool compileResult = compileShader(descriptor.file, descriptor.vertexShader, "vs_4_0", &s->vertexShaderBuffer);
+		if (!compileResult)	{
+			DXTRACE_MSG("Error compiling the vertex shader!");
+			return -1;
+		}
+		HRESULT d3dResult;
+
+		if (!createVertexShader(s->vertexShaderBuffer, &s->vertexShader)) {
+			DXTRACE_MSG("Error creating the vertex shader!");
+			return -1;
+		}
+		ID3DBlob* psBuffer = 0;
+		compileResult = compileShader(descriptor.file, descriptor.pixelShader, "ps_4_0", &psBuffer);
+		if (!compileResult)	{
+			DXTRACE_MSG("Error compiling pixel shader!");
+			return -1;
+		}
+
+		if (!createPixelShader(psBuffer, &s->pixelShader)) {
+			DXTRACE_MSG("Error creating pixel shader!");
+			return -1;
+		}
+		psBuffer->Release();
+		D3D11_SAMPLER_DESC colorMapDesc;
+		ZeroMemory(&colorMapDesc, sizeof(colorMapDesc));
+		colorMapDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+		colorMapDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+		colorMapDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+		colorMapDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+		colorMapDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+		colorMapDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+		d3dResult = _context->d3dDevice->CreateSamplerState(&colorMapDesc, &s->samplerState);
+		if (FAILED(d3dResult)) {
+			DXTRACE_MSG("Failed to create SamplerState!");
+			return -1;
+		}
+		_context->shaders.push_back(s);
+		ri.index = idx;
+		ri.id = descriptor.id;
+		ri.type = ResourceType::SHADER;
+		return ri.id;
+	}
+	/*
 	int compileShader(char* fileName) {
 		Shader* s = new Shader;
 		int idx = _context->shaders.size();
@@ -369,8 +432,8 @@ namespace graphics {
 		_context->shaders.push_back(s);
 		return idx;
 	}
-
-	bool compileShader(char* filePath, char* entry, char* shaderModel, ID3DBlob** buffer) {
+	*/
+	bool compileShader(const char* filePath, const  char* entry, const  char* shaderModel, ID3DBlob** buffer) {
 		DWORD shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
 
 #if defined( DEBUG ) || defined( _DEBUG )
@@ -424,7 +487,7 @@ namespace graphics {
 	// ------------------------------------------------------
 	// create input layout
 	// ------------------------------------------------------
-	int createInputLayout(int shaderIndex, Attribute* attribute) {		
+	int createInputLayout(RID shaderRID, Attribute* attribute) {		
 		Attribute* ptr = attribute;
 		uint32_t total = 0;
 		while (*ptr != Attribute::End) {
@@ -451,7 +514,9 @@ namespace graphics {
 		}
 		int idx = _context->layouts.size();
 		ID3D11InputLayout* layout = 0;
-		Shader* s = _context->shaders[shaderIndex];
+		const ResourceIndex& res_idx = _context->resourceTable[shaderRID];
+		assert(res_idx.type == ResourceType::SHADER);
+		Shader* s = _context->shaders[res_idx.index];
 		HRESULT d3dResult = _context->d3dDevice->CreateInputLayout(descriptors, total, s->vertexShaderBuffer->GetBufferPointer(), s->vertexShaderBuffer->GetBufferSize(), &layout);
 		if (d3dResult < 0) {
 			return -1;
@@ -527,12 +592,14 @@ namespace graphics {
 	// ------------------------------------------------------
 	// create constant buffer
 	// ------------------------------------------------------
-	int createConstantBuffer(uint32_t size) {
+	RID createConstantBuffer(const ConstantBufferDescriptor& descriptor) {
+		ResourceIndex& ri = _context->resourceTable[descriptor.id];
+		assert(ri.type == ResourceType::UNKNOWN);
 		int index = _context->constantBuffers.size();
 		D3D11_BUFFER_DESC constDesc;
 		ZeroMemory(&constDesc, sizeof(constDesc));
 		constDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		constDesc.ByteWidth = size;
+		constDesc.ByteWidth = descriptor.size;
 		constDesc.Usage = D3D11_USAGE_DEFAULT;
 		ID3D11Buffer* buffer = 0;
 		HRESULT d3dResult = _context->d3dDevice->CreateBuffer(&constDesc, 0, &buffer);
@@ -541,52 +608,31 @@ namespace graphics {
 			return -1;
 		}
 		_context->constantBuffers.push_back(buffer);
-		return index;
-	}
-	
-	bool createBuffer(D3D11_BUFFER_DESC vertexDesc, D3D11_SUBRESOURCE_DATA resourceData, ID3D11Buffer** buffer) {
-		HRESULT d3dResult = _context->d3dDevice->CreateBuffer(&vertexDesc, &resourceData, buffer);
-		if (FAILED(d3dResult))	{
-			DXTRACE_MSG("Failed to create vertex buffer!");
-			return false;
-		}
-		return true;
+		ri.index = index;
+		ri.id = descriptor.id;
+		ri.type = ResourceType::CONSTANTBUFFER;
+		return ri.id;
 	}
 
-	bool createBuffer(D3D11_BUFFER_DESC bufferDesciption, ID3D11Buffer** buffer) {
-		HRESULT d3dResult = _context->d3dDevice->CreateBuffer(&bufferDesciption, 0, buffer);
-		if (FAILED(d3dResult))	{
-			DXTRACE_MSG("Failed to create buffer!");
-			return false;
-		}
-		return true;
-	}
-
-	int createBuffer(uint32_t bufferSize, D3D11_SUBRESOURCE_DATA resourceData) {
+	// ------------------------------------------------------
+	// create vertex buffer
+	// ------------------------------------------------------
+	RID createVertexBuffer(const VertexBufferDescriptor& descriptor) {
+		ResourceIndex& ri = _context->resourceTable[descriptor.id];
+		assert(ri.type == ResourceType::UNKNOWN);
 		D3D11_BUFFER_DESC bufferDesciption;
 		ZeroMemory(&bufferDesciption, sizeof(bufferDesciption));
-		bufferDesciption.Usage = D3D11_USAGE_DYNAMIC;
-		bufferDesciption.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		bufferDesciption.ByteWidth = bufferSize;
-		bufferDesciption.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-		ID3D11Buffer* buffer = 0;
-		HRESULT d3dResult = _context->d3dDevice->CreateBuffer(&bufferDesciption, &resourceData, &buffer);
-		if (FAILED(d3dResult))	{
-			DXTRACE_MSG("Failed to create buffer!");
-			return -1;
+		if (descriptor.dynamic) {
+			bufferDesciption.Usage = D3D11_USAGE_DYNAMIC;
+			bufferDesciption.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 		}
-		int idx = _context->vertexBuffers.size();
-		_context->vertexBuffers.push_back(buffer);
-		return idx;
-	}
-
-	int createBuffer(uint32_t bufferSize) {
-		D3D11_BUFFER_DESC bufferDesciption;
-		ZeroMemory(&bufferDesciption, sizeof(bufferDesciption));
-		bufferDesciption.Usage = D3D11_USAGE_DYNAMIC;
+		else {
+			bufferDesciption.Usage = D3D11_USAGE_DEFAULT;
+			bufferDesciption.CPUAccessFlags = 0;
+		}
 		bufferDesciption.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		bufferDesciption.ByteWidth = bufferSize;
-		bufferDesciption.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		bufferDesciption.ByteWidth = descriptor.size;
+		
 		ID3D11Buffer* buffer = 0;
 		HRESULT d3dResult = _context->d3dDevice->CreateBuffer(&bufferDesciption, 0, &buffer);
 		if (FAILED(d3dResult))	{
@@ -595,9 +641,89 @@ namespace graphics {
 		}
 		int idx = _context->vertexBuffers.size();
 		_context->vertexBuffers.push_back(buffer);
-		return idx;
+		ri.index = idx;
+		ri.id = descriptor.id;
+		ri.type = ResourceType::VERTEXBUFFER;
+		return ri.id;
 	}
 
+	// ------------------------------------------------------
+	// create index buffer
+	// ------------------------------------------------------
+	RID createIndexBuffer(const IndexBufferDescriptor& descriptor) {
+		int idx = _context->indexBuffers.size();
+		D3D11_BUFFER_DESC bufferDesc;
+		if (descriptor.dynamic) {
+			bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+			bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		}
+		else {
+			bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+			bufferDesc.CPUAccessFlags = 0;
+		}
+		bufferDesc.ByteWidth = sizeof(uint32_t) * descriptor.size;
+		bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;		
+		bufferDesc.MiscFlags = 0;
+		ID3D11Buffer* buffer;
+		HRESULT hr = _context->d3dDevice->CreateBuffer(&bufferDesc, 0, &buffer);
+		if (FAILED(hr)) {
+			DXTRACE_MSG("Failed to create index buffer!");
+			return -1;
+		}
+		_context->indexBuffers.push_back(buffer);
+		return combine(idx,idx);
+	}
+
+	// ------------------------------------------------------
+	// cretate quad index buffer
+	// ------------------------------------------------------
+	RID createQuadIndexBuffer(const QuadIndexBufferDescriptor& descriptor) {
+		int idx = _context->indexBuffers.size();
+		ResourceIndex& ri = _context->resourceTable[descriptor.id];
+		assert(ri.type == ResourceType::UNKNOWN);
+		// FIXME: check that size % 6 == 0 !!!
+		D3D11_BUFFER_DESC bufferDesc;
+		bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+		bufferDesc.CPUAccessFlags = 0;
+		bufferDesc.ByteWidth = sizeof(uint32_t) * descriptor.size;
+		bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+		bufferDesc.MiscFlags = 0;
+
+		uint32_t* data = new uint32_t[descriptor.size];
+		int base = 0;
+		int cnt = 0;
+		int num = descriptor.size / 6;
+		for (int i = 0; i < num; ++i) {
+			data[base] = cnt;
+			data[base + 1] = cnt + 1;
+			data[base + 2] = cnt + 3;
+			data[base + 3] = cnt + 1;
+			data[base + 4] = cnt + 2;
+			data[base + 5] = cnt + 3;
+			base += 6;
+			cnt += 4;
+		}
+		// Define the resource data.
+		D3D11_SUBRESOURCE_DATA InitData;
+		InitData.pSysMem = data;
+		InitData.SysMemPitch = 0;
+		InitData.SysMemSlicePitch = 0;
+		// Create the buffer with the device.
+		ID3D11Buffer* buffer;
+		HRESULT hr = _context->d3dDevice->CreateBuffer(&bufferDesc, &InitData, &buffer);
+		if (FAILED(hr)) {
+			delete[] data;
+			DXTRACE_MSG("Failed to create quad index buffer!");
+			return -1;
+		}
+		delete[] data;
+		_context->indexBuffers.push_back(buffer);
+		ri.index = idx;
+		ri.id = descriptor.id;
+		ri.type = ResourceType::INDEXBUFFER;
+		return ri.id;
+	}
+	/*
 	int createQuadIndexBuffer(uint32_t numQuads) {
 		int idx = _context->indexBuffers.size();
 		D3D11_BUFFER_DESC bufferDesc;
@@ -663,24 +789,26 @@ namespace graphics {
 		_context->indexBuffers.push_back(buffer);
 		return idx;
 	}
-
-	const XMMATRIX& getViewProjectionMaxtrix() {
-		return _context->viewProjectionMaxtrix;
+	*/
+	const ds::mat4& getViewProjectionMaxtrix() {
+		return _context->viewProjectionMatrix;
 	}
 
 	// ------------------------------------------------------
 	// begin rendering
 	// ------------------------------------------------------
-	void beginRendering() {
-		float clearColor[4] = { 0.0f, 0.0f, 0.25f, 1.0f };
-		_context->d3dContext->ClearRenderTargetView(_context->backBufferTarget, clearColor);
+	void beginRendering(const Color& color) {
+		//float clearColor[4] = { 0.0f, 0.0f, 0.25f, 1.0f };
+		_context->d3dContext->ClearRenderTargetView(_context->backBufferTarget, color);
 	}
 
 	// ------------------------------------------------------
 	// set index buffer
 	// ------------------------------------------------------
-	void setIndexBuffer(int index) {
-		_context->d3dContext->IASetIndexBuffer(_context->indexBuffers[index], DXGI_FORMAT_R32_UINT, 0);
+	void setIndexBuffer(RID rid) {
+		const ResourceIndex& res_idx = _context->resourceTable[rid];
+		assert(res_idx.type == ResourceType::INDEXBUFFER);
+		_context->d3dContext->IASetIndexBuffer(_context->indexBuffers[res_idx.index], DXGI_FORMAT_R32_UINT, 0);
 	}
 
 	// ------------------------------------------------------
@@ -694,16 +822,20 @@ namespace graphics {
 	// ------------------------------------------------------
 	// update constant buffer
 	// ------------------------------------------------------
-	void updateConstantBuffer(int index, void* data) {
-		ID3D11Buffer* buffer = _context->constantBuffers[index];
+	void updateConstantBuffer(RID rid, void* data) {
+		const ResourceIndex& res_idx = _context->resourceTable[rid];
+		assert(res_idx.type == ResourceType::CONSTANTBUFFER);
+		ID3D11Buffer* buffer = _context->constantBuffers[res_idx.index];
 		_context->d3dContext->UpdateSubresource(buffer, 0, 0, data, 0, 0);
 	}
 
 	// ------------------------------------------------------
 	// set shader
 	// ------------------------------------------------------
-	void setShader(int shaderIndex) {
-		Shader* s = _context->shaders[shaderIndex];
+	void setShader(RID rid) {
+		const ResourceIndex& res_idx = _context->resourceTable[rid];
+		assert(res_idx.type == ResourceType::SHADER);
+		Shader* s = _context->shaders[res_idx.index];
 		if (s->vertexShader != 0) {
 			_context->d3dContext->VSSetShader(s->vertexShader, 0, 0);
 		}
@@ -716,8 +848,10 @@ namespace graphics {
 	// ------------------------------------------------------
 	// map data to vertex buffer
 	// ------------------------------------------------------
-	void mapData(int bufferIndex, void* data, uint32_t size) {
-		ID3D11Buffer* buffer = _context->vertexBuffers[bufferIndex];
+	void mapData(RID rid, void* data, uint32_t size) {
+		const ResourceIndex& res_idx = _context->resourceTable[rid];
+		assert(res_idx.type == ResourceType::VERTEXBUFFER);
+		ID3D11Buffer* buffer = _context->vertexBuffers[res_idx.index];
 		D3D11_MAPPED_SUBRESOURCE resource;
 		HRESULT hResult = _context->d3dContext->Map(buffer, 0,D3D11_MAP_WRITE_DISCARD, 0, &resource);
 		// This will be S_OK
@@ -745,13 +879,17 @@ namespace graphics {
 		_context->d3dContext->PSSetShaderResources(slot, 1, &srv);
 	}
 
-	void setVertexBuffer(int index, uint32_t* stride, uint32_t* offset) {
-		_context->d3dContext->IASetVertexBuffers(0, 1, &_context->vertexBuffers[index], stride, offset);
+	void setVertexBuffer(RID rid, uint32_t* stride, uint32_t* offset) {
+		const ResourceIndex& res_idx = _context->resourceTable[rid];
+		assert(res_idx.type == ResourceType::VERTEXBUFFER);
+		_context->d3dContext->IASetVertexBuffers(0, 1, &_context->vertexBuffers[res_idx.index], stride, offset);
 		_context->d3dContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
 
-	void setVertexShaderConstantBuffer(int bufferIndex) {
-		ID3D11Buffer* buffer = _context->constantBuffers[bufferIndex];
+	void setVertexShaderConstantBuffer(RID rid) {
+		const ResourceIndex& res_idx = _context->resourceTable[rid];
+		assert(res_idx.type == ResourceType::CONSTANTBUFFER);
+		ID3D11Buffer* buffer = _context->constantBuffers[res_idx.index];
 		_context->d3dContext->VSSetConstantBuffers(0, 1, &buffer);
 	}
 

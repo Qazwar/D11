@@ -2,6 +2,10 @@
 #include "..\graphics.h"
 #include <assert.h>
 #include "renderQueue.h"
+#include "..\math\math_types.h"
+#include "..\math\matrix.h"
+#include "..\resources\ResourceDescriptors.h"
+#include "..\utils\Log.h"
 
 const v2 ARRAY[] = { v2(-0.5f, 0.5f), v2(0.5f, 0.5f), v2(0.5f, -0.5f), v2(-0.5f, -0.5f) };
 
@@ -20,21 +24,18 @@ v2 srt(const v2& v, const v2& u, float scaleX, float scaleY, float rotation) {
 }
 
 SpriteBuffer::SpriteBuffer(int maxSprites) : _maxSprites(maxSprites) , _index(0) , _started(false) {
-	// create indexbuffer
-	_indexBuffer = graphics::createQuadIndexBuffer(maxSprites * 6);
-	assert(_indexBuffer != -1);
+	_indexBuffer = 0;
 	// create shader
-	_shaderIndex = graphics::compileShader("TextureMap.fx");
+	_shaderIndex = 3;
 	// create input layout
 	Attribute desc[] = { Attribute::Position, Attribute::Texcoord0, Attribute::Color0 , Attribute::End };
 	_layoutIndex = graphics::createInputLayout(_shaderIndex, desc);
 	assert(_layoutIndex != -1);
 	// load texture
 	_colorMap = graphics::loadTexture("content\\textures\\TextureArray.png");
-	// create vertexbuffer
-	_vertexBuffer = graphics::createBuffer(sizeof(SpriteVertex) * 4 * maxSprites);
-	// create constant buffer
-	_mvpCB = graphics::createConstantBuffer(sizeof(XMMATRIX));
+
+	_vertexBuffer = 2;
+	_mvpCB = 1;
 	// create blend state
 	_alphaBlendState = graphics::createBlendState(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA);
 	// create data
@@ -85,9 +86,9 @@ void SpriteBuffer::flush() {
 	graphics::setShader(_shaderIndex);
 	graphics::setPixelShaderResourceView(_colorMap);
 
-	XMMATRIX world = XMMatrixIdentity();
-	XMMATRIX mvp = XMMatrixMultiply(world, graphics::getViewProjectionMaxtrix());
-	mvp = XMMatrixTranspose(mvp);
+	//XMMATRIX world = XMMatrixIdentity();
+	ds::mat4 mvp = graphics::getViewProjectionMaxtrix();
+	mvp = ds::matrix::mat4Transpose(mvp);
 	
 
 	for (int i = 0; i < _index; i++) {
@@ -109,12 +110,6 @@ void SpriteBuffer::flush() {
 	graphics::setVertexShaderConstantBuffer(_mvpCB);
 
 	graphics::drawIndexed(_index * 6);
-	/*
-	IndexedDrawCall* dc = renderQueue::createIndexedDrawCall();
-	dc->indexBuffer = _indexBuffer;
-	dc->vertexBuffer = _vertexBuffer;
-	dc->layout = _layoutIndex;
-	renderQueue::submit(dc);
-	*/
+
 	_index = 0;
 }

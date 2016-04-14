@@ -3,20 +3,25 @@
 #include <d3d11.h>
 #include <d3dx11.h>
 #include <DxErr.h>
-#define _XM_NO_INTRINSICS_
-#include <xnamath.h>
+#include "base\Settings.h"
+#include "math\math_types.h"
+#include "resources\ResourceDescriptors.h"
+
+const uint32_t MAX_RESOURCES = 1024;
 
 enum ResourceType {
 	SHADER,
 	TEXTURE,
 	VERTEXBUFFER,
 	INDEXBUFFER,
+	CONSTANTBUFFER,
+	BLENDSTATE,
 	UNKNOWN
 };
 
 typedef uint32_t RID;
 
-const RID INVALID_RID = 0;
+const RID INVALID_RID = UINT32_MAX;
 
 struct Access{
 
@@ -50,61 +55,57 @@ namespace graphics {
 
 	};
 
-	bool initialize(HINSTANCE hInstance, HWND hwnd);
+	bool initialize(HINSTANCE hInstance, HWND hwnd, const ds::Settings& settings);
 
 	ID3D11DeviceContext* getContext();
 
-	int createConstantBuffer(uint32_t size);
+	RID createConstantBuffer(const ConstantBufferDescriptor& descriptor);
 
-	void updateConstantBuffer(int index, void* data);
+	void updateConstantBuffer(RID rid, void* data);
 
-	int compileShader(char* fileName);
+	RID createShader(const ShaderDescriptor& descriptor);
 
-	bool compileShader(char* filePath, char* entry, char* shaderModel, ID3DBlob** buffer);
+	//int compileShader(char* fileName);
+
+	bool compileShader(const char* filePath, const char* entry, const char* shaderModel, ID3DBlob** buffer);
 
 	bool createVertexShader(ID3DBlob* buffer, ID3D11VertexShader** shader);
 
 	bool createPixelShader(ID3DBlob* buffer, ID3D11PixelShader** shader);
 
-	int createInputLayout(int shaderIndex, Attribute* attribute);
+	int createInputLayout(RID shaderRID, Attribute* attribute);
 
 	int loadTexture(const char* name);
 
 	bool createSamplerState(ID3D11SamplerState** sampler);
 
-	const XMMATRIX& getViewProjectionMaxtrix();
+	const ds::mat4& getViewProjectionMaxtrix();
 
 	void setBlendState(int index);
 
 	int createBlendState(D3D11_BLEND srcBlend, D3D11_BLEND destBlend);
 
-	int createIndexBuffer(uint32_t num, uint32_t* data);
+	RID createIndexBuffer(const IndexBufferDescriptor& descriptor);
 
-	int createQuadIndexBuffer(uint32_t numQuads);
+	RID createQuadIndexBuffer(const QuadIndexBufferDescriptor& descriptor);
 
-	int createBuffer(uint32_t bufferSize, D3D11_SUBRESOURCE_DATA resourceData);
+	RID createVertexBuffer(const VertexBufferDescriptor& descriptor);
 
-	int createBuffer(uint32_t bufferSize);
+	void beginRendering(const Color& color);
 
-	bool createBuffer(D3D11_BUFFER_DESC bufferDesciption, D3D11_SUBRESOURCE_DATA resourceData, ID3D11Buffer** buffer);
+	void setIndexBuffer(RID rid);
 
-	bool createBuffer(D3D11_BUFFER_DESC bufferDesciption, ID3D11Buffer** buffer);
+	void setVertexBuffer(RID rid, uint32_t* stride, uint32_t* offset);
 
-	void beginRendering();
+	void mapData(RID rid, void* data, uint32_t size);
 
-	void setIndexBuffer(int index);
-
-	void setVertexBuffer(int index, uint32_t* stride, uint32_t* offset);
-
-	void mapData(int bufferIndex, void* data, uint32_t size);
-
-	void setShader(int shaderIndex);
+	void setShader(RID rid);
 
 	void setInputLayout(int layoutIndex);
 
 	void setPixelShaderResourceView(int index, uint32_t slot = 0);
 
-	void setVertexShaderConstantBuffer(int bufferIndex);
+	void setVertexShaderConstantBuffer(RID rid);
 
 	void drawIndexed(int num);
 

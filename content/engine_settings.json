@@ -9,7 +9,6 @@ basic_settings {
 	mode : 1
 	reporting_directory : "reports"
 }		
-
 init_actions {
 	textures : "TextureArray" 
 	fonts {

@@ -5,7 +5,7 @@
 #include "math\math.h"
 #include <assert.h>
 
-BaseApp *app = new Demo();
+ds::BaseApp *app = new Demo();
 
 Demo::Demo() : BaseApp() , _timer(0.0f) {	
 }

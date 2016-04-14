@@ -69,8 +69,10 @@ namespace ds {
 		bool matches(int category_id, const char* name) const;
 		bool contains_property(int category_id, const char* name) const;
 		bool get_int(int category_id, const char* name, int* ret) const;
-		bool get_bool(int category_id, const char* name, bool* ret) const;
+		bool get(int category_id, const char* name, bool* ret) const;
 		bool get_uint(int category_id, const char* name, uint32_t* ret) const;
+		bool get(int category_id, const char* name, uint16_t* ret) const;
+		bool get(int category_id, const char* name, uint32_t* ret) const;
 		bool get_float(int category_id, const char* name, float* ret) const;
 		bool get_vec2(int category_id, const char* name, v2* ret) const;
 		bool get_vec3(int category_id, const char* name, v3* ret) const;

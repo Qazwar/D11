@@ -1,14 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
@@ -34,22 +26,16 @@
     <Filter Include="math">
       <UniqueIdentifier>{ea8be514-4dbd-4983-93cc-8e435139a6b4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="content">
+      <UniqueIdentifier>{0f7e376b-9539-4e68-b62a-ab8f1b45cb79}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resources">
+      <UniqueIdentifier>{85cfbf4a-6631-48e0-a65e-6458fd431b49}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="graphics.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Demo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="utils\Log.cpp">
       <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="math\math.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="renderer\sprites.cpp">
       <Filter>renderer</Filter>
@@ -96,22 +82,22 @@
     <ClCompile Include="utils\GlobalStringBuffer.cpp">
       <Filter>utils</Filter>
     </ClCompile>
+    <ClCompile Include="math\math.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Demo.cpp" />
+    <ClCompile Include="graphics.cpp" />
+    <ClCompile Include="math\matrix.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="graphics.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Demo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="utils\Log.h">
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="renderer\render_types.h">
       <Filter>renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="math\math.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="renderer\sprites.h">
       <Filter>renderer</Filter>
@@ -149,9 +135,6 @@
     <ClInclude Include="utils\StringUtils.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="Common.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="io\FileRepository.h">
       <Filter>io</Filter>
     </ClInclude>
@@ -170,5 +153,31 @@
     <ClInclude Include="utils\GlobalStringBuffer.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="math\math.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics.h" />
+    <ClInclude Include="Demo.h" />
+    <ClInclude Include="Common.h" />
+    <ClInclude Include="base\Settings.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="math\math_types.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\matrix.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\ResourceDescriptors.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="content\engine_settings.json">
+      <Filter>content</Filter>
+    </None>
+    <None Include="content\resources.json">
+      <Filter>content</Filter>
+    </None>
   </ItemGroup>
 </Project>
