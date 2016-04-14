@@ -80,6 +80,21 @@ namespace ds {
 					descriptor.model = reader.get_string(children[i], "shader_model");
 					graphics::createShader(descriptor);
 				}
+				else if (reader.matches(children[i], "blendstate")) {
+					// FIXME: assert that every entry is != -1
+					BlendStateDescriptor descriptor;
+					reader.get(children[i], "id", &descriptor.id);
+					const char* entry = reader.get_string(children[i], "src_blend");
+					descriptor.srcBlend = graphics::findBlendState(entry);
+					entry = reader.get_string(children[i], "dest_blend");
+					descriptor.destBlend = graphics::findBlendState(entry);
+					entry = reader.get_string(children[i], "src_blend_alpha");
+					descriptor.srcAlphaBlend = graphics::findBlendState(entry);
+					entry = reader.get_string(children[i], "dest_blend_alpha");
+					descriptor.destAlphaBlend = graphics::findBlendState(entry);
+					reader.get(children[i], "alpha_enabled", &descriptor.alphaEnabled);
+					graphics::createBlendState(descriptor);
+				}
 				
 			}
 			return true;

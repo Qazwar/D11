@@ -18,11 +18,14 @@ vertex_buffer {
 	size : 147456
 	dynamic : true
 }
-blend_state {
-	id : 0
+blendstate {
+	id : 4
+	name : "regular_blendstate"
 	alpha_enabled : true
 	src_blend : "SRC_ALPHA"
 	dest_blend : "INV_SRC_ALPHA"
+	src_blend_alpha : "SRC_ALPHA"
+	dest_blend_alpha : "INV_SRC_ALPHA"
 }
 shader {
 	id : 3

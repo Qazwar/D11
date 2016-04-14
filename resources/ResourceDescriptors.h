@@ -50,6 +50,15 @@ struct ShaderDescriptor {
 	const char* model;
 	const char* file;
 };
+
+struct BlendStateDescriptor {
+	uint16_t id;
+	bool alphaEnabled;
+	int srcBlend;
+	int destBlend;
+	int srcAlphaBlend;
+	int destAlphaBlend;
+};
 /*
 input_layout {
 id : 0
@@ -64,11 +73,5 @@ id : 0
 alpha_enabled : true
 src_blend : "SRC_ALPHA"
 dest_blend : "INV_SRC_ALPHA"
-}
-shader {
-id : 0
-file : "TextureMap.fx"
-vertex_shader : "vss"
-pixel_shader : "pss"
 }
 */

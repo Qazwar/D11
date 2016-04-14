@@ -37,7 +37,7 @@ SpriteBuffer::SpriteBuffer(int maxSprites) : _maxSprites(maxSprites) , _index(0)
 	_vertexBuffer = 2;
 	_mvpCB = 1;
 	// create blend state
-	_alphaBlendState = graphics::createBlendState(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA);
+	_alphaBlendState = 4;// graphics::createBlendState(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA);
 	// create data
 	_sprites = new Sprite[maxSprites];
 	_vertices = new SpriteVertex[4 * maxSprites];

@@ -64,9 +64,7 @@ namespace graphics {
 	void updateConstantBuffer(RID rid, void* data);
 
 	RID createShader(const ShaderDescriptor& descriptor);
-
-	//int compileShader(char* fileName);
-
+	
 	bool compileShader(const char* filePath, const char* entry, const char* shaderModel, ID3DBlob** buffer);
 
 	bool createVertexShader(ID3DBlob* buffer, ID3D11VertexShader** shader);
@@ -80,10 +78,12 @@ namespace graphics {
 	bool createSamplerState(ID3D11SamplerState** sampler);
 
 	const ds::mat4& getViewProjectionMaxtrix();
-
-	void setBlendState(int index);
-
+	
 	int createBlendState(D3D11_BLEND srcBlend, D3D11_BLEND destBlend);
+
+	RID createBlendState(const BlendStateDescriptor& descriptor);
+
+	int findBlendState(const char* text);
 
 	RID createIndexBuffer(const IndexBufferDescriptor& descriptor);
 
@@ -106,6 +106,8 @@ namespace graphics {
 	void setPixelShaderResourceView(int index, uint32_t slot = 0);
 
 	void setVertexShaderConstantBuffer(RID rid);
+
+	void setBlendState(RID rid);
 
 	void drawIndexed(int num);
 
