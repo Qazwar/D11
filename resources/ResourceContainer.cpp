@@ -109,6 +109,9 @@ namespace ds {
 		for (size_t i = 0; i < _fonts.size(); ++i) {
 			delete _fonts[i];
 		}
+		for (size_t i = 0; i < _spriteBuffers.size(); ++i) {
+			delete _spriteBuffers[i];
+		}
 	}
 
 	void ResourceContainer::parseJSONFile() {
@@ -189,6 +192,25 @@ namespace ds {
 				reader.get(children[i], "id", &descriptor.id);
 				descriptor.name = reader.get_string(children[i], "file");
 				loadFont(descriptor);
+			}
+			else if (reader.matches(children[i], "sprite_buffer")) {
+				SpriteBufferDescriptor descriptor;
+				reader.get(children[i], "id", &descriptor.id);
+				reader.get(children[i], "size", &descriptor.size);
+				reader.get(children[i], "index_buffer", &descriptor.indexBuffer);
+				reader.get(children[i], "constant_buffer", &descriptor.constantBuffer);
+				reader.get(children[i], "vertex_buffer", &descriptor.vertexBuffer);
+				reader.get(children[i], "shader", &descriptor.shader);
+				reader.get(children[i], "blend_state", &descriptor.blendstate);
+				reader.get(children[i], "color_map", &descriptor.colormap);
+				reader.get(children[i], "input_layout", &descriptor.inputlayout);
+				if (reader.contains_property(children[i], "font")) {
+					reader.get(children[i], "font", &descriptor.font);
+				}
+				else {
+					descriptor.font = INVALID_RID;
+				}
+				createSpriteBuffer(descriptor);
 			}
 		}
 	}
@@ -297,6 +319,21 @@ namespace ds {
 		ri.index = index;
 		ri.id = descriptor.id;
 		ri.type = ResourceType::CONSTANTBUFFER;
+		return ri.id;
+	}
+
+	// ------------------------------------------------------
+	// create sprite buffer
+	// ------------------------------------------------------
+	RID ResourceContainer::createSpriteBuffer(const SpriteBufferDescriptor& descriptor) {
+		ResourceIndex& ri = _resourceTable[descriptor.id];
+		assert(ri.type == ResourceType::UNKNOWN);
+		int index = _spriteBuffers.size();
+		SpriteBuffer* buffer = new SpriteBuffer(descriptor);
+		_spriteBuffers.push_back(buffer);
+		ri.index = index;
+		ri.id = descriptor.id;
+		ri.type = ResourceType::SPRITEBUFFER;
 		return ri.id;
 	}
 
@@ -632,5 +669,11 @@ namespace ds {
 		const ResourceIndex& res_idx = _resourceTable[rid];
 		assert(res_idx.type == ResourceType::BITMAPFONT);
 		return _fonts[res_idx.index];
+	}
+
+	SpriteBuffer* ResourceContainer::getSpriteBuffer(RID rid) {
+		const ResourceIndex& res_idx = _resourceTable[rid];
+		assert(res_idx.type == ResourceType::SPRITEBUFFER);
+		return _spriteBuffers[res_idx.index];
 	}
 }

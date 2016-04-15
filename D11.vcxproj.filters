@@ -35,6 +35,12 @@
     <Filter Include="content\resources">
       <UniqueIdentifier>{a4b9e98e-c614-4e38-a6d1-331966f8c28d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="gamestates">
+      <UniqueIdentifier>{207b41b3-e386-4854-8caf-51bcc613af7d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sprites">
+      <UniqueIdentifier>{3a64bf55-3f42-459f-b3d1-4619e913d8ea}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="utils\Log.cpp">
@@ -99,6 +105,9 @@
     </ClCompile>
     <ClCompile Include="renderer\Bitmapfont.cpp">
       <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="gamestates\GameStateMachine.cpp">
+      <Filter>gamestates</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -185,6 +194,12 @@
     </ClInclude>
     <ClInclude Include="renderer\Bitmapfont.h">
       <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="gamestates\GameState.h">
+      <Filter>gamestates</Filter>
+    </ClInclude>
+    <ClInclude Include="gamestates\GameStateMachine.h">
+      <Filter>gamestates</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -4,6 +4,7 @@
 #include "ResourceDescriptors.h"
 #include "..\Common.h"
 #include "..\renderer\Bitmapfont.h"
+#include "..\renderer\sprites.h"
 
 namespace ds {
 
@@ -28,6 +29,7 @@ namespace ds {
 		BLENDSTATE,
 		INPUTLAYOUT,
 		BITMAPFONT,
+		SPRITEBUFFER,
 		UNKNOWN
 	};
 
@@ -53,6 +55,7 @@ namespace ds {
 		RID createShader(const ShaderDescriptor& descriptor);
 		RID createInputLayout(const InputLayoutDescriptor& descriptor);
 		RID loadFont(const BitmapfontDescriptor& descriptor);
+		RID createSpriteBuffer(const SpriteBufferDescriptor& descriptor);
 		ID3D11Buffer* getIndexBuffer(RID rid);
 		ID3D11BlendState* getBlendState(RID rid);
 		ID3D11Buffer* getConstantBuffer(RID rid);
@@ -61,6 +64,7 @@ namespace ds {
 		ID3D11ShaderResourceView* getShaderResourceView(RID rid);
 		Bitmapfont* getFont(RID rid);
 		Shader* getShader(RID rid);
+		SpriteBuffer* getSpriteBuffer(RID rid);
 		int findInputElement(const char* name);
 		int findBlendState(const char* text);
 	private:
@@ -77,6 +81,7 @@ namespace ds {
 		std::vector<Shader*> _shaders;
 		std::vector<ID3D11InputLayout*> _layouts;
 		std::vector<Bitmapfont*> _fonts;
+		std::vector<SpriteBuffer*> _spriteBuffers;
 		uint32_t _resourceIndex;
 		ResourceIndex _resourceTable[MAX_RESOURCES];
 	};

@@ -23,6 +23,8 @@ struct Access{
 namespace ds {
 
 	class ResourceContainer;
+
+	class SpriteBuffer;
 }
 
 namespace graphics {
@@ -35,9 +37,11 @@ namespace graphics {
 
 	ID3D11Device* getDevice();
 
-	void updateConstantBuffer(RID rid, void* data);
+	ds::SpriteBuffer* getSpriteBuffer(RID rid);
 
 	ds::Bitmapfont* getFont(RID rid);
+
+	void updateConstantBuffer(RID rid, void* data);
 
 	bool createSamplerState(ID3D11SamplerState** sampler);
 

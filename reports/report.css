@@ -1,0 +1,78 @@
+body {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  font : Verdana 10px;
+}
+h1 {
+	font-family: Verdana;
+	font-weight: bold;
+	font-size: 18px;
+}
+h2 {
+	font-family: Verdana;
+	font-weight: bold;
+	font-size: 15px;
+}
+#box-table-a {
+	font-family: Verdana, "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+	font-size: 12px;
+	margin: 5px;
+	min-width: 300px;
+	text-align: left;
+	border-collapse: collapse;
+}
+#box-table-a th {
+	font-size: 13px;
+	font-weight: bold;
+	padding: 4px;
+	background: #b9c9fe;
+	border-bottom: 1px solid #fff;
+	color: #039;
+	border-left: 2px solid #fff;
+}
+#box-table-a td {
+	padding: 8px;
+	background: #e8edff; 
+	border-bottom: 2px solid #fff;
+	border-left: 2px solid #fff;
+	color: #669;
+	border-top: 1px solid transparent;
+}
+#box-table-a tr:hover td {
+	background: #d0dafd;
+	color: #339;
+}
+
+.panel {
+    margin-bottom: 20px;
+    background-color: #fff;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+    border-color: #ddd;
+}
+body .panel .panel-heading {
+    color: #808080;
+    font-weight: bold;
+}
+
+.panel .panel-heading {
+    color: #333;
+    background-color: #f5f5f5;
+    border-color: #ddd;
+}
+.panel-heading {
+    padding: 10px 15px;
+    border-bottom: 1px solid transparent;
+    border-top-right-radius: 3px;
+    border-top-left-radius: 3px;
+}
+.panel .panel-heading h1 {
+	font-family: Verdana;
+	font-weight: bold;
+	font-size: 18px;
+	color:  #333;
+	padding: 2px;
+    margin: 0px;
+}

@@ -50,3 +50,15 @@ font {
 	id : 7
 	file : "xscale.json"
 }
+sprite_buffer {
+	id : 8
+	size : 1024
+	index_buffer : 0
+	constant_buffer : 1
+	vertex_buffer : 2
+	shader : 3
+	blend_state : 4
+	color_map : 5
+	input_layout : 6
+	font : 7
+}

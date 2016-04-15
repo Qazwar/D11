@@ -6,14 +6,47 @@
 
 extern ds::BaseApp* app;
 
-LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
-	PAINTSTRUCT paintStruct;
-	HDC hDC;
+#define GETX(l) (int(l & 0xFFFF))
+#define GETY(l) (int(l) >> 16)
 
+LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
 		case WM_PAINT:
-			hDC = BeginPaint(hwnd, &paintStruct);
-			EndPaint(hwnd, &paintStruct);
+			if (app->isLoading()) {
+				HDC hDC = GetDC(hwnd);
+				TCHAR strMsg[MAX_PATH];
+				wsprintf(strMsg, TEXT("Loading data - Please wait"));
+				RECT rct;
+				GetClientRect(hwnd, &rct);
+				SetTextColor(hDC, RGB(255, 255, 255));
+				SetBkMode(hDC, TRANSPARENT);
+				DrawText(hDC, strMsg, -1, &rct, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+				ReleaseDC(hwnd, hDC);
+			}
+			break;
+		case WM_CHAR: {
+			char ascii = wParam;
+			unsigned int keyState = lParam;
+			app->sendOnChar(ascii, keyState);
+		}
+			return 0;
+		case WM_KEYDOWN:
+			//app->sendKeyDown(wParam);
+			return 0;
+		case WM_KEYUP:
+			//app->sendKeyUp(wParam);
+			return 0;
+		case WM_LBUTTONDOWN:
+			//app->sendButton(0, GETX(lParam), GETY(lParam), true);
+			break;
+		case WM_LBUTTONUP:
+			//app->sendButton(0, GETX(lParam), GETY(lParam), false);
+			break;
+		case WM_RBUTTONDOWN:
+			//app->sendButton(1, GETX(lParam), GETY(lParam), true);
+			break;
+		case WM_RBUTTONUP:
+			//app->sendButton(1, GETX(lParam), GETY(lParam), false);
 			break;
 		case WM_DESTROY :
 			PostQuitMessage(0);
@@ -51,8 +84,7 @@ int WINAPI WinMain(HINSTANCE hThisInst, HINSTANCE hLastInst, LPSTR lpszCmdLine, 
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		app->tick();
-		app->renderFrame();
+		app->buildFrame();
 	}
 	delete app;
 	graphics::shutdown();

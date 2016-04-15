@@ -18,8 +18,8 @@ public:
 	void render();
 	void update(float dt);
 private:
-	SpriteBuffer* _spriteBuffer;
-	Sprite _sprites[256];
+	ds::SpriteBuffer* _spriteBuffer;
+	ds::Sprite _sprites[256];
 	float _timer;
 	int _num;
 };

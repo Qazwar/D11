@@ -19,7 +19,7 @@ bool Demo::initialize() {
 	int cnt = 0;
 	for (int y = 0; y < 4; ++y) {
 		for (int i = 0; i < 6; ++i) {
-			Sprite& sp = _sprites[cnt];
+			ds::Sprite& sp = _sprites[cnt];
 			sp.position = v2(400 + i * 100, 200 + y * 100);
 			sp.color = Color(255 - i * 14, 0, 0, 255);
 			sp.texture = math::buildTexture(70.0f, 0.0f, 60.0f, 60.0f);
@@ -28,7 +28,7 @@ bool Demo::initialize() {
 			++cnt;
 		}
 	}
-	_spriteBuffer = new SpriteBuffer(1024);
+	_spriteBuffer = graphics::getSpriteBuffer(8);
 	return true;
 }
 

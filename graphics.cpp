@@ -5,6 +5,7 @@
 #include <vector>
 #include "math\matrix.h"
 #include "resources\ResourceContainer.h"
+#include "renderer\sprites.h"
 
 namespace graphics {
 
@@ -324,7 +325,7 @@ namespace graphics {
 	// set shader
 	// ------------------------------------------------------
 	void setShader(RID rid) {
-		Shader* s = _context->resources->getShader(rid);
+		ds::Shader* s = _context->resources->getShader(rid);
 		if (s->vertexShader != 0) {
 			_context->d3dContext->VSSetShader(s->vertexShader, 0, 0);
 		}
@@ -391,6 +392,10 @@ namespace graphics {
 
 	ds::Bitmapfont* getFont(RID rid) {
 		return _context->resources->getFont(rid);
+	}
+
+	ds::SpriteBuffer* getSpriteBuffer(RID rid) {
+		return _context->resources->getSpriteBuffer(rid);
 	}
 
 }
