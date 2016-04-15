@@ -29,6 +29,7 @@ namespace ds {
 
 	SpriteBuffer::SpriteBuffer(const SpriteBufferDescriptor& descriptor) : _descriptor(descriptor), _index(0), _started(false) {
 		// create data
+		_maxSprites = descriptor.size;
 		_sprites = new Sprite[descriptor.size];
 		_vertices = new SpriteVertex[4 * descriptor.size];
 	}

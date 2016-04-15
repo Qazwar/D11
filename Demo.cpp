@@ -15,14 +15,14 @@ Demo::~Demo() {
 }
 
 bool Demo::initialize() {
-	_num = 24;
+	_num = 8 * 16;
 	int cnt = 0;
-	for (int y = 0; y < 4; ++y) {
-		for (int i = 0; i < 6; ++i) {
+	for (int y = 0; y < 8; ++y) {
+		for (int i = 0; i < 16; ++i) {
 			ds::Sprite& sp = _sprites[cnt];
-			sp.position = v2(400 + i * 100, 200 + y * 100);
+			sp.position = v2(200 + i * 60, 100 + y * 60);
 			sp.color = Color(255 - i * 14, 0, 0, 255);
-			sp.texture = math::buildTexture(70.0f, 0.0f, 60.0f, 60.0f);
+			sp.texture = math::buildTexture(0.0f, 340.0f, 46.0f, 42.0f);
 			sp.scale = v2(1, 1);
 			sp.rotation = 6.28f * (float)cnt / 24.0f;
 			++cnt;
