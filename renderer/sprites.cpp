@@ -5,6 +5,7 @@
 #include "..\math\math_types.h"
 #include "..\math\matrix.h"
 #include "..\resources\ResourceDescriptors.h"
+#include "..\resources\ResourceContainer.h"
 #include "..\utils\Log.h"
 #include "..\utils\Profiler.h"
 
@@ -56,7 +57,7 @@ namespace ds {
 	}
 
 	void SpriteBuffer::drawText(RID fontID, int x, int y, const char* text, int padding, float scaleX, float scaleY, const Color& color) {
-		ds::Bitmapfont* font = graphics::getFont(fontID);
+		ds::Bitmapfont* font = ds::res::getFont(fontID);
 		int len = strlen(text);
 		for (int cnt = 0; cnt < len; ++cnt) {
 			char c = text[cnt];
@@ -112,7 +113,6 @@ namespace ds {
 
 		graphics::updateConstantBuffer(_descriptor.constantBuffer, &mvp);
 		graphics::setVertexShaderConstantBuffer(_descriptor.constantBuffer);
-
 		graphics::drawIndexed(_index * 6);
 
 		_index = 0;

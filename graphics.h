@@ -31,15 +31,9 @@ namespace graphics {
 	
 	bool initialize(HINSTANCE hInstance, HWND hwnd, const ds::Settings& settings);
 
-	void setResourceContainer(ds::ResourceContainer* container);
-
 	ID3D11DeviceContext* getContext();
 
 	ID3D11Device* getDevice();
-
-	ds::SpriteBuffer* getSpriteBuffer(RID rid);
-
-	ds::Bitmapfont* getFont(RID rid);
 
 	void updateConstantBuffer(RID rid, void* data);
 
@@ -47,7 +41,7 @@ namespace graphics {
 
 	const ds::mat4& getViewProjectionMaxtrix();
 
-	void beginRendering(const Color& color);
+	void beginRendering(const ds::Color& color);
 
 	void setIndexBuffer(RID rid);
 

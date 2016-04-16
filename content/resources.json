@@ -62,3 +62,8 @@ sprite_buffer {
 	input_layout : 6
 	font : 7
 }
+world {
+	id : 9
+	size : 1024
+	sprite_buffer : 8
+}

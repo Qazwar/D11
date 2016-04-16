@@ -25,9 +25,6 @@ namespace graphics {
 		ds::mat4 worldMatrix;
 		ds::mat4 projectionMatrix;
 		ds::mat4 viewProjectionMatrix;
-		
-		
-		ds::ResourceContainer* resources;
 	};
 
 	static GraphicContext* _context;
@@ -237,11 +234,6 @@ namespace graphics {
 		return true;
 	}
 
-
-	void setResourceContainer(ds::ResourceContainer* container) {
-		_context->resources = container;
-	}
-
 	// ------------------------------------------------------
 	// shutdown
 	// ------------------------------------------------------
@@ -293,8 +285,7 @@ namespace graphics {
 	// ------------------------------------------------------
 	// begin rendering
 	// ------------------------------------------------------
-	void beginRendering(const Color& color) {
-		//float clearColor[4] = { 0.0f, 0.0f, 0.25f, 1.0f };
+	void beginRendering(const ds::Color& color) {
 		_context->d3dContext->ClearRenderTargetView(_context->backBufferTarget, color);
 	}
 
@@ -302,7 +293,7 @@ namespace graphics {
 	// set index buffer
 	// ------------------------------------------------------
 	void setIndexBuffer(RID rid) {		
-		_context->d3dContext->IASetIndexBuffer(_context->resources->getIndexBuffer(rid), DXGI_FORMAT_R32_UINT, 0);
+		_context->d3dContext->IASetIndexBuffer(ds::res::getIndexBuffer(rid), DXGI_FORMAT_R32_UINT, 0);
 	}
 
 	// ------------------------------------------------------
@@ -310,14 +301,14 @@ namespace graphics {
 	// ------------------------------------------------------
 	void setBlendState(RID rid) {
 		float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-		_context->d3dContext->OMSetBlendState(_context->resources->getBlendState(rid), blendFactor, 0xFFFFFFFF);
+		_context->d3dContext->OMSetBlendState(ds::res::getBlendState(rid), blendFactor, 0xFFFFFFFF);
 	}
 
 	// ------------------------------------------------------
 	// update constant buffer
 	// ------------------------------------------------------
 	void updateConstantBuffer(RID rid, void* data) {
-		ID3D11Buffer* buffer = _context->resources->getConstantBuffer(rid);
+		ID3D11Buffer* buffer = ds::res::getConstantBuffer(rid);
 		_context->d3dContext->UpdateSubresource(buffer, 0, 0, data, 0, 0);
 	}
 
@@ -325,7 +316,7 @@ namespace graphics {
 	// set shader
 	// ------------------------------------------------------
 	void setShader(RID rid) {
-		ds::Shader* s = _context->resources->getShader(rid);
+		ds::Shader* s = ds::res::getShader(rid);
 		if (s->vertexShader != 0) {
 			_context->d3dContext->VSSetShader(s->vertexShader, 0, 0);
 		}
@@ -339,7 +330,7 @@ namespace graphics {
 	// map data to vertex buffer
 	// ------------------------------------------------------
 	void mapData(RID rid, void* data, uint32_t size) {
-		ID3D11Buffer* buffer = _context->resources->getVertexBuffer(rid);
+		ID3D11Buffer* buffer = ds::res::getVertexBuffer(rid);
 		D3D11_MAPPED_SUBRESOURCE resource;
 		HRESULT hResult = _context->d3dContext->Map(buffer, 0,D3D11_MAP_WRITE_DISCARD, 0, &resource);
 		// This will be S_OK
@@ -358,23 +349,23 @@ namespace graphics {
 	// set input layout
 	// ------------------------------------------------------
 	void setInputLayout(RID rid) {
-		ID3D11InputLayout* layout = _context->resources->getInputLayout(rid);
+		ID3D11InputLayout* layout = ds::res::getInputLayout(rid);
 		_context->d3dContext->IASetInputLayout(layout);
 	}
 
 	void setPixelShaderResourceView(RID rid, uint32_t slot) {
-		ID3D11ShaderResourceView* srv = _context->resources->getShaderResourceView(rid);
+		ID3D11ShaderResourceView* srv = ds::res::getShaderResourceView(rid);
 		_context->d3dContext->PSSetShaderResources(slot, 1, &srv);
 	}
 
 	void setVertexBuffer(RID rid, uint32_t* stride, uint32_t* offset) {
-		ID3D11Buffer* buffer = _context->resources->getVertexBuffer(rid);
+		ID3D11Buffer* buffer = ds::res::getVertexBuffer(rid);
 		_context->d3dContext->IASetVertexBuffers(0, 1, &buffer, stride, offset);
 		_context->d3dContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
 
 	void setVertexShaderConstantBuffer(RID rid) {
-		ID3D11Buffer* buffer = _context->resources->getConstantBuffer(rid);
+		ID3D11Buffer* buffer = ds::res::getConstantBuffer(rid);
 		_context->d3dContext->VSSetConstantBuffers(0, 1, &buffer);
 	}
 
@@ -387,15 +378,6 @@ namespace graphics {
 	// ------------------------------------------------------
 	void endRendering() {
 		_context->swapChain->Present(0, 0);
-	}
-
-
-	ds::Bitmapfont* getFont(RID rid) {
-		return _context->resources->getFont(rid);
-	}
-
-	ds::SpriteBuffer* getSpriteBuffer(RID rid) {
-		return _context->resources->getSpriteBuffer(rid);
 	}
 
 }

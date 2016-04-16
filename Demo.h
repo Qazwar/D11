@@ -8,6 +8,7 @@
 #include "renderer\sprites.h"
 #include "utils\Color.h"
 #include "base\BaseApp.h"
+#include "world\World.h"
 
 class Demo : public ds::BaseApp {
 
@@ -18,6 +19,7 @@ public:
 	void render();
 	void update(float dt);
 private:
+	ds::World* _world;
 	ds::SpriteBuffer* _spriteBuffer;
 	ds::Sprite _sprites[256];
 	float _timer;

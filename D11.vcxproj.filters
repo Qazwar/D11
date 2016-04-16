@@ -41,6 +41,15 @@
     <Filter Include="sprites">
       <UniqueIdentifier>{3a64bf55-3f42-459f-b3d1-4619e913d8ea}</UniqueIdentifier>
     </Filter>
+    <Filter Include="world">
+      <UniqueIdentifier>{fafeff11-b720-489d-a16a-9de5c9472b92}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="world\actions">
+      <UniqueIdentifier>{a953b0c5-158c-46c1-a1bd-00cbc2feec68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="physics">
+      <UniqueIdentifier>{2cdf0fcb-f0c5-4dc5-841f-0ebdebf8f29a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="utils\Log.cpp">
@@ -108,6 +117,96 @@
     </ClCompile>
     <ClCompile Include="gamestates\GameStateMachine.cpp">
       <Filter>gamestates</Filter>
+    </ClCompile>
+    <ClCompile Include="world\AdditionalData.cpp">
+      <Filter>world</Filter>
+    </ClCompile>
+    <ClCompile Include="world\BehaviorDefinitions.cpp">
+      <Filter>world</Filter>
+    </ClCompile>
+    <ClCompile Include="world\World.cpp">
+      <Filter>world</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\AbstractAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\AlphaFadeToAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\ColorFadeToAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\ColorFlashAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\FollowCurveAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\FollowPathAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\FollowStraightPathAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\FollowTargetAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\MoveByAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\MoveToAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\MoveWithAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\RemoveAfterAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\RotateAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\RotateByAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\ScaleByPathAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\ScalingAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\WaitAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="math\tweening.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="sprites\SpriteArray.cpp">
+      <Filter>sprites</Filter>
+    </ClCompile>
+    <ClCompile Include="physics\ColliderArray.cpp">
+      <Filter>physics</Filter>
+    </ClCompile>
+    <ClCompile Include="physics\PhysicalWorld.cpp">
+      <Filter>physics</Filter>
+    </ClCompile>
+    <ClCompile Include="math\CubicBezierPath.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="math\hex.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="math\StraightPath.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="base\CrashReporter.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="math\GameMath.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\mtrand.cpp">
+      <Filter>utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -200,6 +299,117 @@
     </ClInclude>
     <ClInclude Include="gamestates\GameStateMachine.h">
       <Filter>gamestates</Filter>
+    </ClInclude>
+    <ClInclude Include="world\AdditionalData.h">
+      <Filter>world</Filter>
+    </ClInclude>
+    <ClInclude Include="world\BehaviorDefinitions.h">
+      <Filter>world</Filter>
+    </ClInclude>
+    <ClInclude Include="world\World.h">
+      <Filter>world</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\AbstractAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\AlphaFadeToAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\ColorFadeToAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\ColorFlashAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\FollowCurveAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\FollowPathAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\FollowStraightPathAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\FollowTargetAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\MoveByAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\MoveToAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\MoveWithAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\RemoveAfterAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\RotateAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\RotateByAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\ScaleByPathAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\ScalingAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\WaitAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="math\tweening.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="sprites\Sprite.h">
+      <Filter>sprites</Filter>
+    </ClInclude>
+    <ClInclude Include="sprites\SpriteArray.h">
+      <Filter>sprites</Filter>
+    </ClInclude>
+    <ClInclude Include="physics\ColliderArray.h">
+      <Filter>physics</Filter>
+    </ClInclude>
+    <ClInclude Include="physics\PhysicalWorld.h">
+      <Filter>physics</Filter>
+    </ClInclude>
+    <ClInclude Include="physics\physic_types.h">
+      <Filter>physics</Filter>
+    </ClInclude>
+    <ClInclude Include="math\Bitset.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\CubicBezierPath.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\FloatArray.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\hex.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\HexGrid.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\StraightPath.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\BezierCurve.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="base\CrashReporter.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="math\GameMath.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\mtrand.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\Assert.h">
+      <Filter>utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

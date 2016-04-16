@@ -47,7 +47,7 @@ namespace ds {
 		perf::shutdown();
 		delete _stateMachine;
 		delete gStringBuffer;
-		delete _resources;
+		res::shutdown();
 		//gDefaultMemory->printOpenAllocations();
 		delete gDefaultMemory;
 	}
@@ -56,9 +56,8 @@ namespace ds {
 	bool BaseApp::prepare(HINSTANCE hInstance, HWND hwnd) {
 		if (graphics::initialize(hInstance, hwnd, _settings)) {
 			profiler::init();
-			_resources = new ResourceContainer(graphics::getDevice());
-			_resources->parseJSONFile();
-			graphics::setResourceContainer(_resources);
+			res::initialize(graphics::getDevice());
+			res::parseJSONFile();
 			_loading = false;
 			return true;
 		}

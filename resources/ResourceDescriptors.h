@@ -94,4 +94,10 @@ namespace ds {
 		RID font;
 	};
 
+	struct WorldDescriptor {
+		uint16_t id;
+		uint32_t size;
+		RID spriteBuffer;
+	};
+
 }

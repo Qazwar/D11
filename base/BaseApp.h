@@ -46,7 +46,6 @@ namespace ds {
 		int _fps;
 		bool _loading;
 		Settings _settings;
-		ResourceContainer* _resources;
 		GameStateMachine* _stateMachine;
 		KeyStates _keyStates;
 		bool _createReport;

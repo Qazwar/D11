@@ -4,16 +4,9 @@
 #include "..\utils\Color.h"
 #include "..\graphics.h"
 #include "..\resources\ResourceDescriptors.h"
+#include "..\sprites\Sprite.h"
 
 namespace ds {
-
-	struct Sprite {
-		v2 position;
-		float rotation;
-		v2 scale;
-		ds::Texture texture;
-		Color color;
-	};
 
 	class SpriteBuffer {
 

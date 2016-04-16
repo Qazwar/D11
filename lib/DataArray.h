@@ -1,15 +1,12 @@
 #pragma once
 #include <limits.h>
 #include <assert.h>
-
+#include "..\Common.h"
 // iterator:
 // https://gist.github.com/jeetsukumaran/307264
 
 #define INDEX_MASK 0xffff
 #define NEW_OBJECT_ID_ADD 0x10000
-
-typedef unsigned int ID;
-const unsigned int INVALID_ID = UINT_MAX; 
 
 namespace ds {
 
