@@ -35,9 +35,9 @@ namespace graphics {
 
 	ID3D11Device* getDevice();
 
-	void updateConstantBuffer(RID rid, void* data);
+	v2 getMousePosition();
 
-	bool createSamplerState(ID3D11SamplerState** sampler);
+	void updateConstantBuffer(RID rid, void* data);
 
 	const ds::mat4& getViewProjectionMaxtrix();
 

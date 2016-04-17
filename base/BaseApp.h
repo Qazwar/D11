@@ -1,5 +1,6 @@
 #pragma once
 #include <Windows.h>
+#include <chrono>
 #include "Settings.h"
 #include "..\resources\ResourceContainer.h"
 #include "..\gamestates\GameStateMachine.h"
@@ -39,9 +40,8 @@ namespace ds {
 		void tick();
 		void renderFrame();
 		float _dt;
-		DWORD _lastTime;
-		DWORD _delta;
 		float _accu;
+		float _fpsTimer;
 		int _frames;
 		int _fps;
 		bool _loading;
@@ -50,6 +50,7 @@ namespace ds {
 		KeyStates _keyStates;
 		bool _createReport;
 		bool _updated;
+		std::chrono::steady_clock::time_point _start, _now;
 	};
 
 }

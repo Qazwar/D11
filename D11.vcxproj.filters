@@ -208,6 +208,7 @@
     <ClCompile Include="utils\mtrand.cpp">
       <Filter>utils</Filter>
     </ClCompile>
+    <ClCompile Include="Enemies.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils\Log.h">
@@ -411,6 +412,7 @@
     <ClInclude Include="utils\Assert.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="Enemies.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="content\engine_settings.json">

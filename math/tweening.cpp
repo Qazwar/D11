@@ -1,7 +1,7 @@
 #include "tweening.h"
 #include "..\Common.h"
 //#include "..\sprites\SpriteBatch.h"
-#include "..\math\GameMath.h"
+#include "..\math\math.h"
 
 // The code is taking from here https://github.com/jesusgollonet/ofpennereasing/tree/master/PennerEasing
 // Everything is based on http://robertpenner.com/easing/
@@ -10,7 +10,7 @@
 namespace tweening {
 
 	float linear(float t, float start, float end, float duration) {
-		float n = ds::math::clamp(t / duration, 0.0f, 1.0f);
+		float n = math::clamp(t / duration, 0.0f, 1.0f);
 		return start + ( end - start ) * n;
 	}
 

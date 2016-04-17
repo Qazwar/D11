@@ -10,11 +10,10 @@ namespace ds {
 
 	BaseApp::BaseApp() {
 		_dt = 1.0f / 60.0f;
-		_lastTime = GetTickCount();
-		_delta = 0;
 		_accu = 0.0f;
 		_frames = 0;
 		_fps = 0;
+		_fpsTimer = 0.0f;
 		_loading = true;
 		_createReport = false;
 		_updated = false;
@@ -39,6 +38,7 @@ namespace ds {
 			sprintf_s(_settings.reportingDirectory, "");
 		}
 		LOG << "size: " << _settings.screenWidth << " x " << _settings.screenHeight;
+		_start = std::chrono::steady_clock::now();
 	}
 
 
@@ -99,14 +99,15 @@ namespace ds {
 				OnChar(_keyStates.ascii);				
 			}
 		}
-
-		DWORD now = GetTickCount();
-		_delta += (now - _lastTime);
-		float elapsed = (float)((now - _lastTime) * 0.001);
-		_lastTime = now;
+		_now = std::chrono::steady_clock::now();
+		auto duration = _now - _start;
+		auto time_span = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+		double elapsed = static_cast<double>(time_span) / 1000.0;
+		_start = _now;
 		_accu += elapsed;
-		if (_delta > 1000) {
-			_delta = 0;
+		_fpsTimer += elapsed;
+		if (_fpsTimer >= 1.0f) {
+			_fpsTimer -= 1.0f;
 			_fps = _frames;
 			_frames = 0;
 			//LOG << "FPS:" << _fps;

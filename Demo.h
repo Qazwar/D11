@@ -9,6 +9,7 @@
 #include "utils\Color.h"
 #include "base\BaseApp.h"
 #include "world\World.h"
+#include "Enemies.h"
 
 class Demo : public ds::BaseApp {
 
@@ -20,8 +21,7 @@ public:
 	void update(float dt);
 private:
 	ds::World* _world;
-	ds::SpriteBuffer* _spriteBuffer;
-	ds::Sprite _sprites[256];
+	Enemies* _enemies;
 	float _timer;
 	int _num;
 };

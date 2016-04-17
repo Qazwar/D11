@@ -1,7 +1,39 @@
 #include "math.h"
-#include "GameMath.h"
+#include "..\utils\mtrand.h"
 
 namespace math {
+
+	// http://allenchou.net/2014/02/game-math-faster-sine-cosine-with-polynomial-curves/
+	float hill(float x)	{
+		const float a0 = 1.0f;
+		const float a2 = 2.0f / PI - 12.0f / (PI * PI);
+		const float a3 = 16.0f / (PI * PI * PI) - 4.0f / (PI * PI);
+		const float xx = x * x;
+		const float xxx = xx * x;
+		return a0 + a2 * xx + a3 * xxx;
+	}
+
+	float fastSin(float x) {
+		// wrap x within [0, TWO_PI)
+		const float a = x * TWO_PI_INV;
+		x -= static_cast<int>(a)* TWO_PI;
+		if (x < 0.0f)
+			x += TWO_PI;
+
+		// 4 pieces of hills
+		if (x < HALF_PI)
+			return hill(HALF_PI - x);
+		else if (x < PI)
+			return hill(x - HALF_PI);
+		else if (x < 3.0f * HALF_PI)
+			return -hill(3.0f * HALF_PI - x);
+		else
+			return -hill(x - 3.0f * HALF_PI);
+	}
+
+	float fastCos(float x) {
+		return fastSin(x + HALF_PI);
+	}
 
 	v4 getTextureCoordinates(const ds::Rect& textureRect, float textureWidth, float textureHeight) {
 		v4 ret;
@@ -53,6 +85,15 @@ namespace math {
 		v.y = yt;
 	}
 
+	float clamp(float value, float min, float max) {
+		if (value < min) {
+			return min;
+		}
+		if (value > max) {
+			return max;
+		}
+		return value;
+	}
 	//! Scale and rotate counter clock wise and translate
 	/*
 	\param v the center
@@ -74,8 +115,8 @@ namespace math {
 		//float xt = cosf(rotation) * sx - sinf(rotation) * sy;
 		//float yt = sinf(rotation) * sx + cosf(rotation) * sy;
 
-		float xt = ds::math::fastCos(rotation) * sx - ds::math::fastSin(rotation) * sy;
-		float yt = ds::math::fastSin(rotation) * sx + ds::math::fastCos(rotation) * sy;
+		float xt = fastCos(rotation) * sx - fastSin(rotation) * sy;
+		float yt = fastSin(rotation) * sx + fastCos(rotation) * sy;
 
 		xt += v.x;
 		yt += v.y;
@@ -95,8 +136,8 @@ namespace math {
 		//float xt = cosf(rotation) * sx - sinf(rotation) * sy;
 		//float yt = sinf(rotation) * sx + cosf(rotation) * sy;
 
-		float xt = ds::math::fastCos(rotation) * sx - ds::math::fastSin(rotation) * sy;
-		float yt = ds::math::fastSin(rotation) * sx + ds::math::fastCos(rotation) * sy;
+		float xt = fastCos(rotation) * sx - fastSin(rotation) * sy;
+		float yt = fastSin(rotation) * sx + fastCos(rotation) * sy;
 
 		xt += v.x;
 		yt += v.y;
@@ -118,8 +159,8 @@ namespace math {
 		//float xt = cosf(rotation) * sx - sinf(rotation) * sy;
 		//float yt = sinf(rotation) * sx + cosf(rotation) * sy;
 
-		float xt = ds::math::fastCos(rotation) * sx - ds::math::fastSin(rotation) * sy;
-		float yt = ds::math::fastSin(rotation) * sx + ds::math::fastCos(rotation) * sy;
+		float xt = fastCos(rotation) * sx - fastSin(rotation) * sy;
+		float yt = fastSin(rotation) * sx + fastCos(rotation) * sy;
 
 		xt += v.x;
 		yt += v.y;
@@ -129,8 +170,8 @@ namespace math {
 
 
 	void addRadial(Vector2f& v, float radius, float angle) {
-		v.x += radius * ds::math::fastCos(angle);
-		v.y += radius * ds::math::fastSin(angle);
+		v.x += radius * fastCos(angle);
+		v.y += radius * fastSin(angle);
 	}
 
 	// -PI < beta < PI   0 < phi < 2PI
@@ -144,15 +185,15 @@ namespace math {
 		Vector2f ret;
 		//float ra = math::reflect(angle);
 		float ra = angle;
-		ret.x = v.x + radius * ds::math::fastCos(ra);
-		ret.y = v.y + radius * ds::math::fastSin(ra);
+		ret.x = v.x + radius * fastCos(ra);
+		ret.y = v.y + radius * fastSin(ra);
 		return ret;
 	}
 
 	float calculateRotation(const Vector2f& v) {
 		Vector2f vn = normalize(v);
 		if (vn != V2_RIGHT) {
-			float dt = ds::math::clamp(dot(vn, V2_RIGHT), -1.0f, 1.0f);
+			float dt = clamp(dot(vn, V2_RIGHT), -1.0f, 1.0f);
 			float tmp = acos(dt);
 			float cross = -1.0f * vn.y;
 			if (cross > 0.0f) {
@@ -193,8 +234,8 @@ namespace math {
 	}
 
 	Vector2f getRadialVelocity(float angle, float velocity) {
-		float vx = ds::math::fastCos(angle) * velocity;
-		float vy = ds::math::fastSin(angle) * velocity;
+		float vx = fastCos(angle) * velocity;
+		float vy = fastSin(angle) * velocity;
 		return Vector2f(vx, vy);
 	}
 
@@ -222,5 +263,52 @@ namespace math {
 			r = 0.0f;
 		}
 		return r;
+	}
+
+	// -------------------------------------------------------
+	// random
+	// -------------------------------------------------------
+	float random(float min, float max) {
+		MTRand_open rand;
+		//rand.seed(GetTickCount());
+		return min + (max - min)* (float)rand();
+	}
+
+	float randomRange(float value, float variance) {
+		return random(value - variance, value + variance);
+	}
+
+	// -------------------------------------------------------
+	// random v2
+	// -------------------------------------------------------
+	v2 random(const v2& min, const v2& max) {
+		float x = random(min.x, max.x);
+		float y = random(min.y, max.y);
+		return v2(x, y);
+	}
+
+	// -------------------------------------------------------
+	// random v2 range
+	// -------------------------------------------------------
+	v2 randomRange(const v2& value, const v2& variance) {
+		float x = randomRange(value.x, variance.x);
+		float y = randomRange(value.y, variance.y);
+		return v2(x, y);
+	}
+
+	// -------------------------------------------------------
+	// random int
+	// -------------------------------------------------------
+	int random(int min, int max) {
+		MTRand_open rand;
+		float minf = static_cast<float>(min);
+		float maxf = static_cast<float>(max)+0.99f;
+		float r = minf + (maxf - minf)* (float)rand();
+		return static_cast<int>(r);
+	}
+
+	bool chanceRoll(int min) {
+		int r = random(0, 100);
+		return r <= min;
 	}
 }

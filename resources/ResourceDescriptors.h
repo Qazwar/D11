@@ -43,6 +43,7 @@ namespace ds {
 		const char* pixelShader;
 		const char* model;
 		const char* file;
+		RID samplerState;
 	};
 
 	struct BlendStateDescriptor {
@@ -57,6 +58,13 @@ namespace ds {
 	struct TextureDescriptor {
 		uint16_t id;
 		const char* name;
+	};
+
+	struct SamplerStateDescriptor {
+		uint16_t id;
+		uint16_t addressU;
+		uint16_t addressV;
+		uint16_t addressW;
 	};
 
 	struct Shader {

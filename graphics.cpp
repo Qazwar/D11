@@ -260,26 +260,26 @@ namespace graphics {
 		return _context->d3dDevice;
 	}
 
-	bool createSamplerState(ID3D11SamplerState** sampler) {
-		D3D11_SAMPLER_DESC colorMapDesc;
-		ZeroMemory(&colorMapDesc, sizeof(colorMapDesc));
-		colorMapDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-		colorMapDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-		colorMapDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-		colorMapDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-		colorMapDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-		colorMapDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
-		HRESULT d3dResult = _context->d3dDevice->CreateSamplerState(&colorMapDesc, sampler);
-		if (FAILED(d3dResult)) {
-			DXTRACE_MSG("Failed to create SamplerState!");
-			return false;
-		}
-		return true;
-	}
-
+	// ------------------------------------------------------
+	// get view projection matrix
+	// ------------------------------------------------------
 	const ds::mat4& getViewProjectionMaxtrix() {
 		return _context->viewProjectionMatrix;
+	}
+
+	// ------------------------------------------------------
+	// get mouse position
+	// ------------------------------------------------------
+	bool getMousePosition(v2* ret) {
+		POINT p;
+		if (GetCursorPos(&p)) {
+			if (ScreenToClient(_context->hwnd, &p)) {
+				ret->x = p.x;
+				ret->y = p.y;
+				return true;
+			}
+		}
+		return false;
 	}
 
 	// ------------------------------------------------------

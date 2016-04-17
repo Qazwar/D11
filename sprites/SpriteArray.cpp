@@ -2,6 +2,7 @@
 #include "..\utils\Log.h"
 #include "..\memory\DefaultAllocator.h"
 #include "..\Common.h"
+#include "..\math\math.h"
 #include "..\utils\Assert.h"
 
 namespace ds {

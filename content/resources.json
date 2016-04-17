@@ -3,6 +3,13 @@ quad_index_buffer {
 	name : "SpriteQuadBuffer"
 	size : 6144
 }
+sampler_state {
+	id : 10
+	addressU : "CLAMP"
+	addressV : "CLAMP"
+	addressW : "CLAMP"
+	//colorMapDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+}
 shader {
 	id : 3
 	name : "SpriteShader"
@@ -10,6 +17,7 @@ shader {
 	vertex_shader : "VS_Main"
 	pixel_shader : "PS_Main"
 	shader_model : "4_0"
+	sampler_state : 10
 }
 input_layout {
 	id : 6

@@ -60,12 +60,31 @@ namespace ds {
 			{ "TEXCOORD", 3, DXGI_FORMAT_R32G32_FLOAT, 8 },
 		};
 
+		struct TextureAddressModeMapping {
+			const char* name;
+			D3D11_TEXTURE_ADDRESS_MODE mode;
+		};
+
+		static const TextureAddressModeMapping TEXTURE_ADDRESS_MODES[] = {
+			{ "WRAP", D3D11_TEXTURE_ADDRESS_WRAP },
+			{ "MIRROR", D3D11_TEXTURE_ADDRESS_MIRROR },
+			{ "CLAMP", D3D11_TEXTURE_ADDRESS_CLAMP },
+			{ "BORDER", D3D11_TEXTURE_ADDRESS_BORDER },
+			{ "MIRROR_ONCE", D3D11_TEXTURE_ADDRESS_MIRROR_ONCE },
+		};
+
+		// ------------------------------------------------------
+		// resource index
+		// ------------------------------------------------------
 		struct ResourceIndex {
 			RID id;
 			uint32_t index;
 			ResourceType type;
 		};
 
+		// ------------------------------------------------------
+		// resource context
+		// ------------------------------------------------------
 		struct ResourceContext {
 
 			ID3D11Device* device;
@@ -79,6 +98,7 @@ namespace ds {
 			std::vector<Bitmapfont*> fonts;
 			std::vector<SpriteBuffer*> spriteBuffers;
 			std::vector<World*> worlds;
+			std::vector<ID3D11SamplerState*> samplerStates;
 			uint32_t resourceIndex;
 			ResourceIndex resourceTable[MAX_RESOURCES];
 
@@ -86,6 +106,9 @@ namespace ds {
 
 		static ResourceContext* _resCtx;
 
+		// ------------------------------------------------------
+		// initialize
+		// ------------------------------------------------------
 		void initialize(ID3D11Device* device) {
 			_resCtx = new ResourceContext;
 			_resCtx->device = device;
@@ -98,7 +121,9 @@ namespace ds {
 			}
 		}
 
-
+		// ------------------------------------------------------
+		// shutdown
+		// ------------------------------------------------------
 		void shutdown() {
 			for (size_t i = 0; i < _resCtx->indexBuffers.size(); ++i) {
 				_resCtx->indexBuffers[i]->Release();
@@ -120,9 +145,6 @@ namespace ds {
 				if (shader->vertexShaderBuffer != 0) {
 					shader->vertexShaderBuffer->Release();
 				}
-				if (shader->samplerState != 0) {
-					shader->samplerState->Release();
-				}
 				delete _resCtx->shaders[i];
 			}
 			for (size_t i = 0; i < _resCtx->shaderResourceViews.size(); ++i) {
@@ -142,6 +164,9 @@ namespace ds {
 			}
 			for (size_t i = 0; i < _resCtx->worlds.size(); ++i) {
 				delete _resCtx->worlds[i];
+			}
+			for (size_t i = 0; i < _resCtx->samplerStates.size(); ++i) {
+				_resCtx->samplerStates[i]->Release();
 			}
 		}
 
@@ -266,6 +291,46 @@ namespace ds {
 			ri.index = index;
 			ri.id = descriptor.id;
 			ri.type = ResourceType::SPRITEBUFFER;
+			return ri.id;
+		}
+
+		// ------------------------------------------------------
+		// find sampler state by name
+		// ------------------------------------------------------
+		static int findTextureAddressMode(const char* name) {
+			for (int i = 0; i < 5; ++i) {
+				if (strcmp(TEXTURE_ADDRESS_MODES[i].name, name) == 0) {
+					return i;
+				}
+			}
+			return -1;
+		}
+
+		// ------------------------------------------------------
+		// create sampler state
+		// ------------------------------------------------------
+		RID createSamplerState(const SamplerStateDescriptor& descriptor) {
+			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
+			assert(ri.type == ResourceType::UNKNOWN);
+			int index = _resCtx->samplerStates.size();
+			D3D11_SAMPLER_DESC colorMapDesc;
+			ZeroMemory(&colorMapDesc, sizeof(colorMapDesc));
+			colorMapDesc.AddressU = TEXTURE_ADDRESS_MODES[descriptor.addressU].mode;
+			colorMapDesc.AddressV = TEXTURE_ADDRESS_MODES[descriptor.addressV].mode;
+			colorMapDesc.AddressW = TEXTURE_ADDRESS_MODES[descriptor.addressW].mode;
+			colorMapDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+			colorMapDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+			colorMapDesc.MaxLOD = D3D11_FLOAT32_MAX;
+			ID3D11SamplerState* sampler;
+			HRESULT d3dResult = _resCtx->device->CreateSamplerState(&colorMapDesc, &sampler);
+			if (FAILED(d3dResult)) {
+				DXTRACE_MSG("Failed to create SamplerState!");
+				return INVALID_RID;
+			}
+			_resCtx->samplerStates.push_back(sampler);
+			ri.index = index;
+			ri.id = descriptor.id;
+			ri.type = ResourceType::SAMPLERSTATE;
 			return ri.id;
 		}
 
@@ -525,20 +590,7 @@ namespace ds {
 				return -1;
 			}
 			psBuffer->Release();
-			D3D11_SAMPLER_DESC colorMapDesc;
-			ZeroMemory(&colorMapDesc, sizeof(colorMapDesc));
-			colorMapDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-			colorMapDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-			colorMapDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-			colorMapDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-			colorMapDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-			colorMapDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
-			d3dResult = _resCtx->device->CreateSamplerState(&colorMapDesc, &s->samplerState);
-			if (FAILED(d3dResult)) {
-				DXTRACE_MSG("Failed to create SamplerState!");
-				return -1;
-			}
+			s->samplerState = getSamplerState(descriptor.samplerState);
 			_resCtx->shaders.push_back(s);
 			ri.index = idx;
 			ri.id = descriptor.id;
@@ -606,6 +658,7 @@ namespace ds {
 					descriptor.vertexShader = reader.get_string(children[i], "vertex_shader");
 					descriptor.pixelShader = reader.get_string(children[i], "pixel_shader");
 					descriptor.model = reader.get_string(children[i], "shader_model");
+					reader.get(children[i], "sampler_state", &descriptor.samplerState);
 					createShader(descriptor);
 				}
 				else if (reader.matches(children[i], "blendstate")) {
@@ -650,6 +703,23 @@ namespace ds {
 					reader.get(children[i], "id", &descriptor.id);
 					descriptor.name = reader.get_string(children[i], "file");
 					loadFont(descriptor);
+				}
+				else if (reader.matches(children[i], "sampler_state")) {
+					SamplerStateDescriptor descriptor;
+					reader.get(children[i], "id", &descriptor.id);
+					const char* mode = reader.get_string(children[i], "addressU");
+					int idx = findTextureAddressMode(mode);
+					assert(idx >= 0);
+					descriptor.addressU = idx;
+					mode = reader.get_string(children[i], "addressV");
+					idx = findTextureAddressMode(mode);
+					assert(idx >= 0);
+					descriptor.addressV = idx;
+					mode = reader.get_string(children[i], "addressW");
+					idx = findTextureAddressMode(mode);
+					assert(idx >= 0);
+					descriptor.addressW = idx;
+					createSamplerState(descriptor);
 				}
 				else if (reader.matches(children[i], "sprite_buffer")) {
 					SpriteBufferDescriptor descriptor;
@@ -719,6 +789,11 @@ namespace ds {
 			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
 			assert(res_idx.type == ResourceType::TEXTURE);
 			return _resCtx->shaderResourceViews[res_idx.index];
+		}
+
+		ID3D11SamplerState* getSamplerState(RID rid) {
+			uint32_t idx = getIndex(rid, ResourceType::SAMPLERSTATE);
+			return _resCtx->samplerStates[idx];
 		}
 
 		Shader* getShader(RID rid) {

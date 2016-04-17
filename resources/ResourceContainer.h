@@ -32,6 +32,7 @@ namespace ds {
 		BITMAPFONT,
 		SPRITEBUFFER,
 		WORLD,
+		SAMPLERSTATE,
 		UNKNOWN
 	};
 
@@ -54,6 +55,8 @@ namespace ds {
 		ID3D11InputLayout* getInputLayout(RID rid);
 
 		ID3D11ShaderResourceView* getShaderResourceView(RID rid);
+
+		ID3D11SamplerState* getSamplerState(RID rid);
 
 		Bitmapfont* getFont(RID rid);
 

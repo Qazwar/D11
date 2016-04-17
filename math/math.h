@@ -2,7 +2,18 @@
 
 #include "..\renderer\render_types.h"
 
+const float PI = 3.1415926535897932384626433832795f;
+const float TWO_PI = 2.0f * PI;
+const float HALF_PI = 0.5f * PI;
+const float TWO_PI_INV = 1.0f / TWO_PI;
+
 namespace math {
+
+	float hill(float x);
+
+	float fastSin(float x);
+
+	float fastCos(float x);
 
 	ds::Texture buildTexture(float top, float left, float width, float height, float textureWidth = 1024.0f, float textureHeight = 1024.0f);
 
@@ -30,5 +41,32 @@ namespace math {
 
 	void clamp(v2& v, const v2& min, const v2& max);
 
+	float clamp(float value, float min = 0.0f, float max = 1.0f);
+
 	float norm(float t, float max);
+
+	// -------------------------------------------------------
+	// Get random float between min and max
+	// -------------------------------------------------------
+	float random(float min, float max);
+	// -------------------------------------------------------
+	// Get random v2 between min and max
+	// -------------------------------------------------------
+	v2 random(const v2& min, const v2& max);
+	// -------------------------------------------------------
+	// Get random int between min and max
+	// -------------------------------------------------------
+	int random(int min, int max);
+	// -------------------------------------------------------
+	// Get random float between value - variance and value + variance
+	// -------------------------------------------------------
+	float randomRange(float value, float variance);
+	// -------------------------------------------------------
+	// Get random v2 between value - variance and value + variance
+	// -------------------------------------------------------
+	v2 randomRange(const v2& value, const v2& variance);
+	// -------------------------------------------------------
+	// get random between 0 - 100 and returns true if below min
+	// -------------------------------------------------------
+	bool chanceRoll(int min);
 }

@@ -1,7 +1,7 @@
 #include "GameMath.h"
 #include "..\utils\mtrand.h"
 #include "..\utils\Log.h"
-
+#include "math.h"
 // ---------------------------------------------
 //
 // ---------------------------------------------
@@ -16,320 +16,8 @@ namespace ds {
 
 	namespace math {
 
-		// http://allenchou.net/2014/02/game-math-faster-sine-cosine-with-polynomial-curves/
-		float hill(float x)	{
-			const float a0 = 1.0f;
-			const float a2 = 2.0f / PI - 12.0f / (PI * PI);
-			const float a3 = 16.0f / (PI * PI * PI) - 4.0f / (PI * PI);
-			const float xx = x * x;
-			const float xxx = xx * x;
-			return a0 + a2 * xx + a3 * xxx;
-		}
-
-		float fastSin(float x) {
-			// wrap x within [0, TWO_PI)
-			const float a = x * TWO_PI_INV;
-			x -= static_cast<int>(a) * TWO_PI;
-			if (x < 0.0f)
-				x += TWO_PI;
-
-			// 4 pieces of hills
-			if (x < HALF_PI)
-				return hill(HALF_PI - x);
-			else if (x < PI)
-				return hill(x - HALF_PI);
-			else if (x < 3.0f * HALF_PI)
-				return -hill(3.0f * HALF_PI - x);
-			else
-				return -hill(x - 3.0f * HALF_PI);
-		}
-
-		float fastCos(float x) {
-			return fastSin(x + HALF_PI);
-		}
-
-		void sincos(float x, float* s, float* c) {
-			//always wrap input angle to -PI..PI
-			if (x < -PI) {
-				x += TWO_PI;
-			}
-			else {
-				if (x > PI) {
-					x -= TWO_PI;
-				}
-			}
-			//compute sine
-			if (x < 0) {
-				*s = 1.27323954f * x + 0.405284735f * x * x;
-			}
-			else {
-				*s = 1.27323954f * x - 0.405284735f * x * x;
-			}
-			//compute cosine: sin(x + PI/2) = cos(x)
-			x += HALF_PI;
-			if (x > PI) {
-				x -= TWO_PI;
-			}
-			if (x < 0) {
-				*c = 1.27323954f * x + 0.405284735f * x * x;
-			}
-			else {
-				*c = 1.27323954f * x - 0.405284735f * x * x;
-			}
-		}
-
-		unsigned int SIN_LOOP = 15;
-		unsigned int COS_LOOP = 15;
-
-		// sin(x) = x - x^3/3! + x^5/5! - x^7/7! + ...
-		float sin_f(float x) {
-			float Sum = 0;
-			float Power = x;
-			float Sign = 1;
-			const float x2 = x * x;
-			float Fact = 1.0;
-			for (unsigned int i = 1; i < SIN_LOOP; i += 2) {
-				Sum += Sign * Power / Fact;
-				Power *= x2;
-				Fact *= (i + 1) * (i + 2);
-				Sign *= -1.0;
-			}
-			return Sum;
-		}
-
-		static const float fact3 = 0.148148148148148f;//6.75f;
-
-		float f_sin(float a) {
-			float y = 0.0f;
-			float tmp = 0.0f;
-			bool sign = false;
-			if ((a > TWO_PI) || (a < -TWO_PI)) {
-				a = fmod(a, TWO_PI);
-			}
-			if (a > PI) {
-				a -= TWO_PI;
-				sign = true;
-			}
-
-			if (a < HALF_PI) {
-				y = a - a * a * a * fact3;
-			}
-			else {
-				tmp = a - PI;
-				y = -tmp + tmp * tmp * tmp * fact3;
-			}
-
-			if (sign) {
-				y = -y;
-			}
-			return y;
-		}
-
-		// cos(x) = 1 - x^2/2! + x^4/4! - x^6/6! + ...
-		float cos_f(float x) {
-			float Sum = x;
-			float Power = x;
-			float Sign = 1.0;
-			const float x2 = x * x;
-			float Fact = 1.0;
-			for (unsigned int i = 3; i < COS_LOOP; i += 2) {
-				Power *= x2;
-				Fact *= i * (i - 1);
-				Sign *= -1.0;
-				Sum += Sign * Power / Fact;
-			}
-			return Sum;
-		}
-
-
-
-
-		const Vector2f V2_RIGHT = Vector2f(1.0f,0.0f);
-
-	void clamp(int* value,int min,int max) {
-		if ( *value > max ) {
-			*value = max;
-		}
-		if ( *value < min ) {
-			*value = min;
-		}
-	}
-
-	void clamp(float* value,float min,float max) {
-		if ( *value > max ) {
-			*value = max;
-		}
-		if ( *value < min ) {
-			*value = min;
-		}
-	}
-
-	float clamp(float value,float min,float max) {
-		if ( value < min ) {
-			return min;
-		}
-		if ( value > max ) {
-			return max;
-		}
-		return value;
-	}
-
-	void getTextureCoordinates(const Rect& textureRect,int textureSize,float* u1,float* v1,float* u2,float* v2,bool useHalfTexel) {
-		if ( useHalfTexel ) {
-			float halfTexel = 0.5f;
-			float const width   = textureSize;
-			float const height  = textureSize;
-
-			float kUOffset = halfTexel/width;
-			float kVOffset = halfTexel/height;
-
-			*u1 = static_cast<float>(textureRect.left)/width  + kUOffset;
-			*v1 = static_cast<float>(textureRect.top)/height + kVOffset;  
-
-			*u2 = *u1 + static_cast<float>(textureRect.width()) /width   - 2.0f*kUOffset;
-			*v2 = *v1 + static_cast<float>(textureRect.height())/height  - 2.0f*kVOffset;
-		}
-		else {
-			float size = static_cast<float>(textureSize);
-			*u1 = static_cast<float>(textureRect.left)/size;
-			*u2 = static_cast<float>(textureRect.right)/size;
-			*v1 = static_cast<float>(textureRect.top)/size;
-			*v2 = static_cast<float>(textureRect.bottom)/size;
-		}
-	}
-
-	void getTextureCoordinates(const Rect& textureRect,int textureWidth,float textureHeight,float* u1,float* v1,float* u2,float* v2,bool useHalfTexel) {
-		if ( useHalfTexel ) {
-			float halfTexel = 0.5f;
-			float const width   = textureWidth;
-			float const height  = textureHeight;
-
-			float kUOffset = halfTexel/width;
-			float kVOffset = halfTexel/height;
-
-			*u1 = static_cast<float>(textureRect.left)/width  + kUOffset;
-			*v1 = static_cast<float>(textureRect.top)/height + kVOffset;  
-
-			*u2 = *u1 + static_cast<float>(textureRect.width()) /width   - 2.0f*kUOffset;
-			*v2 = *v1 + static_cast<float>(textureRect.height())/height  - 2.0f*kVOffset;
-		}
-		else {
-			*u1 = static_cast<float>(textureRect.left)/textureWidth;
-			*u2 = static_cast<float>(textureRect.right)/textureWidth;
-			*v1 = static_cast<float>(textureRect.top)/textureHeight;
-			*v2 = static_cast<float>(textureRect.bottom)/textureHeight;
-		}
-	}
-
-	Vector4f getTextureCoordinates(const Rect& textureRect,float textureWidth,float textureHeight,bool useHalfTexel) {
-		Vector4f ret;
-		if ( useHalfTexel ) {
-			float halfTexel = 0.5f;
-			float const width   = textureWidth;
-			float const height  = textureHeight;
-
-			float tw = textureRect.width() / textureWidth;
-			float th = textureRect.height() / textureHeight;
-
-			float kUOffset = halfTexel/width;
-			float kVOffset = halfTexel/height;
-
-			ret.x = textureRect.left/width  + kUOffset;
-			ret.y = textureRect.top/height + kVOffset;  
-
-			ret.z = ret.x + tw   - 2.0f*kUOffset;
-			ret.w = ret.y + th  - 2.0f*kVOffset;
-		}
-		else {
-			ret.x = textureRect.left/textureWidth;
-			ret.z = textureRect.right/textureWidth;
-			ret.y = textureRect.top/textureHeight;
-			ret.w = textureRect.bottom/textureHeight;
-		}
-		return ret;
-	}
-
-	Vector4f getTextureCoordinates(float top,float left,float width,float height,float textureWidth,float textureHeight,bool useHalfTexel) {
-		Vector4f ret;
-		float tw = width/ textureWidth;
-		float th = height / textureHeight;
-		if ( useHalfTexel ) {
-			float halfTexel = 0.5f;
-
-			float kUOffset = halfTexel/textureWidth;
-			float kVOffset = halfTexel/textureHeight;
-
-			ret.x = left/textureWidth  + kUOffset;
-			ret.y = top/textureHeight + kVOffset;  
-
-			ret.z = ret.x + tw   - 2.0f*kUOffset;
-			ret.w = ret.y + th  - 2.0f*kVOffset;
-		}
-		else {
-			ret.x = left/textureWidth;
-			ret.z = ret.x + tw;
-			ret.y = top/textureHeight;
-			ret.w = ret.y + th;
-		}
-		return ret;
-	}
-
-	Texture buildTexture(float top, float left, float width, float height, float textureWidth, float textureHeight, bool useHalfTexel) {
-		Texture ret;		
-		Rect r(top, left, width, height);
-		ret.rect = r;
-		ret.uv = getTextureCoordinates(r, textureWidth, textureHeight, useHalfTexel);
-		ret.textureID = 0;
-		ret.dim = Vector2f(width ,height);
-		ret.textureSize.x = textureWidth;
-		ret.textureSize.y = textureHeight;
-		return ret;
-	}
-
-	Texture buildTexture(const Rect& r, float textureWidth, float textureHeight, bool useHalfTexel) {
-		Texture ret;
-		ret.rect = r;
-		ret.uv = getTextureCoordinates(r, textureWidth, textureHeight);
-		ret.textureID = 0;
-		ret.dim = Vector2f(r.width(), r.height());
-		ret.textureSize.x = textureWidth;
-		ret.textureSize.y = textureHeight;
-		return ret;
-	}
-
-	void transformMousePosToWorld(Vector3f* vPickRayDir,Vector3f* vPickRayOrig) {
-		// Get the Pick ray from the mouse position
-		/*
-		Camera *camera = gEngine->getRenderer()->getCamera();
-		const D3DXMATRIX* pmatProj = &camera->getProjectionMatrix();
-
-		Vector3f mp = Vector3f(0,0,0);
-		mp.x = gEngine->getMousePosX();
-		mp.y = gEngine->getMousePosY();
-
-		// Compute the vector of the Pick ray in screen space
-		D3DXVECTOR3 v;
-		v.x = ( ( ( 2.0f * mp.x ) / gEngine->getWidth() ) - 1 ) / pmatProj->_11;
-		v.y = -( ( ( 2.0f * mp.y ) / gEngine->getHeight() ) - 1 ) / pmatProj->_22;
-		v.z = 1.0f;
-
-		// Get the inverse view matrix
-		const D3DXMATRIX matView = camera->getViewMatrix();
-		const D3DXMATRIX matWorld = gEngine->getRenderer()->getWorldMatrix();
-		D3DXMATRIX mWorldView = matWorld * matView;
-		D3DXMATRIX m;
-		D3DXMatrixInverse( &m, NULL, &mWorldView );
-
-		// Transform the screen space Pick ray into 3D space
-		vPickRayDir->x = v.x * m._11 + v.y * m._21 + v.z * m._31;
-		vPickRayDir->y = v.x * m._12 + v.y * m._22 + v.z * m._32;
-		vPickRayDir->z = v.x * m._13 + v.y * m._23 + v.z * m._33;
-
-		vPickRayOrig->x = gEngine->getRenderer()->getCamera()->getPosition().x;
-		vPickRayOrig->y = gEngine->getRenderer()->getCamera()->getPosition().y;
-		vPickRayOrig->z = gEngine->getRenderer()->getCamera()->getPosition().z;
-		*/
-	}
+	const Vector2f V2_RIGHT = Vector2f(1.0f,0.0f);
+	
 	// ---------------------------------------------
 	// Returns a smooth value between 0.0 and 1.0
 	// ---------------------------------------------
@@ -342,19 +30,19 @@ namespace ds {
 		}
 		return x;
 	}
-
+	/*
 	float smoothstep(float min,float max,float x) {
-		clamp(&x,0.0f,1.0f);	
+		x = math::clamp(x,0.0f,1.0f);	
 		float sp =  x * x * ( 3.0f - 2.0f * x);
 		return min + sp * (max - min);
 	}
 
 	float smoothstep(float x) {
-		clamp(&x,0.0f,1.0f);	
+		x = math::clamp(x, 0.0f, 1.0f);
 		float sp =  x * x * ( 3.0f - 2.0f * x);
 		return sp;
 	}
-
+	*/
 	float cubicPulse( float c, float w, float x ) {
 		x = fabsf(x - c);
 		if( x>w ) return 0.0f;
@@ -602,36 +290,7 @@ namespace ds {
 		return ret;
 	}
 
-		// -------------------------------------------------------
-		// random
-		// -------------------------------------------------------
-		float random(float min,float max) {
-			MTRand_open rand;
-			//rand.seed(GetTickCount());
-			return min + (max - min)* (float)rand();
-		}
-
-		float randomRange(float value, float variance) {
-			return random(value - variance, value + variance);
-		}
-
-		// -------------------------------------------------------
-		// random v2
-		// -------------------------------------------------------
-		v2 random(const v2& min, const v2& max) {
-			float x = random(min.x, max.x);
-			float y = random(min.y, max.y);
-			return v2(x, y);
-		}
-
-		// -------------------------------------------------------
-		// random v2 range
-		// -------------------------------------------------------
-		v2 randomRange(const v2& value, const v2& variance) {
-			float x = randomRange(value.x, variance.x);
-			float y = randomRange(value.y, variance.y);
-			return v2(x, y);
-		}
+		
 		// -------------------------------------------------------
 		// 
 		// -------------------------------------------------------
@@ -652,21 +311,7 @@ namespace ds {
 
 			return (h2 <= (radius * radius));
 		}
-		// -------------------------------------------------------
-		// random int
-		// -------------------------------------------------------
-		int random(int min,int max) {
-			MTRand_open rand;
-			float minf = static_cast<float>(min);
-			float maxf = static_cast<float>(max) + 0.99f;
-			float r = minf + (maxf - minf)* (float)rand();
-			return static_cast<int>(r);
-		}
-
-		bool chanceRoll(int min) {
-			int r = random(0, 100);
-			return r <= min;
-		}
+		
 
 
 
@@ -801,20 +446,7 @@ namespace ds {
 		}
 
 
-		void clamp(Vector2f& v,float minX,float maxX,float minY,float maxY) {
-			if ( v.x < minX ) {
-				v.x = minX;
-			}
-			if ( v.x > maxX ) {
-				v.x = maxX;
-			}
-			if ( v.y < minY ) {
-				v.y = minY;
-			}
-			if ( v.y > maxY ) {
-				v.y = maxY;
-			}
-		}
+		
 
 		bool circleSweepTest(const Vector2f& a0,const Vector2f& a1,float ra,const Vector2f& b0,const Vector2f& b1,float rb,float* u0,float* u1) {
 			Vector2f va = a1 - a0;
