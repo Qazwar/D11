@@ -18,6 +18,14 @@ namespace ds {
 			bool keyUp;
 		};
 
+		struct ButtonState {
+			int button;
+			int x;
+			int y;
+			bool down;
+			bool processed;
+		};
+
 	public:
 		BaseApp();
 		~BaseApp();
@@ -30,12 +38,15 @@ namespace ds {
 			return _loading;
 		}
 		void sendOnChar(char ascii, unsigned int state);
+		void sendButton(int button, int x, int y, bool down);
 	protected:
 		void addGameState(GameState* gameState);
 		void activate(const char* name);
 		void deactivate(const char* name);
 		void connectGameStates(const char* firstStateName, int outcome, const char* secondStateName);
 		virtual void OnChar(uint8_t ascii) {}
+		virtual void OnButtonDown(int button, int x, int y) {}
+		virtual void OnButtonUp(int button, int x, int y) {}
 	private:
 		void tick();
 		void renderFrame();
@@ -48,6 +59,7 @@ namespace ds {
 		Settings _settings;
 		GameStateMachine* _stateMachine;
 		KeyStates _keyStates;
+		ButtonState _buttonState;
 		bool _createReport;
 		bool _updated;
 		std::chrono::steady_clock::time_point _start, _now;

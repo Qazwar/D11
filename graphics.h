@@ -35,7 +35,7 @@ namespace graphics {
 
 	ID3D11Device* getDevice();
 
-	v2 getMousePosition();
+	bool getMousePosition(v2* ret);
 
 	void updateConstantBuffer(RID rid, void* data);
 

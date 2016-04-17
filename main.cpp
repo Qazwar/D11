@@ -37,16 +37,16 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			//app->sendKeyUp(wParam);
 			return 0;
 		case WM_LBUTTONDOWN:
-			//app->sendButton(0, GETX(lParam), GETY(lParam), true);
+			app->sendButton(0, GETX(lParam), GETY(lParam), true);
 			break;
 		case WM_LBUTTONUP:
-			//app->sendButton(0, GETX(lParam), GETY(lParam), false);
+			app->sendButton(0, GETX(lParam), GETY(lParam), false);
 			break;
 		case WM_RBUTTONDOWN:
-			//app->sendButton(1, GETX(lParam), GETY(lParam), true);
+			app->sendButton(1, GETX(lParam), GETY(lParam), true);
 			break;
 		case WM_RBUTTONUP:
-			//app->sendButton(1, GETX(lParam), GETY(lParam), false);
+			app->sendButton(1, GETX(lParam), GETY(lParam), false);
 			break;
 		case WM_DESTROY :
 			PostQuitMessage(0);

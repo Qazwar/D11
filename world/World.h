@@ -289,6 +289,7 @@ namespace ds {
 		void enableCollisionChecks() {
 			_checkCollisions = true;
 		}
+
 	private:
 		ActionEventBuffer m_Buffer;
 		//void allocate(int size);

@@ -82,6 +82,7 @@ namespace ds {
 			sprintf_s(filename, "%s%s.html", _settings.reportingDirectory, timeFormat);
 			ReportWriter rw(filename);
 			perf::save(rw);
+
 			gDefaultMemory->save(rw);
 			_createReport = false;
 		}
@@ -97,6 +98,15 @@ namespace ds {
 			if (_keyStates.onChar) {
 				_keyStates.onChar = false;
 				OnChar(_keyStates.ascii);				
+			}
+			if (!_buttonState.processed) {
+				_buttonState.processed = true;
+				if (_buttonState.down) {
+					OnButtonDown(_buttonState.button, _buttonState.x, _buttonState.y);
+				}
+				else {
+					OnButtonUp(_buttonState.button, _buttonState.x, _buttonState.y);
+				}
 			}
 		}
 		_now = std::chrono::steady_clock::now();
@@ -174,6 +184,17 @@ namespace ds {
 	// -------------------------------------------------------
 	void BaseApp::connectGameStates(const char* firstStateName, int outcome, const char* secondStateName) {
 		_stateMachine->connect(firstStateName, outcome, secondStateName);
+	}
+
+	// -------------------------------------------------------
+	// Mouse button
+	// -------------------------------------------------------
+	void BaseApp::sendButton(int button, int x, int y, bool down) {
+		_buttonState.processed = false;
+		_buttonState.x = x;
+		_buttonState.y = y;
+		_buttonState.button = button;
+		_buttonState.down = down;
 	}
 
 }

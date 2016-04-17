@@ -17,6 +17,7 @@ public:
 	~Enemies();
 	void init();
 	void tick(float dt);
+	int kill(ds::SID sid);
 private:
 	ds::World* _world;
 	Enemy _enemies[55];

@@ -19,10 +19,15 @@ public:
 	bool initialize();
 	void render();
 	void update(float dt);
+	void OnButtonDown(int button, int x, int y);
+	void OnButtonUp(int button, int x, int y);
 private:
 	ds::World* _world;
+	ds::SID _player;
 	Enemies* _enemies;
 	float _timer;
 	int _num;
+	bool _firing;
+	float _fireTimer;
 };
 

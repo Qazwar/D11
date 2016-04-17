@@ -22,11 +22,12 @@ void Enemies::init() {
 			Enemy& e = _enemies[cnt];
 			v2 position = v2(200 + i * 60, 400 + y * 60);
 			const ds::Texture& t = _textures[type];
-			e.sid = _world->create(position, t);
+			e.sid = _world->create(position, t, 2);
 			e.texture = t;
 			e.type = type;
 			e.position = position;
 			e.velocity = v2(100, 0);
+			_world->attachCollider(e.sid);
 			++cnt;
 		}
 	}
@@ -48,10 +49,25 @@ void Enemies::tick(float dt) {
 	if (flip) {
 		for (int i = 0; i < 55; ++i) {
 			Enemy& e = _enemies[i];
-			v2 p = _world->getPosition(e.sid);
-			e.velocity *= -1.0f;
-			p.y -= 40.0f;
-			_world->setPosition(e.sid, p);
+			if (e.sid != ds::INVALID_SID) {
+				v2 p = _world->getPosition(e.sid);
+				e.velocity *= -1.0f;
+				p.y -= 21.0f;
+				_world->setPosition(e.sid, p);
+			}
 		}
 	}
+}
+
+int Enemies::kill(ds::SID sid) {
+	for (int i = 0; i < 55; ++i) {
+		Enemy& e = _enemies[i];
+		if (e.sid != ds::INVALID_SID && e.sid == sid) {
+			_world->remove(e.sid);
+			e.sid = ds::INVALID_SID;
+			return e.type;
+		}
+	}
+	return -1;
+
 }
