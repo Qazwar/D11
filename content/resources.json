@@ -54,6 +54,11 @@ texture {
 	name : "TextureArray" 
 	file : "TextureArray.png"
 }
+texture {
+	id : 11
+	name : "gui" 
+	file : "gui.png"
+}
 font {
 	id : 7
 	file : "xscale.json"
@@ -74,4 +79,21 @@ world {
 	id : 9
 	size : 1024
 	sprite_buffer : 8
+}
+sprite_buffer {
+	id : 10
+	size : 1024
+	index_buffer : 0
+	constant_buffer : 1
+	vertex_buffer : 2
+	shader : 3
+	blend_state : 4
+	color_map : 11
+	input_layout : 6
+	font : 7
+}
+imgui {
+	id : 12
+	font : 7
+	sprite_buffer : 10
 }

@@ -21,6 +21,7 @@ bool Demo::initialize() {
 	_world = ds::res::getWorld(9);
 	_world->enableCollisionChecks();
 	_player = _world->create(v2(640, 60), math::buildTexture(0.0f, 868.0f, 46.0f, 42.0f),1);
+	LOG << "Player: " << _player;
 	return true;
 }
 
@@ -39,6 +40,7 @@ void Demo::update(float dt) {
 			ds::SID id = _world->create(p, math::buildTexture(0.0f, 0.0f, 18.0f, 18.0f),0);
 			_world->moveBy(id, v2(0, 300));
 			_world->attachCollider(id);
+			LOG << "bullet: " << id;
 		}
 	}
 	_world->tick(dt);
@@ -69,4 +71,11 @@ void Demo::OnButtonDown(int button, int x, int y) {
 
 void Demo::OnButtonUp(int button, int x, int y) {
 	_firing = false;
+}
+
+void Demo::OnChar(uint8_t ascii) {
+	if (ascii == 'd') {
+		ds::ReportWriter rw("reports\\world.html");
+		_world->save(rw);
+	}
 }

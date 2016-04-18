@@ -5,7 +5,11 @@
 #include <chrono>
 #include "Log.h"
 
-class ReportWriter;
+namespace ds {
+
+	class ReportWriter;
+
+}
 
 class StopWatch {
 
@@ -53,7 +57,7 @@ namespace perf {
 
 	void debug();
 
-	void save(const ReportWriter& writer);
+	void save(const ds::ReportWriter& writer);
 
 	//void showDialog(v2* position);
 
@@ -94,7 +98,7 @@ namespace profiler {
 
 	void save(FILE* f);
 
-	void save(const ReportWriter& writer);
+	void save(const ds::ReportWriter& writer);
 
 	int get_total_times(float* values, int max);
 

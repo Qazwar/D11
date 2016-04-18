@@ -23,6 +23,7 @@ void Enemies::init() {
 			v2 position = v2(200 + i * 60, 400 + y * 60);
 			const ds::Texture& t = _textures[type];
 			e.sid = _world->create(position, t, 2);
+			LOG << "enemy: " << e.sid;
 			e.texture = t;
 			e.type = type;
 			e.position = position;

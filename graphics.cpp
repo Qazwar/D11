@@ -370,7 +370,7 @@ namespace graphics {
 	}
 
 	void drawIndexed(uint32_t num) {
-		_context->d3dContext->DrawIndexed(num * 6, 0, 0);
+		_context->d3dContext->DrawIndexed(num, 0, 0);
 	}
 
 	// ------------------------------------------------------

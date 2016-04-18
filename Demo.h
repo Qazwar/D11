@@ -21,6 +21,7 @@ public:
 	void update(float dt);
 	void OnButtonDown(int button, int x, int y);
 	void OnButtonUp(int button, int x, int y);
+	void OnChar(uint8_t ascii);
 private:
 	ds::World* _world;
 	ds::SID _player;

@@ -50,6 +50,12 @@
     <Filter Include="physics">
       <UniqueIdentifier>{2cdf0fcb-f0c5-4dc5-841f-0ebdebf8f29a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="particles">
+      <UniqueIdentifier>{12270537-ff6c-47d5-97f2-bbb5bcf09e4b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="imgui">
+      <UniqueIdentifier>{4b3b0ea6-66c3-4e89-9529-28c501eb6cab}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="utils\Log.cpp">
@@ -209,6 +215,21 @@
       <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="Enemies.cpp" />
+    <ClCompile Include="particles\ParticleManager.cpp">
+      <Filter>particles</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\ParticleModule.cpp">
+      <Filter>particles</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\ParticleSystem.cpp">
+      <Filter>particles</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\ParticleSystemFactory.cpp">
+      <Filter>particles</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\IMGUI.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils\Log.h">
@@ -413,6 +434,27 @@
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="Enemies.h" />
+    <ClInclude Include="particles\Particle.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\ParticleEmitter.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\ParticleManager.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\ParticleModule.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\ParticleSystem.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\ParticleSystemFactory.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\IMGUI.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="content\engine_settings.json">

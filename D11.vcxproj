@@ -81,6 +81,7 @@
     <ClCompile Include="Enemies.cpp" />
     <ClCompile Include="gamestates\GameStateMachine.cpp" />
     <ClCompile Include="graphics.cpp" />
+    <ClCompile Include="imgui\IMGUI.cpp" />
     <ClCompile Include="io\DataFile.cpp" />
     <ClCompile Include="io\FileRepository.cpp" />
     <ClCompile Include="io\json.cpp" />
@@ -96,6 +97,10 @@
     <ClCompile Include="math\StraightPath.cpp" />
     <ClCompile Include="math\tweening.cpp" />
     <ClCompile Include="memory\DefaultAllocator.cpp" />
+    <ClCompile Include="particles\ParticleManager.cpp" />
+    <ClCompile Include="particles\ParticleModule.cpp" />
+    <ClCompile Include="particles\ParticleSystem.cpp" />
+    <ClCompile Include="particles\ParticleSystemFactory.cpp" />
     <ClCompile Include="physics\ColliderArray.cpp" />
     <ClCompile Include="physics\PhysicalWorld.cpp" />
     <ClCompile Include="renderer\Bitmapfont.cpp" />
@@ -141,6 +146,7 @@
     <ClInclude Include="gamestates\GameState.h" />
     <ClInclude Include="gamestates\GameStateMachine.h" />
     <ClInclude Include="graphics.h" />
+    <ClInclude Include="imgui\IMGUI.h" />
     <ClInclude Include="io\DataFile.h" />
     <ClInclude Include="io\FileRepository.h" />
     <ClInclude Include="io\json.h" />
@@ -163,6 +169,12 @@
     <ClInclude Include="math\tweening.h" />
     <ClInclude Include="memory\DefaultAllocator.h" />
     <ClInclude Include="memory\memory_types.h" />
+    <ClInclude Include="particles\Particle.h" />
+    <ClInclude Include="particles\ParticleEmitter.h" />
+    <ClInclude Include="particles\ParticleManager.h" />
+    <ClInclude Include="particles\ParticleModule.h" />
+    <ClInclude Include="particles\ParticleSystem.h" />
+    <ClInclude Include="particles\ParticleSystemFactory.h" />
     <ClInclude Include="physics\ColliderArray.h" />
     <ClInclude Include="physics\PhysicalWorld.h" />
     <ClInclude Include="physics\physic_types.h" />

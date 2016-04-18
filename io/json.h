@@ -4,6 +4,7 @@
 #include "..\utils\Color.h"
 #include "..\memory\DefaultAllocator.h"
 #include "..\lib\BlockArray.h"
+#include "..\math\FloatArray.h"
 
 namespace ds {
 
@@ -31,8 +32,8 @@ namespace ds {
 		int size() const {
 			return _tokens.size();
 		}
-		const Token& get(int index) const {
-			if (index >= 0 && index < _tokens.size()) {
+		const Token& get(uint32_t index) const {
+			if (index < _tokens.size()) {
 				return _tokens[index];
 			}
 			else {
@@ -78,9 +79,9 @@ namespace ds {
 		bool get_vec3(int category_id, const char* name, v3* ret) const;
 		bool get_color(int category_id, const char* name, Color* ret) const;
 		bool get(int category_id, const char* name, Rect* ret) const;
-		//bool get_color_path(int category_id, const char* name, ds::ColorPath* path) const;
-		//bool get_vec2_path(int category_id, const char* name, ds::Vector2fPath* path) const;
-		//bool get_float_path(int category_id, const char* name, ds::FloatArray* path) const;
+		bool get_color_path(int category_id, const char* name, ds::ColorPath* path) const;
+		bool get_vec2_path(int category_id, const char* name, ds::Vector2fPath* path) const;
+		bool get_float_path(int category_id, const char* name, ds::FloatArray* path) const;
 		int get_array(int category_id, const char* name, float* values, int max) const;
 		int get_array(int category_id, const char* name, int* values, int max) const;
 		const char* get_string(int category_id, const char* name) const;
@@ -130,9 +131,9 @@ namespace ds {
 		void write(const char* name, const Color& value);
 		void write(const char* name, const Rect& value);
 		void write(const char* name, const char* value);
-		//void write(const char* name, const ds::ColorPath& path);
-		//void write(const char* name, const ds::Vector2fPath& path);
-		//void write(const char* name, const ds::FloatArray& path);
+		void write(const char* name, const ds::ColorPath& path);
+		void write(const char* name, const ds::Vector2fPath& path);
+		void write(const char* name, const ds::FloatArray& path);
 		void write(const char* name, const int* values,int count);
 		void endCategory();
 	private:

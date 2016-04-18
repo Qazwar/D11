@@ -556,7 +556,6 @@ const char* JSONReader::get_string(int category_id, const char* name) const {
 // -------------------------------------------
 // get color path
 // -------------------------------------------
-/*
 bool JSONReader::get_color_path(int category_id, const char* name, ds::ColorPath* path) const {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
@@ -585,11 +584,9 @@ bool JSONReader::get_color_path(int category_id, const char* name, ds::ColorPath
 	}
 	return true;
 }
-*/
 // -------------------------------------------
 // get v2 path
 // -------------------------------------------
-/*
 bool JSONReader::get_vec2_path(int category_id, const char* name, ds::Vector2fPath* path) const {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
@@ -614,11 +611,9 @@ bool JSONReader::get_vec2_path(int category_id, const char* name, ds::Vector2fPa
 	}
 	return true;
 }
-*/
 // -------------------------------------------
 // get float path
 // -------------------------------------------
-/*
 bool JSONReader::get_float_path(int category_id, const char* name, ds::FloatArray* path) const {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
@@ -640,7 +635,6 @@ bool JSONReader::get_float_path(int category_id, const char* name, ds::FloatArra
 	}
 	return true;
 }
-*/
 // -------------------------------------------
 // get array
 // -------------------------------------------
@@ -917,7 +911,6 @@ void JSONWriter::writeLineIdent() {
 // ----------------------------------------------------------
 // write color path
 // ----------------------------------------------------------
-/*
 void JSONWriter::write(const char* name, const ds::ColorPath& path) {
 	for (int i = 0; i < path.size(); ++i) {
 		const ds::Color& value = path.value(i);
@@ -931,11 +924,9 @@ void JSONWriter::write(const char* name, const ds::ColorPath& path) {
 		++_items;
 	}
 }
-*/
 // ----------------------------------------------------------
 // write color path
 // ----------------------------------------------------------
-/*
 void JSONWriter::write(const char* name, const ds::Vector2fPath& path) {
 	writeLineIdent();
 	fprintf(f, "%s : ", name);
@@ -947,11 +938,9 @@ void JSONWriter::write(const char* name, const ds::Vector2fPath& path) {
 		++_items;
 	}
 }
-*/
 // ----------------------------------------------------------
 // write color path
 // ----------------------------------------------------------
-/*
 void JSONWriter::write(const char* name, const ds::FloatArray& path) {
 	writeLineIdent();
 	fprintf(f, "%s : ", name);
@@ -963,7 +952,7 @@ void JSONWriter::write(const char* name, const ds::FloatArray& path) {
 		++_items;
 	}
 }
-*/
+
 void JSONWriter::write(const char* name, const int* values, int count) {
 	writeLineIdent();
 	fprintf(f, "%s : ", name);

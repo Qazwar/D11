@@ -276,7 +276,7 @@ namespace profiler {
 		LOG << "------------------------------------------------------------";
 	}
 
-	void save(const ReportWriter& writer) {
+	void save(const ds::ReportWriter& writer) {
 		writer.addHeader("Profiling");
 		char p[10];
 		const char* HEADERS[] = { "C", "Percent", "Accu", "Name" };
@@ -464,7 +464,7 @@ namespace perf {
 		}
 	};
 
-	void save(const ReportWriter& writer) {
+	void save(const ds::ReportWriter& writer) {
 		writer.startBox("Perf - Profiling");
 		const char* HEADERS[] = { "Percent", "Accu", "Name" };
 		writer.startTable(HEADERS, 3);

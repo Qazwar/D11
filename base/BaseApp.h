@@ -63,6 +63,8 @@ namespace ds {
 		bool _createReport;
 		bool _updated;
 		std::chrono::steady_clock::time_point _start, _now;
+		float _ar[256];
+		int _num;
 	};
 
 }

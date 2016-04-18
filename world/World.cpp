@@ -432,8 +432,8 @@ namespace ds {
 		char buffer[128];
 		sprintf_s(buffer, 128, "Sprites (%d)", m_Data.num);
 		writer.startBox(buffer);
-		const char* HEADERS[] = { "Index", "ID", "Type", "Position", "Rotation", "Scale", "Extents", "Shape" };
-		writer.startTable(HEADERS, 6);
+		const char* HEADERS[] = { "Index", "ID", "Type", "Position", "Rotation", "Scale", "Texture", "Extents", "Shape" };
+		writer.startTable(HEADERS, 9);
 		for (int i = 0; i < m_Data.num; ++i) {
 			writer.startRow();
 			writer.addCell(i);
@@ -442,6 +442,7 @@ namespace ds {
 			writer.addCell(m_Data.positions[i]);
 			writer.addCell(RADTODEG(m_Data.rotations[i]));
 			writer.addCell(m_Data.scales[i]);
+			writer.addCell(m_Data.textures[i].rect);
 			writer.addCell(m_Data.extents[i]);
 			writer.addCell(m_Data.shapeTypes[i]);
 			writer.endRow();

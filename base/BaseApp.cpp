@@ -39,6 +39,7 @@ namespace ds {
 		}
 		LOG << "size: " << _settings.screenWidth << " x " << _settings.screenHeight;
 		_start = std::chrono::steady_clock::now();
+		_num = 0;
 	}
 
 
@@ -111,8 +112,12 @@ namespace ds {
 		}
 		_now = std::chrono::steady_clock::now();
 		auto duration = _now - _start;
-		auto time_span = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-		double elapsed = static_cast<double>(time_span) / 1000.0;
+		auto time_span = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+		double elapsed = static_cast<double>(time_span) / 1000.0f / 1000.0f;
+		_ar[_num++] = elapsed;
+		if (_num >= 255) {
+			_num = 0;
+		}
 		_start = _now;
 		_accu += elapsed;
 		_fpsTimer += elapsed;
@@ -121,9 +126,9 @@ namespace ds {
 			_fps = _frames;
 			_frames = 0;
 			//LOG << "FPS:" << _fps;
-		}
-		ZoneTracker u1("UPDATE");
+		}		
 		{
+			ZoneTracker u1("UPDATE");
 			while (_accu >= _dt) {
 				update(_dt);
 				_stateMachine->update(_dt);

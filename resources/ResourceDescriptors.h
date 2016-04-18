@@ -108,4 +108,10 @@ namespace ds {
 		RID spriteBuffer;
 	};
 
+	struct IMGUIDescriptor {
+		uint16_t id;
+		RID font;
+		RID spriteBuffer;
+	};
+
 }

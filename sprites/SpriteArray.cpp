@@ -56,28 +56,27 @@ namespace ds {
 		XASSERT(in.index != UINT16_MAX,"Invalid index for %d",id);
 		XASSERT(id < capacity,"ID %d out of range %d",id,capacity);
 		if (num > 1) {
-			int last = num - 1;
-			ID lastID = ids[last];
+			ID lastID = ids[num-1];
 			SpriteArrayIndex& lastIn = indices[lastID];
-			if (last != in.index) {
-				ids[in.index] = ids[last];
-				positions[in.index] = positions[last];
-				scales[in.index] = scales[last];
-				rotations[in.index] = rotations[last];
-				textures[in.index] = textures[last];
-				colors[in.index] = colors[last];
-				timers[in.index] = timers[last];
-				types[in.index] = types[last];
-				layers[in.index] = layers[last];
-				previous[in.index] = previous[last];
-				extents[in.index] = extents[last];
-				shapeTypes[in.index] = shapeTypes[last];
+			if (lastID != in.index) {
+				ids[in.index] = ids[lastIn.index];
+				positions[in.index] = positions[lastIn.index];
+				scales[in.index] = scales[lastIn.index];
+				rotations[in.index] = rotations[lastIn.index];
+				textures[in.index] = textures[lastIn.index];
+				colors[in.index] = colors[lastIn.index];
+				timers[in.index] = timers[lastIn.index];
+				types[in.index] = types[lastIn.index];
+				layers[in.index] = layers[lastIn.index];
+				previous[in.index] = previous[lastIn.index];
+				extents[in.index] = extents[lastIn.index];
+				shapeTypes[in.index] = shapeTypes[lastIn.index];
 			}
 			lastIn.index = in.index;
 		}
+		--num;
 		in.index = UINT16_MAX;
 		freeList.push_back(id);
-		--num;
 	}
 
 	void SpriteArray::allocate(uint16_t size) {

@@ -122,7 +122,7 @@ namespace ds {
 		if (_buffer.size > 0) {
 			writer.addSubHeader("MoveByAction");
 			const char* HEADERS[] = { "Index", "ID", "Velocity", "Bounce"};
-			writer.startTable(HEADERS, 5);
+			writer.startTable(HEADERS, 4);
 			for (int i = 0; i < _buffer.size; ++i) {
 				writer.startRow();
 				writer.addCell(i);
