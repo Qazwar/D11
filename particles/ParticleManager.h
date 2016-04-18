@@ -2,6 +2,7 @@
 #include "ParticleSystem.h"
 #include "ParticleSystemFactory.h"
 #include "..\renderer\sprites.h"
+#include "..\resources\ResourceDescriptors.h"
 
 namespace ds {
 
@@ -18,7 +19,7 @@ struct ParticleEvent;
 class ParticleManager : public DataFile {
 
 public:
-	ParticleManager();
+	ParticleManager(const ParticleSystemsDescriptor& descriptor);
 	~ParticleManager();
 	//void init(const Descriptor& desc);
 	void start(uint32_t id,const v2& pos);

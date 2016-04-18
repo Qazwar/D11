@@ -81,7 +81,7 @@ world {
 	sprite_buffer : 8
 }
 sprite_buffer {
-	id : 10
+	id : 12
 	name : "IMGUI_Buffer"
 	size : 1024
 	index_buffer : 0
@@ -96,5 +96,9 @@ sprite_buffer {
 imgui {
 	id : 12
 	font : 7
-	sprite_buffer : 10
+	sprite_buffer : 12
+}
+particles {
+	id : 13
+	sprite_buffer : 8
 }

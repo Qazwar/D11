@@ -461,6 +461,7 @@
     <ClInclude Include="utils\font.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="Constants.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="content\engine_settings.json">

@@ -1,5 +1,6 @@
 #include "font.h"
 #include "..\utils\Log.h"
+#include "..\resources\ResourceContainer.h"
 
 namespace ds {
 
@@ -12,43 +13,46 @@ namespace ds {
 			float cPadding = 0.0f;
 			v2 ret(0.0f, 0.0f);
 			int len = strlen(text);
-			ret.y = bitmapFont.charHeight * scaleY;
+			Bitmapfont* font = res::getFont(bitmapFont);
 			for (int cnt = 0; cnt < len; ++cnt) {
 				char c = text[cnt];
-				if (bitmapFont.contains(c)) {
-					CharDef cd = bitmapFont.getCharDef(c);
-					cPadding = (cd.width + padding)  * scaleX;
-					float dimX = cd.width * scaleX;
-					ret.x += dimX + padding;
+				const Texture& t = font->get(c);
+				cPadding = (t.rect.width() + padding)  * scaleX;
+				float dimX = t.rect.width() * scaleX;
+				ret.x += dimX + padding;
+				float h = t.rect.height() * scaleY;
+				if (h > ret.y) {
+					ret.y = h;
 				}
 			}
 			return ret;
 		}
 
 		// -------------------------------------------------------
-		// Calculate size of text
+		// Calculate limited size of text
 		// -------------------------------------------------------
 		v2 calculateLimitedSize(RID bitmapFont, const char* text, int chars, int padding, float scaleX, float scaleY) {
 			float cPadding = 0.0f;
 			v2 ret(0.0f, 0.0f);
-			ret.y = bitmapFont.charHeight * scaleY;
-			int total = chars;
 			int len = strlen(text);
-			if (total >= len) {
-				total = len;
+			if (len > chars) {
+				len = chars;
 			}
-			for (int cnt = 0; cnt < total; ++cnt) {
+			Bitmapfont* font = res::getFont(bitmapFont);
+			for (int cnt = 0; cnt < len; ++cnt) {
 				char c = text[cnt];
-				if (bitmapFont.contains(c)) {
-					CharDef cd = bitmapFont.getCharDef(c);
-					cPadding = (cd.width + padding)  * scaleX;
-					float dimX = cd.width * scaleX;
-					ret.x += dimX + padding;
+				const Texture& t = font->get(c);
+				cPadding = (t.rect.width() + padding)  * scaleX;
+				float dimX = t.rect.width() * scaleX;
+				ret.x += dimX + padding;
+				float h = t.rect.height() * scaleY;
+				if (h > ret.y) {
+					ret.y = h;
 				}
 			}
 			return ret;
 		}
-		
+		/*
 		// -------------------------------------------------------
 		// Create text
 		// -------------------------------------------------------
@@ -95,6 +99,6 @@ namespace ds {
 			sprites.push_back(sp);
 				
 		}
-
+		*/
 	}
 }

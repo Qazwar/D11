@@ -6,6 +6,7 @@
 #include "..\renderer\Bitmapfont.h"
 #include "..\renderer\sprites.h"
 #include "..\world\World.h"
+#include "..\particles\ParticleManager.h"
 
 namespace ds {
 
@@ -57,6 +58,8 @@ namespace ds {
 		ID3D11ShaderResourceView* getShaderResourceView(RID rid);
 
 		ID3D11SamplerState* getSamplerState(RID rid);
+
+		ParticleManager* getParticleManager();
 
 		Bitmapfont* getFont(RID rid);
 

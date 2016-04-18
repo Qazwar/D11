@@ -33,6 +33,14 @@ namespace ds {
 			}
 			return secondSID;
 		}
+
+		const v2& getPositionByType(int type) const {
+			if (type == firstType) {
+				return firstPos;
+			}
+			return secondPos;
+		}
+
 	};
 
 	namespace physics {

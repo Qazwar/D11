@@ -1,6 +1,7 @@
 #include "Enemies.h"
 #include "resources\ResourceContainer.h"
 #include "math\math.h"
+#include "Constants.h"
 
 Enemies::Enemies() {
 	_world = ds::res::getWorld(9);
@@ -22,7 +23,7 @@ void Enemies::init() {
 			Enemy& e = _enemies[cnt];
 			v2 position = v2(200 + i * 60, 400 + y * 60);
 			const ds::Texture& t = _textures[type];
-			e.sid = _world->create(position, t, 2);
+			e.sid = _world->create(position, t, ObjectTypes::OT_ENEMY);
 			LOG << "enemy: " << e.sid;
 			e.texture = t;
 			e.type = type;
@@ -61,12 +62,24 @@ void Enemies::tick(float dt) {
 }
 
 int Enemies::kill(ds::SID sid) {
+	int killed = 0;
 	for (int i = 0; i < 55; ++i) {
 		Enemy& e = _enemies[i];
 		if (e.sid != ds::INVALID_SID && e.sid == sid) {
 			_world->remove(e.sid);
 			e.sid = ds::INVALID_SID;
 			return e.type;
+		}
+		if (e.sid == ds::INVALID_SID) {
+			++killed;
+		}
+	}
+	if (killed - 55 < 4) {
+		for (int i = 0; i < 55; ++i) {
+			Enemy& e = _enemies[i];
+			if (e.sid != ds::INVALID_SID) {
+				e.velocity *= 2.0f;
+			}
 		}
 	}
 	return -1;

@@ -3,6 +3,7 @@
 #include "..\math\matrix.h"
 #include "..\utils\Log.h"
 #include "..\io\FileRepository.h"
+#include "..\resources\ResourceContainer.h"
 
 namespace ds {
 
@@ -11,11 +12,12 @@ namespace ds {
 	// --------------------------------------------------------------------------
 	// constructor
 	// --------------------------------------------------------------------------
-	ParticleManager::ParticleManager() : _particles(0) {		
+	ParticleManager::ParticleManager(const ParticleSystemsDescriptor& descriptor) : _particles(0) {
 		_systems = new ParticleSystem*[MAX_PARTICLE_SYSTEMS];
 		for (int i = 0; i < 128; ++i) {
 			_systems[i] = 0;
 		}
+		_particles = res::getSpriteBuffer(descriptor.spriteBuffer);
 	}
 
 	// --------------------------------------------------------------------------
@@ -29,9 +31,6 @@ namespace ds {
 			_systems[i] = 0;
 		}
 		delete[] _systems;
-		if (_particles != 0) {
-			delete _particles;
-		}
 	}
 
 	ParticleSystem* ParticleManager::create(int id, const char* name) {

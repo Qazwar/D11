@@ -114,4 +114,10 @@ namespace ds {
 		RID spriteBuffer;
 	};
 
+	struct ParticleSystemsDescriptor {
+		uint16_t id;
+		RID spriteBuffer;
+		uint32_t maxParticles;
+	};
+
 }

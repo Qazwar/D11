@@ -101,6 +101,7 @@ namespace ds {
 			std::vector<ID3D11SamplerState*> samplerStates;
 			uint32_t resourceIndex;
 			ResourceIndex resourceTable[MAX_RESOURCES];
+			ParticleManager* particles;
 
 		};
 
@@ -113,6 +114,7 @@ namespace ds {
 			_resCtx = new ResourceContext;
 			_resCtx->device = device;
 			_resCtx->resourceIndex = 0;
+			_resCtx->particles = 0;
 			for (uint32_t i = 0; i < MAX_RESOURCES; ++i) {
 				ResourceIndex& index = _resCtx->resourceTable[i];
 				index.id = INVALID_RID;
@@ -167,6 +169,9 @@ namespace ds {
 			}
 			for (size_t i = 0; i < _resCtx->samplerStates.size(); ++i) {
 				_resCtx->samplerStates[i]->Release();
+			}
+			if (_resCtx->particles != 0) {
+				delete _resCtx->particles;
 			}
 		}
 
@@ -444,6 +449,14 @@ namespace ds {
 		}
 
 		// ------------------------------------------------------
+		// create particle manager
+		// ------------------------------------------------------
+		static void createParticleManager(const ParticleSystemsDescriptor& descriptor) {
+			_resCtx->particles = new ParticleManager(descriptor);
+			_resCtx->particles->load();
+		}
+
+		// ------------------------------------------------------
 		// create vertex buffer
 		// ------------------------------------------------------
 		static RID createVertexBuffer(const VertexBufferDescriptor& descriptor) {
@@ -704,6 +717,12 @@ namespace ds {
 					descriptor.name = reader.get_string(children[i], "file");
 					loadFont(descriptor);
 				}
+				else if (reader.matches(children[i], "particles")) {
+					ParticleSystemsDescriptor descriptor;
+					reader.get(children[i], "id", &descriptor.id);
+					reader.get(children[i], "sprite_buffer", &descriptor.spriteBuffer);
+					createParticleManager(descriptor);
+				}
 				else if (reader.matches(children[i], "sampler_state")) {
 					SamplerStateDescriptor descriptor;
 					reader.get(children[i], "id", &descriptor.id);
@@ -817,6 +836,10 @@ namespace ds {
 		World* getWorld(RID rid) {
 			uint32_t idx = getIndex(rid, ResourceType::WORLD);
 			return _resCtx->worlds[idx];
+		}
+
+		ParticleManager* getParticleManager() {
+			return _resCtx->particles;
 		}
 
 	}

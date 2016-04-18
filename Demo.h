@@ -30,5 +30,7 @@ private:
 	int _num;
 	bool _firing;
 	float _fireTimer;
+	float _bombTimer;
+	ds::ParticleManager* _particles;
 };
 
