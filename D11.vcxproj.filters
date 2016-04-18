@@ -230,6 +230,9 @@
     <ClCompile Include="imgui\IMGUI.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
+    <ClCompile Include="utils\font.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils\Log.h">
@@ -454,6 +457,9 @@
     </ClInclude>
     <ClInclude Include="imgui\IMGUI.h">
       <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\font.h">
+      <Filter>utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

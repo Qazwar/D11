@@ -110,6 +110,7 @@
     <ClCompile Include="sprites\SpriteArray.cpp" />
     <ClCompile Include="utils\Color.cpp" />
     <ClCompile Include="utils\FileUtils.cpp" />
+    <ClCompile Include="utils\font.cpp" />
     <ClCompile Include="utils\GlobalStringBuffer.cpp" />
     <ClCompile Include="utils\Log.cpp" />
     <ClCompile Include="utils\mtrand.cpp" />
@@ -189,6 +190,7 @@
     <ClInclude Include="utils\Assert.h" />
     <ClInclude Include="utils\Color.h" />
     <ClInclude Include="utils\FileUtils.h" />
+    <ClInclude Include="utils\font.h" />
     <ClInclude Include="utils\GlobalStringBuffer.h" />
     <ClInclude Include="utils\Log.h" />
     <ClInclude Include="utils\mtrand.h" />

@@ -4,6 +4,7 @@
 #include "..\renderer\render_types.h"
 #include "..\lib\collection_types.h"
 #include "..\utils\Color.h"
+#include "..\resources\ResourceDescriptors.h"
 
 namespace gui {
 
@@ -95,7 +96,7 @@ namespace gui {
 		GDM_FLOATING
 	};
 
-	void initialize(bool editorMode = false);
+	void initialize(const ds::IMGUIDescriptor& descriptor, bool editorMode = false);
 
 	void switchEditorMode(bool editorMode);
 

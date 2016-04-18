@@ -69,6 +69,87 @@ namespace ds {
 		}
 	}
 
+	void SpriteBuffer::drawTiledXY(const v2& position, const v2& size, const Texture& texture, float cornersize, const Color& color) {
+		v2 center = position;
+		center.x += size.x * 0.5f;
+		center.y -= size.y * 0.5f;
+		float ch = size.y - 2.0f * cornersize;
+		float cw = size.x - 2.0f * cornersize;
+		float hcz = cornersize * 0.5f;
+		float sx = (size.x - 2.0f * cornersize) / (texture.dim.x - 2.0f * cornersize);
+		float sy = (size.y - 2.0f * cornersize) / (texture.dim.y - 2.0f * cornersize);
+		// left top corner 
+		v2 p = center;
+		ds::Texture tex = math::buildTexture(texture.rect.top, texture.rect.left, cornersize, cornersize, texture.textureSize.x, texture.textureSize.y);
+		p.x = center.x - cw * 0.5f - hcz;
+		p.y = center.y + ch * 0.5f + hcz;
+		draw(p, tex, 0.0f, v2(1.0f, 1.0f), color);
+		// right top corner
+		tex = math::buildTexture(texture.rect.top, texture.rect.right - cornersize, cornersize, cornersize, texture.textureSize.x, texture.textureSize.y);
+		p.x = center.x + cw * 0.5f + hcz;
+		p.y = center.y + ch * 0.5f + hcz;
+		draw(p, tex, 0.0f, v2(1.0f, 1.0f), color);
+		// left bottom corner
+		tex = math::buildTexture(texture.rect.bottom - cornersize, texture.rect.left, cornersize, cornersize, texture.textureSize.x, texture.textureSize.y);
+		p.x = center.x - cw * 0.5f - hcz;
+		p.y = center.y - ch * 0.5f - hcz;
+		draw(p, tex, 0.0f, v2(1.0f, 1.0f), color);
+		// right bottom corner
+		tex = math::buildTexture(texture.rect.bottom - cornersize, texture.rect.right - cornersize, cornersize, cornersize, texture.textureSize.x, texture.textureSize.y);
+		p.x = center.x + cw * 0.5f + hcz;
+		p.y = center.y - ch * 0.5f - hcz;
+		draw(p, tex, 0.0f, v2(1.0f, 1.0f), color);
+		// top
+		tex = math::buildTexture(texture.rect.top, texture.rect.left + cornersize, texture.rect.width() - 2.0f * cornersize, cornersize, texture.textureSize.x, texture.textureSize.y);
+		p.x = center.x;
+		p.y = center.y + ch * 0.5f + hcz;
+		draw(p, tex, 0.0f, v2(sx, 1.0f), color);
+		// bottom
+		tex = math::buildTexture(texture.rect.bottom - cornersize, texture.rect.left + cornersize, texture.rect.width() - 2.0f * cornersize, cornersize, texture.textureSize.x, texture.textureSize.y);
+		p.x = center.x;
+		p.y = center.y - ch * 0.5f - hcz;
+		draw(p, tex, 0.0f, v2(sx, 1.0f), color);
+		// left
+		tex = math::buildTexture(texture.rect.top + cornersize, texture.rect.left, cornersize, texture.rect.height() - 2.0f *cornersize, texture.textureSize.x, texture.textureSize.y);
+		p.x = center.x - cw * 0.5f - hcz;
+		p.y = center.y;
+		draw(p, tex, 0.0f, v2(1.0f, sy), color);
+		// right
+		tex = math::buildTexture(texture.rect.top + cornersize, texture.rect.right - cornersize, cornersize, texture.rect.height() - 2.0f *cornersize, texture.textureSize.x, texture.textureSize.y);
+		p.x = center.x + cw * 0.5f + hcz;
+		p.y = center.y;
+		draw(p, tex, 0.0f, v2(1.0f, sy), color);
+		// center
+		tex = math::buildTexture(texture.rect.top + cornersize, texture.rect.left + cornersize, texture.rect.width() - 2.0f * cornersize, texture.rect.height() - 2.0f * cornersize, texture.textureSize.x, texture.textureSize.y);
+		p.x = center.x;
+		p.y = center.y;
+		draw(p, tex, 0.0f, v2(sx, sy), color);
+
+	}
+
+	void SpriteBuffer::drawTiledX(const v2& position, float width, const Texture& texture, float cornersize, const Color& color) {
+		v2 center = position;
+		center.x += width * 0.5f;
+		float cw = width - 2.0f * cornersize;
+		float hcz = cornersize * 0.5f;
+		float sx = (width - 2.0f * cornersize) / (texture.dim.x - 2.0f * cornersize);
+		// left 
+		v2 p = center;
+		ds::Texture tex = math::buildTexture(texture.rect.top, texture.rect.left, cornersize, cornersize, texture.textureSize.x, texture.textureSize.y);
+		p.x = center.x - cw * 0.5f - hcz;
+		draw(p, tex, 0.0f,v2(1.0f, 1.0f), color);
+		// right
+		tex = math::buildTexture(texture.rect.top, texture.rect.right - cornersize, cornersize, cornersize, texture.textureSize.x, texture.textureSize.y);
+		p.x = center.x + cw * 0.5f + hcz;
+		draw(p, tex, 0.0f, v2(1.0f, 1.0f), color);
+		// center
+		tex = math::buildTexture(texture.rect.top, texture.rect.left + cornersize, texture.rect.width() - 2.0f * cornersize, texture.rect.height(), texture.textureSize.x, texture.textureSize.y);
+		p.x = center.x;
+		p.y = center.y;
+		draw(p, tex, 0.0f, v2(sx, 1.0f), color);
+
+	}
+
 	void SpriteBuffer::begin() {
 		_index = 0;
 		_started = true;

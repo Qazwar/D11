@@ -82,6 +82,7 @@ world {
 }
 sprite_buffer {
 	id : 10
+	name : "IMGUI_Buffer"
 	size : 1024
 	index_buffer : 0
 	constant_buffer : 1

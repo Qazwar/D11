@@ -2,8 +2,10 @@
 #include "..\math\math.h"
 #include "..\graphics.h"
 #include "..\renderer\sprites.h"
+#include "..\resources\ResourceContainer.h"
 #include "..\utils\Profiler.h"
 #include "..\utils\Log.h"
+#include "..\utils\font.h"
 #include <stdarg.h>
 
 namespace gui {
@@ -268,7 +270,7 @@ namespace gui {
 	// -------------------------------------------------------
 	struct GUIContext {
 
-		ds::Bitmapfont* font;
+		RID font;
 		int textureID;
 		GUIWindow window;
 		v2 cursorPosition;
@@ -310,7 +312,7 @@ namespace gui {
 		}
 
 		void reset() {
-			cursorPosition = graphics::getMousePosition();
+			graphics::getMousePosition(&cursorPosition);
 			//clicked = false;
 			grouped = false;
 			visible = false;
@@ -354,14 +356,14 @@ namespace gui {
 		}
 
 		void addText(const v2& position, const char* text) {
-			v2 size = ds::font::calculateSize(*font, text, CHAR_PADDING);
+			v2 size = ds::font::calculateSize(font, text, CHAR_PADDING);
 			v2 p = position;
 			p.x += TEXT_PADDING;
 			addText(p, text, size);
 		}
 
 		void addHeader(const v2& position, const char* text) {
-			v2 size = ds::font::calculateSize(*font, text, CHAR_PADDING);
+			v2 size = ds::font::calculateSize(font, text, CHAR_PADDING);
 			v2 p = position;
 			p.x += TEXT_PADDING;
 			window.addHeader(position, text, size);
@@ -650,7 +652,7 @@ namespace gui {
 	}
 
 	v2 getTextSize(const char* text) {
-		return ds::font::calculateSize(*guiContext->font, text,CHAR_PADDING);
+		return ds::font::calculateSize(guiContext->font, text,CHAR_PADDING);
 	}
 
 	// -------------------------------------------------------
@@ -825,7 +827,7 @@ namespace gui {
 			handleTextInput();
 			*v = atoi(guiContext->inputText);
 			v2 cp = p;
-			v2 cursorPos = ds::font::calculateLimitedSize(*guiContext->font, guiContext->inputText,guiContext->caretPos,CHAR_PADDING);
+			v2 cursorPos = ds::font::calculateLimitedSize(guiContext->font, guiContext->inputText,guiContext->caretPos,CHAR_PADDING);
 			cp.x = guiContext->position.x + TEXT_PADDING + (width + 10.0f)  * index + cursorPos.x + guiContext->settings[GS_LABELSIZE];
 			guiContext->addBox(cp, v2(2, BOX_HEIGHT - 4.0f), ds::Color(192, 0, 0, 255));
 			p.y -= 1.0f;
@@ -859,7 +861,7 @@ namespace gui {
 			handleTextInput();
 			*v = atof(guiContext->inputText);
 			v2 cp = p;
-			v2 cursorPos = ds::font::calculateLimitedSize(*guiContext->font, guiContext->inputText, guiContext->caretPos, CHAR_PADDING);
+			v2 cursorPos = ds::font::calculateLimitedSize(guiContext->font, guiContext->inputText, guiContext->caretPos, CHAR_PADDING);
 			cp.x = guiContext->position.x + TEXT_PADDING + (width + 10.0f) * index + cursorPos.x + guiContext->settings[GS_LABELSIZE];
 			guiContext->addBox(cp, v2(2, BOX_HEIGHT - 4.0f), ds::Color(192, 0, 0, 255));
 			p.y -= 1.0f;
@@ -894,7 +896,7 @@ namespace gui {
 			ret = handleTextInput();
 			strncpy(v, guiContext->inputText, maxLength);
 			v2 cp = p;
-			v2 cursorPos = ds::font::calculateLimitedSize(*guiContext->font, guiContext->inputText, guiContext->caretPos, CHAR_PADDING);
+			v2 cursorPos = ds::font::calculateLimitedSize(guiContext->font, guiContext->inputText, guiContext->caretPos, CHAR_PADDING);
 			cp.x = guiContext->position.x + TEXT_PADDING + (width + 10.0f) * index + cursorPos.x + guiContext->settings[GS_LABELSIZE];
 			guiContext->addBox(cp, v2(2, BOX_HEIGHT - 4.0f), ds::Color(192, 0, 0, 255));
 			p.y -= 1.0f;
@@ -1706,26 +1708,13 @@ namespace gui {
 	// -------------------------------------------------------
 	// intialize gui
 	// -------------------------------------------------------	
-	void initialize(bool editorMode) {
+	void initialize(const ds::IMGUIDescriptor& descriptor,bool editorMode) {
 		assert(guiContext == 0);
 		guiContext = new GUIContext;
-		guiContext->textureID = ds::renderer::loadTexture("gui");
-		assert(guiContext->textureID != -1);
-		guiContext->font = ds::renderer::createBitmapFont("gui_font", guiContext->textureID);
-		ds::FontDefinition fdf;
-		fdf.startChar = 32;
-		fdf.endChar = 128;
-		fdf.width = 209;
-		fdf.height = 92;
-		fdf.padding = 1;
-		fdf.textureSize = 1024.0f;
-		fdf.charHeight = 14;
-		fdf.startX = 0;
-		fdf.startY = 0;
-		fdf.gridHeight = 14;
+		guiContext->spriteBuffer = ds::res::getSpriteBuffer(descriptor.spriteBuffer);
+		guiContext->font = descriptor.font;
 
-		guiContext->font->intialize(fdf);
-		ds::renderer::initializeBitmapFont(guiContext->font, guiContext->textureID);
+
 		guiContext->clicked = false;
 		guiContext->released = false;
 		guiContext->buttonPressed = false;
