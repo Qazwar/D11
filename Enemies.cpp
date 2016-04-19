@@ -16,11 +16,10 @@ Enemies::~Enemies() {
 }
 
 void Enemies::init() {
-	int cnt = 0;
 	for (int y = 0; y < 5; ++y) {
 		int type = math::random(0.0f, 3.99f);
 		for (int i = 0; i < 11; ++i) {
-			Enemy& e = _enemies[cnt];
+			Enemy e;
 			v2 position = v2(200 + i * 60, 400 + y * 60);
 			const ds::Texture& t = _textures[type];
 			e.sid = _world->create(position, t, ObjectTypes::OT_ENEMY);
@@ -30,15 +29,15 @@ void Enemies::init() {
 			e.position = position;
 			e.velocity = v2(100, 0);
 			_world->attachCollider(e.sid);
-			++cnt;
+			_enemies.push_back(e);
 		}
 	}
 }
 
 void Enemies::tick(float dt) {
 	bool flip = false;
-	for (int i = 0; i < 55; ++i) {
-		Enemy& e = _enemies[i];
+	for (int i = 0; i < _enemies.size(); ++i) {
+		const Enemy& e = _enemies[i];
 		if (e.sid != ds::INVALID_SID) {
 			v2 p = _world->getPosition(e.sid);
 			p += e.velocity * dt;
@@ -49,7 +48,7 @@ void Enemies::tick(float dt) {
 		}
 	}
 	if (flip) {
-		for (int i = 0; i < 55; ++i) {
+		for (int i = 0; i < _enemies.size(); ++i) {
 			Enemy& e = _enemies[i];
 			if (e.sid != ds::INVALID_SID) {
 				v2 p = _world->getPosition(e.sid);
@@ -63,25 +62,32 @@ void Enemies::tick(float dt) {
 
 int Enemies::kill(ds::SID sid) {
 	int killed = 0;
-	for (int i = 0; i < 55; ++i) {
-		Enemy& e = _enemies[i];
-		if (e.sid != ds::INVALID_SID && e.sid == sid) {
+	for (int i = 0; i < _enemies.size(); ++i) {
+		const Enemy& e = _enemies[i];
+		if (e.sid == sid) {		
+			int type = e.type;
+			LOG << "removing at: " << i;
 			_world->remove(e.sid);
-			e.sid = ds::INVALID_SID;
-			return e.type;
-		}
-		if (e.sid == ds::INVALID_SID) {
-			++killed;
+			_enemies.remove(i);
+			return type;
 		}
 	}
+	/*
 	if (killed - 55 < 4) {
-		for (int i = 0; i < 55; ++i) {
+		for (int i = 0; i < _enemies.size(); ++i) {
 			Enemy& e = _enemies[i];
 			if (e.sid != ds::INVALID_SID) {
 				e.velocity *= 2.0f;
 			}
 		}
 	}
+	*/
 	return -1;
 
+}
+
+v2 Enemies::getRandomPosition() {
+	int idx = math::random(0, _enemies.size() - 1);
+	ds::SID sid = _enemies[idx].sid;
+	return _world->getPosition(sid);
 }

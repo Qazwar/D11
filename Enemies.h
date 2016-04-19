@@ -18,9 +18,10 @@ public:
 	void init();
 	void tick(float dt);
 	int kill(ds::SID sid);
+	v2 getRandomPosition();
 private:
 	ds::World* _world;
-	Enemy _enemies[55];
+	ds::Array<Enemy> _enemies;
 	ds::Texture _textures[4];
 };
 

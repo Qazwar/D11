@@ -22,7 +22,7 @@ bool Demo::initialize() {
 	_world = ds::res::getWorld(9);
 	_world->enableCollisionChecks();
 	_world->setBoundingRect(ds::Rect(10, 10, 1240, 680));
-	_world->ignoreCollisions(2, 3);
+	_world->ignoreCollisions(ObjectTypes::OT_BOMB, ObjectTypes::OT_ENEMY);
 	_player = _world->create(v2(640, 60), math::buildTexture(0.0f, 868.0f, 46.0f, 42.0f), ObjectTypes::OT_PLAYER);
 	LOG << "Player: " << _player;
 	_particles = ds::res::getParticleManager();
@@ -54,7 +54,7 @@ void Demo::update(float dt) {
 		int num = _world->getNumCollisions();
 		for (int i = 0; i < num; ++i) {
 			const ds::Collision& c = _world->getCollision(i);
-			LOG << "c: " << c.firstSID << "/" << c.firstType << " " << c.secondSID << "/" << c.secondType;
+			LOG << "c: " << c.firstSID << "/" << ObjectNames[c.firstType] << " " << c.secondSID << "/" << ObjectNames[c.secondType];
 			if (c.containsType(ObjectTypes::OT_ENEMY) && c.containsType(ObjectTypes::OT_BULLET)) {
 				int points = _enemies->kill(c.getSIDByType(OT_ENEMY));
 				if (points > 0) {
@@ -87,7 +87,8 @@ void Demo::update(float dt) {
 	_bombTimer += dt;
 	if (_bombTimer > 3.0f) {
 		_bombTimer = math::random(1.5f, 2.5f);
-		ds::SID id = _world->create(v2(640, 480), math::buildTexture(16, 56, 24, 24), ObjectTypes::OT_BOMB);
+		v2 p = _enemies->getRandomPosition();
+		ds::SID id = _world->create(p, math::buildTexture(16, 56, 24, 24), ObjectTypes::OT_BOMB);
 		_world->moveBy(id, v2(0, -200));
 		_world->attachCollider(id);
 	}

@@ -56,6 +56,7 @@ namespace ds {
 		int _frames;
 		int _fps;
 		bool _loading;
+		bool _running;
 		Settings _settings;
 		GameStateMachine* _stateMachine;
 		KeyStates _keyStates;

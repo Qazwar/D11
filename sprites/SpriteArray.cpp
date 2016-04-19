@@ -53,8 +53,8 @@ namespace ds {
 
 	void SpriteArray::remove(SID id) {
 		SpriteArrayIndex& in = indices[id];
-		XASSERT(in.index != UINT16_MAX,"Invalid index for %d",id);
-		XASSERT(id < capacity,"ID %d out of range %d",id,capacity);
+		XASSERT(in.index != UINT16_MAX,"Remove : Invalid index for %d",id);
+		XASSERT(id < capacity,"Remove : ID %d out of range %d",id,capacity);
 		if (num > 1) {
 			ID lastID = ids[num-1];
 			SpriteArrayIndex& lastIn = indices[lastID];
@@ -71,8 +71,8 @@ namespace ds {
 				previous[in.index] = previous[lastIn.index];
 				extents[in.index] = extents[lastIn.index];
 				shapeTypes[in.index] = shapeTypes[lastIn.index];
-			}
-			lastIn.index = in.index;
+				lastIn.index = in.index;
+			}			
 		}
 		--num;
 		in.index = UINT16_MAX;

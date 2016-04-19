@@ -17,6 +17,7 @@ namespace ds {
 		_loading = true;
 		_createReport = false;
 		_updated = false;
+		_running = true;
 		gDefaultMemory = new DefaultAllocator(64 * 1024 * 1024);
 		gStringBuffer = new GlobalStringBuffer();
 		perf::init();
@@ -96,17 +97,19 @@ namespace ds {
 	void BaseApp::tick() {
 		{
 			ZoneTracker z("INPUT");
-			if (_keyStates.onChar) {
-				_keyStates.onChar = false;
-				OnChar(_keyStates.ascii);				
-			}
-			if (!_buttonState.processed) {
-				_buttonState.processed = true;
-				if (_buttonState.down) {
-					OnButtonDown(_buttonState.button, _buttonState.x, _buttonState.y);
+			if (_running) {
+				if (_keyStates.onChar) {
+					_keyStates.onChar = false;
+					OnChar(_keyStates.ascii);
 				}
-				else {
-					OnButtonUp(_buttonState.button, _buttonState.x, _buttonState.y);
+				if (!_buttonState.processed) {
+					_buttonState.processed = true;
+					if (_buttonState.down) {
+						OnButtonDown(_buttonState.button, _buttonState.x, _buttonState.y);
+					}
+					else {
+						OnButtonUp(_buttonState.button, _buttonState.x, _buttonState.y);
+					}
 				}
 			}
 		}
@@ -130,8 +133,10 @@ namespace ds {
 		{
 			ZoneTracker u1("UPDATE");
 			while (_accu >= _dt) {
-				update(_dt);
-				_stateMachine->update(_dt);
+				if (_running) {
+					update(_dt);
+					_stateMachine->update(_dt);
+				}
 				_accu -= _dt;
 				_updated = true;
 			}
@@ -159,6 +164,9 @@ namespace ds {
 		_keyStates.onChar = true;
 		if (ascii == 'r') {
 			_createReport = true;
+		}
+		if (ascii == 's') {
+			_running = !_running;
 		}
 	}
 
