@@ -6,6 +6,7 @@
 #include <assert.h>
 #include "resources\ResourceContainer.h"
 #include "Constants.h"
+#include "TestGUI.h"
 
 ds::BaseApp *app = new Demo();
 
@@ -17,6 +18,8 @@ Demo::~Demo() {
 }
 
 bool Demo::initialize() {
+	addGameState(new TestGUIState());
+	/*
 	_enemies = new Enemies();
 	_enemies->init();
 	_world = ds::res::getWorld(9);
@@ -27,10 +30,13 @@ bool Demo::initialize() {
 	LOG << "Player: " << _player;
 	_particles = ds::res::getParticleManager();
 	_bombTimer = math::random(2.0f, 3.0f);
+	*/
+	activate("TestGUIState");
 	return true;
 }
 
 void Demo::update(float dt) {
+	/*
 	_particles->update(dt);
 	v2 mp;
 	if (graphics::getMousePosition(&mp)) {
@@ -92,20 +98,21 @@ void Demo::update(float dt) {
 		_world->moveBy(id, v2(0, -200));
 		_world->attachCollider(id);
 	}
+	*/
 }
 
 void Demo::render() {
-	_world->render();
-	_particles->render();
+	//_world->render();
+	//_particles->render();
 }
 
 void Demo::OnButtonDown(int button, int x, int y) {
-	_fireTimer = 0.0f;
-	_firing = true;
+	//_fireTimer = 0.0f;
+	//_firing = true;
 }
 
 void Demo::OnButtonUp(int button, int x, int y) {
-	_firing = false;
+	//_firing = false;
 }
 
 void Demo::OnChar(uint8_t ascii) {

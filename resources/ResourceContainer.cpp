@@ -7,6 +7,7 @@
 #include <string.h>
 #include "..\utils\Log.h"
 #include "..\renderer\render_types.h"
+#include "..\imgui\IMGUI.h"
 
 namespace ds {
 
@@ -173,6 +174,7 @@ namespace ds {
 			if (_resCtx->particles != 0) {
 				delete _resCtx->particles;
 			}
+			gui::shutdown();
 		}
 
 
@@ -764,6 +766,13 @@ namespace ds {
 					reader.get(children[i], "id", &descriptor.id);
 					reader.get(children[i], "sprite_buffer", &descriptor.spriteBuffer);
 					createWorld(descriptor);
+				}
+				else if (reader.matches(children[i], "imgui")) {
+					IMGUIDescriptor descriptor;
+					reader.get(children[i], "id", &descriptor.id);
+					reader.get(children[i], "sprite_buffer", &descriptor.spriteBuffer);
+					reader.get(children[i], "font", &descriptor.font);
+					gui::initialize(descriptor);
 				}
 			}
 		}

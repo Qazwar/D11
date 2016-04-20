@@ -44,9 +44,14 @@ namespace ds {
 		void activate(const char* name);
 		void deactivate(const char* name);
 		void connectGameStates(const char* firstStateName, int outcome, const char* secondStateName);
+
+		virtual void init() {}
 		virtual void OnChar(uint8_t ascii) {}
 		virtual void OnButtonDown(int button, int x, int y) {}
 		virtual void OnButtonUp(int button, int x, int y) {}
+		virtual bool loadContent() {
+			return true;
+		}
 	private:
 		void tick();
 		void renderFrame();

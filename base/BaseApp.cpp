@@ -5,6 +5,7 @@
 #include "..\utils\GlobalStringBuffer.h"
 #include "..\io\FileRepository.h"
 #include "..\utils\Profiler.h"
+#include "..\imgui\IMGUI.h"
 
 namespace ds {
 
@@ -57,9 +58,13 @@ namespace ds {
 
 	bool BaseApp::prepare(HINSTANCE hInstance, HWND hwnd) {
 		if (graphics::initialize(hInstance, hwnd, _settings)) {
-			profiler::init();
+			perf::init();
 			res::initialize(graphics::getDevice());
 			res::parseJSONFile();
+			LOG << "------------------ start load content ------------------";
+			loadContent();
+			init();
+			LOG << "------------------ end load content ------------------";
 			_loading = false;
 			return true;
 		}
@@ -68,11 +73,9 @@ namespace ds {
 	}
 
 	void BaseApp::buildFrame() {
-		profiler::reset();
 		perf::reset();
 		tick();
 		renderFrame();
-		profiler::finalize();
 		perf::finalize();
 		if (_updated && _createReport) {
 			char timeFormat[255];
@@ -168,6 +171,7 @@ namespace ds {
 		if (ascii == 's') {
 			_running = !_running;
 		}
+		gui::sendKey(ascii);
 	}
 
 	// -------------------------------------------------------

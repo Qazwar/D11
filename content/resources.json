@@ -80,6 +80,10 @@ world {
 	size : 1024
 	sprite_buffer : 8
 }
+font {
+	id : 14
+	file : "gui_font.json"
+}
 sprite_buffer {
 	id : 12
 	name : "IMGUI_Buffer"
@@ -91,11 +95,11 @@ sprite_buffer {
 	blend_state : 4
 	color_map : 11
 	input_layout : 6
-	font : 7
+	font : 14
 }
 imgui {
 	id : 12
-	font : 7
+	font : 14
 	sprite_buffer : 12
 }
 particles {

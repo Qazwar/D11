@@ -1,8 +1,5 @@
 #include <Windows.h>
-#include "graphics.h"
-#include "Demo.h"
-#include "utils\Log.h"
-#include "base\BaseApp.h"
+#include "BaseApp.h"
 
 extern ds::BaseApp* app;
 

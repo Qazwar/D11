@@ -1,7 +1,5 @@
 #pragma once
 #include <Windows.h>
-//#include "BaseApp.h"
-//#include "..\dialogs\GUIDialog.h"
 #include "..\Common.h"
 #include "..\utils\StringUtils.h"
 
