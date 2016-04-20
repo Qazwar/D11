@@ -28,8 +28,12 @@ namespace ds {
 
 	public:
 		BaseApp();
-		~BaseApp();
-		bool prepare(HINSTANCE hInstance, HWND hwnd);
+		virtual ~BaseApp();
+		void setInstance(const HINSTANCE hInst){
+			hInstance = hInst;
+		}
+		bool prepare();
+		void createWindow();
 		virtual bool initialize() = 0;
 		virtual void render() = 0;
 		virtual void update(float dt) = 0;		
@@ -45,6 +49,7 @@ namespace ds {
 		void deactivate(const char* name);
 		void connectGameStates(const char* firstStateName, int outcome, const char* secondStateName);
 
+		virtual const char* getTitle() = 0;
 		virtual void init() {}
 		virtual void OnChar(uint8_t ascii) {}
 		virtual void OnButtonDown(int button, int x, int y) {}
@@ -55,6 +60,9 @@ namespace ds {
 	private:
 		void tick();
 		void renderFrame();
+
+		HINSTANCE hInstance;
+		HWND m_hWnd;
 		float _dt;
 		float _accu;
 		float _fpsTimer;

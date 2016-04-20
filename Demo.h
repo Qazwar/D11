@@ -22,6 +22,9 @@ public:
 	void OnButtonDown(int button, int x, int y);
 	void OnButtonUp(int button, int x, int y);
 	void OnChar(uint8_t ascii);
+	const char* getTitle() {
+		return "Demo";
+	}
 private:
 	ds::World* _world;
 	ds::SID _player;

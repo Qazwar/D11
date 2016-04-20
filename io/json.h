@@ -41,8 +41,8 @@ namespace ds {
 			}
 		}
 
-		Token& get(int index) {
-			if (index >= 0 && index < _tokens.size()) {
+		Token& get(uint32_t index) {
+			if (index < _tokens.size()) {
 				return _tokens[index];
 			}
 			else {

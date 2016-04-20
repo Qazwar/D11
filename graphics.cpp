@@ -25,6 +25,9 @@ namespace graphics {
 		ds::mat4 worldMatrix;
 		ds::mat4 projectionMatrix;
 		ds::mat4 viewProjectionMatrix;
+
+		uint16_t screenWidth;
+		uint16_t screenHeight;
 	};
 
 	static GraphicContext* _context;
@@ -131,7 +134,8 @@ namespace graphics {
 		_context = new GraphicContext;
 		_context->hInstance = hInstance;
 		_context->hwnd = hwnd;
-		
+		_context->screenWidth = settings.screenWidth;
+		_context->screenHeight = settings.screenHeight;
 		RECT dimensions;
 		GetClientRect(hwnd, &dimensions);
 
@@ -243,12 +247,7 @@ namespace graphics {
 			if (_context->swapChain) _context->swapChain->Release();
 			if (_context->d3dContext) _context->d3dContext->Release();
 			if (_context->d3dDevice) _context->d3dDevice->Release();
-
-			
-			_context->backBufferTarget = 0;
-			_context->swapChain = 0;
-			_context->d3dContext = 0;
-			_context->d3dDevice = 0;
+			delete _context;
 		}
 	}
 
@@ -275,7 +274,7 @@ namespace graphics {
 		if (GetCursorPos(&p)) {
 			if (ScreenToClient(_context->hwnd, &p)) {
 				ret->x = p.x;
-				ret->y = p.y;
+				ret->y = _context->screenHeight - p.y;
 				return true;
 			}
 		}

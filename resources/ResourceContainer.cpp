@@ -175,6 +175,7 @@ namespace ds {
 				delete _resCtx->particles;
 			}
 			gui::shutdown();
+			delete _resCtx;
 		}
 
 

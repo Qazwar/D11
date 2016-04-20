@@ -53,6 +53,13 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 }
 
 int WINAPI WinMain(HINSTANCE hThisInst, HINSTANCE hLastInst, LPSTR lpszCmdLine, int nCmdShow) {
+#ifdef _DEBUG
+	int flag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG); // Get current flag
+	flag |= _CRTDBG_LEAK_CHECK_DF; // Turn on leak-checking bit
+	flag |= _CRTDBG_CHECK_ALWAYS_DF; // Turn on CrtCheckMemory
+	//flag |= _CRTDBG_DELAY_FREE_MEM_DF;
+	_CrtSetDbgFlag(flag); // Set flag to the new value
+#endif
 	WNDCLASSEX wndClass = { 0 };
 	wndClass.cbSize = sizeof(WNDCLASSEX);
 	wndClass.style = CS_HREDRAW | CS_VREDRAW;
@@ -66,15 +73,10 @@ int WINAPI WinMain(HINSTANCE hThisInst, HINSTANCE hLastInst, LPSTR lpszCmdLine, 
 	if (!RegisterClassEx(&wndClass)) {
 		return -1;
 	}
-	RECT rc = { 0, 0, 1280, 720};
-	AdjustWindowRect(&rc, WS_OVERLAPPED, FALSE);
-	HWND hwnd = CreateWindowA("D11", "Hello", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hThisInst, NULL);
-	if (!hwnd) {
-		return -1;
-	}	
-	app->prepare(hThisInst, hwnd);
+	app->setInstance(hThisInst);
+	app->createWindow();
+	app->prepare();
 	app->initialize();
-	ShowWindow(hwnd, SW_SHOW);
 	MSG msg = { 0 };
 	while (msg.message != WM_QUIT) {
 		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
@@ -83,7 +85,6 @@ int WINAPI WinMain(HINSTANCE hThisInst, HINSTANCE hLastInst, LPSTR lpszCmdLine, 
 		}
 		app->buildFrame();
 	}
-	delete app;
-	graphics::shutdown();
+	delete app;	
 	return 0;
 }

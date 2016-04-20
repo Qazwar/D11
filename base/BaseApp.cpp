@@ -6,6 +6,40 @@
 #include "..\io\FileRepository.h"
 #include "..\utils\Profiler.h"
 #include "..\imgui\IMGUI.h"
+#include <strsafe.h>
+
+void ErrorExit(LPTSTR lpszFunction)
+{
+	// Retrieve the system error message for the last-error code
+
+	LPVOID lpMsgBuf;
+	LPVOID lpDisplayBuf;
+	DWORD dw = GetLastError();
+
+	FormatMessage(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER |
+		FORMAT_MESSAGE_FROM_SYSTEM |
+		FORMAT_MESSAGE_IGNORE_INSERTS,
+		NULL,
+		dw,
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(LPTSTR)&lpMsgBuf,
+		0, NULL);
+
+	// Display the error message and exit the process
+
+	lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT,
+		(lstrlen((LPCTSTR)lpMsgBuf) + lstrlen((LPCTSTR)lpszFunction) + 40) * sizeof(TCHAR));
+	StringCchPrintf((LPTSTR)lpDisplayBuf,
+		LocalSize(lpDisplayBuf) / sizeof(TCHAR),
+		TEXT("%s failed with error %d: %s"),
+		lpszFunction, dw, lpMsgBuf);
+	MessageBox(NULL, (LPCTSTR)lpDisplayBuf, TEXT("Error"), MB_OK);
+
+	LocalFree(lpMsgBuf);
+	LocalFree(lpDisplayBuf);
+	ExitProcess(dw);
+}
 
 namespace ds {
 
@@ -47,18 +81,57 @@ namespace ds {
 
 	BaseApp::~BaseApp() {
 		repository::shutdown();
-		perf::shutdown();
+		perf::shutdown();		
 		delete _stateMachine;
 		delete gStringBuffer;
 		res::shutdown();
+		graphics::shutdown();
 		//gDefaultMemory->printOpenAllocations();
 		delete gDefaultMemory;
 	}
 
+	// -------------------------------------------------------
+	// Creates the window
+	// -------------------------------------------------------
+	void BaseApp::createWindow() {
+		RECT DesktopSize;
+		GetClientRect(GetDesktopWindow(), &DesktopSize);
+		// Create the application's window
+		m_hWnd = CreateWindow("D11", "D11",
+			WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+			(DesktopSize.right - _settings.screenWidth) / 2, (DesktopSize.bottom - _settings.screenHeight) / 2,
+			_settings.screenWidth, _settings.screenHeight,
+			NULL, NULL, hInstance, NULL);
 
-	bool BaseApp::prepare(HINSTANCE hInstance, HWND hwnd) {
-		if (graphics::initialize(hInstance, hwnd, _settings)) {
-			perf::init();
+		if (!m_hWnd) 	{
+			DWORD dw = GetLastError();
+			LOG << "Failed to created window";
+			ErrorExit(TEXT("CreateWindow"));
+			ExitProcess(dw);
+		}
+
+		// Adjust to desired size
+		RECT rect = { 0, 0, _settings.screenWidth, _settings.screenHeight };
+		AdjustWindowRect(&rect, GetWindowLong(m_hWnd, GWL_STYLE), FALSE);
+		SetWindowPos(m_hWnd, HWND_TOP, 0, 0, rect.right - rect.left, rect.bottom - rect.top,
+			SWP_NOZORDER | SWP_NOMOVE);
+
+		LOG << "window rect " << rect.top << " " << rect.left << " " << rect.bottom << " " << rect.right;
+		ShowWindow(m_hWnd, SW_SHOW);
+		UpdateWindow(m_hWnd);
+
+		SetWindowText(m_hWnd, getTitle());
+
+		// Save current location/size
+		//ZeroMemory(&m_wp, sizeof(WINDOWPLACEMENT));
+		//m_wp.length = sizeof(WINDOWPLACEMENT);
+		//GetWindowPlacement(m_hWnd, &m_wp);
+		LOG << "window created";
+	}
+
+
+	bool BaseApp::prepare() {
+		if (graphics::initialize(hInstance, m_hWnd, _settings)) {
 			res::initialize(graphics::getDevice());
 			res::parseJSONFile();
 			LOG << "------------------ start load content ------------------";
@@ -106,11 +179,14 @@ namespace ds {
 					OnChar(_keyStates.ascii);
 				}
 				if (!_buttonState.processed) {
+					LOG << "unprocessed button";
 					_buttonState.processed = true;
 					if (_buttonState.down) {
+						_stateMachine->onButtonDown(_buttonState.button, _buttonState.x, _buttonState.y);
 						OnButtonDown(_buttonState.button, _buttonState.x, _buttonState.y);
 					}
 					else {
+						_stateMachine->onButtonUp(_buttonState.button, _buttonState.x, _buttonState.y);
 						OnButtonUp(_buttonState.button, _buttonState.x, _buttonState.y);
 					}
 				}

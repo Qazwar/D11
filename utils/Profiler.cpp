@@ -72,9 +72,10 @@ namespace perf {
 		int ident;
 	};
 
-	static ZoneTrackerContext* zoneTrackerCtx;
+	static ZoneTrackerContext* zoneTrackerCtx = 0;
 
 	void init() {
+		assert(zoneTrackerCtx == 0);
 		zoneTrackerCtx = new ZoneTrackerContext;
 		QueryPerformanceFrequency(&zoneTrackerCtx->frequency);
 	}

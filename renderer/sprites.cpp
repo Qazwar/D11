@@ -36,6 +36,8 @@ namespace ds {
 	}
 
 	SpriteBuffer::~SpriteBuffer() {
+		delete[] _sprites;
+		delete[] _vertices;
 	}
 
 	void SpriteBuffer::draw(const Sprite& sprite) {
