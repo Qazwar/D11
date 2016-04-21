@@ -78,7 +78,7 @@ public:
 	void render() {
 		_dialog->render();
 	}
-private:
+protected:
 	GUIDialog* _dialog;
 	const char* _dialogName;
 };
