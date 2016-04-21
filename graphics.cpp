@@ -28,6 +28,8 @@ namespace graphics {
 
 		uint16_t screenWidth;
 		uint16_t screenHeight;
+
+		v2 viewportCenter;
 	};
 
 	static GraphicContext* _context;
@@ -139,9 +141,6 @@ namespace graphics {
 		RECT dimensions;
 		GetClientRect(hwnd, &dimensions);
 
-		unsigned int width = dimensions.right - dimensions.left;
-		unsigned int height = dimensions.bottom - dimensions.top;
-
 		D3D_DRIVER_TYPE driverTypes[] = {
 			D3D_DRIVER_TYPE_HARDWARE, D3D_DRIVER_TYPE_WARP,
 			D3D_DRIVER_TYPE_REFERENCE, D3D_DRIVER_TYPE_SOFTWARE
@@ -160,11 +159,11 @@ namespace graphics {
 		DXGI_SWAP_CHAIN_DESC swapChainDesc;
 		ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
 		swapChainDesc.BufferCount = 1;
-		swapChainDesc.BufferDesc.Width = width;
-		swapChainDesc.BufferDesc.Height = height;
+		swapChainDesc.BufferDesc.Width = settings.screenWidth;
+		swapChainDesc.BufferDesc.Height = settings.screenHeight;
 		swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		DXGI_RATIONAL refreshRate;
-		QueryRefreshRate(width, height, true,&refreshRate);
+		QueryRefreshRate(settings.screenWidth, settings.screenHeight, true, &refreshRate);
 		//swapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
 		//swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
 		swapChainDesc.BufferDesc.RefreshRate = refreshRate;
@@ -222,8 +221,8 @@ namespace graphics {
 		_context->d3dContext->OMSetRenderTargets(1, &_context->backBufferTarget, 0);
 
 		D3D11_VIEWPORT viewport;
-		viewport.Width = static_cast<float>(width);
-		viewport.Height = static_cast<float>(height);
+		viewport.Width = static_cast<float>(settings.screenWidth);
+		viewport.Height = static_cast<float>(settings.screenHeight);
 		viewport.MinDepth = 0.0f;
 		viewport.MaxDepth = 1.0f;
 		viewport.TopLeftX = 0.0f;
@@ -231,8 +230,11 @@ namespace graphics {
 
 		_context->d3dContext->RSSetViewports(1, &viewport);
 
+		_context->viewportCenter.x = settings.screenWidth / 2;
+		_context->viewportCenter.y = settings.screenHeight / 2;
+
 		_context->viewMatrix = ds::matrix::m4identity();
-		_context->projectionMatrix = ds::matrix::mat4OrthoLH(static_cast<float>(width), static_cast<float>(height), 0.1f, 100.0f);
+		_context->projectionMatrix = ds::matrix::mat4OrthoLH(static_cast<float>(settings.screenWidth), static_cast<float>(settings.screenHeight), 0.1f, 100.0f);
 		_context->viewProjectionMatrix = _context->viewMatrix * _context->projectionMatrix;
 
 		return true;
@@ -266,6 +268,9 @@ namespace graphics {
 		return _context->viewProjectionMatrix;
 	}
 
+	v2 getScreenCenter() {
+		return _context->viewportCenter;
+	}
 	// ------------------------------------------------------
 	// get mouse position
 	// ------------------------------------------------------

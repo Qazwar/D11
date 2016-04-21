@@ -178,7 +178,7 @@ namespace ds {
 		ds::mat4 mvp = graphics::getViewProjectionMaxtrix();
 		mvp = ds::matrix::mat4Transpose(mvp);
 
-
+		v2 sc = graphics::getScreenCenter();
 		for (int i = 0; i < _index; i++) {
 			const Sprite& sprite = _sprites[i];
 			for (int j = 0; j < 4; ++j) {
@@ -186,7 +186,7 @@ namespace ds {
 				start.x *= sprite.texture.dim.x;
 				start.y *= sprite.texture.dim.y;
 				v2 sp = sprite.position;
-				sp -= v2(640, 360);
+				sp -= sc;
 				v2 p = srt(sp, start, sprite.scale.x, sprite.scale.y, sprite.rotation);
 				_vertices[i * 4 + j] = SpriteVertex(p, sprite.texture.getUV(j), sprite.color);
 			}
