@@ -146,9 +146,6 @@ public:
 
 	virtual void activate();
 	virtual void deactivate();		
-	const bool isActive() const {
-		return m_Active;
-	}
 	const IdString& getHashName() const {
 		return m_HashName;
 	}
@@ -200,9 +197,6 @@ private:
 	Items m_Items;
 	Rect m_ButtonItem;
 	Rect m_ButtonItemSelected;
-	bool m_Active;
-	int m_Selected;
-	bool m_SupportHover;
 	int m_SelectedInput;
 
 	Array<const char*> _availableElements;

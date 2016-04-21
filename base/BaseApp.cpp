@@ -180,7 +180,6 @@ namespace ds {
 					OnChar(_keyStates.ascii);
 				}
 				if (!_buttonState.processed) {
-					LOG << "unprocessed button";
 					_buttonState.processed = true;
 					if (_buttonState.down) {
 						_stateMachine->onButtonDown(_buttonState.button, _buttonState.x, _buttonState.y);

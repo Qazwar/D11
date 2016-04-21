@@ -68,14 +68,12 @@ public:
 		_dialog = res::getGUIDialog(rid);
 	}
 	~BasicMenuGameState() {}
-	void activate() {
-		//_gui->activate(_dialogName);
-	}
-	void deactivate() {
-		//_gui->deactivate(_dialogName);
-	}
-	int onGUIButton(ds::DialogID dlgID, int button) {
-		return button;
+	int onButtonDown(int button, int x, int y) {
+		int ret = _dialog->onButton(button, x, graphics::getScreenHeight() - y, true);
+		if (ret != -1) {
+			return ret;
+		}
+		return 0;
 	}
 	void render() {
 		_dialog->render();

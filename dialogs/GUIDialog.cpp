@@ -275,12 +275,9 @@ namespace ds {
 	// On button
 	// -------------------------------------------------------
 	int GUIDialog::onButton(int button,int x,int y,bool down) {
-		if ( !m_Active ) {
-			return -1;
-		}
 		for (int i = 0; i < MAX_GUID; ++i) {
 			const GUID& gid = _ids[i];
-			if ( gid.entryIndex != -1 ) {
+			if (gid.entryIndex != -1) {
 				const GUIItem& item = m_Items[gid.entryIndex];
 				if (item.type == GIT_BUTTON || item.type == GIT_IMAGE_BUTTON) {
 					Rect br;
@@ -305,7 +302,7 @@ namespace ds {
 					}
 				}
 			}
-		}	
+		}
 		return -1;
 	}
 	
@@ -342,7 +339,6 @@ namespace ds {
 	// Activate
 	// -------------------------------------------------------
 	void GUIDialog::activate() {
-		m_Active = true;		
 		m_SelectedInput = -1;			
 		if (_transitionCounter > 0) {
 			_transitionMode = true;
@@ -356,7 +352,6 @@ namespace ds {
 	// Deactivate
 	// -------------------------------------------------------
 	void GUIDialog::deactivate() {
-		m_Active = false;
 	}
 
 	// -------------------------------------------------------
@@ -470,24 +465,6 @@ namespace ds {
 	// Update Mouse pos and set button textures if enabled
 	// -------------------------------------------------------
 	void GUIDialog::updateMousePos(const Vector2f& mousePos) {
-		if ( m_SupportHover ) {
-			int ret = onButton(0,mousePos.x,mousePos.y,false);	
-			for ( size_t i = 0; i < m_Items.size(); ++i ) {
-				//DialogButton* db = &m_Buttons[i];		
-				//if ( db->id == ret && ret != m_Selected ) {
-					//setButtonTexture(db->id,m_ButtonItemSelected);
-				//}
-			}
-			if ( ret == -1 && m_Selected != -1 ) {
-				//for ( size_t i = 0; i < m_Buttons.size(); ++i ) {
-					//DialogButton* db = &m_Buttons[i];		
-					//if ( m_Selected == db->id ) {
-						//setButtonTexture(db->id,m_ButtonItem);
-					//}
-				//}
-			}
-			m_Selected = ret;
-		}
 	}
 
 	// -------------------------------------------------------
@@ -530,7 +507,6 @@ namespace ds {
 	// Set button hover
 	// -------------------------------------------------------
 	void GUIDialog::setButtonHover(const Rect& regularItem,const Rect& highlightItem) {
-		m_SupportHover = true;
 		m_ButtonItem = regularItem;
 		m_ButtonItemSelected = highlightItem;
 	}
