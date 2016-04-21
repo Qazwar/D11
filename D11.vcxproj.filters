@@ -56,6 +56,9 @@
     <Filter Include="imgui">
       <UniqueIdentifier>{4b3b0ea6-66c3-4e89-9529-28c501eb6cab}</UniqueIdentifier>
     </Filter>
+    <Filter Include="dialogs">
+      <UniqueIdentifier>{8b070728-2af1-4142-8741-c1a4686a27ac}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="utils\Log.cpp">
@@ -235,6 +238,12 @@
     <ClCompile Include="TestGUI.cpp" />
     <ClCompile Include="base\WindowMain.cpp">
       <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="dialogs\DialogManager.cpp">
+      <Filter>dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="dialogs\GUIDialog.cpp">
+      <Filter>dialogs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -468,6 +477,12 @@
     <ClInclude Include="TestGUI.h" />
     <ClInclude Include="utils\GameTimer.h">
       <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="dialogs\DialogManager.h">
+      <Filter>dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="dialogs\GUIDialog.h">
+      <Filter>dialogs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

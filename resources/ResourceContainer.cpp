@@ -8,6 +8,7 @@
 #include "..\utils\Log.h"
 #include "..\renderer\render_types.h"
 #include "..\imgui\IMGUI.h"
+#include "..\dialogs\DialogManager.h"
 
 namespace ds {
 
@@ -103,7 +104,7 @@ namespace ds {
 			uint32_t resourceIndex;
 			ResourceIndex resourceTable[MAX_RESOURCES];
 			ParticleManager* particles;
-
+			DialogManager* dialogs;
 		};
 
 		static ResourceContext* _resCtx;
@@ -116,6 +117,7 @@ namespace ds {
 			_resCtx->device = device;
 			_resCtx->resourceIndex = 0;
 			_resCtx->particles = 0;
+			_resCtx->dialogs = 0;
 			for (uint32_t i = 0; i < MAX_RESOURCES; ++i) {
 				ResourceIndex& index = _resCtx->resourceTable[i];
 				index.id = INVALID_RID;
@@ -175,6 +177,9 @@ namespace ds {
 				delete _resCtx->particles;
 			}
 			gui::shutdown();
+			if (_resCtx->dialogs != 0) {
+				delete _resCtx->dialogs;
+			}
 			delete _resCtx;
 		}
 
@@ -775,6 +780,20 @@ namespace ds {
 					reader.get(children[i], "font", &descriptor.font);
 					gui::initialize(descriptor);
 				}
+				else if (reader.matches(children[i], "dialogs")) {
+					DialogManagerDescriptor descriptor;
+					reader.get(children[i], "id", &descriptor.id);
+					reader.get(children[i], "sprite_buffer", &descriptor.spriteBuffer);
+					reader.get(children[i], "font", &descriptor.font);
+					_resCtx->dialogs = new DialogManager(descriptor);
+				}
+				/*
+				dialogs {
+				id : 14
+				sprite_buffer : 8
+				font : 7
+				}
+				*/
 			}
 		}
 

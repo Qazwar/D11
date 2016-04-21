@@ -792,7 +792,7 @@ void JSONWriter::write(const char* name, int value) {
 }
 
 // ----------------------------------------------------------
-// write uint32
+// write uint32_t
 // ----------------------------------------------------------
 void JSONWriter::write(const char* name, uint32_t value) {
 

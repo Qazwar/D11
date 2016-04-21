@@ -120,4 +120,10 @@ namespace ds {
 		uint32_t maxParticles;
 	};
 
+	struct DialogManagerDescriptor {
+		uint16_t id;
+		RID spriteBuffer;
+		RID font;
+	};
+
 }
