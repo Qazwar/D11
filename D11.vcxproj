@@ -87,7 +87,6 @@
     <ClCompile Include="base\CrashReporter.cpp" />
     <ClCompile Include="base\WindowMain.cpp" />
     <ClCompile Include="Demo.cpp" />
-    <ClCompile Include="dialogs\DialogManager.cpp" />
     <ClCompile Include="dialogs\GUIDialog.cpp" />
     <ClCompile Include="Enemies.cpp" />
     <ClCompile Include="gamestates\GameStateMachine.cpp" />
@@ -155,7 +154,6 @@
     <ClInclude Include="Common.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="Demo.h" />
-    <ClInclude Include="dialogs\DialogManager.h" />
     <ClInclude Include="dialogs\GUIDialog.h" />
     <ClInclude Include="Enemies.h" />
     <ClInclude Include="gamestates\GameState.h" />

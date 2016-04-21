@@ -239,9 +239,6 @@
     <ClCompile Include="base\WindowMain.cpp">
       <Filter>base</Filter>
     </ClCompile>
-    <ClCompile Include="dialogs\DialogManager.cpp">
-      <Filter>dialogs</Filter>
-    </ClCompile>
     <ClCompile Include="dialogs\GUIDialog.cpp">
       <Filter>dialogs</Filter>
     </ClCompile>
@@ -477,9 +474,6 @@
     <ClInclude Include="TestGUI.h" />
     <ClInclude Include="utils\GameTimer.h">
       <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="dialogs\DialogManager.h">
-      <Filter>dialogs</Filter>
     </ClInclude>
     <ClInclude Include="dialogs\GUIDialog.h">
       <Filter>dialogs</Filter>

@@ -7,6 +7,7 @@
 #include "..\renderer\sprites.h"
 #include "..\world\World.h"
 #include "..\particles\ParticleManager.h"
+#include "..\dialogs\GUIDialog.h"
 
 namespace ds {
 
@@ -34,6 +35,7 @@ namespace ds {
 		SPRITEBUFFER,
 		WORLD,
 		SAMPLERSTATE,
+		GUIDIALOG,
 		UNKNOWN
 	};
 
@@ -65,6 +67,8 @@ namespace ds {
 
 		Shader* getShader(RID rid);
 
+		GUIDialog* getGUIDialog(RID rid);
+
 		SpriteBuffer* getSpriteBuffer(RID rid);
 
 		int findInputElement(const char* name);
@@ -72,6 +76,8 @@ namespace ds {
 		int findBlendState(const char* text);
 
 		World* getWorld(RID rid);
+
+		void debug();
 
 	}
 	

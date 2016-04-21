@@ -2,13 +2,13 @@
 #include "..\utils\Log.h"
 #include "..\utils\StringUtils.h"
 #include "..\utils\font.h"
-#include "..\renderer\graphics.h"
-#include "..\sprites\SpriteBatch.h"
-#include "..\DialogResources.h"
-
+#include "..\utils\Assert.h"
+#include "..\resources\ResourceContainer.h"
 
 namespace ds {
-	GUIDialog::GUIDialog() {
+	GUIDialog::GUIDialog(const GUIDialogDescriptor& descriptor) {
+		_font = descriptor.font;
+		_sprites = res::getSpriteBuffer(descriptor.spriteBuffer);
 		_state = 1;
 		_offset = 0;
 		_position = v2(1050, 690);
@@ -29,6 +29,8 @@ namespace ds {
 			_transitions[i].id = -1;
 		}
 		_transitionCounter = 0;
+		strcpy(_name, descriptor.file);
+		sprintf_s(_jsonName, 128, "dialogs\\%s.json", _name);
 	}
 
 	// -------------------------------------------------------
@@ -65,6 +67,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// Init
 	// -------------------------------------------------------
+	/*
 	void GUIDialog::init(const char* name,const DialogID& id,BitmapFont* bitmapFont) {	
 		m_ID = id;
 		m_BitmapFont = bitmapFont;
@@ -76,7 +79,7 @@ namespace ds {
 		sprintf_s(_jsonName, 128, "dialogs\\%s.json", _name);
 		load();
 	}
-
+	*/
 
 	// -------------------------------------------------------
 	// Destructor
@@ -291,7 +294,7 @@ namespace ds {
 					}
 					v2 p = item.pos;
 					if (item.centered) {
-						p.x = renderer::getScreenWidth() * 0.5f;
+						p.x = graphics::getScreenWidth() * 0.5f;
 					}
 					br.left += p.x;
 					br.right += p.x;
@@ -364,7 +367,7 @@ namespace ds {
 		const GUIItem& item = m_Items[id.entryIndex];
 		v2 p = item.pos;
 		if (item.centered) {
-			p.x = renderer::getScreenWidth() * 0.5f;
+			p.x = graphics::getScreenWidth() * 0.5f;
 		}
 		if (_transitionMode) {
 			if (_transitions[index].id != -1) {
@@ -391,7 +394,8 @@ namespace ds {
 	// Render both nodes
 	// -------------------------------------------------------
 	void GUIDialog::render() {
-		if ( m_Active ) {
+		_sprites->begin();
+		//if ( m_Active ) {
 			char buffer[32];
 			for (int i = 0; i < MAX_GUID; ++i) {
 				const GUID& id = _ids[i];
@@ -401,47 +405,47 @@ namespace ds {
 					if (item.type == GIT_NUMBERS) {
 						const GUINumber& number = _numbers[id.index];
 						string::formatInt(number.value, buffer, 32, number.length);
-						v2 size = font::calculateSize(*m_BitmapFont, buffer, 2, item.scale, item.scale);
+						v2 size = font::calculateSize(_font, buffer, 2, item.scale, item.scale);
 						float ty = p.y - size.y * 0.5f;
 						if (item.centered) {
-							p.x = renderer::getScreenWidth() * 0.5f;
+							p.x = graphics::getScreenWidth() * 0.5f;
 						}
 						p += v2(size.x * -0.5f, -size.y * 0.5f);
-						ds::sprites::drawText(m_BitmapFont, p.x, p.y, buffer, 2.0f, item.scale, item.scale, item.color);
+						_sprites->drawText(_font, p.x, p.y, buffer, 2.0f, item.scale, item.scale, item.color);
 					}
 					else if (item.type == GIT_TEXT) {
 						const GUIText& text = _texts[id.index];
-						v2 size = font::calculateSize(*m_BitmapFont, text.text, 2, item.scale, item.scale);
+						v2 size = font::calculateSize(_font, text.text, 2, item.scale, item.scale);
 						float ty = p.y - size.y * 0.5f;
 						if (item.centered) {
-							p.x = renderer::getScreenWidth() * 0.5f;
+							p.x = graphics::getScreenWidth() * 0.5f;
 						}
 						p += v2(size.x * -0.5f, -size.y * 0.5f);
-						ds::sprites::drawText(m_BitmapFont, p.x, p.y, text.text, 2.0f, item.scale, item.scale, item.color);
+						_sprites->drawText(_font, p.x, p.y, text.text, 2.0f, item.scale, item.scale, item.color);
 					}
 					else if (item.type == GIT_TIMER) {
 						const GameTimer& timer = _timers[id.index];
 						sprintf_s(buffer, 32, "%02d:%02d", timer.getMinutes(), timer.getSeconds());
-						v2 size = font::calculateSize(*m_BitmapFont, buffer, item.scale);
+						v2 size = font::calculateSize(_font, buffer, item.scale);
 						float ty = p.y - size.y * 0.5f;
 						p += v2(size.x * -0.5f, -size.y * 0.5f);
-						ds::sprites::drawText(m_BitmapFont, p.x, p.y, buffer, 2.0f, item.scale, item.scale, item.color);
+						_sprites->drawText(_font, p.x, p.y, buffer, 2.0f, item.scale, item.scale, item.color);
 					}
 					else if (item.type == GIT_IMAGE) {
 						const GUIImage& image = _images[id.index];
 						v2 p = item.pos;
 						if (item.centered) {
-							p.x = renderer::getScreenWidth() * 0.5f;
+							p.x = graphics::getScreenWidth() * 0.5f;
 						}
-						sprites::draw(p, image.texture, 0.0f, item.scale, item.scale, item.color);
+						_sprites->draw(p, image.texture, 0.0f, v2(item.scale, item.scale), item.color);
 					}
 					else if (item.type == GIT_IMAGE_BUTTON) {
 						const GUIImageButton& image = _imageButtons[id.index];
 						v2 p = item.pos;
 						if (item.centered) {
-							p.x = renderer::getScreenWidth() * 0.5f;
+							p.x = graphics::getScreenWidth() * 0.5f;
 						}
-						sprites::draw(p, image.texture, 0.0f, item.scale, item.scale, item.color);
+						_sprites->draw(p, image.texture, 0.0f, v2(item.scale, item.scale), item.color);
 					}
 					else if (item.type == GIT_BUTTON) {
 						const GUIButton& button = _buttons[id.index];
@@ -450,15 +454,16 @@ namespace ds {
 						//if (item.centered) {
 							//p.x = renderer::getScreenWidth() * 0.5f;
 						//}
-						sprites::draw(p, button.texture);
-						v2 size = font::calculateSize(*m_BitmapFont, button.text, item.scale);
+						_sprites->draw(p, button.texture);
+						v2 size = font::calculateSize(_font, button.text, item.scale);
 						float ty = p.y - size.y * 0.5f;
 						p += v2(size.x * -0.5f, -size.y * 0.5f);
-						ds::sprites::drawText(m_BitmapFont, p.x, p.y, button.text, 2.0f, item.scale, item.scale, item.color);
+						_sprites->drawText(_font, p.x, p.y, button.text, 2.0f, item.scale, item.scale, item.color);
 					}
 				}
 			}
-		}
+		//}
+			_sprites->end();
 	}
 
 	// -------------------------------------------------------
@@ -854,7 +859,7 @@ namespace ds {
 				GUIItem item;
 				int id = loadItem(cats[i], reader, &item);
 				Rect r;
-				reader.get_rect(cats[i], "rect", &r);
+				reader.get(cats[i], "rect", &r);
 				GUID gid = addImage(id, item.pos.x, item.pos.y, r, item.scale, item.centered);
 				addToModel(gid.id, GIT_IMAGE, "Image");
 			}
@@ -862,7 +867,7 @@ namespace ds {
 				GUIItem item;
 				int id = loadItem(cats[i], reader, &item);
 				Rect r;
-				reader.get_rect(cats[i], "rect", &r);
+				reader.get(cats[i], "rect", &r);
 				const char* label = reader.get_string(cats[i], "text");
 				GUID gid = addButton(id, item.pos.x, item.pos.y, label, r, item.color, item.scale, item.centered);
 				addToModel(gid.id, GIT_BUTTON, "Button");
@@ -871,7 +876,7 @@ namespace ds {
 				GUIItem item;
 				int id = loadItem(cats[i], reader, &item);
 				Rect r;
-				reader.get_rect(cats[i], "rect", &r);
+				reader.get(cats[i], "rect", &r);
 				GUID gid = addImageButton(id, item.pos.x, item.pos.y, r, item.centered);
 				addToModel(gid.id, GIT_IMAGE_BUTTON, "ImageButton");
 			}
@@ -907,7 +912,7 @@ namespace ds {
 		reader.get_int(category,"id", &id);
 		reader.get_vec2(category, "pos", &item->pos);
 		reader.get_color(category, "color", &item->color);
-		reader.get_bool(category, "centered", &item->centered);
+		reader.get(category, "centered", &item->centered);
 		reader.get_float(category, "scale", &item->scale);
 		return id;
 	}

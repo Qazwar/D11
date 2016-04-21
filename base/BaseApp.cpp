@@ -138,6 +138,7 @@ namespace ds {
 			loadContent();
 			init();
 			LOG << "------------------ end load content ------------------";
+			res::debug();
 			_loading = false;
 			return true;
 		}

@@ -8,7 +8,6 @@
 #include "..\utils\Log.h"
 #include "..\renderer\render_types.h"
 #include "..\imgui\IMGUI.h"
-#include "..\dialogs\DialogManager.h"
 
 namespace ds {
 
@@ -75,6 +74,22 @@ namespace ds {
 			{ "MIRROR_ONCE", D3D11_TEXTURE_ADDRESS_MIRROR_ONCE },
 		};
 
+		static const char* ResourceTypeNames[] = {
+			"SHADER",
+			"TEXTURE",
+			"VERTEXBUFFER",
+			"INDEXBUFFER",
+			"CONSTANTBUFFER",
+			"BLENDSTATE",
+			"INPUTLAYOUT",
+			"BITMAPFONT",
+			"SPRITEBUFFER",
+			"WORLD",
+			"SAMPLERSTATE",
+			"GUIDIALOG",
+			"UNKNOWN"
+		};
+
 		// ------------------------------------------------------
 		// resource index
 		// ------------------------------------------------------
@@ -82,6 +97,7 @@ namespace ds {
 			RID id;
 			uint32_t index;
 			ResourceType type;
+			uint32_t nameIndex;
 		};
 
 		// ------------------------------------------------------
@@ -89,6 +105,7 @@ namespace ds {
 		// ------------------------------------------------------
 		struct ResourceContext {
 
+			CharBuffer nameBuffer;
 			ID3D11Device* device;
 			std::vector<ID3D11Buffer*> indexBuffers;
 			std::vector<ID3D11Buffer*> constantBuffers;
@@ -101,10 +118,10 @@ namespace ds {
 			std::vector<SpriteBuffer*> spriteBuffers;
 			std::vector<World*> worlds;
 			std::vector<ID3D11SamplerState*> samplerStates;
+			std::vector<GUIDialog*> dialogs;
 			uint32_t resourceIndex;
 			ResourceIndex resourceTable[MAX_RESOURCES];
 			ParticleManager* particles;
-			DialogManager* dialogs;
 		};
 
 		static ResourceContext* _resCtx;
@@ -117,11 +134,11 @@ namespace ds {
 			_resCtx->device = device;
 			_resCtx->resourceIndex = 0;
 			_resCtx->particles = 0;
-			_resCtx->dialogs = 0;
 			for (uint32_t i = 0; i < MAX_RESOURCES; ++i) {
 				ResourceIndex& index = _resCtx->resourceTable[i];
 				index.id = INVALID_RID;
 				index.index = 0;
+				index.nameIndex = -1;
 				index.type = ResourceType::UNKNOWN;
 			}
 		}
@@ -173,13 +190,13 @@ namespace ds {
 			for (size_t i = 0; i < _resCtx->samplerStates.size(); ++i) {
 				_resCtx->samplerStates[i]->Release();
 			}
+			for (size_t i = 0; i < _resCtx->dialogs.size(); ++i) {
+				delete _resCtx->dialogs[i];
+			}
 			if (_resCtx->particles != 0) {
 				delete _resCtx->particles;
 			}
 			gui::shutdown();
-			if (_resCtx->dialogs != 0) {
-				delete _resCtx->dialogs;
-			}
 			delete _resCtx;
 		}
 
@@ -188,7 +205,7 @@ namespace ds {
 		// ------------------------------------------------------
 		// cretate quad index buffer
 		// ------------------------------------------------------
-		static RID createQuadIndexBuffer(const QuadIndexBufferDescriptor& descriptor) {
+		static RID createQuadIndexBuffer(const char* name,const QuadIndexBufferDescriptor& descriptor) {
 			int idx = _resCtx->indexBuffers.size();
 			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
 			assert(ri.type == ResourceType::UNKNOWN);
@@ -231,6 +248,8 @@ namespace ds {
 			_resCtx->indexBuffers.push_back(buffer);
 			ri.index = idx;
 			ri.id = descriptor.id;
+			ri.nameIndex = _resCtx->nameBuffer.size;
+			_resCtx->nameBuffer.append(name);
 			ri.type = ResourceType::INDEXBUFFER;
 			return ri.id;
 		}
@@ -238,7 +257,7 @@ namespace ds {
 		// ------------------------------------------------------
 		// create index buffer
 		// ------------------------------------------------------
-		static RID createIndexBuffer(const IndexBufferDescriptor& descriptor) {
+		static RID createIndexBuffer(const char* name, const IndexBufferDescriptor& descriptor) {
 			int idx = _resCtx->indexBuffers.size();
 			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
 			assert(ri.type == ResourceType::UNKNOWN);
@@ -263,6 +282,8 @@ namespace ds {
 			_resCtx->indexBuffers.push_back(buffer);
 			ri.index = idx;
 			ri.id = descriptor.id;
+			ri.nameIndex = _resCtx->nameBuffer.size;
+			_resCtx->nameBuffer.append(name);
 			ri.type = ResourceType::INDEXBUFFER;
 			return ri.id;
 		}
@@ -270,7 +291,7 @@ namespace ds {
 		// ------------------------------------------------------
 		// create constant buffer
 		// ------------------------------------------------------
-		static RID createConstantBuffer(const ConstantBufferDescriptor& descriptor) {
+		static RID createConstantBuffer(const char* name, const ConstantBufferDescriptor& descriptor) {
 			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
 			assert(ri.type == ResourceType::UNKNOWN);
 			int index = _resCtx->constantBuffers.size();
@@ -288,6 +309,8 @@ namespace ds {
 			_resCtx->constantBuffers.push_back(buffer);
 			ri.index = index;
 			ri.id = descriptor.id;
+			ri.nameIndex = _resCtx->nameBuffer.size;
+			_resCtx->nameBuffer.append(name);
 			ri.type = ResourceType::CONSTANTBUFFER;
 			return ri.id;
 		}
@@ -295,7 +318,7 @@ namespace ds {
 		// ------------------------------------------------------
 		// create sprite buffer
 		// ------------------------------------------------------
-		static RID createSpriteBuffer(const SpriteBufferDescriptor& descriptor) {
+		static RID createSpriteBuffer(const char* name, const SpriteBufferDescriptor& descriptor) {
 			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
 			assert(ri.type == ResourceType::UNKNOWN);
 			int index = _resCtx->spriteBuffers.size();
@@ -303,6 +326,8 @@ namespace ds {
 			_resCtx->spriteBuffers.push_back(buffer);
 			ri.index = index;
 			ri.id = descriptor.id;
+			ri.nameIndex = _resCtx->nameBuffer.size;
+			_resCtx->nameBuffer.append(name);
 			ri.type = ResourceType::SPRITEBUFFER;
 			return ri.id;
 		}
@@ -322,7 +347,7 @@ namespace ds {
 		// ------------------------------------------------------
 		// create sampler state
 		// ------------------------------------------------------
-		RID createSamplerState(const SamplerStateDescriptor& descriptor) {
+		RID createSamplerState(const char* name, const SamplerStateDescriptor& descriptor) {
 			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
 			assert(ri.type == ResourceType::UNKNOWN);
 			int index = _resCtx->samplerStates.size();
@@ -343,6 +368,8 @@ namespace ds {
 			_resCtx->samplerStates.push_back(sampler);
 			ri.index = index;
 			ri.id = descriptor.id;
+			ri.nameIndex = _resCtx->nameBuffer.size;
+			_resCtx->nameBuffer.append(name);
 			ri.type = ResourceType::SAMPLERSTATE;
 			return ri.id;
 		}
@@ -350,7 +377,7 @@ namespace ds {
 		// ------------------------------------------------------
 		// load texture
 		// ------------------------------------------------------
-		static RID loadTexture(const TextureDescriptor& descriptor) {
+		static RID loadTexture(const char* name, const TextureDescriptor& descriptor) {
 			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
 			assert(ri.type == ResourceType::UNKNOWN);
 			int idx = _resCtx->shaderResourceViews.size();
@@ -365,6 +392,8 @@ namespace ds {
 			_resCtx->shaderResourceViews.push_back(srv);
 			ri.index = idx;
 			ri.id = descriptor.id;
+			ri.nameIndex = _resCtx->nameBuffer.size;
+			_resCtx->nameBuffer.append(name);
 			ri.type = ResourceType::TEXTURE;
 			return ri.id;
 		}
@@ -372,7 +401,7 @@ namespace ds {
 		// ------------------------------------------------------
 		// load bitmap font
 		// ------------------------------------------------------
-		static RID loadFont(const BitmapfontDescriptor& descriptor) {
+		static RID loadFont(const char* name,const BitmapfontDescriptor& descriptor) {
 			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
 			assert(ri.type == ResourceType::UNKNOWN);
 			int idx = _resCtx->fonts.size();
@@ -400,6 +429,8 @@ namespace ds {
 			_resCtx->fonts.push_back(font);
 			ri.index = idx;
 			ri.id = descriptor.id;
+			ri.nameIndex = _resCtx->nameBuffer.size;
+			_resCtx->nameBuffer.append(name);
 			ri.type = ResourceType::BITMAPFONT;
 			return ri.id;
 		}
@@ -407,7 +438,7 @@ namespace ds {
 		// ------------------------------------------------------
 		// create blend state
 		// ------------------------------------------------------
-		static RID createBlendState(const BlendStateDescriptor& descriptor) {
+		static RID createBlendState(const char* name, const BlendStateDescriptor& descriptor) {
 			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
 			assert(ri.type == ResourceType::UNKNOWN);
 			int idx = _resCtx->blendStates.size();
@@ -437,6 +468,8 @@ namespace ds {
 			_resCtx->blendStates.push_back(state);
 			ri.index = idx;
 			ri.id = descriptor.id;
+			ri.nameIndex = _resCtx->nameBuffer.size;
+			_resCtx->nameBuffer.append(name);
 			ri.type = ResourceType::BLENDSTATE;
 			return ri.id;
 		}
@@ -444,7 +477,7 @@ namespace ds {
 		// ------------------------------------------------------
 		// create world
 		// ------------------------------------------------------
-		static RID createWorld(const WorldDescriptor& descriptor) {
+		static RID createWorld(const char* name, const WorldDescriptor& descriptor) {
 			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
 			assert(ri.type == ResourceType::UNKNOWN);
 			World* w = new World(descriptor);
@@ -453,6 +486,26 @@ namespace ds {
 			ri.index = idx;
 			ri.id = descriptor.id;
 			ri.type = ResourceType::WORLD;
+			ri.nameIndex = _resCtx->nameBuffer.size;
+			_resCtx->nameBuffer.append(name);
+			return ri.id;
+		}
+
+		// ------------------------------------------------------
+		// create dialog
+		// ------------------------------------------------------
+		static RID createDialog(const char* name, const GUIDialogDescriptor& descriptor) {
+			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
+			assert(ri.type == ResourceType::UNKNOWN);
+			GUIDialog* dialog = new GUIDialog(descriptor);
+			dialog->load();
+			int idx = _resCtx->dialogs.size();
+			_resCtx->dialogs.push_back(dialog);
+			ri.index = idx;
+			ri.id = descriptor.id;
+			ri.nameIndex = _resCtx->nameBuffer.size;
+			_resCtx->nameBuffer.append(name);
+			ri.type = ResourceType::GUIDIALOG;
 			return ri.id;
 		}
 
@@ -467,7 +520,7 @@ namespace ds {
 		// ------------------------------------------------------
 		// create vertex buffer
 		// ------------------------------------------------------
-		static RID createVertexBuffer(const VertexBufferDescriptor& descriptor) {
+		static RID createVertexBuffer(const char* name, const VertexBufferDescriptor& descriptor) {
 			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
 			assert(ri.type == ResourceType::UNKNOWN);
 			D3D11_BUFFER_DESC bufferDesciption;
@@ -493,6 +546,8 @@ namespace ds {
 			_resCtx->vertexBuffers.push_back(buffer);
 			ri.index = idx;
 			ri.id = descriptor.id;
+			ri.nameIndex = _resCtx->nameBuffer.size;
+			_resCtx->nameBuffer.append(name);
 			ri.type = ResourceType::VERTEXBUFFER;
 			return ri.id;
 		}
@@ -500,7 +555,7 @@ namespace ds {
 		// ------------------------------------------------------
 		// create vertex buffer
 		// ------------------------------------------------------
-		static RID createInputLayout(const InputLayoutDescriptor& descriptor) {
+		static RID createInputLayout(const char* name, const InputLayoutDescriptor& descriptor) {
 			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
 			assert(ri.type == ResourceType::UNKNOWN);
 			int idx = _resCtx->layouts.size();
@@ -531,6 +586,8 @@ namespace ds {
 			_resCtx->layouts.push_back(layout);
 			ri.index = idx;
 			ri.id = descriptor.id;
+			ri.nameIndex = _resCtx->nameBuffer.size;
+			_resCtx->nameBuffer.append(name);
 			ri.type = ResourceType::INPUTLAYOUT;
 			return ri.id;
 		}
@@ -582,7 +639,7 @@ namespace ds {
 			return true;
 		}
 
-		static RID createShader(const ShaderDescriptor& descriptor) {
+		static RID createShader(const char* name, const ShaderDescriptor& descriptor) {
 			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
 			assert(ri.type == ResourceType::UNKNOWN);
 			Shader* s = new Shader;
@@ -615,6 +672,8 @@ namespace ds {
 			_resCtx->shaders.push_back(s);
 			ri.index = idx;
 			ri.id = descriptor.id;
+			ri.nameIndex = _resCtx->nameBuffer.size;
+			_resCtx->nameBuffer.append(name);
 			ri.type = ResourceType::SHADER;
 			return ri.id;
 		}
@@ -656,13 +715,15 @@ namespace ds {
 					QuadIndexBufferDescriptor descriptor;
 					reader.get(children[i], "id", &descriptor.id);
 					reader.get(children[i], "size", &descriptor.size);
-					createQuadIndexBuffer(descriptor);
+					const char* name = reader.get_string(children[i], "name");
+					createQuadIndexBuffer(name,descriptor);
 				}
 				else if (reader.matches(children[i], "constant_buffer")) {
 					ConstantBufferDescriptor descriptor;
 					reader.get(children[i], "id", &descriptor.id);
 					reader.get(children[i], "size", &descriptor.size);
-					createConstantBuffer(descriptor);
+					const char* name = reader.get_string(children[i], "name");
+					createConstantBuffer(name,descriptor);
 				}
 				else if (reader.matches(children[i], "vertex_buffer")) {
 					VertexBufferDescriptor descriptor;
@@ -670,7 +731,8 @@ namespace ds {
 					reader.get(children[i], "size", &descriptor.size);
 					reader.get(children[i], "dynamic", &descriptor.dynamic);
 					reader.get(children[i], "layout", &descriptor.layout);
-					createVertexBuffer(descriptor);
+					const char* name = reader.get_string(children[i], "name");
+					createVertexBuffer(name, descriptor);
 				}
 				else if (reader.matches(children[i], "shader")) {
 					ShaderDescriptor descriptor;
@@ -680,7 +742,8 @@ namespace ds {
 					descriptor.pixelShader = reader.get_string(children[i], "pixel_shader");
 					descriptor.model = reader.get_string(children[i], "shader_model");
 					reader.get(children[i], "sampler_state", &descriptor.samplerState);
-					createShader(descriptor);
+					const char* name = reader.get_string(children[i], "name");
+					createShader(name, descriptor);
 				}
 				else if (reader.matches(children[i], "blendstate")) {
 					// FIXME: assert that every entry is != -1
@@ -695,13 +758,15 @@ namespace ds {
 					entry = reader.get_string(children[i], "dest_blend_alpha");
 					descriptor.destAlphaBlend = findBlendState(entry);
 					reader.get(children[i], "alpha_enabled", &descriptor.alphaEnabled);
-					createBlendState(descriptor);
+					const char* name = reader.get_string(children[i], "name");
+					createBlendState(name, descriptor);
 				}
 				else if (reader.matches(children[i], "texture")) {
 					TextureDescriptor descriptor;
 					reader.get(children[i], "id", &descriptor.id);
 					descriptor.name = reader.get_string(children[i], "file");
-					loadTexture(descriptor);
+					const char* name = reader.get_string(children[i], "name");
+					loadTexture(name, descriptor);
 				}
 				else if (reader.matches(children[i], "input_layout")) {
 					InputLayoutDescriptor descriptor;
@@ -717,18 +782,21 @@ namespace ds {
 						token = strtok(NULL, ",");
 					}
 					reader.get(children[i], "shader", &descriptor.shader);
-					createInputLayout(descriptor);
+					const char* name = reader.get_string(children[i], "name");
+					createInputLayout(name, descriptor);
 				}
 				else if (reader.matches(children[i], "font")) {
 					BitmapfontDescriptor descriptor;
 					reader.get(children[i], "id", &descriptor.id);
 					descriptor.name = reader.get_string(children[i], "file");
-					loadFont(descriptor);
+					const char* name = reader.get_string(children[i], "name");
+					loadFont(name,descriptor);
 				}
 				else if (reader.matches(children[i], "particles")) {
 					ParticleSystemsDescriptor descriptor;
 					reader.get(children[i], "id", &descriptor.id);
 					reader.get(children[i], "sprite_buffer", &descriptor.spriteBuffer);
+					const char* name = reader.get_string(children[i], "name");
 					createParticleManager(descriptor);
 				}
 				else if (reader.matches(children[i], "sampler_state")) {
@@ -746,7 +814,8 @@ namespace ds {
 					idx = findTextureAddressMode(mode);
 					assert(idx >= 0);
 					descriptor.addressW = idx;
-					createSamplerState(descriptor);
+					const char* name = reader.get_string(children[i], "name");
+					createSamplerState(name, descriptor);
 				}
 				else if (reader.matches(children[i], "sprite_buffer")) {
 					SpriteBufferDescriptor descriptor;
@@ -765,13 +834,15 @@ namespace ds {
 					else {
 						descriptor.font = INVALID_RID;
 					}
-					createSpriteBuffer(descriptor);
+					const char* name = reader.get_string(children[i], "name");
+					createSpriteBuffer(name, descriptor);
 				}
 				else if (reader.matches(children[i], "world")) {
 					WorldDescriptor descriptor;
 					reader.get(children[i], "id", &descriptor.id);
 					reader.get(children[i], "sprite_buffer", &descriptor.spriteBuffer);
-					createWorld(descriptor);
+					const char* name = reader.get_string(children[i], "name");
+					createWorld(name, descriptor);
 				}
 				else if (reader.matches(children[i], "imgui")) {
 					IMGUIDescriptor descriptor;
@@ -780,12 +851,14 @@ namespace ds {
 					reader.get(children[i], "font", &descriptor.font);
 					gui::initialize(descriptor);
 				}
-				else if (reader.matches(children[i], "dialogs")) {
-					DialogManagerDescriptor descriptor;
+				else if (reader.matches(children[i], "dialog")) {
+					GUIDialogDescriptor descriptor;
 					reader.get(children[i], "id", &descriptor.id);
 					reader.get(children[i], "sprite_buffer", &descriptor.spriteBuffer);
 					reader.get(children[i], "font", &descriptor.font);
-					_resCtx->dialogs = new DialogManager(descriptor);
+					descriptor.file = reader.get_string(children[i], "file");
+					const char* name = reader.get_string(children[i], "name");
+					createDialog(name, descriptor);
 				}
 				/*
 				dialogs {
@@ -867,8 +940,25 @@ namespace ds {
 			return _resCtx->worlds[idx];
 		}
 
+		GUIDialog* getGUIDialog(RID rid) {
+			uint32_t idx = getIndex(rid, ResourceType::GUIDIALOG);
+			return _resCtx->dialogs[idx];
+		}
+
 		ParticleManager* getParticleManager() {
 			return _resCtx->particles;
+		}
+
+		void debug() {
+			for (uint32_t i = 0; i < MAX_RESOURCES; ++i) {
+				ResourceIndex& index = _resCtx->resourceTable[i];
+				if (index.type != ResourceType::UNKNOWN) {
+					if (index.nameIndex != -1) {
+						const char* text = _resCtx->nameBuffer.data + index.nameIndex;
+						LOG << index.id << " Type: " << ResourceTypeNames[index.type] << " name: " << text;
+					}
+				}
+			}
 		}
 
 	}

@@ -37,6 +37,10 @@ namespace graphics {
 
 	v2 getScreenCenter();
 
+	float getScreenWidth();
+
+	float getScreenHeight();
+
 	bool getMousePosition(v2* ret);
 
 	void updateConstantBuffer(RID rid, void* data);

@@ -120,10 +120,11 @@ namespace ds {
 		uint32_t maxParticles;
 	};
 
-	struct DialogManagerDescriptor {
+	struct GUIDialogDescriptor {
 		uint16_t id;
 		RID spriteBuffer;
 		RID font;
+		const char* file;
 	};
 
 }

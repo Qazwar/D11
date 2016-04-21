@@ -2,6 +2,8 @@
 #include <Windows.h>
 #include "..\Common.h"
 #include "..\utils\StringUtils.h"
+#include "..\dialogs\GUIDialog.h"
+#include "..\resources\ResourceContainer.h"
 
 namespace ds {
 
@@ -59,27 +61,28 @@ private:
 // --------------------------------------------
 // Basic menu game state
 // --------------------------------------------
-/*
 class BasicMenuGameState : public GameState {
 
 public:
-	BasicMenuGameState(const char* name, const char* dialogName, ds::DialogManager* gui) : GameState(name) {
-		_dialogName = dialogName;
-		_gui = gui;
+	BasicMenuGameState(const char* name,RID rid) : GameState(name) {
+		_dialog = res::getGUIDialog(rid);
 	}
 	~BasicMenuGameState() {}
 	void activate() {
-		_gui->activate(_dialogName);
+		//_gui->activate(_dialogName);
 	}
 	void deactivate() {
-		_gui->deactivate(_dialogName);
+		//_gui->deactivate(_dialogName);
 	}
 	int onGUIButton(ds::DialogID dlgID, int button) {
 		return button;
 	}
+	void render() {
+		_dialog->render();
+	}
 private:
+	GUIDialog* _dialog;
 	const char* _dialogName;
-	ds::DialogManager* _gui;
 };
-*/
+
 }

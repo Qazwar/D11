@@ -7,6 +7,8 @@
 #include "..\imgui\IMGUI.h"
 #include "..\utils\GameTimer.h"
 #include "..\io\DataFile.h"
+#include "..\resources\ResourceDescriptors.h"
+#include "..\renderer\sprites.h"
 
 namespace ds {
 
@@ -114,9 +116,9 @@ class GUIDialog : public DataFile {
 	typedef Array<GameTimer> Timers;
 
 public:
-	GUIDialog();
+	GUIDialog(const GUIDialogDescriptor& descriptor);
 	~GUIDialog(void);
-	void init(const char* name,const DialogID& id,Bitmapfont* bitmapFont);
+	//void init(const char* name,const DialogID& id,Bitmapfont* bitmapFont);
 	void render();
 	void setButtonHover(const Rect& regularItem,const Rect& highlightItem);
 	
@@ -193,7 +195,8 @@ private:
 
 	DialogID m_ID;
 	IdString m_HashName;
-	Bitmapfont* m_BitmapFont;
+	RID _font;
+	SpriteBuffer* _sprites;
 	Items m_Items;
 	Rect m_ButtonItem;
 	Rect m_ButtonItemSelected;

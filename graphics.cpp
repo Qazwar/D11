@@ -377,6 +377,14 @@ namespace graphics {
 		_context->d3dContext->DrawIndexed(num, 0, 0);
 	}
 
+	float getScreenWidth() {
+		return _context->screenWidth;
+	}
+
+	float getScreenHeight() {
+		return _context->screenHeight;
+	}
+
 	// ------------------------------------------------------
 	// end rendering
 	// ------------------------------------------------------
