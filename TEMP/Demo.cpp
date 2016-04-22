@@ -1,5 +1,5 @@
 #include "Demo.h"
-#include "graphics.h"
+#include "renderer\graphics.h"
 #include "utils\Log.h"
 #include "renderer\render_types.h"
 #include "math\math.h"

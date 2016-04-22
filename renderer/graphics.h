@@ -3,11 +3,11 @@
 #include <d3d11.h>
 #include <d3dx11.h>
 #include <DxErr.h>
-#include "base\Settings.h"
-#include "math\math_types.h"
-#include "resources\ResourceDescriptors.h"
-#include "Common.h"
-#include "renderer\Bitmapfont.h"
+#include "..\base\Settings.h"
+#include "..\math\math_types.h"
+#include "..\resources\ResourceDescriptors.h"
+#include "..\Common.h"
+#include "Bitmapfont.h"
 
 struct Access{
 

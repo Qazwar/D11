@@ -3,7 +3,7 @@
 #include <D3Dcompiler.h>
 #include "..\io\json.h"
 #include "ResourceDescriptors.h"
-#include "..\graphics.h"
+#include "..\renderer\graphics.h"
 #include <string.h>
 #include "..\utils\Log.h"
 #include "..\renderer\render_types.h"
@@ -408,12 +408,19 @@ namespace ds {
 
 			char buffer[256];
 			sprintf_s(buffer, 256, "content\\resources\\%s", descriptor.name);
+			float xOffset = 0.0f;
+			float yOffset = 0.0f;
+			float textureSize = 1024.0f;
 			Bitmapfont* font = new Bitmapfont;
-
-
 			JSONReader reader;
 			bool ret = reader.parse(buffer);
 			assert(ret);
+			int info = reader.find_category("settings");
+			if (info != -1) {
+				reader.get_float(info, "x_offset", &xOffset);
+				reader.get_float(info, "y_offset", &yOffset);
+				reader.get_float(info, "texture_size", &textureSize);
+			}
 			int num = reader.find_category("characters");
 			char tmp[16];
 			Rect rect;
@@ -422,7 +429,7 @@ namespace ds {
 					sprintf_s(tmp, 16, "C%d", i);
 					if (reader.contains_property(num, tmp)) {
 						reader.get(num, tmp, &rect);
-						font->add(i, rect);
+						font->add(i, rect, xOffset, yOffset, textureSize);
 					}
 				}
 			}
@@ -650,8 +657,6 @@ namespace ds {
 				DXTRACE_MSG("Error compiling the vertex shader!");
 				return -1;
 			}
-			HRESULT d3dResult;
-
 			if (!createVertexShader(s->vertexShaderBuffer, &s->vertexShader)) {
 				DXTRACE_MSG("Error creating the vertex shader!");
 				return -1;
@@ -959,6 +964,28 @@ namespace ds {
 					}
 				}
 			}
+		}
+
+		void save(const ReportWriter& writer) {
+			writer.startBox("Resources");
+			const char* HEADERS[] = { "ID", "Index", "Type", "Name" };
+			writer.startTable(HEADERS, 4);
+			for (uint32_t i = 0; i < MAX_RESOURCES; ++i) {
+				ResourceIndex& index = _resCtx->resourceTable[i];
+				if (index.type != ResourceType::UNKNOWN) {
+					if (index.nameIndex != -1) {
+						writer.startRow();
+						writer.addCell(index.id);
+						writer.addCell(index.index);
+						writer.addCell(ResourceTypeNames[index.type]);
+						const char* text = _resCtx->nameBuffer.data + index.nameIndex;
+						writer.addCell(text);
+						writer.endRow();
+					}
+				}
+			}
+			writer.endTable();
+			writer.endBox();
 		}
 
 	}

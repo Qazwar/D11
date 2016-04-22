@@ -1,6 +1,6 @@
 #include "IMGUI.h"
 #include "..\math\math.h"
-#include "..\graphics.h"
+#include "..\renderer\graphics.h"
 #include "..\renderer\sprites.h"
 #include "..\resources\ResourceContainer.h"
 #include "..\utils\Profiler.h"

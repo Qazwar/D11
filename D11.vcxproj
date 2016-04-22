@@ -42,7 +42,7 @@
     <IncludePath>$(IncludePath);$(DXSDK_DIR)Include;..\math</IncludePath>
     <LibraryPath>$(LibraryPath);$(DXSDK_DIR)Lib\x86</LibraryPath>
     <OutDir>$(Configuration)\</OutDir>
-    <IntDir />
+    <IntDir>$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(IncludePath);$(DXSDK_DIR)Include;..\math</IncludePath>
@@ -86,11 +86,8 @@
     <ClCompile Include="base\BaseApp.cpp" />
     <ClCompile Include="base\CrashReporter.cpp" />
     <ClCompile Include="base\WindowMain.cpp" />
-    <ClCompile Include="Demo.cpp" />
     <ClCompile Include="dialogs\GUIDialog.cpp" />
-    <ClCompile Include="Enemies.cpp" />
     <ClCompile Include="gamestates\GameStateMachine.cpp" />
-    <ClCompile Include="graphics.cpp" />
     <ClCompile Include="imgui\IMGUI.cpp" />
     <ClCompile Include="io\DataFile.cpp" />
     <ClCompile Include="io\FileRepository.cpp" />
@@ -113,11 +110,11 @@
     <ClCompile Include="physics\ColliderArray.cpp" />
     <ClCompile Include="physics\PhysicalWorld.cpp" />
     <ClCompile Include="renderer\Bitmapfont.cpp" />
+    <ClCompile Include="renderer\graphics.cpp" />
     <ClCompile Include="renderer\sprites.cpp" />
     <ClCompile Include="renderer\renderQueue.cpp" />
     <ClCompile Include="resources\ResourceContainer.cpp" />
     <ClCompile Include="sprites\SpriteArray.cpp" />
-    <ClCompile Include="TestGUI.cpp" />
     <ClCompile Include="utils\Color.cpp" />
     <ClCompile Include="utils\FileUtils.cpp" />
     <ClCompile Include="utils\font.cpp" />
@@ -152,13 +149,9 @@
     <ClInclude Include="base\CrashReporter.h" />
     <ClInclude Include="base\Settings.h" />
     <ClInclude Include="Common.h" />
-    <ClInclude Include="Constants.h" />
-    <ClInclude Include="Demo.h" />
     <ClInclude Include="dialogs\GUIDialog.h" />
-    <ClInclude Include="Enemies.h" />
     <ClInclude Include="gamestates\GameState.h" />
     <ClInclude Include="gamestates\GameStateMachine.h" />
-    <ClInclude Include="graphics.h" />
     <ClInclude Include="imgui\IMGUI.h" />
     <ClInclude Include="io\DataFile.h" />
     <ClInclude Include="io\FileRepository.h" />
@@ -192,6 +185,7 @@
     <ClInclude Include="physics\PhysicalWorld.h" />
     <ClInclude Include="physics\physic_types.h" />
     <ClInclude Include="renderer\Bitmapfont.h" />
+    <ClInclude Include="renderer\graphics.h" />
     <ClInclude Include="renderer\renderQueue.h" />
     <ClInclude Include="renderer\render_types.h" />
     <ClInclude Include="renderer\sprites.h" />
@@ -199,7 +193,6 @@
     <ClInclude Include="resources\ResourceDescriptors.h" />
     <ClInclude Include="sprites\Sprite.h" />
     <ClInclude Include="sprites\SpriteArray.h" />
-    <ClInclude Include="TestGUI.h" />
     <ClInclude Include="utils\Assert.h" />
     <ClInclude Include="utils\Color.h" />
     <ClInclude Include="utils\FileUtils.h" />

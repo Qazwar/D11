@@ -9,7 +9,7 @@ namespace ds {
 	public:
 		Bitmapfont();
 		~Bitmapfont();
-		void add(int ascii, const Rect& r);
+		void add(int ascii, const Rect& r, float xOffset = 0.0f, float yOffset = 0.0f, float textureSize = 1024.0f);
 		const Texture& get(int ascii) const {
 			return _textures[ascii];
 		}

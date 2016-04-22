@@ -112,8 +112,6 @@
     <ClCompile Include="math\math.cpp">
       <Filter>math</Filter>
     </ClCompile>
-    <ClCompile Include="Demo.cpp" />
-    <ClCompile Include="graphics.cpp" />
     <ClCompile Include="math\matrix.cpp">
       <Filter>math</Filter>
     </ClCompile>
@@ -216,7 +214,6 @@
     <ClCompile Include="utils\mtrand.cpp">
       <Filter>utils</Filter>
     </ClCompile>
-    <ClCompile Include="Enemies.cpp" />
     <ClCompile Include="particles\ParticleManager.cpp">
       <Filter>particles</Filter>
     </ClCompile>
@@ -235,12 +232,14 @@
     <ClCompile Include="utils\font.cpp">
       <Filter>utils</Filter>
     </ClCompile>
-    <ClCompile Include="TestGUI.cpp" />
     <ClCompile Include="base\WindowMain.cpp">
       <Filter>base</Filter>
     </ClCompile>
     <ClCompile Include="dialogs\GUIDialog.cpp">
       <Filter>dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\graphics.cpp">
+      <Filter>renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -307,8 +306,6 @@
     <ClInclude Include="math\math.h">
       <Filter>math</Filter>
     </ClInclude>
-    <ClInclude Include="graphics.h" />
-    <ClInclude Include="Demo.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="base\Settings.h">
       <Filter>base</Filter>
@@ -445,7 +442,6 @@
     <ClInclude Include="utils\Assert.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="Enemies.h" />
     <ClInclude Include="particles\Particle.h">
       <Filter>particles</Filter>
     </ClInclude>
@@ -470,13 +466,14 @@
     <ClInclude Include="utils\font.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="Constants.h" />
-    <ClInclude Include="TestGUI.h" />
     <ClInclude Include="utils\GameTimer.h">
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="dialogs\GUIDialog.h">
       <Filter>dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\graphics.h">
+      <Filter>renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

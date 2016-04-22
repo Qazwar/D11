@@ -1,6 +1,6 @@
 #include "ParticleSystem.h"
 #include "..\utils\Profiler.h"
-#include "..\graphics.h"
+#include "..\renderer\graphics.h"
 #include "..\utils\Log.h"
 #include "ParticleManager.h"
 

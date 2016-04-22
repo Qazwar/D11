@@ -1,5 +1,5 @@
 #include "BaseApp.h"
-#include "..\graphics.h"
+#include "..\renderer\graphics.h"
 #include "..\utils\Log.h"
 #include "..\io\json.h"
 #include "..\utils\GlobalStringBuffer.h"
@@ -161,7 +161,7 @@ namespace ds {
 			sprintf_s(filename, "%s%s.html", _settings.reportingDirectory, timeFormat);
 			ReportWriter rw(filename);
 			perf::save(rw);
-
+			res::save(rw);
 			gDefaultMemory->save(rw);
 			_createReport = false;
 		}

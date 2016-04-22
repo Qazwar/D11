@@ -1,5 +1,5 @@
 #include "sprites.h"
-#include "..\graphics.h"
+#include "..\renderer\graphics.h"
 #include <assert.h>
 #include "renderQueue.h"
 #include "..\math\math_types.h"

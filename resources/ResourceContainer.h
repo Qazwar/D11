@@ -79,6 +79,8 @@ namespace ds {
 
 		void debug();
 
+		void save(const ReportWriter& rw);
+
 	}
 	
 }

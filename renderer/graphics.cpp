@@ -1,11 +1,11 @@
 #include "graphics.h"
 
 #include <assert.h>
-#include "utils\Log.h"
+#include "..\utils\Log.h"
 #include <vector>
-#include "math\matrix.h"
-#include "resources\ResourceContainer.h"
-#include "renderer\sprites.h"
+#include "..\math\matrix.h"
+#include "..\resources\ResourceContainer.h"
+#include "sprites.h"
 
 namespace graphics {
 
