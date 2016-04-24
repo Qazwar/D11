@@ -34,9 +34,9 @@ public:
 	virtual int onChar(int ascii) {
 		return 0;
 	}
-	//virtual int onGUIButton(ds::DialogID dlgID, int button) {
-		//return button;
-	//}
+	virtual int onGUIButton(int button) {
+		return button;
+	}
 	virtual int onKeyDown(WPARAM virtualKey) {
 		return 0;
 	}
@@ -71,6 +71,10 @@ public:
 	int onButtonDown(int button, int x, int y) {
 		int ret = _dialog->onButton(button, x, graphics::getScreenHeight() - y, true);
 		if (ret != -1) {
+			int tmp = onGUIButton(ret);
+			if (tmp != -1) {
+				return tmp;
+			}
 			return ret;
 		}
 		return 0;
