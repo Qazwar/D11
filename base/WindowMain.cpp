@@ -45,6 +45,9 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		case WM_RBUTTONUP:
 			app->sendButton(1, GETX(lParam), GETY(lParam), false);
 			break;
+		case WM_CLOSE:
+			app->shutdown();
+			break;
 		case WM_DESTROY :
 			PostQuitMessage(0);
 			break;
@@ -78,7 +81,8 @@ int WINAPI WinMain(HINSTANCE hThisInst, HINSTANCE hLastInst, LPSTR lpszCmdLine, 
 	app->prepare();
 	app->initialize();
 	MSG msg = { 0 };
-	while (msg.message != WM_QUIT) {
+	//while (msg.message != WM_QUIT) {
+	while (app->isRunning()) { 
 		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);

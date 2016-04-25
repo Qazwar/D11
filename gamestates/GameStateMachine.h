@@ -38,7 +38,6 @@ public:
 	void onKeyUp(WPARAM virtualKey);
 	void onButtonUp(int button, int x, int y);
 	void onChar(int ascii);
-	//void onGUIButton(ds::DialogID dlgID, int button);
 	void connect(const char* firstStateName, int outcome, const char* secondStateName);
 	void showDialog();
 	//void processEvents(const EventStream& events);

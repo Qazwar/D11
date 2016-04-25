@@ -68,7 +68,7 @@ public:
 		_dialog = res::getGUIDialog(rid);
 	}
 	~BasicMenuGameState() {}
-	int onButtonDown(int button, int x, int y) {
+	int onButtonUp(int button, int x, int y) {
 		int ret = _dialog->onButton(button, x, graphics::getScreenHeight() - y, true);
 		if (ret != -1) {
 			int tmp = onGUIButton(ret);

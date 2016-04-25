@@ -43,6 +43,8 @@ namespace ds {
 		}
 		void sendOnChar(char ascii, unsigned int state);
 		void sendButton(int button, int x, int y, bool down);
+		void shutdown();
+		bool isRunning() const;
 	protected:
 		void addGameState(GameState* gameState);
 		void activate(const char* name);
@@ -70,6 +72,7 @@ namespace ds {
 		int _fps;
 		bool _loading;
 		bool _running;
+		bool _alive;
 		Settings _settings;
 		GameStateMachine* _stateMachine;
 		KeyStates _keyStates;

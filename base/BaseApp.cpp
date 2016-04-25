@@ -44,6 +44,7 @@ void ErrorExit(LPTSTR lpszFunction)
 namespace ds {
 
 	BaseApp::BaseApp() {
+		_alive = true;
 		_dt = 1.0f / 60.0f;
 		_accu = 0.0f;
 		_frames = 0;
@@ -288,6 +289,15 @@ namespace ds {
 		_buttonState.y = y;
 		_buttonState.button = button;
 		_buttonState.down = down;
+	}
+
+	void BaseApp::shutdown() {
+		_alive = false;
+		DestroyWindow(m_hWnd);
+	}
+
+	bool BaseApp::isRunning() const {
+		return _alive;
 	}
 
 }
