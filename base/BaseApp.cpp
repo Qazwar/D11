@@ -230,8 +230,8 @@ namespace ds {
 	void BaseApp::renderFrame() {
 		ZoneTracker("Render");
 		graphics::beginRendering(_settings.clearColor);
-		_stateMachine->render();
 		render();
+		_stateMachine->render();		
 		graphics::endRendering();
 		++_frames;
 	}
