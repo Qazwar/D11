@@ -13,6 +13,7 @@ namespace ds {
 		ParticleSystemFactory();
 		~ParticleSystemFactory();
 		ParticleModuleData* addModule(ParticleSystem* system, const char* moduleName);
+		ParticleModule* getModule(const char* moduleName);
 	private:
 		ParticleModuleData* createData(ParticleModuleType type) const;
 		ParticleSystemFactory(const ParticleSystemFactory& other) {}

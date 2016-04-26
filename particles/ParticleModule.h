@@ -44,10 +44,13 @@ namespace ds {
 	public:
 		ParticleModule() {}
 		virtual ~ParticleModule() {}
-		virtual void generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32_t start, uint32_t end) = 0;
-		virtual void update(ParticleArray* array, const ParticleModuleData* data, float dt) = 0;
+		//virtual void generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32_t start, uint32_t end) = 0;
+		//virtual void update(ParticleArray* array, const ParticleModuleData* data, float dt) = 0;
+		virtual void generate(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt, uint32_t start, uint32_t end) = 0;
+		virtual void update(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt) = 0;
 		virtual const ParticleModuleType getType() const = 0;
 		virtual const char* getName() const = 0;
+		virtual int getDataSize() const = 0;
 	};
 
 	// -------------------------------------------------------
@@ -69,6 +72,8 @@ namespace ds {
 			reader.get_float(category, "ttl", &ttl);
 			reader.get_float(category, "variance", &variance);
 		}
+
+		
 	};
 
 	// -------------------------------------------------------
@@ -79,13 +84,17 @@ namespace ds {
 	public:
 		ParticleTimeModule() : ParticleModule() {}
 		virtual ~ParticleTimeModule() {}
-		void generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32_t start, uint32_t end);
-		void  update(ParticleArray* array, const ParticleModuleData* data, float dt);
+		void generate(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt, uint32_t start, uint32_t end);
+		void  update(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt);
 		const ParticleModuleType getType() const {
 			return PM_LIFECYCLE;
 		}
 		const char* getName() const {
 			return "lifecycle";
+		}
+
+		int getDataSize() const {
+			return sizeof(float);
 		}
 	};
 
@@ -123,13 +132,16 @@ namespace ds {
 			m_Angle = 0.0f;
 		}
 		virtual ~RingLocationModule() {}
-		void generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32_t start, uint32_t end);
-		void  update(ParticleArray* array, const ParticleModuleData* data, float dt) {}
+		void generate(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt, uint32_t start, uint32_t end);
+		void  update(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt) {}
 		const char* getName() const {
 			return "ring_location";
 		}
 		const ParticleModuleType getType() const {
 			return PM_RING;
+		}
+		int getDataSize() const {
+			return sizeof(float);
 		}
 	private:
 		float m_Angle;
@@ -182,13 +194,16 @@ namespace ds {
 	public:
 		SizeModule() : ParticleModule() {}
 		virtual ~SizeModule() {}
-		void update(ParticleArray* array, const ParticleModuleData* data, float dt);
-		void generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32_t start, uint32_t end);
+		void update(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt);
+		void generate(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt, uint32_t start, uint32_t end);
 		const ParticleModuleType getType() const {
 			return PM_SIZE;
 		}
 		const char* getName() const {
 			return "size";
+		}
+		int getDataSize() const {
+			return sizeof(v2) * 2;
 		}
 	};
 
@@ -259,13 +274,16 @@ namespace ds {
 		ColorModule() : ParticleModule() {
 		}
 		virtual ~ColorModule() {}
-		void generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32_t start, uint32_t end);
-		void update(ParticleArray* array, const ParticleModuleData* data, float dt);
+		void generate(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt, uint32_t start, uint32_t end);
+		void update(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt);
 		const ParticleModuleType getType() const {
 			return PM_COLOR;
 		}
 		const char* getName() const {
 			return "color";
+		}
+		int getDataSize() const {
+			return sizeof(float);
 		}
 	};
 
@@ -316,13 +334,16 @@ namespace ds {
 	public:
 		AlphaModule() : ParticleModule() {}
 		virtual ~AlphaModule() {}
-		void  update(ParticleArray* array, const ParticleModuleData* data, float dt);
-		void generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32_t start, uint32_t end);
+		void  update(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt);
+		void generate(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt, uint32_t start, uint32_t end);
 		const ParticleModuleType getType() const {
 			return PM_ALPHA;
 		}
 		const char* getName() const {
 			return "alpha";
+		}
+		int getDataSize() const {
+			return sizeof(float);
 		}
 	};
 
@@ -354,13 +375,16 @@ namespace ds {
 	public:
 		RotationModule() : ParticleModule() {}
 		virtual ~RotationModule() {}
-		void generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32_t start, uint32_t end);
-		void  update(ParticleArray* array, const ParticleModuleData* data, float dt);
+		void generate(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt, uint32_t start, uint32_t end);
+		void  update(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt);
 		const char* getName() const {
 			return "rotation";
 		}
 		const ParticleModuleType getType() const {
 			return PM_ROTATION;
+		}
+		int getDataSize() const {
+			return sizeof(float);
 		}
 	};
 
@@ -391,13 +415,16 @@ namespace ds {
 	public:
 		AccelerationModule() : ParticleModule() {}
 		virtual ~AccelerationModule() {}
-		void generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32_t start, uint32_t end);
-		void  update(ParticleArray* array, const ParticleModuleData* data, float dt);
+		void generate(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt, uint32_t start, uint32_t end);
+		void  update(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt);
 		const char* getName() const {
 			return "acceleration";
 		}
 		const ParticleModuleType getType() const {
 			return PM_ACCELERATION;
+		}
+		int getDataSize() const {
+			return sizeof(v2) * 2;
 		}
 	};
 
@@ -451,13 +478,16 @@ namespace ds {
 	public:
 		VelocityModule() : ParticleModule() {}
 		virtual ~VelocityModule() {}
-		void generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32_t start, uint32_t end);
-		void update(ParticleArray* array, const ParticleModuleData* data, float dt);
+		void generate(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt, uint32_t start, uint32_t end);
+		void update(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt);
 		const char* getName() const {
 			return "velocity";
 		}
 		const ParticleModuleType getType() const {
 			return PM_VELOCITY;
+		}
+		int getDataSize() const {
+			return sizeof(v2);
 		}
 	};
 

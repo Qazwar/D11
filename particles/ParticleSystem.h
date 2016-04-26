@@ -23,19 +23,6 @@ namespace ds {
 		ParticleEventType type;
 	};
 
-
-// -------------------------------------------------------
-// New particle system
-// -------------------------------------------------------
-	/*
-struct ParticleSystemData {
-
-	uint32_t id;
-	uint32_t maxParticles;
-	uint32_t textureID;
-	Texture texture;
-};
-*/
 // -------------------------------------------------------
 // Module instance
 // -------------------------------------------------------
@@ -61,9 +48,11 @@ public:
 	void stop(ID id) {}
 	void addModule(ParticleModule* module, ParticleModuleData* data) {
 		if (_count_modules < 32) {
-			ModuleInstance& instance = _module_instances[_count_modules++];
+			ModuleInstance& instance = _module_instances[_count_modules];
+			_sizes[_count_modules] = module->getDataSize();
 			instance.module = module;
 			instance.data = data;
+			++_count_modules;
 		}
 	}
 	const ModuleInstance& getModuleInstance(int id) const {
@@ -109,6 +98,8 @@ private:
 	ParticleSpawner _spawner;
 	Texture _texture;
 	ParticleArray m_Array;
+	int _sizes[32];
+	BlockArray _buffer;
 	char m_DebugName[32];
 	char _json_name[64];
 	int _id;

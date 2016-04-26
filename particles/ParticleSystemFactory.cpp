@@ -14,6 +14,7 @@ namespace ds {
 		_known_modules[_count_modules++] = new AlphaModule();
 		_known_modules[_count_modules++] = new RotationModule();
 		_known_modules[_count_modules++] = new VelocityModule();
+		_known_modules[_count_modules++] = new AccelerationModule();
 		for (int i = 0; i < _count_modules; ++i) {
 			_known_module_names.push_back(gStringBuffer->add(_known_modules[i]->getName()));
 		}
@@ -37,6 +38,15 @@ namespace ds {
 		}
 		return 0;
 	}
+
+	ParticleModule* ParticleSystemFactory::getModule(const char* moduleName) {
+		for (int i = 0; i < _count_modules; ++i) {
+			if (strcmp(_known_modules[i]->getName(), moduleName) == 0) {
+				return _known_modules[i];
+			}
+		}
+		return 0;
+	}
 	
 	ParticleModuleData* ParticleSystemFactory::createData(ParticleModuleType type) const {
 		switch (type) {
@@ -47,6 +57,7 @@ namespace ds {
 			case PM_ALPHA: return new AlphaModuleData(); break;
 			case PM_ROTATION: return new RotationModuleData(); break;
 			case PM_VELOCITY: return new VelocityModuleData(); break;
+			case PM_ACCELERATION: return new AccelerationModuleData(); break;
 		}
 		return 0;
 	}

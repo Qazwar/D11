@@ -297,7 +297,7 @@ namespace ds {
 	void BaseApp::sendButton(int button, int x, int y, bool down) {
 		_buttonState.processed = false;
 		_buttonState.x = x;
-		_buttonState.y = y;
+		_buttonState.y = graphics::getScreenHeight() - y;
 		_buttonState.button = button;
 		_buttonState.down = down;
 	}

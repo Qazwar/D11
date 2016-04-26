@@ -12,7 +12,7 @@ namespace ds {
 	struct ParticleArray {
 
 		v3* position;
-		v3* velocity;
+		//v3* velocity;
 		v3* forces;
 		v3* normal;
 		v2* scale;
@@ -37,11 +37,11 @@ namespace ds {
 		}
 
 		void initialize(unsigned int maxParticles) {
-			int size = maxParticles * (sizeof(v3) * 2 + sizeof(v3) + sizeof(v3) + sizeof(v2) * 2 + sizeof(float) * 2 + sizeof(v3) + sizeof(Color));// +4 * sizeof(PTCVertex));
+			int size = maxParticles * (sizeof(v3) + sizeof(v3) + sizeof(v3) + sizeof(v2) * 2 + sizeof(float) * 2 + sizeof(v3) + sizeof(Color));// +4 * sizeof(PTCVertex));
 			buffer = (char*)ALLOC(size);//new char[size];
 			position = (v3*)(buffer);
-			velocity = (v3*)(position + maxParticles);
-			forces = (v3*)(velocity + maxParticles);
+			//velocity = (v3*)(position + maxParticles);
+			forces = (v3*)(position + maxParticles);
 			normal = (v3*)(forces + maxParticles);
 			scale = (Vector2f*)(normal + maxParticles);
 			baseScale = (v2*)(scale + maxParticles);
@@ -57,7 +57,7 @@ namespace ds {
 		void swapData(uint32_t a, uint32_t b) {
 			if ( a != b ) {
 				position[a] = position[b];
-				velocity[a] = velocity[b];
+				//velocity[a] = velocity[b];
 				forces[a] = forces[b];
 				normal[a] = normal[b];
 				scale[a] = scale[b];

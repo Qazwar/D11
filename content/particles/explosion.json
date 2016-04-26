@@ -1,5 +1,5 @@
 spawn { 
-	texture : 0,0,18,18
+	texture : 0,165,20,20
     duration : 0
     rate : 64
     loop : 0
@@ -25,7 +25,7 @@ size {
 	max : 0.1,0.1
 }
 velocity {
-	radial : 40
-	radial_variance : 20
+	radial : 140
+	radial_variance : 80
 	distribution : 0.0,1.0,1.0,0.8,0.4,0.4,1.0,0.0,0.0
 }
