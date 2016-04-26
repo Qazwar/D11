@@ -59,6 +59,7 @@ namespace ds {
 		perf::init();
 		repository::initialize(repository::RM_DEBUG);
 		_stateMachine = new GameStateMachine;
+		events::init();
 		JSONReader reader;
 		bool ret = reader.parse("content\\engine_settings.json");
 		assert(ret);
@@ -83,6 +84,7 @@ namespace ds {
 	BaseApp::~BaseApp() {
 		repository::shutdown();
 		perf::shutdown();		
+		events::shutdown();
 		delete _stateMachine;
 		delete gStringBuffer;
 		res::shutdown();
@@ -149,9 +151,18 @@ namespace ds {
 
 	void BaseApp::buildFrame() {
 		perf::reset();
+		events::reset();
 		tick();
 		renderFrame();
 		perf::finalize();
+		// check for internal events
+		if (events::num() > 0) {
+			for (uint32_t i = 0; i < events::num(); ++i) {
+				if (events::getType(i) == InternalEvents::ENGINE_SHUTDOWN) {
+					shutdown();
+				}
+			}
+		}
 		if (_updated && _createReport) {
 			char timeFormat[255];
 			time_t now;

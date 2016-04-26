@@ -1,6 +1,7 @@
 #pragma once
 #include <Windows.h>
 #include "..\base\CrashReporter.h"
+#include "Log.h"
 
 #ifndef XASSERT
 #define XASSERT(cond, s, ...) do { \

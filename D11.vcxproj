@@ -85,6 +85,7 @@
   <ItemGroup>
     <ClCompile Include="base\BaseApp.cpp" />
     <ClCompile Include="base\CrashReporter.cpp" />
+    <ClCompile Include="base\EventStream.cpp" />
     <ClCompile Include="base\WindowMain.cpp" />
     <ClCompile Include="dialogs\GUIDialog.cpp" />
     <ClCompile Include="gamestates\GameStateMachine.cpp" />
@@ -147,6 +148,7 @@
   <ItemGroup>
     <ClInclude Include="base\BaseApp.h" />
     <ClInclude Include="base\CrashReporter.h" />
+    <ClInclude Include="base\EventStream.h" />
     <ClInclude Include="base\Settings.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="dialogs\GUIDialog.h" />

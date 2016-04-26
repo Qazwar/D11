@@ -4,6 +4,7 @@
 #include "Settings.h"
 #include "..\resources\ResourceContainer.h"
 #include "..\gamestates\GameStateMachine.h"
+#include "EventStream.h"
 
 namespace ds {
 
