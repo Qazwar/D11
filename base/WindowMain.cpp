@@ -69,13 +69,16 @@ int WINAPI WinMain(HINSTANCE hThisInst, HINSTANCE hLastInst, LPSTR lpszCmdLine, 
 	wndClass.lpfnWndProc = WinProc;
 	wndClass.hInstance = hThisInst;
 	wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wndClass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+	wndClass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
 	wndClass.lpszMenuName = NULL;
 	wndClass.lpszClassName = "D11";
 
 	if (!RegisterClassEx(&wndClass)) {
 		return -1;
 	}
+
+	SetThreadAffinityMask(GetCurrentThread(), 1);
+
 	app->setInstance(hThisInst);
 	app->createWindow();
 	app->prepare();

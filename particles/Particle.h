@@ -1,8 +1,8 @@
 #pragma once
 #include "..\utils\Color.h"
 #include "..\math\math_types.h"
-//#include "..\renderer\vertex_types.h"
 #include "..\memory\DefaultAllocator.h"
+#include "..\utils\Log.h"
 
 namespace ds {
 
@@ -11,17 +11,15 @@ namespace ds {
 	// -------------------------------------------------------
 	struct ParticleArray {
 
+		uint32_t* ids;
 		v3* position;
-		//v3* velocity;
 		v3* forces;
 		v3* normal;
 		v2* scale;
 		v2* baseScale;
 		float* rotation;
-		float* rotationVelocity;
 		v3* timer;	
 		Color* color;
-		//SpriteVertex* vertices;
 		char* buffer;
 
 		uint32_t count;
@@ -37,33 +35,31 @@ namespace ds {
 		}
 
 		void initialize(unsigned int maxParticles) {
-			int size = maxParticles * (sizeof(v3) + sizeof(v3) + sizeof(v3) + sizeof(v2) * 2 + sizeof(float) * 2 + sizeof(v3) + sizeof(Color));// +4 * sizeof(PTCVertex));
-			buffer = (char*)ALLOC(size);//new char[size];
-			position = (v3*)(buffer);
-			//velocity = (v3*)(position + maxParticles);
+			int size = maxParticles * (sizeof(uint32_t) + sizeof(v3) + sizeof(v3) + sizeof(v3) + sizeof(v2) * 2 + sizeof(float) + sizeof(v3) + sizeof(Color));
+			buffer = (char*)ALLOC(size);
+			ids = (uint32_t*)(buffer);
+			position = (v3*)(ids + maxParticles);
 			forces = (v3*)(position + maxParticles);
 			normal = (v3*)(forces + maxParticles);
 			scale = (Vector2f*)(normal + maxParticles);
 			baseScale = (v2*)(scale + maxParticles);
 			rotation = (float*)(baseScale + maxParticles);
-			rotationVelocity = (float*)(rotation + maxParticles);
-			timer = (v3*)(rotationVelocity + maxParticles);
+			timer = (v3*)(rotation + maxParticles);
 			color = (Color*)(timer + maxParticles);
-			//vertices = (PTCVertex*)(color + maxParticles);
 			count = maxParticles;
 			countAlive = 0;
 		}
 
 		void swapData(uint32_t a, uint32_t b) {
-			if ( a != b ) {
+			//LOG << "swapping from " << b << " (" << ids[b] << ") to " << a << " (" << ids[a] << ")";
+			if ( a != b ) {				
+				ids[a] = ids[b];
 				position[a] = position[b];
-				//velocity[a] = velocity[b];
 				forces[a] = forces[b];
 				normal[a] = normal[b];
 				scale[a] = scale[b];
 				baseScale[a] = baseScale[b];
 				rotation[a] = rotation[b];
-				rotationVelocity[a] = rotationVelocity[b];
 				timer[a] = timer[b];
 				color[a] = color[b];
 			}
@@ -78,7 +74,7 @@ namespace ds {
 
 		void wake(uint32_t id) {
 			if (countAlive < count)	{
-				swapData(id, countAlive);
+				//swapData(id, countAlive);
 				++countAlive;
 			}
 		}   

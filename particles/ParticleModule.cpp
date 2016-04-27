@@ -11,16 +11,28 @@ namespace ds {
 	void ParticleTimeModule::generate(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt, uint32_t start, uint32_t end) {
 		uint32_t count = end - start;
 		const LifetimeModuleData* my_data = static_cast<const LifetimeModuleData*>(data);
+		float* timers = static_cast<float*>(buffer);
 		for (uint32_t i = 0; i < count; ++i) {
 			float ttl = math::random(my_data->ttl - my_data->variance, my_data->ttl + my_data->variance);
 			array->timer[start + i] = Vector3f(0.0f, 0.0f, ttl);
+			timers[start + i] = ttl;
 		}
+		
 	}
 
 	void  ParticleTimeModule::update(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt) {
+		float* timers = static_cast<float*>(buffer);
 		for (uint32_t i = 0; i < array->countAlive; ++i) {
 			array->timer[i].x += dt;
-			array->timer[i].y = array->timer[i].x / array->timer[i].z;
+			array->timer[i].y = array->timer[i].x / *timers;// array->timer[i].z;
+			++timers;
+		}
+	}
+
+	void ParticleTimeModule::debug(const ParticleModuleData* data, void* buffer, uint32_t count) {
+		float* timers = static_cast<float*>(buffer);
+		for (int i = 0; i < count; ++i) {
+			LOG << "timer: (" << i << ") : " << timers[i];
 		}
 	}
 
@@ -186,17 +198,20 @@ namespace ds {
 	void RotationModule::generate(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt, uint32_t start, uint32_t end) {
 		XASSERT(data != 0, "Required data not found");
 		uint32_t count = end - start;
+		float* rotations = static_cast<float*>(buffer);
 		const RotationModuleData* my_data = static_cast<const RotationModuleData*>(data);
 		for (uint32_t i = start; i < end; ++i) {
-			array->rotationVelocity[i] = math::randomRange(my_data->velocity, my_data->variance);
+			//rotations[i] = math::randomRange(my_data->velocity, my_data->variance);
+			rotations[i] = math::random(my_data->velocityRange.x, my_data->velocityRange.y);
 		}
 	}
 
 	void RotationModule::update(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt) {
 		XASSERT(data != 0, "Required data not found");
 		const RotationModuleData* my_data = static_cast<const RotationModuleData*>(data);
+		float* rotations = static_cast<float*>(buffer);
 		for (uint32_t i = 0; i < array->countAlive; ++i) {
-			array->rotation[i] += array->rotationVelocity[i] * dt;
+			array->rotation[i] += rotations[i] * dt;
 		}
 	}
 
@@ -208,7 +223,7 @@ namespace ds {
 		uint32_t count = end - start;
 		const AccelerationModuleData* my_data = static_cast<const AccelerationModuleData*>(data);
 		v2* accelerations = static_cast<v2*>(buffer);
-		accelerations += start;
+		accelerations += start * 2;
 		for (uint32_t i = 0; i < count; ++i) {
 			float v = math::randomRange(my_data->radial, my_data->radialVariance);
 			*accelerations = math::getRadialVelocity(array->rotation[start + i], v);
@@ -223,8 +238,15 @@ namespace ds {
 		const AccelerationModuleData* my_data = static_cast<const AccelerationModuleData*>(data);
 		v2* accelerations = static_cast<v2*>(buffer);
 		for (uint32_t i = 0; i < array->countAlive; ++i) {
-			accelerations[i * 2 + 1] += accelerations[i * 2] * dt * dt;
+			accelerations[i * 2 + 1] += accelerations[i * 2] * dt;
 			array->forces[i] += v3(accelerations[i * 2 + 1]);
+		}
+	}
+
+	void AccelerationModule::debug(const ParticleModuleData* data, void* buffer, uint32_t count) {
+		v2* accelerations = static_cast<v2*>(buffer);
+		for (int i = 0; i < count; ++i) {
+			LOG << "acceleration: (" << i << ") : " << DBG_V2(accelerations[i * 2]) << " velocity: " << DBG_V2(accelerations[i * 2 + 1]);
 		}
 	}
 
@@ -239,14 +261,12 @@ namespace ds {
 		if (my_data->type == VelocityModuleData::VT_RADIAL) {
 			for (uint32_t i = 0; i < count; ++i) {
 				float v = math::randomRange(my_data->radial, my_data->radialVariance);
-				//array->velocity[start + i] = math::getRadialVelocity(array->rotation[start + i], v);
 				velocities[start + i] = math::getRadialVelocity(array->rotation[start + i], v);
 			}
 		}
 		else {
 			for (uint32_t i = 0; i < count; ++i) {
 				v2 v = math::randomRange(my_data->velocity, my_data->variance);
-				//array->velocity[start + i] = v;
 				velocities[start + i] = v;
 			}
 		}
@@ -260,8 +280,6 @@ namespace ds {
 			v2 dist;
 			for (uint32_t i = 0; i < array->countAlive; ++i) {
 				my_data->distribution.get(array->timer[i].x / array->timer[i].z, &dist);
-				//float vx = array->velocity[i].x * dist.x;
-				//float vy = array->velocity[i].y * dist.y;
 				float vx = velocities[i].x * dist.x;
 				float vy = velocities[i].y * dist.y;
 				array->forces[i] += v3(vx,vy,0.0f);
@@ -269,9 +287,15 @@ namespace ds {
 		}
 		else {
 			for (uint32_t i = 0; i < array->countAlive; ++i) {
-				//array->forces[i] += array->velocity[i];
 				array->forces[i] += v3(velocities[i],0.0f);
 			}
+		}
+	}
+
+	void VelocityModule::debug(const ParticleModuleData* data, void* buffer, uint32_t count) {
+		v2* velocities = static_cast<v2*>(buffer);
+		for (int i = 0; i < count; ++i) {
+			LOG << "velocity: (" << i << ") : " << DBG_V2(velocities[i]);
 		}
 	}
 }

@@ -89,6 +89,7 @@ public:
 	void activateEvents() {
 		_sendEvents = true;
 	}
+	void debug();
 private:
 	void updateSpawners(float dt);
 	void initSpawner();
@@ -108,7 +109,7 @@ private:
 	ParticleSystemFactory* _factory;
 	SpawnerInstances _spawnerInstances;
 	bool _sendEvents;
-
+	uint32_t _counter;
 };
 
 }

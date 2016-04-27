@@ -68,6 +68,14 @@ void BlockArray::remove(int index) {
 	--size;
 }
 
+void BlockArray::swap(int newIndex,int oldIndex) {
+	for (int i = 0; i < _num_blocks; ++i) {
+		char* dest = data + _indices[i] + newIndex * _sizes[i];
+		char* src = data + _indices[i] + oldIndex * _sizes[i];
+		memcpy(dest, src, _sizes[i]);
+	}
+}
+
 namespace ds {
 
 	ChannelArray::ChannelArray() : size(0), capacity(0), data(0), total_capacity(0) , _data_indices(0) , _free_dequeue(0) , _free_enqueue(0) {

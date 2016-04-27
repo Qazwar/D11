@@ -51,6 +51,7 @@ namespace ds {
 		virtual const ParticleModuleType getType() const = 0;
 		virtual const char* getName() const = 0;
 		virtual int getDataSize() const = 0;
+		virtual void debug(const ParticleModuleData* data, void* buffer,uint32_t count) = 0;
 	};
 
 	// -------------------------------------------------------
@@ -96,6 +97,7 @@ namespace ds {
 		int getDataSize() const {
 			return sizeof(float);
 		}
+		void debug(const ParticleModuleData* data, void* buffer, uint32_t count);
 	};
 
 	// -------------------------------------------------------
@@ -142,6 +144,9 @@ namespace ds {
 		}
 		int getDataSize() const {
 			return sizeof(float);
+		}
+		void debug(const ParticleModuleData* data, void* buffer, uint32_t count) {
+
 		}
 	private:
 		float m_Angle;
@@ -204,6 +209,9 @@ namespace ds {
 		}
 		int getDataSize() const {
 			return sizeof(v2) * 2;
+		}
+		void debug(const ParticleModuleData* data, void* buffer, uint32_t count) {
+
 		}
 	};
 
@@ -285,6 +293,9 @@ namespace ds {
 		int getDataSize() const {
 			return sizeof(float);
 		}
+		void debug(const ParticleModuleData* data, void* buffer, uint32_t count) {
+
+		}
 	};
 
 	// -------------------------------------------------------
@@ -345,6 +356,9 @@ namespace ds {
 		int getDataSize() const {
 			return sizeof(float);
 		}
+		void debug(const ParticleModuleData* data, void* buffer, uint32_t count) {
+
+		}
 	};
 
 	// -------------------------------------------------------
@@ -354,6 +368,7 @@ namespace ds {
 
 		float velocity;
 		float variance;
+		v2 velocityRange;
 
 		RotationModuleData() : velocity(0.0f), variance(0.0f) {}
 
@@ -367,6 +382,9 @@ namespace ds {
 			reader.get_float(category, "variance", &variance);
 			velocity = DEGTORAD(velocity);
 			variance = DEGTORAD(variance);
+			reader.get_vec2(category, "velocity_range", &velocityRange);
+			velocityRange.x = DEGTORAD(velocityRange.x);
+			velocityRange.y = DEGTORAD(velocityRange.y);
 		}
 	};
 
@@ -385,6 +403,9 @@ namespace ds {
 		}
 		int getDataSize() const {
 			return sizeof(float);
+		}
+		void debug(const ParticleModuleData* data, void* buffer, uint32_t count) {
+
 		}
 	};
 
@@ -426,6 +447,7 @@ namespace ds {
 		int getDataSize() const {
 			return sizeof(v2) * 2;
 		}
+		void debug(const ParticleModuleData* data, void* buffer, uint32_t count);
 	};
 
 	// -------------------------------------------------------
@@ -489,6 +511,7 @@ namespace ds {
 		int getDataSize() const {
 			return sizeof(v2);
 		}
+		void debug(const ParticleModuleData* data, void* buffer, uint32_t count);
 	};
 
 }

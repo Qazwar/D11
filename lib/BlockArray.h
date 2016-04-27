@@ -24,6 +24,8 @@ struct BlockArray {
 	bool resize(int new_size);
 
 	void remove(int index);
+
+	void swap(int oldIndex, int newIndex);
 	
 };
 
