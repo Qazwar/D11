@@ -208,11 +208,9 @@ namespace ds {
 			return "size";
 		}
 		int getDataSize() const {
-			return sizeof(v2) * 2;
+			return sizeof(v2);
 		}
-		void debug(const ParticleModuleData* data, void* buffer, uint32_t count) {
-
-		}
+		void debug(const ParticleModuleData* data, void* buffer, uint32_t count);
 	};
 
 	// -------------------------------------------------------
@@ -354,11 +352,9 @@ namespace ds {
 			return "alpha";
 		}
 		int getDataSize() const {
-			return sizeof(float);
+			return sizeof(v2);
 		}
-		void debug(const ParticleModuleData* data, void* buffer, uint32_t count) {
-
-		}
+		void debug(const ParticleModuleData* data, void* buffer, uint32_t count);
 	};
 
 	// -------------------------------------------------------

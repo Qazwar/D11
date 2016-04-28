@@ -122,11 +122,9 @@ namespace ds {
 			//LOG << "emitting - index: " << i<< " id: " << m_Array.ids[i];
 			m_Array.color[i] = Color::WHITE;
 			m_Array.scale[i] = v2(1, 1);
-			m_Array.baseScale[i] = v2(1, 1);
 			m_Array.rotation[i] = 0.0f;
 			m_Array.timer[i] = v3(0, 1, 1);
 			m_Array.forces[i] = v3(0, 0, 0);
-			//m_Array.velocity[i] = v3(0, 0, 0);
 			m_Array.position[i] = instance.pos;
 		}
 		for (uint32_t i = *start; i < *end; ++i) {

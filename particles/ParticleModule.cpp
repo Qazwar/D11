@@ -24,7 +24,7 @@ namespace ds {
 		float* timers = static_cast<float*>(buffer);
 		for (uint32_t i = 0; i < array->countAlive; ++i) {
 			array->timer[i].x += dt;
-			array->timer[i].y = array->timer[i].x / *timers;// array->timer[i].z;
+			array->timer[i].y = array->timer[i].x / *timers;
 			++timers;
 		}
 	}
@@ -65,19 +65,20 @@ namespace ds {
 	void SizeModule::update(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt) {
 		XASSERT(data != 0, "Required data not found");
 		const SizeModuleData* my_data = static_cast<const SizeModuleData*>(data);
+		v2* scales = static_cast<v2*>(buffer);
 		if (my_data->modifier != MMT_NONE) {			
 			for (uint32_t i = 0; i < array->countAlive; ++i) {
 				if (my_data->modifier == MMT_PATH) {
 					for (uint32_t i = 0; i < array->countAlive; ++i) {
 						my_data->path.get(array->timer[i].y, &array->scale[i]);
-						array->scale[i].x *= array->baseScale[i].x;
-						array->scale[i].y *= array->baseScale[i].y;
+						array->scale[i].x *= scales[i].x;
+						array->scale[i].y *= scales[i].y;
 					}
 				}
 				else {
 					array->scale[i] = lerp(my_data->minScale, my_data->maxScale, array->timer[i].y);
-					array->scale[i].x *= array->baseScale[i].x;
-					array->scale[i].y *= array->baseScale[i].y;
+					array->scale[i].x *= scales[i].x;
+					array->scale[i].y *= scales[i].y;
 				}
 			}
 		}
@@ -86,6 +87,7 @@ namespace ds {
 	void SizeModule::generate(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt, uint32_t start, uint32_t end) {
 		XASSERT(data != 0, "Required data not found");
 		const SizeModuleData* my_data = static_cast<const SizeModuleData*>(data);
+		v2* scales = static_cast<v2*>(buffer);
 		for (uint32_t i = start; i < end; ++i) {
 			v2 s = math::randomRange(my_data->initial, my_data->variance);
 			if (s.x < 0.1f) {
@@ -95,11 +97,18 @@ namespace ds {
 				s.y = 0.1f;
 			}
 			array->scale[i] = s;
-			array->baseScale[i] = s;
+			scales[i] = s;
 			if (my_data->modifier == MMT_LINEAR) {
 				array->scale[i].x = s.x * my_data->minScale.x;
 				array->scale[i].y = s.y * my_data->minScale.y;
-			}
+			}			
+		}
+	}
+
+	void SizeModule::debug(const ParticleModuleData* data, void* buffer, uint32_t count) {
+		v2* scales = static_cast<v2*>(buffer);
+		for (int i = 0; i < count; ++i) {
+			LOG << "scale: (" << i << ") : " << DBG_V2(scales[i]);
 		}
 	}
 
@@ -168,16 +177,17 @@ namespace ds {
 	void AlphaModule::update(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt) {
 		XASSERT(data != 0, "Required data not found");
 		const AlphaModuleData* my_data = static_cast<const AlphaModuleData*>(data);
+		v2* alphas = static_cast<v2*>(buffer);
 		if (my_data->modifier != MMT_NONE) {
 			if (my_data->modifier == MMT_LINEAR) {
 				for (uint32_t i = 0; i < array->countAlive; ++i) {
-					array->color[i].a = tweening::interpolate(tweening::linear, my_data->startAlpha, my_data->endAlpha, array->timer[i].x, array->timer[i].z);
+					array->color[i].a = alphas[i].x * ( 1.0f - array->timer[i].y) + alphas[i].y * array->timer[i].y;
 				}
 			}
 			else {
 				float a = 0.0f;
 				for (uint32_t i = 0; i < array->countAlive; ++i) {
-					my_data->path.get(array->timer[i].x / array->timer[i].z, &a);
+					my_data->path.get(array->timer[i].y, &a);
 					array->color[i].a = math::clamp(a, 0.0f, 1.0f);
 				}
 			}
@@ -187,9 +197,16 @@ namespace ds {
 	void AlphaModule::generate(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt, uint32_t start, uint32_t end) {
 		XASSERT(data != 0, "Required data not found");
 		const AlphaModuleData* my_data = static_cast<const AlphaModuleData*>(data);
+		v2* alphas = static_cast<v2*>(buffer);
 		for (uint32_t i = start; i < end; ++i) {
-			array->color[i].a = math::clamp(math::randomRange(my_data->initial,my_data->variance),0.0f,1.0f);
+			float start = math::clamp(math::randomRange(my_data->initial, my_data->variance), 0.0f, 1.0f);
+			alphas[i] = v2(start, my_data->endAlpha);
+			array->color[i].a = start;
 		}
+	}
+
+	void debug(const ParticleModuleData* data, void* buffer, uint32_t count) {
+
 	}
 
 	// -------------------------------------------------------
@@ -201,7 +218,6 @@ namespace ds {
 		float* rotations = static_cast<float*>(buffer);
 		const RotationModuleData* my_data = static_cast<const RotationModuleData*>(data);
 		for (uint32_t i = start; i < end; ++i) {
-			//rotations[i] = math::randomRange(my_data->velocity, my_data->variance);
 			rotations[i] = math::random(my_data->velocityRange.x, my_data->velocityRange.y);
 		}
 	}

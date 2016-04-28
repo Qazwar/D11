@@ -16,7 +16,6 @@ namespace ds {
 		v3* forces;
 		v3* normal;
 		v2* scale;
-		v2* baseScale;
 		float* rotation;
 		v3* timer;	
 		Color* color;
@@ -35,15 +34,14 @@ namespace ds {
 		}
 
 		void initialize(unsigned int maxParticles) {
-			int size = maxParticles * (sizeof(uint32_t) + sizeof(v3) + sizeof(v3) + sizeof(v3) + sizeof(v2) * 2 + sizeof(float) + sizeof(v3) + sizeof(Color));
+			int size = maxParticles * (sizeof(uint32_t) + sizeof(v3) + sizeof(v3) + sizeof(v3) + sizeof(v2) + sizeof(float) + sizeof(v3) + sizeof(Color));
 			buffer = (char*)ALLOC(size);
 			ids = (uint32_t*)(buffer);
 			position = (v3*)(ids + maxParticles);
 			forces = (v3*)(position + maxParticles);
 			normal = (v3*)(forces + maxParticles);
 			scale = (Vector2f*)(normal + maxParticles);
-			baseScale = (v2*)(scale + maxParticles);
-			rotation = (float*)(baseScale + maxParticles);
+			rotation = (float*)(scale + maxParticles);
 			timer = (v3*)(rotation + maxParticles);
 			color = (Color*)(timer + maxParticles);
 			count = maxParticles;
@@ -58,7 +56,6 @@ namespace ds {
 				forces[a] = forces[b];
 				normal[a] = normal[b];
 				scale[a] = scale[b];
-				baseScale[a] = baseScale[b];
 				rotation[a] = rotation[b];
 				timer[a] = timer[b];
 				color[a] = color[b];
