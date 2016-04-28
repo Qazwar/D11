@@ -205,7 +205,7 @@ namespace ds {
 		}
 	}
 
-	void debug(const ParticleModuleData* data, void* buffer, uint32_t count) {
+	void AlphaModule::debug(const ParticleModuleData* data, void* buffer, uint32_t count) {
 
 	}
 

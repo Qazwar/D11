@@ -60,6 +60,7 @@ public:
 	}
 	void getModuleNames(Array<const char*>& names);
 	ParticleModuleData* getData(const char* modifierName);
+	ParticleModuleData* getData(ParticleModuleType type);
 	ParticleModule* getModule(ParticleModuleType type);
 	const int getCountAlive() const {
 		return m_Array.countAlive;

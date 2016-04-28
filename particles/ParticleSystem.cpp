@@ -61,6 +61,20 @@ namespace ds {
 		}
 		return 0;
 	}
+
+	// -----------------------------------------------------------
+	// get data
+	// -----------------------------------------------------------
+	ParticleModuleData* ParticleSystem::getData(ParticleModuleType type) {
+		for (int i = 0; i < _count_modules; ++i) {
+			const ModuleInstance& instance = _module_instances[i];
+			// FIXME: use hash
+			if (instance.module->getType() == type) {
+				return instance.data;
+			}
+		}
+		return 0;
+	}
 	
 	// -------------------------------------------------
 	// tick emitter instances
