@@ -111,6 +111,7 @@
     <ClCompile Include="physics\ColliderArray.cpp" />
     <ClCompile Include="physics\PhysicalWorld.cpp" />
     <ClCompile Include="renderer\Bitmapfont.cpp" />
+    <ClCompile Include="renderer\Camera.cpp" />
     <ClCompile Include="renderer\graphics.cpp" />
     <ClCompile Include="renderer\sprites.cpp" />
     <ClCompile Include="renderer\renderQueue.cpp" />
@@ -187,6 +188,7 @@
     <ClInclude Include="physics\PhysicalWorld.h" />
     <ClInclude Include="physics\physic_types.h" />
     <ClInclude Include="renderer\Bitmapfont.h" />
+    <ClInclude Include="renderer\Camera.h" />
     <ClInclude Include="renderer\graphics.h" />
     <ClInclude Include="renderer\renderQueue.h" />
     <ClInclude Include="renderer\render_types.h" />
