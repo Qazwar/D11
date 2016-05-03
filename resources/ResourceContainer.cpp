@@ -116,6 +116,7 @@ namespace ds {
 			std::vector<ID3D11InputLayout*> layouts;
 			std::vector<Bitmapfont*> fonts;
 			std::vector<SpriteBuffer*> spriteBuffers;
+			std::vector<QuadBuffer*> quadBuffers;
 			std::vector<World*> worlds;
 			std::vector<ID3D11SamplerState*> samplerStates;
 			std::vector<GUIDialog*> dialogs;
@@ -192,6 +193,9 @@ namespace ds {
 			}
 			for (size_t i = 0; i < _resCtx->dialogs.size(); ++i) {
 				delete _resCtx->dialogs[i];
+			}
+			for (size_t i = 0; i < _resCtx->quadBuffers.size(); ++i) {
+				delete _resCtx->quadBuffers[i];
 			}
 			if (_resCtx->particles != 0) {
 				delete _resCtx->particles;
@@ -329,6 +333,23 @@ namespace ds {
 			ri.nameIndex = _resCtx->nameBuffer.size;
 			_resCtx->nameBuffer.append(name);
 			ri.type = ResourceType::SPRITEBUFFER;
+			return ri.id;
+		}
+
+		// ------------------------------------------------------
+		// create quad buffer
+		// ------------------------------------------------------
+		static RID createQuadBuffer(const char* name, const QuadBufferDescriptor& descriptor) {
+			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
+			assert(ri.type == ResourceType::UNKNOWN);
+			int index = _resCtx->quadBuffers.size();
+			QuadBuffer* buffer = new QuadBuffer(descriptor);
+			_resCtx->quadBuffers.push_back(buffer);
+			ri.index = index;
+			ri.id = descriptor.id;
+			ri.nameIndex = _resCtx->nameBuffer.size;
+			_resCtx->nameBuffer.append(name);
+			ri.type = ResourceType::QUADBUFFER;
 			return ri.id;
 		}
 
@@ -842,6 +863,20 @@ namespace ds {
 					const char* name = reader.get_string(children[i], "name");
 					createSpriteBuffer(name, descriptor);
 				}
+				else if (reader.matches(children[i], "quad_buffer")) {
+					QuadBufferDescriptor descriptor;
+					reader.get(children[i], "id", &descriptor.id);
+					reader.get(children[i], "size", &descriptor.size);
+					reader.get(children[i], "index_buffer", &descriptor.indexBuffer);
+					reader.get(children[i], "constant_buffer", &descriptor.constantBuffer);
+					reader.get(children[i], "vertex_buffer", &descriptor.vertexBuffer);
+					reader.get(children[i], "shader", &descriptor.shader);
+					reader.get(children[i], "blend_state", &descriptor.blendstate);
+					reader.get(children[i], "color_map", &descriptor.colormap);
+					reader.get(children[i], "input_layout", &descriptor.inputlayout);
+					const char* name = reader.get_string(children[i], "name");
+					createQuadBuffer(name, descriptor);
+				}
 				else if (reader.matches(children[i], "world")) {
 					WorldDescriptor descriptor;
 					reader.get(children[i], "id", &descriptor.id);
@@ -943,6 +978,11 @@ namespace ds {
 		World* getWorld(RID rid) {
 			uint32_t idx = getIndex(rid, ResourceType::WORLD);
 			return _resCtx->worlds[idx];
+		}
+
+		QuadBuffer* getQuadBuffer(RID rid) {
+			uint32_t idx = getIndex(rid, ResourceType::QUADBUFFER);
+			return _resCtx->quadBuffers[idx];
 		}
 
 		GUIDialog* getGUIDialog(RID rid) {

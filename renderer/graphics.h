@@ -8,6 +8,7 @@
 #include "..\resources\ResourceDescriptors.h"
 #include "..\Common.h"
 #include "Bitmapfont.h"
+#include "Camera.h"
 
 struct Access{
 
@@ -34,6 +35,10 @@ namespace graphics {
 	ID3D11DeviceContext* getContext();
 
 	ID3D11Device* getDevice();
+
+	void setCamera(ds::Camera* camera);
+
+	ds::Camera* getCamera();
 
 	v2 getScreenCenter();
 

@@ -8,6 +8,7 @@
 #include "..\world\World.h"
 #include "..\particles\ParticleManager.h"
 #include "..\dialogs\GUIDialog.h"
+#include "..\renderer\QuadBuffer.h"
 
 namespace ds {
 
@@ -36,6 +37,7 @@ namespace ds {
 		WORLD,
 		SAMPLERSTATE,
 		GUIDIALOG,
+		QUADBUFFER,
 		UNKNOWN
 	};
 
@@ -70,6 +72,8 @@ namespace ds {
 		GUIDialog* getGUIDialog(RID rid);
 
 		SpriteBuffer* getSpriteBuffer(RID rid);
+
+		QuadBuffer* getQuadBuffer(RID rid);
 
 		int findInputElement(const char* name);
 

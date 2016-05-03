@@ -21,6 +21,9 @@ namespace graphics {
 		IDXGISwapChain* swapChain;
 		ID3D11RenderTargetView* backBufferTarget;
 
+		ID3D11Texture2D* depthTexture;
+		ID3D11DepthStencilView* depthStencilView;
+
 		ds::mat4 viewMatrix;
 		ds::mat4 worldMatrix;
 		ds::mat4 projectionMatrix;
@@ -28,6 +31,8 @@ namespace graphics {
 
 		uint16_t screenWidth;
 		uint16_t screenHeight;
+
+		ds::Camera* camera;
 
 		v2 viewportCenter;
 	};
@@ -218,7 +223,41 @@ namespace graphics {
 			return false;
 		}
 
-		_context->d3dContext->OMSetRenderTargets(1, &_context->backBufferTarget, 0);
+		
+
+		D3D11_TEXTURE2D_DESC depthTexDesc;
+		ZeroMemory(&depthTexDesc, sizeof(depthTexDesc));
+		depthTexDesc.Width = settings.screenWidth;
+		depthTexDesc.Height = settings.screenHeight;
+		depthTexDesc.MipLevels = 1;
+		depthTexDesc.ArraySize = 1;
+		depthTexDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		depthTexDesc.SampleDesc.Count = 1;
+		depthTexDesc.SampleDesc.Quality = 0;
+		depthTexDesc.Usage = D3D11_USAGE_DEFAULT;
+		depthTexDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+		depthTexDesc.CPUAccessFlags = 0;
+		depthTexDesc.MiscFlags = 0;
+
+		result = _context->d3dDevice->CreateTexture2D(&depthTexDesc, 0, &_context->depthTexture);
+		if (FAILED(result))	{
+			DXTRACE_MSG("Failed to create the depth texture!");
+			return false;
+		}
+
+		D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
+		ZeroMemory(&descDSV, sizeof(descDSV));
+		descDSV.Format = depthTexDesc.Format;
+		descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+		descDSV.Texture2D.MipSlice = 0;
+
+		result = _context->d3dDevice->CreateDepthStencilView(_context->depthTexture, &descDSV, &_context->depthStencilView);
+		if (FAILED(result))	{
+			DXTRACE_MSG("Failed to create the depth stencil view!");
+			return false;
+		}
+
+		_context->d3dContext->OMSetRenderTargets(1, &_context->backBufferTarget, _context->depthStencilView);
 
 		D3D11_VIEWPORT viewport;
 		viewport.Width = static_cast<float>(settings.screenWidth);
@@ -237,6 +276,7 @@ namespace graphics {
 		_context->projectionMatrix = ds::matrix::mat4OrthoLH(static_cast<float>(settings.screenWidth), static_cast<float>(settings.screenHeight), 0.1f, 100.0f);
 		_context->viewProjectionMatrix = _context->viewMatrix * _context->projectionMatrix;
 
+		_context->camera = 0;
 		return true;
 	}
 
@@ -248,9 +288,19 @@ namespace graphics {
 			if (_context->backBufferTarget) _context->backBufferTarget->Release();
 			if (_context->swapChain) _context->swapChain->Release();
 			if (_context->d3dContext) _context->d3dContext->Release();
-			if (_context->d3dDevice) _context->d3dDevice->Release();
+			if (_context->depthStencilView) _context->depthStencilView->Release();
+			if (_context->depthTexture) _context->depthTexture->Release();
+			if (_context->d3dDevice) _context->d3dDevice->Release();			
 			delete _context;
 		}
+	}
+
+	void setCamera(ds::Camera* camera) {
+		_context->camera = camera;
+	}
+
+	ds::Camera* getCamera() {
+		return _context->camera;
 	}
 
 	ID3D11DeviceContext* getContext() {
@@ -291,6 +341,7 @@ namespace graphics {
 	// ------------------------------------------------------
 	void beginRendering(const ds::Color& color) {
 		_context->d3dContext->ClearRenderTargetView(_context->backBufferTarget, color);
+		_context->d3dContext->ClearDepthStencilView(_context->depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0.0);
 	}
 
 	// ------------------------------------------------------

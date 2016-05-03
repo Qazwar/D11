@@ -102,6 +102,18 @@ namespace ds {
 		RID font;
 	};
 
+	struct QuadBufferDescriptor {
+		uint16_t id;
+		uint32_t size;
+		RID indexBuffer;
+		RID constantBuffer;
+		RID vertexBuffer;
+		RID shader;
+		RID blendstate;
+		RID colormap;
+		RID inputlayout;
+	};
+
 	struct WorldDescriptor {
 		uint16_t id;
 		uint32_t size;
