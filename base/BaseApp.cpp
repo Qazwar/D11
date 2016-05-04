@@ -189,6 +189,7 @@ namespace ds {
 			if (_running) {
 				if (_keyStates.onChar) {
 					_keyStates.onChar = false;
+					_stateMachine->onChar(_keyStates.ascii);
 					OnChar(_keyStates.ascii);
 				}
 				if (!_buttonState.processed) {

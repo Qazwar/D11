@@ -535,7 +535,7 @@ namespace matrix {
 			);	
 		return sm;
 	}
-
+	// FIXME: wrong direction!!!!
 	mat4 mat4RotationZ(float angle) {
 		mat4 sm (
 			 cos(angle),-sin(angle), 0.0f, 0.0f,

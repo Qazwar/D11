@@ -38,6 +38,7 @@ namespace ds {
 		SAMPLERSTATE,
 		GUIDIALOG,
 		QUADBUFFER,
+		MESH,
 		UNKNOWN
 	};
 
@@ -74,6 +75,8 @@ namespace ds {
 		SpriteBuffer* getSpriteBuffer(RID rid);
 
 		QuadBuffer* getQuadBuffer(RID rid);
+
+		Mesh* getMesh(RID rid);
 
 		int findInputElement(const char* name);
 

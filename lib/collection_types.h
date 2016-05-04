@@ -332,6 +332,10 @@ namespace ds {
 			return _items;
 		}
 
+		T* data() {
+			return _items;
+		}
+
 		const T& front() const {
 			assert(_size > 0);
 			return _items[0];
