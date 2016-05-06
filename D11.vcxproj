@@ -86,6 +86,7 @@
     <ClCompile Include="base\BaseApp.cpp" />
     <ClCompile Include="base\CrashReporter.cpp" />
     <ClCompile Include="base\EventStream.cpp" />
+    <ClCompile Include="base\InputSystem.cpp" />
     <ClCompile Include="base\WindowMain.cpp" />
     <ClCompile Include="dialogs\GUIDialog.cpp" />
     <ClCompile Include="gamestates\GameStateMachine.cpp" />
@@ -121,6 +122,7 @@
     <ClCompile Include="utils\Color.cpp" />
     <ClCompile Include="utils\FileUtils.cpp" />
     <ClCompile Include="utils\font.cpp" />
+    <ClCompile Include="utils\geometrics.cpp" />
     <ClCompile Include="utils\GlobalStringBuffer.cpp" />
     <ClCompile Include="utils\Log.cpp" />
     <ClCompile Include="utils\mtrand.cpp" />
@@ -151,6 +153,7 @@
     <ClInclude Include="base\BaseApp.h" />
     <ClInclude Include="base\CrashReporter.h" />
     <ClInclude Include="base\EventStream.h" />
+    <ClInclude Include="base\InputSystem.h" />
     <ClInclude Include="base\Settings.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="dialogs\GUIDialog.h" />
@@ -204,6 +207,7 @@
     <ClInclude Include="utils\FileUtils.h" />
     <ClInclude Include="utils\font.h" />
     <ClInclude Include="utils\GameTimer.h" />
+    <ClInclude Include="utils\geometrics.h" />
     <ClInclude Include="utils\GlobalStringBuffer.h" />
     <ClInclude Include="utils\Log.h" />
     <ClInclude Include="utils\mtrand.h" />

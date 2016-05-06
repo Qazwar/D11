@@ -1,6 +1,7 @@
 #include "Camera.h"
 #include "..\Common.h"
 #include "..\utils\Log.h"
+#include "..\base\InputSystem.h"
 
 namespace ds {
 
@@ -115,81 +116,48 @@ namespace ds {
 	void FPSCamera::setYAngle(float angle) {				
 		_yaw += angle;
 		mat3 R = matrix::mat3RotationY(_yaw);
-		_right = R * _right;
-		_up = R * _up;
-		_target = R * _target;
+		_right = R * v3(1,0,0);
+		_target = R * v3(0,0,1);
 		buildView();
 	}
 
-	void FPSCamera::update(float elapsedTime, const v2& mousePosition, bool buttonPressed) {
-		/*
-		if ( !gEngine->isConsoleActive() ) {
-		*/
-		if (GetAsyncKeyState('W') & 0x8000) {
+	void FPSCamera::resetYAngle() {
+		_yaw = 0.0f;
+		mat3 R = matrix::mat3RotationY(_yaw);
+		_right = R * v3(1, 0, 0);
+		_target = R * v3(0, 0, 1);
+		buildView();
+	}
+
+	void FPSCamera::update(float elapsedTime, const v2& mousePosition) {
+		if (input::getKeyState(DIK_W)) {
 			move(10.0f*elapsedTime);
 		}
-		if (GetAsyncKeyState('S') & 0x8000) {
+		if (input::getKeyState(DIK_S)) {
 			move(-10.0f*elapsedTime);
 		}
-		if (GetAsyncKeyState('A') & 0x8000) {
+		if (input::getKeyState(DIK_A)) {
 			strafe(-10.0f*elapsedTime);
 		}
-		if (GetAsyncKeyState('D') & 0x8000) {
+		if (input::getKeyState(DIK_D)) {
 			strafe(10.0f*elapsedTime);
 		}
-		
-		if (buttonPressed) {
+		v2 mp = input::getMousePosition();
+		if (input::isMouseButtonPressed(0)) {
+			
 			// Make each pixel correspond to a quarter of a degree.
-			float dx = DEGTORAD(0.25f*(mousePosition.x - _lastMousePos.x));
-			float dy = DEGTORAD(0.25f*(mousePosition.y - _lastMousePos.y));
+			float dx = DEGTORAD(0.25f*(mp.x - _lastMousePos.x));
+			float dy = DEGTORAD(0.25f*(mp.y - _lastMousePos.y));
 			//setPitch(dy);
 			setYAngle(dx);
 		}
-		_lastMousePos.x = mousePosition.x;
-		_lastMousePos.y = mousePosition.y;
+		_lastMousePos.x = mp.x;
+		_lastMousePos.y = mp.y;
 		
 	}
 
 	void FPSCamera::buildView() {
-		//_viewMatrix = matrix::mat4LookAtLH(_position, _target, _up);
 		_viewMatrix = FPSViewRH(_position, _yaw);
-		/*
-		// Keep camera's axes orthogonal to each other and of unit length.
-		v3 L = normalize(_target);
-		v3 U = cross(_target, _right);
-		U = normalize(U);
-		v3 R = cross(U, L);
-		R = normalize(R);
-
-		// Fill in the view matrix entries.
-		_target = L;
-		_right = R;
-		_up = U;
-
-		float x = -dot(_position, R);
-		float y = -dot(_position, U);
-		float z = -dot(_position, L);
-
-		_viewMatrix._11 = _right.x;
-		_viewMatrix._21 = _right.y;
-		_viewMatrix._31 = _right.z;
-		_viewMatrix._41 = x;
-
-		_viewMatrix._12 = _up.x;
-		_viewMatrix._22 = _up.y;
-		_viewMatrix._32 = _up.z;
-		_viewMatrix._42 = y;
-
-		_viewMatrix._13 = _target.x;
-		_viewMatrix._23 = _target.y;
-		_viewMatrix._33 = _target.z;
-		_viewMatrix._43 = z;
-
-		_viewMatrix._14 = 0.0f;
-		_viewMatrix._24 = 0.0f;
-		_viewMatrix._34 = 0.0f;
-		_viewMatrix._44 = 1.0f;
-		*/
 		_viewProjectionMatrix = _viewMatrix * _projectionMatrix;
 	}
 }

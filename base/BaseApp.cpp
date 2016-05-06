@@ -6,6 +6,7 @@
 #include "..\io\FileRepository.h"
 #include "..\utils\Profiler.h"
 #include "..\imgui\IMGUI.h"
+#include "InputSystem.h"
 #include <strsafe.h>
 
 void ErrorExit(LPTSTR lpszFunction)
@@ -85,6 +86,7 @@ namespace ds {
 		repository::shutdown();
 		perf::shutdown();		
 		events::shutdown();
+		input::shutdown();
 		delete _stateMachine;
 		delete gStringBuffer;
 		res::shutdown();
@@ -137,6 +139,7 @@ namespace ds {
 		if (graphics::initialize(hInstance, m_hWnd, _settings)) {
 			res::initialize(graphics::getDevice());
 			res::parseJSONFile();
+			input::init(hInstance, m_hWnd, _settings.screenWidth, _settings.screenHeight);
 			LOG << "------------------ start load content ------------------";
 			loadContent();
 			init();
@@ -152,6 +155,7 @@ namespace ds {
 	void BaseApp::buildFrame() {
 		perf::reset();
 		events::reset();
+		input::update();
 		tick();
 		renderFrame();
 		perf::finalize();
@@ -244,6 +248,7 @@ namespace ds {
 		graphics::beginRendering(_settings.clearColor);
 		render();
 		_stateMachine->render();		
+		gui::endFrame();
 		graphics::endRendering();
 		++_frames;
 	}

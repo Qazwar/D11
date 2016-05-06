@@ -46,8 +46,6 @@ namespace graphics {
 
 	float getScreenHeight();
 
-	bool getMousePosition(v2* ret);
-
 	void updateConstantBuffer(RID rid, void* data);
 
 	const ds::mat4& getViewProjectionMaxtrix();
@@ -75,5 +73,9 @@ namespace graphics {
 	void endRendering();
 
 	void shutdown();
+
+	void turnOnZBuffer();
+
+	void turnOffZBuffer();
 }
 

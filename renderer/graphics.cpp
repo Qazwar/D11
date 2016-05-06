@@ -24,6 +24,9 @@ namespace graphics {
 		ID3D11Texture2D* depthTexture;
 		ID3D11DepthStencilView* depthStencilView;
 
+		ID3D11DepthStencilState* depthDisabledStencilState;
+		ID3D11DepthStencilState* depthEnabledStencilState;
+
 		ds::mat4 viewMatrix;
 		ds::mat4 worldMatrix;
 		ds::mat4 projectionMatrix;
@@ -272,6 +275,38 @@ namespace graphics {
 		_context->viewportCenter.x = settings.screenWidth / 2;
 		_context->viewportCenter.y = settings.screenHeight / 2;
 
+		D3D11_DEPTH_STENCIL_DESC depthDisabledStencilDesc;
+		ZeroMemory(&depthDisabledStencilDesc, sizeof(depthDisabledStencilDesc));
+
+		// Now create a second depth stencil state which turns off the Z buffer for 2D rendering.  The only difference is 
+		// that DepthEnable is set to false, all other parameters are the same as the other depth stencil state.
+		depthDisabledStencilDesc.DepthEnable = false;
+		depthDisabledStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+		depthDisabledStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+		depthDisabledStencilDesc.StencilEnable = true;
+		depthDisabledStencilDesc.StencilReadMask = 0xFF;
+		depthDisabledStencilDesc.StencilWriteMask = 0xFF;
+		depthDisabledStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+		depthDisabledStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+		depthDisabledStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+		depthDisabledStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+		depthDisabledStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+		depthDisabledStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+		depthDisabledStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+		depthDisabledStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+		// Create the state using the device.
+		result = _context->d3dDevice->CreateDepthStencilState(&depthDisabledStencilDesc, &_context->depthDisabledStencilState);
+		if (FAILED(result))	{
+			return false;
+		}
+
+		depthDisabledStencilDesc.DepthEnable = true;
+		result = _context->d3dDevice->CreateDepthStencilState(&depthDisabledStencilDesc, &_context->depthEnabledStencilState);
+		if (FAILED(result))	{
+			return false;
+		}
+
 		_context->viewMatrix = ds::matrix::m4identity();
 		_context->projectionMatrix = ds::matrix::mat4OrthoLH(static_cast<float>(settings.screenWidth), static_cast<float>(settings.screenHeight), 0.1f, 100.0f);
 		_context->viewProjectionMatrix = _context->viewMatrix * _context->projectionMatrix;
@@ -290,7 +325,10 @@ namespace graphics {
 			if (_context->d3dContext) _context->d3dContext->Release();
 			if (_context->depthStencilView) _context->depthStencilView->Release();
 			if (_context->depthTexture) _context->depthTexture->Release();
-			if (_context->d3dDevice) _context->d3dDevice->Release();			
+			if (_context->depthDisabledStencilState) _context->depthDisabledStencilState->Release();
+			if (_context->depthEnabledStencilState) _context->depthEnabledStencilState->Release();
+			if (_context->d3dDevice) _context->d3dDevice->Release();		
+			
 			delete _context;
 		}
 	}
@@ -320,20 +358,6 @@ namespace graphics {
 
 	v2 getScreenCenter() {
 		return _context->viewportCenter;
-	}
-	// ------------------------------------------------------
-	// get mouse position
-	// ------------------------------------------------------
-	bool getMousePosition(v2* ret) {
-		POINT p;
-		if (GetCursorPos(&p)) {
-			if (ScreenToClient(_context->hwnd, &p)) {
-				ret->x = p.x;
-				ret->y = _context->screenHeight - p.y;
-				return true;
-			}
-		}
-		return false;
 	}
 
 	// ------------------------------------------------------
@@ -434,6 +458,14 @@ namespace graphics {
 
 	float getScreenHeight() {
 		return _context->screenHeight;
+	}
+
+	void turnOnZBuffer() {
+		_context->d3dContext->OMSetDepthStencilState(_context->depthEnabledStencilState, 1);
+	}
+
+	void turnOffZBuffer() {
+		_context->d3dContext->OMSetDepthStencilState(_context->depthDisabledStencilState, 1);
 	}
 
 	// ------------------------------------------------------

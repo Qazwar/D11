@@ -45,8 +45,15 @@ namespace ds {
 		void rotateUD(bool down);
 		void setPitch(float angle);
 		void setYAngle(float angle);
+		void resetYAngle();
 
-		void update(float elapsedTime, const v2& mousePosition, bool buttonPressed);
+		void update(float elapsedTime, const v2& mousePosition);
+		const float getAngle() const {
+			return _yaw;
+		}
+		const v3& getPosition() const {
+			return _position;
+		}
 	private:
 		void buildView();
 		float _yaw;

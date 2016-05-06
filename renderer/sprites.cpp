@@ -175,7 +175,8 @@ namespace ds {
 		graphics::setShader(_descriptor.shader);
 		graphics::setPixelShaderResourceView(_descriptor.colormap);
 
-		ds::mat4 mvp = graphics::getViewProjectionMaxtrix();
+		//ds::mat4 mvp = graphics::getViewProjectionMaxtrix();
+		ds::mat4 mvp = graphics::getCamera()->getViewProjectionMatrix();
 		mvp = ds::matrix::mat4Transpose(mvp);
 
 		v2 sc = graphics::getScreenCenter();

@@ -6,6 +6,7 @@
 #include "..\utils\Profiler.h"
 #include "..\utils\Log.h"
 #include "..\utils\font.h"
+#include "..\base\InputSystem.h"
 #include <stdarg.h>
 
 namespace gui {
@@ -312,7 +313,7 @@ namespace gui {
 		}
 
 		void reset() {
-			graphics::getMousePosition(&cursorPosition);
+			cursorPosition = ds::input::getMousePosition();
 			//clicked = false;
 			grouped = false;
 			visible = false;
@@ -384,7 +385,6 @@ namespace gui {
 			}
 			else {
 				position.x += window.calls[window.calls.size() - 1].size.x + 50.0f;
-				
 			}
 		}
 	};
@@ -554,7 +554,7 @@ namespace gui {
 			}
 			guiContext->hot = -1;
 
-			if ((GetKeyState(VK_LBUTTON) & 0x80) != 0) {
+			if (ds::input::isMouseButtonPressed(0)) {
 				guiContext->buttonPressed = true;
 			}
 			else {
