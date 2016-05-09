@@ -7,7 +7,7 @@
 
 namespace ds {
 
-	void Tokenizer::parse(const char* text) {
+	void Tokenizer::parse(const char* text, bool skipComments) {
 		int cnt = 0;
 		const char* p = text;
 		while (*p != 0) {
@@ -32,7 +32,7 @@ namespace ds {
 				token = Token(Token::STRING, identifier - text, p - identifier);
 				++p;
 			}
-			else if (*p == '/') {
+			else if (*p == '/' && skipComments) {
 				++p;
 				if (*p == '/') {
 					++p;
@@ -50,6 +50,7 @@ namespace ds {
 					case '}': token = Token(Token::CLOSE_BRACES); break;
 					case '(': token = Token(Token::OPEN_BRACKET); break;
 					case ')': token = Token(Token::CLOSE_BRACKET); break;
+					case '/': token = Token(Token::SLASH); break;
 					case ' ': case '\t': case '\n': case '\r': break;
 					case ':': token = Token(Token::SEPARATOR); break;
 					case '=': token = Token(Token::ASSIGN); break;

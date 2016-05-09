@@ -10,7 +10,7 @@ namespace ds {
 
 	struct Token {
 
-		enum TokenType { EMPTY, NUMBER, NAME, DELIMITER, SEPARATOR, OPEN_BRACES, CLOSE_BRACES, STRING, ASSIGN, SEMICOLON,OPEN_BRACKET,CLOSE_BRACKET };
+		enum TokenType { EMPTY, NUMBER, NAME, DELIMITER, SEPARATOR, OPEN_BRACES, CLOSE_BRACES, STRING, ASSIGN, SEMICOLON,OPEN_BRACKET,CLOSE_BRACKET,SLASH };
 
 		Token() {}
 		Token(TokenType type) : type(type) {}
@@ -28,7 +28,7 @@ namespace ds {
 	public:
 		Tokenizer() : UNKNOWN_TOKEN(Token::EMPTY) {}
 		~Tokenizer() {}
-		void parse(const char* text);
+		void parse(const char* text,bool skipComments = true);
 		int size() const {
 			return _tokens.size();
 		}

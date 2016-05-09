@@ -164,6 +164,8 @@ namespace graphics {
 
 		unsigned int totalFeatureLevels = ARRAYSIZE(featureLevels);
 
+		
+
 		DXGI_SWAP_CHAIN_DESC swapChainDesc;
 		ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
 		swapChainDesc.BufferCount = 1;
@@ -178,7 +180,7 @@ namespace graphics {
 		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 		swapChainDesc.OutputWindow = hwnd;
 		swapChainDesc.Windowed = true;
-		swapChainDesc.SampleDesc.Count = 1;
+		swapChainDesc.SampleDesc.Count = 4;
 		swapChainDesc.SampleDesc.Quality = 0;
 
 		unsigned int creationFlags = 0;
@@ -235,7 +237,7 @@ namespace graphics {
 		depthTexDesc.MipLevels = 1;
 		depthTexDesc.ArraySize = 1;
 		depthTexDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-		depthTexDesc.SampleDesc.Count = 1;
+		depthTexDesc.SampleDesc.Count = 4;
 		depthTexDesc.SampleDesc.Quality = 0;
 		depthTexDesc.Usage = D3D11_USAGE_DEFAULT;
 		depthTexDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
@@ -251,7 +253,7 @@ namespace graphics {
 		D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
 		ZeroMemory(&descDSV, sizeof(descDSV));
 		descDSV.Format = depthTexDesc.Format;
-		descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+		descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
 		descDSV.Texture2D.MipSlice = 0;
 
 		result = _context->d3dDevice->CreateDepthStencilView(_context->depthTexture, &descDSV, &_context->depthStencilView);

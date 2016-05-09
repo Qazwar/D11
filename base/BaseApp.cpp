@@ -201,10 +201,10 @@ namespace ds {
 		_keyStates.keyDown = true;
 		_keyStates.keyPressed = virtualKey;
 #ifdef DEBUG
-		/*
 		if (virtualKey == VK_F1) {
-			m_DebugInfo.printProfiler = !m_DebugInfo.printProfiler;
+			_createReport = true;
 		}
+		/*
 		else if (virtualKey == VK_F2) {
 			m_DebugInfo.showDrawCounter = !m_DebugInfo.showDrawCounter;
 		}
@@ -214,7 +214,7 @@ namespace ds {
 			m_DebugInfo.snapshotCount = profiler::get_snapshot(_snapshots, 64);
 		}
 		*/
-		if (virtualKey == VK_F4) {
+		else if (virtualKey == VK_F4) {
 			_running = !_running;
 			LOG << "toggle running: " << _running;
 		}
@@ -313,15 +313,8 @@ namespace ds {
 	// Key message handling
 	// -------------------------------------------------------
 	void BaseApp::sendOnChar(char ascii, unsigned int state) {
-		LOG << "onChar: " << (int)ascii;
 		_keyStates.ascii = ascii;
 		_keyStates.onChar = true;
-		if (ascii == 'r') {
-			_createReport = true;
-		}
-		//if (ascii == 's') {
-			//_running = !_running;
-		//}
 		gui::sendKey(ascii);
 	}
 

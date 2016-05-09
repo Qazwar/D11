@@ -50,13 +50,13 @@ namespace ds {
 
 	// Pitch should be in the range of [-90 ... 90] degrees and yaw
 	// should be in the range of [0 ... 360] degrees.
-	mat4 FPSViewRH(const v3& eye, float yaw)
+	mat4 FPSViewRH(const v3& eye, float pitch, float yaw)
 	{
 		// If the pitch and yaw angles are in degrees,
 		// they need to be converted to radians. Here
 		// I assume the values are already converted to radians.
-		float cosPitch = 1.0;
-		float sinPitch = 0.0f;
+		float cosPitch = cos(pitch);
+		float sinPitch = sin(pitch);
 		float cosYaw = cos(yaw);
 		float sinYaw = sin(yaw);
 
@@ -84,6 +84,7 @@ namespace ds {
 		_right = v3(1, 0, 0);
 		_speed = 10.0f;
 		_yaw = 0.0f;
+		_pitch = 0.0f;
 		_viewMatrix = matrix::mat4LookAtLH(_position, _target, _up);
 		_viewProjectionMatrix = _viewMatrix * _projectionMatrix;
 		buildView();
@@ -121,6 +122,30 @@ namespace ds {
 		buildView();
 	}
 
+	void FPSCamera::resetYaw(float angle) {
+		_yaw = angle;
+		mat3 R = matrix::mat3RotationY(_yaw);
+		_right = R * v3(1, 0, 0);
+		_target = R * v3(0, 0, 1);
+		buildView();
+	}
+
+	void FPSCamera::setPitch(float angle) {
+		_pitch -= angle;
+		mat3 R = matrix::mat3RotationX(_pitch);
+		_right = R * v3(1, 0, 0);
+		_target = R * v3(0, 0, 1);
+		buildView();
+	}
+
+	void FPSCamera::resetPitch(float angle) {
+		_pitch = angle;
+		mat3 R = matrix::mat3RotationX(_pitch);
+		_right = R * v3(1, 0, 0);
+		_target = R * v3(0, 0, 1);
+		buildView();
+	}
+
 	void FPSCamera::resetYAngle() {
 		_yaw = 0.0f;
 		mat3 R = matrix::mat3RotationY(_yaw);
@@ -148,7 +173,7 @@ namespace ds {
 			// Make each pixel correspond to a quarter of a degree.
 			float dx = DEGTORAD(0.25f*(mp.x - _lastMousePos.x));
 			float dy = DEGTORAD(0.25f*(mp.y - _lastMousePos.y));
-			//setPitch(dy);
+			setPitch(dy);
 			setYAngle(dx);
 		}
 		_lastMousePos.x = mp.x;
@@ -157,7 +182,7 @@ namespace ds {
 	}
 
 	void FPSCamera::buildView() {
-		_viewMatrix = FPSViewRH(_position, _yaw);
+		_viewMatrix = FPSViewRH(_position, _pitch, _yaw);
 		_viewProjectionMatrix = _viewMatrix * _projectionMatrix;
 	}
 }

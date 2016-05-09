@@ -10,6 +10,8 @@ namespace ds {
 		Camera();
 		virtual ~Camera();
 		const mat4& getViewProjectionMatrix() const;
+		virtual const v3& getPosition() const = 0;
+		virtual const v3& getTarget() const = 0;
 	protected:
 		mat4 _viewMatrix;
 		mat4 _projectionMatrix;
@@ -22,6 +24,12 @@ namespace ds {
 		LookAtCamera(float screenWidth, float screenHeight);				
 		virtual ~LookAtCamera();
 		void setPosition(const v3& pos, const v3& lookAt);		
+		const v3& getPosition() const {
+			return _position;
+		}
+		const v3& getTarget() const {
+			return _target;
+		}
 	private:
 		v3 _position;
 		v3 _target;
@@ -44,6 +52,8 @@ namespace ds {
 		void rotateLR(bool right);
 		void rotateUD(bool down);
 		void setPitch(float angle);
+		void resetPitch(float angle);
+		void resetYaw(float angle);
 		void setYAngle(float angle);
 		void resetYAngle();
 
@@ -51,12 +61,19 @@ namespace ds {
 		const float getAngle() const {
 			return _yaw;
 		}
+		float getPitch() const {
+			return _pitch;
+		}
 		const v3& getPosition() const {
 			return _position;
+		}
+		const v3& getTarget() const {
+			return _target;
 		}
 	private:
 		void buildView();
 		float _yaw;
+		float _pitch;
 		v3 _position;
 		v3 _target;
 		v3 _up;
@@ -70,6 +87,15 @@ namespace ds {
 	public:
 		OrthoCamera(float screenWidth, float screenHeight);
 		virtual ~OrthoCamera();
+		const v3& getPosition() const {
+			return _position;
+		}
+		const v3& getTarget() const {
+			return _target;
+		}
+	private:
+		v3 _position;
+		v3 _target;
 	};
 
 }

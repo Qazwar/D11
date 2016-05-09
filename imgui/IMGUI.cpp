@@ -400,7 +400,6 @@ namespace gui {
 	// -------------------------------------------------------
 	void sendKey(unsigned char c) {
 		if (guiContext->ready && guiContext->active != -1) {			
-			LOG << "received key: " << c << " (" << (int)c << ")";
 			if (guiContext->keyInput.num < 256) {
 				guiContext->keyInput.keys[guiContext->keyInput.num++] = c;
 			}

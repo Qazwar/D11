@@ -5,20 +5,11 @@
 #include "graphics.h"
 #include "..\resources\ResourceDescriptors.h"
 #include "..\sprites\Sprite.h"
+#include "VertexTypes.h"
 
 namespace ds {
 
 	class SpriteBuffer {
-
-		struct SpriteVertex {
-			v3 position;
-			v2 texture;
-			Color color;
-
-			SpriteVertex() : position(0, 0, 0) {}
-			SpriteVertex(const v3& p, const v2& t, const Color& c) : position(p), texture(t), color(c) {}
-			SpriteVertex(const v2& p, const v2& t, const Color& c) : position(p, 1.0f), texture(t), color(c) {}
-		};
 
 	public:
 		SpriteBuffer(const SpriteBufferDescriptor& descriptor);

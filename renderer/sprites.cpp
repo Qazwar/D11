@@ -1,7 +1,6 @@
 #include "sprites.h"
 #include "..\renderer\graphics.h"
 #include <assert.h>
-#include "renderQueue.h"
 #include "..\math\math_types.h"
 #include "..\math\matrix.h"
 #include "..\resources\ResourceDescriptors.h"

@@ -116,7 +116,6 @@
     <ClCompile Include="renderer\graphics.cpp" />
     <ClCompile Include="renderer\QuadBuffer.cpp" />
     <ClCompile Include="renderer\sprites.cpp" />
-    <ClCompile Include="renderer\renderQueue.cpp" />
     <ClCompile Include="resources\ResourceContainer.cpp" />
     <ClCompile Include="sprites\SpriteArray.cpp" />
     <ClCompile Include="utils\Color.cpp" />
@@ -126,6 +125,7 @@
     <ClCompile Include="utils\GlobalStringBuffer.cpp" />
     <ClCompile Include="utils\Log.cpp" />
     <ClCompile Include="utils\mtrand.cpp" />
+    <ClCompile Include="utils\ObjLoader.cpp" />
     <ClCompile Include="utils\Profiler.cpp" />
     <ClCompile Include="utils\StringUtils.cpp" />
     <ClCompile Include="world\actions\AbstractAction.cpp" />
@@ -195,9 +195,9 @@
     <ClInclude Include="renderer\Camera.h" />
     <ClInclude Include="renderer\graphics.h" />
     <ClInclude Include="renderer\QuadBuffer.h" />
-    <ClInclude Include="renderer\renderQueue.h" />
     <ClInclude Include="renderer\render_types.h" />
     <ClInclude Include="renderer\sprites.h" />
+    <ClInclude Include="renderer\VertexTypes.h" />
     <ClInclude Include="resources\ResourceContainer.h" />
     <ClInclude Include="resources\ResourceDescriptors.h" />
     <ClInclude Include="sprites\Sprite.h" />
@@ -211,6 +211,7 @@
     <ClInclude Include="utils\GlobalStringBuffer.h" />
     <ClInclude Include="utils\Log.h" />
     <ClInclude Include="utils\mtrand.h" />
+    <ClInclude Include="utils\ObjLoader.h" />
     <ClInclude Include="utils\Profiler.h" />
     <ClInclude Include="utils\StringUtils.h" />
     <ClInclude Include="world\actions\AbstractAction.h" />

@@ -59,6 +59,7 @@ namespace ds {
 			{ "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 8 },
 			{ "TEXCOORD", 2, DXGI_FORMAT_R32G32_FLOAT, 8 },
 			{ "TEXCOORD", 3, DXGI_FORMAT_R32G32_FLOAT, 8 },
+			{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 12 }
 		};
 
 		struct TextureAddressModeMapping {
@@ -743,7 +744,7 @@ namespace ds {
 		// find inputelement by name
 		// ------------------------------------------------------
 		static int findInputElement(const char* name) {
-			for (int i = 0; i < 6; ++i) {
+			for (int i = 0; i < 7; ++i) {
 				if (strcmp(INPUT_ELEMENT_DESCRIPTIONS[i].semantic, name) == 0) {
 					return i;
 				}
