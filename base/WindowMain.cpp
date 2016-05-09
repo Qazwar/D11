@@ -1,5 +1,6 @@
 #include <Windows.h>
 #include "BaseApp.h"
+#include "InputSystem.h"
 
 extern ds::BaseApp* app;
 
@@ -21,6 +22,14 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 				ReleaseDC(hwnd, hDC);
 			}
 			break;
+		case WM_INPUT: {
+				char buffer[sizeof(RAWINPUT)] = {};
+				UINT size = sizeof(RAWINPUT);
+				GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, buffer, &size, sizeof(RAWINPUTHEADER));
+				RAWINPUT* raw = reinterpret_cast<RAWINPUT*>(buffer);
+				ds::input::update(raw);
+			}
+			return 0;
 		case WM_CHAR: {
 			char ascii = wParam;
 			unsigned int keyState = lParam;
@@ -28,10 +37,10 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		}
 			return 0;
 		case WM_KEYDOWN:
-			//app->sendKeyDown(wParam);
+			app->sendKeyDown(wParam);
 			return 0;
 		case WM_KEYUP:
-			//app->sendKeyUp(wParam);
+			app->sendKeyUp(wParam);
 			return 0;
 		case WM_LBUTTONDOWN:
 			app->sendButton(0, GETX(lParam), GETY(lParam), true);
@@ -78,6 +87,22 @@ int WINAPI WinMain(HINSTANCE hThisInst, HINSTANCE hLastInst, LPSTR lpszCmdLine, 
 	}
 
 	SetThreadAffinityMask(GetCurrentThread(), 1);
+
+	RAWINPUTDEVICE Rid[2];
+
+	// Keyboard
+	Rid[0].usUsagePage = 1;
+	Rid[0].usUsage = 6;
+	Rid[0].dwFlags = 0;
+	Rid[0].hwndTarget = NULL;
+
+	// Mouse
+	Rid[1].usUsagePage = 1;
+	Rid[1].usUsage = 2;
+	Rid[1].dwFlags = 0;
+	Rid[1].hwndTarget = NULL;
+
+	RegisterRawInputDevices(Rid, 2, sizeof(RAWINPUTDEVICE));
 
 	app->setInstance(hThisInst);
 	app->createWindow();

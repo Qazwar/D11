@@ -130,16 +130,16 @@ namespace ds {
 	}
 
 	void FPSCamera::update(float elapsedTime, const v2& mousePosition) {
-		if (input::getKeyState(DIK_W)) {
+		if (input::getKeyState('W')) {
 			move(10.0f*elapsedTime);
 		}
-		if (input::getKeyState(DIK_S)) {
+		if (input::getKeyState('S')) {
 			move(-10.0f*elapsedTime);
 		}
-		if (input::getKeyState(DIK_A)) {
+		if (input::getKeyState('A')) {
 			strafe(-10.0f*elapsedTime);
 		}
-		if (input::getKeyState(DIK_D)) {
+		if (input::getKeyState('D')) {
 			strafe(10.0f*elapsedTime);
 		}
 		v2 mp = input::getMousePosition();

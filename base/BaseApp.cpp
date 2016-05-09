@@ -139,7 +139,7 @@ namespace ds {
 		if (graphics::initialize(hInstance, m_hWnd, _settings)) {
 			res::initialize(graphics::getDevice());
 			res::parseJSONFile();
-			input::init(hInstance, m_hWnd, _settings.screenWidth, _settings.screenHeight);
+			input::init(m_hWnd, _settings.screenWidth, _settings.screenHeight);
 			LOG << "------------------ start load content ------------------";
 			loadContent();
 			init();
@@ -155,7 +155,7 @@ namespace ds {
 	void BaseApp::buildFrame() {
 		perf::reset();
 		events::reset();
-		input::update();
+		//input::update();
 		tick();
 		renderFrame();
 		perf::finalize();
@@ -181,6 +181,62 @@ namespace ds {
 			gDefaultMemory->save(rw);
 			_createReport = false;
 		}
+	}
+
+	// -------------------------------------------------------
+	// send key up
+	// -------------------------------------------------------
+	void BaseApp::sendKeyUp(WPARAM virtualKey) {
+		_keyStates.keyUp = true;
+		_keyStates.keyReleased = virtualKey;
+		//if (editor::isActive()) {
+		gui::sendSpecialKey(virtualKey);
+		//}
+	}
+
+	// -------------------------------------------------------
+	// send key down
+	// -------------------------------------------------------
+	void BaseApp::sendKeyDown(WPARAM virtualKey) {
+		_keyStates.keyDown = true;
+		_keyStates.keyPressed = virtualKey;
+#ifdef DEBUG
+		/*
+		if (virtualKey == VK_F1) {
+			m_DebugInfo.printProfiler = !m_DebugInfo.printProfiler;
+		}
+		else if (virtualKey == VK_F2) {
+			m_DebugInfo.showDrawCounter = !m_DebugInfo.showDrawCounter;
+		}
+		else if (virtualKey == VK_F3) {
+			m_DebugInfo.showProfiler = !m_DebugInfo.showProfiler;
+			m_DebugInfo.profilerTicks = 0;
+			m_DebugInfo.snapshotCount = profiler::get_snapshot(_snapshots, 64);
+		}
+		*/
+		if (virtualKey == VK_F4) {
+			_running = !_running;
+			LOG << "toggle running: " << _running;
+		}
+		/*
+		else if (virtualKey == VK_F5) {
+			m_DebugInfo.performanceOverlay = !m_DebugInfo.performanceOverlay;
+		}
+		else if (virtualKey == VK_F6) {
+			bool ret = editor::toggle();
+			m_Running = !ret;
+		}
+		else if (virtualKey == VK_F7 && !m_DebugInfo.debugRenderer) {
+			m_DebugInfo.debugRenderer = true;
+		}
+		else if (virtualKey == VK_F8) {
+			m_DebugInfo.showActionBar = !m_DebugInfo.showActionBar;
+		}
+		else if (virtualKey == VK_F9) {
+			m_DebugInfo.showConsole = !m_DebugInfo.showConsole;
+		}
+		*/
+#endif
 	}
 
 	// -------------------------------------------------------
@@ -257,14 +313,15 @@ namespace ds {
 	// Key message handling
 	// -------------------------------------------------------
 	void BaseApp::sendOnChar(char ascii, unsigned int state) {
+		LOG << "onChar: " << (int)ascii;
 		_keyStates.ascii = ascii;
 		_keyStates.onChar = true;
 		if (ascii == 'r') {
 			_createReport = true;
 		}
-		if (ascii == 's') {
-			_running = !_running;
-		}
+		//if (ascii == 's') {
+			//_running = !_running;
+		//}
 		gui::sendKey(ascii);
 	}
 

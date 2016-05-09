@@ -46,6 +46,8 @@ namespace ds {
 		void sendButton(int button, int x, int y, bool down);
 		void shutdown();
 		bool isRunning() const;
+		void sendKeyUp(WPARAM virtualKey);
+		void sendKeyDown(WPARAM virtualKey);
 	protected:
 		void addGameState(GameState* gameState);
 		void activate(const char* name);
