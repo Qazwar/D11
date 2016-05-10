@@ -48,9 +48,6 @@ namespace ds {
 		_alive = true;
 		_dt = 1.0f / 60.0f;
 		_accu = 0.0f;
-		_frames = 0;
-		_fps = 0;
-		_fpsTimer = 0.0f;
 		_loading = true;
 		_createReport = false;
 		_updated = false;
@@ -155,7 +152,6 @@ namespace ds {
 	void BaseApp::buildFrame() {
 		perf::reset();
 		events::reset();
-		//input::update();
 		tick();
 		renderFrame();
 		perf::finalize();
@@ -192,26 +188,18 @@ namespace ds {
 		//if (editor::isActive()) {
 		gui::sendSpecialKey(virtualKey);
 		//}
-	}
-
-	// -------------------------------------------------------
-	// send key down
-	// -------------------------------------------------------
-	void BaseApp::sendKeyDown(WPARAM virtualKey) {
-		_keyStates.keyDown = true;
-		_keyStates.keyPressed = virtualKey;
-#ifdef DEBUG
+//#ifdef DEBUG
 		if (virtualKey == VK_F1) {
 			_createReport = true;
 		}
 		/*
 		else if (virtualKey == VK_F2) {
-			m_DebugInfo.showDrawCounter = !m_DebugInfo.showDrawCounter;
+		m_DebugInfo.showDrawCounter = !m_DebugInfo.showDrawCounter;
 		}
 		else if (virtualKey == VK_F3) {
-			m_DebugInfo.showProfiler = !m_DebugInfo.showProfiler;
-			m_DebugInfo.profilerTicks = 0;
-			m_DebugInfo.snapshotCount = profiler::get_snapshot(_snapshots, 64);
+		m_DebugInfo.showProfiler = !m_DebugInfo.showProfiler;
+		m_DebugInfo.profilerTicks = 0;
+		m_DebugInfo.snapshotCount = profiler::get_snapshot(_snapshots, 64);
 		}
 		*/
 		else if (virtualKey == VK_F4) {
@@ -220,23 +208,32 @@ namespace ds {
 		}
 		/*
 		else if (virtualKey == VK_F5) {
-			m_DebugInfo.performanceOverlay = !m_DebugInfo.performanceOverlay;
+		m_DebugInfo.performanceOverlay = !m_DebugInfo.performanceOverlay;
 		}
 		else if (virtualKey == VK_F6) {
-			bool ret = editor::toggle();
-			m_Running = !ret;
+		bool ret = editor::toggle();
+		m_Running = !ret;
 		}
 		else if (virtualKey == VK_F7 && !m_DebugInfo.debugRenderer) {
-			m_DebugInfo.debugRenderer = true;
+		m_DebugInfo.debugRenderer = true;
 		}
 		else if (virtualKey == VK_F8) {
-			m_DebugInfo.showActionBar = !m_DebugInfo.showActionBar;
+		m_DebugInfo.showActionBar = !m_DebugInfo.showActionBar;
 		}
 		else if (virtualKey == VK_F9) {
-			m_DebugInfo.showConsole = !m_DebugInfo.showConsole;
+		m_DebugInfo.showConsole = !m_DebugInfo.showConsole;
 		}
 		*/
-#endif
+//#endif
+	}
+
+	// -------------------------------------------------------
+	// send key down
+	// -------------------------------------------------------
+	void BaseApp::sendKeyDown(WPARAM virtualKey) {
+		_keyStates.keyDown = true;
+		_keyStates.keyPressed = virtualKey;
+
 	}
 
 	// -------------------------------------------------------
@@ -275,18 +272,15 @@ namespace ds {
 		}
 		_start = _now;
 		_accu += elapsed;
-		_fpsTimer += elapsed;
-		if (_fpsTimer >= 1.0f) {
-			_fpsTimer -= 1.0f;
-			_fps = _frames;
-			_frames = 0;
-			//LOG << "FPS:" << _fps;
-		}		
+		perf::tickFPS(elapsed);
 		{
 			ZoneTracker u1("UPDATE");
 			while (_accu >= _dt) {
 				if (_running) {
-					update(_dt);
+					{
+						ZoneTracker u2("UPDATE::main");
+						update(_dt);
+					}
 					_stateMachine->update(_dt);
 				}
 				_accu -= _dt;
@@ -302,11 +296,20 @@ namespace ds {
 	void BaseApp::renderFrame() {
 		ZoneTracker("Render");
 		graphics::beginRendering(_settings.clearColor);
-		render();
-		_stateMachine->render();		
-		gui::endFrame();
-		graphics::endRendering();
-		++_frames;
+		{
+			ZoneTracker("Render::render");
+			render();
+		}
+		{
+			ZoneTracker("Render::stateMachine");
+			_stateMachine->render();
+		}
+		{
+			ZoneTracker("Render::endFrame");
+			gui::endFrame();
+			graphics::endRendering();
+			perf::incFrame();
+		}
 	}
 
 	// -------------------------------------------------------

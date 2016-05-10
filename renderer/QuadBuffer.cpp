@@ -50,6 +50,10 @@ namespace ds {
 		_scale = scale;
 	}
 
+	void Mesh::reset() {
+		_vertices.clear();
+	}
+
 	void Mesh::draw() {
 		ZoneTracker("Mesh::draw");
 
@@ -73,7 +77,6 @@ namespace ds {
 
 		Camera* camera = graphics::getCamera();
 
-		//ds::mat4 mvp = graphics::getViewProjectionMaxtrix();
 		ds::mat4 mvp = world * camera->getViewProjectionMatrix();
 		_buffer.viewProjectionMatrix = ds::matrix::mat4Transpose(mvp);
 		_buffer.worldMatrix = ds::matrix::mat4Transpose(world);

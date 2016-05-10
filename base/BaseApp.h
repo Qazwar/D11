@@ -70,9 +70,6 @@ namespace ds {
 		HWND m_hWnd;
 		float _dt;
 		float _accu;
-		float _fpsTimer;
-		int _frames;
-		int _fps;
 		bool _loading;
 		bool _running;
 		bool _alive;

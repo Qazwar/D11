@@ -70,6 +70,9 @@ namespace perf {
 		int root_event;
 		ds::Array<ZoneTrackerEvent> events;
 		int ident;
+		int frames;
+		float fpsTimer;
+		int fps;
 	};
 
 	static ZoneTrackerContext* zoneTrackerCtx = 0;
@@ -78,6 +81,10 @@ namespace perf {
 		assert(zoneTrackerCtx == 0);
 		zoneTrackerCtx = new ZoneTrackerContext;
 		QueryPerformanceFrequency(&zoneTrackerCtx->frequency);
+		zoneTrackerCtx->frames = 0;
+		zoneTrackerCtx->fpsTimer = 0.0f;
+		zoneTrackerCtx->fps = 0;
+
 	}
 
 	void reset() {
@@ -117,6 +124,19 @@ namespace perf {
 		}
 		LOG << "------------------------------------------------------------";
 
+	}
+
+	void tickFPS(float dt) {
+		zoneTrackerCtx->fpsTimer += dt;
+		if (zoneTrackerCtx->fpsTimer >= 1.0f) {
+			zoneTrackerCtx->fpsTimer -= 1.0f;
+			zoneTrackerCtx->fps = zoneTrackerCtx->frames;
+			zoneTrackerCtx->frames = 0;
+		}
+	}
+
+	void incFrame() {
+		++zoneTrackerCtx->frames;
 	}
 
 	int findHash(IdString hash) {
@@ -183,7 +203,9 @@ namespace perf {
 	};
 
 	void save(const ds::ReportWriter& writer) {
-		writer.startBox("Perf - Profiling");
+		char buffer[256];
+		sprintf_s(buffer, 256, "Perf - Profiling (%d FPS)", zoneTrackerCtx->fps);
+		writer.startBox(buffer);
 		const char* HEADERS[] = { "Percent", "Accu", "Name" };
 		writer.startTable(HEADERS, 3);
 		char p[10];

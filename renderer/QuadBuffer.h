@@ -26,6 +26,7 @@ namespace ds {
 		~Mesh();
 		void add(const v3& position, const v3& normal, const v2& uv, const Color& color = Color(255, 255, 255, 255));
 		void add(const PNTCVertex& v);
+		void reset();
 		void draw();
 		void rotateX(float angle);
 		void rotateY(float angle);

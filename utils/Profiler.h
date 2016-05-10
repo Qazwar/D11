@@ -59,6 +59,9 @@ namespace perf {
 
 	void save(const ds::ReportWriter& writer);
 
+	void tickFPS(float dt);
+
+	void incFrame();
 	//void showDialog(v2* position);
 
 	//int get_snapshot(ProfileSnapshot* items, int max);
