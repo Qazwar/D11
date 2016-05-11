@@ -10,6 +10,12 @@ namespace ds {
 		Camera();
 		virtual ~Camera();
 		const mat4& getViewProjectionMatrix() const;
+		const mat4& getViewMatrix() const {
+			return _viewMatrix;
+		}
+		const mat4& getProjectionMatrix() const {
+			return _projectionMatrix;
+		}
 		virtual const v3& getPosition() const = 0;
 		virtual const v3& getTarget() const = 0;
 	protected:

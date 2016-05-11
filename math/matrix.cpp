@@ -1,6 +1,7 @@
 #include "matrix.h"
 #include <math.h>
 #include "vector.h"
+#include "..\utils\Log.h"
 
 ds::mat3 operator * (const ds::mat3& m1,const ds::mat3& m2) {
 	ds::mat3 tmp;
@@ -32,11 +33,20 @@ Vector3f operator * (const ds::mat3& m,const Vector3f& v) {
 
 // column mode
 Vector4f operator * (const ds::mat4& m,const Vector4f& v) {
+	/*
 	Vector4f tmp;
 	tmp.x = m._11 * v.x + m._12 * v.y + m._13 * v.z + m._14 * v.w;
 	tmp.y = m._21 * v.x + m._22 * v.y + m._23 * v.z + m._24 * v.w;
 	tmp.z = m._31 * v.x + m._32 * v.y + m._33 * v.z + m._34 * v.w;
 	tmp.w = m._41 * v.x + m._42 * v.y + m._43 * v.z + m._44 * v.w;
+	return tmp;
+	*/
+	// row mode
+	Vector4f tmp;
+	tmp.x = m._11 * v.x + m._21 * v.y + m._31 * v.z + m._41 * v.w;
+	tmp.y = m._12 * v.x + m._22 * v.y + m._32 * v.z + m._42 * v.w;
+	tmp.z = m._13 * v.x + m._23 * v.y + m._33 * v.z + m._43 * v.w;
+	tmp.w = m._14 * v.x + m._24 * v.y + m._34 * v.z + m._44 * v.w;
 	return tmp;
 }
 
@@ -321,12 +331,21 @@ namespace matrix {
 	// -------------------------------------------------------
 
 	mat4 mat4Transform(const Vector3f& pos) {
-		mat4 tm (
-			 1.0f,  0.0f,  0.0f, 0.0f,
-			 0.0f,  1.0f,  0.0f, 0.0f,
-			 0.0f,  0.0f,  1.0f, 0.0f,
+		/*
+		mat4 tm(
+			1.0f, 0.0f, 0.0f, pos.x,
+			0.0f, 1.0f, 0.0f, pos.y,
+			0.0f, 0.0f, 1.0f, pos.z,
+			0.0f, 0.0f, 0.0f, 1.0f
+			);
+		return tm;
+		*/
+		mat4 tm(
+			1.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f,
 			pos.x, pos.y, pos.z, 1.0f
-		);
+			);
 		return tm;
 	}
 
@@ -336,10 +355,10 @@ namespace matrix {
 
 	mat4 mat4Transform(const v2& pos) {
 		mat4 tm(
-			1.0f, 0.0f, pos.x, 0.0f,
-			0.0f, 1.0f, pos.y, 0.0f,
-			0.0f, 0.0f,  1.0f, 0.0f,
-			0.0f, 0.0f,  0.0f, 1.0f
+			1.0f, 0.0f, 0.0f, pos.x,
+			0.0f, 1.0f, 0.0f, pos.y,
+			0.0f, 0.0f, 1.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f
 			);
 		return tm;
 	}
@@ -548,6 +567,34 @@ namespace matrix {
 
 	mat4 mat4Rotation(const Vector3f& r) {
 		return mat4RotationZ(r.z) * mat4RotationY(r.y) * mat4RotationX(r.x);
+	}
+
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/bb206269%28v=vs.85%29.aspx
+
+	v3 transformCoordinate(const v3& v, const mat4& m) {
+		v4 tmp;
+
+		tmp.x = (v.x * m._11) + (v.y * m._21) + (v.z * m._31) + m._41;
+		tmp.y = (v.x * m._12) + (v.y * m._22) + (v.z * m._32) + m._42;
+		tmp.z = (v.x * m._13) + (v.y * m._23) + (v.z * m._33) + m._43;
+		tmp.w = 1 / ((v.x * m._14) + (v.y * m._24) + (v.z * m._34) + m._44);
+
+		return v3(tmp.x * tmp.w, tmp.y * tmp.w, tmp.z * tmp.w);
+	}
+
+	v3 transformNormal(const v3& v, const mat4& m) {
+		v3 result =
+			v3(v.x * m._11 + v.y * m._21 + v.z * m._31,
+			v.x * m._12 + v.y * m._22 + v.z * m._32,
+			v.x * m._13 + v.y * m._23 + v.z * m._33);
+		return result;
+	}
+
+	void debug(const mat4& m) {
+		LOG << m._11 << " " << m._12 << " " << m._13 << " " << m._14;
+		LOG << m._21 << " " << m._22 << " " << m._23 << " " << m._24;
+		LOG << m._31 << " " << m._32 << " " << m._33 << " " << m._34;
+		LOG << m._41 << " " << m._42 << " " << m._43 << " " << m._44;
 	}
 }
 

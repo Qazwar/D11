@@ -492,6 +492,20 @@ bool JSONReader::get_vec3(int category_id, const char* name, v3* ret) const {
 }
 
 // -------------------------------------------
+// get v3
+// -------------------------------------------
+bool JSONReader::get(int category_id, const char* name, v3* ret) const {
+	int idx = get_index(category_id, name);
+	if (idx != -1) {
+		ret->x = get(_data_indices[idx]);
+		ret->y = get(_data_indices[idx] + 1);
+		ret->z = get(_data_indices[idx] + 2);
+		return true;
+	}
+	return false;
+}
+
+// -------------------------------------------
 // get index
 // -------------------------------------------
 int JSONReader::get_index(int category_id, const char* name) const {

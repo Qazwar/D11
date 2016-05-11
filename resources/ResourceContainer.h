@@ -38,6 +38,7 @@ namespace ds {
 		SAMPLERSTATE,
 		GUIDIALOG,
 		QUADBUFFER,
+		MESHBUFFER,
 		MESH,
 		UNKNOWN
 	};
@@ -75,6 +76,8 @@ namespace ds {
 		SpriteBuffer* getSpriteBuffer(RID rid);
 
 		QuadBuffer* getQuadBuffer(RID rid);
+
+		MeshBuffer* getMeshBuffer(RID rid);
 
 		Mesh* getMesh(RID rid);
 

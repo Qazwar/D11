@@ -91,6 +91,12 @@ namespace ds {
 		mat3 rotation(const Vector3f& d,const Vector3f& z);
 
 		mat3 rotationAxisCosSin(const Vector3f& v,float co,float si );
+
+		v3 transformCoordinate(const v3& v, const mat4& m);
+
+		v3 transformNormal(const v3& v, const mat4& m);
+
+		void debug(const mat4& m);
 	}
 
 }

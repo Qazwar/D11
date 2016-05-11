@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <d3d11.h>
 #include "..\Common.h"
+#include <Vector.h>
 
 namespace ds {
 	
@@ -114,7 +115,7 @@ namespace ds {
 		RID inputlayout;
 	};
 
-	struct MeshDescriptor {
+	struct MeshBufferDescriptor {
 		uint16_t id;
 		uint32_t size;
 		RID indexBuffer;
@@ -124,6 +125,14 @@ namespace ds {
 		RID blendstate;
 		RID colormap;
 		RID inputlayout;
+	};
+
+	struct MeshDescriptor {
+		uint16_t id;
+		const char* fileName;
+		v3 position;
+		v3 scale;
+		v3 rotation;
 	};
 
 	struct WorldDescriptor {

@@ -8,6 +8,7 @@
 #include "..\utils\Log.h"
 #include "..\renderer\render_types.h"
 #include "..\imgui\IMGUI.h"
+#include "..\utils\ObjLoader.h"
 
 namespace ds {
 
@@ -89,6 +90,7 @@ namespace ds {
 			"SAMPLERSTATE",
 			"GUIDIALOG",
 			"QUADBUFFER",
+			"MESHBUFFER",
 			"MESH",
 			"UNKNOWN"
 		};
@@ -121,6 +123,7 @@ namespace ds {
 			std::vector<SpriteBuffer*> spriteBuffers;
 			std::vector<QuadBuffer*> quadBuffers;
 			std::vector<Mesh*> meshes;
+			std::vector<MeshBuffer*> meshBuffers;
 			std::vector<World*> worlds;
 			std::vector<ID3D11SamplerState*> samplerStates;
 			std::vector<GUIDialog*> dialogs;
@@ -200,6 +203,9 @@ namespace ds {
 			}
 			for (size_t i = 0; i < _resCtx->quadBuffers.size(); ++i) {
 				delete _resCtx->quadBuffers[i];
+			}
+			for (size_t i = 0; i < _resCtx->meshBuffers.size(); ++i) {
+				delete _resCtx->meshBuffers[i];
 			}
 			for (size_t i = 0; i < _resCtx->meshes.size(); ++i) {
 				delete _resCtx->meshes[i];
@@ -361,14 +367,32 @@ namespace ds {
 		}
 
 		// ------------------------------------------------------
-		// create quad buffer
+		// create mesh buffer
+		// ------------------------------------------------------
+		static RID createMeshBuffer(const char* name, const MeshBufferDescriptor& descriptor) {
+			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
+			assert(ri.type == ResourceType::UNKNOWN);
+			int index = _resCtx->meshBuffers.size();
+			MeshBuffer* buffer = new MeshBuffer(descriptor);
+			_resCtx->meshBuffers.push_back(buffer);
+			ri.index = index;
+			ri.id = descriptor.id;
+			ri.nameIndex = _resCtx->nameBuffer.size;
+			_resCtx->nameBuffer.append(name);
+			ri.type = ResourceType::MESHBUFFER;
+			return ri.id;
+		}
+
+		// ------------------------------------------------------
+		// create mesh 
 		// ------------------------------------------------------
 		static RID createMesh(const char* name, const MeshDescriptor& descriptor) {
 			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
 			assert(ri.type == ResourceType::UNKNOWN);
 			int index = _resCtx->meshes.size();
-			Mesh* buffer = new Mesh(descriptor);
-			_resCtx->meshes.push_back(buffer);
+			Mesh* mesh = new Mesh;
+			obj::parse(descriptor.fileName, mesh);
+			_resCtx->meshes.push_back(mesh);
 			ri.index = index;
 			ri.id = descriptor.id;
 			ri.nameIndex = _resCtx->nameBuffer.size;
@@ -402,7 +426,9 @@ namespace ds {
 			colorMapDesc.AddressV = TEXTURE_ADDRESS_MODES[descriptor.addressV].mode;
 			colorMapDesc.AddressW = TEXTURE_ADDRESS_MODES[descriptor.addressW].mode;
 			colorMapDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-			colorMapDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+			//colorMapDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+			//colorMapDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+			colorMapDesc.Filter = D3D11_FILTER_ANISOTROPIC;
 			colorMapDesc.MaxLOD = D3D11_FLOAT32_MAX;
 			ID3D11SamplerState* sampler;
 			HRESULT d3dResult = _resCtx->device->CreateSamplerState(&colorMapDesc, &sampler);
@@ -901,8 +927,8 @@ namespace ds {
 					const char* name = reader.get_string(children[i], "name");
 					createQuadBuffer(name, descriptor);
 				}
-				else if (reader.matches(children[i], "mesh")) {
-					MeshDescriptor descriptor;
+				else if (reader.matches(children[i], "mesh_buffer")) {
+					MeshBufferDescriptor descriptor;
 					reader.get(children[i], "id", &descriptor.id);
 					reader.get(children[i], "size", &descriptor.size);
 					reader.get(children[i], "index_buffer", &descriptor.indexBuffer);
@@ -912,6 +938,16 @@ namespace ds {
 					reader.get(children[i], "blend_state", &descriptor.blendstate);
 					reader.get(children[i], "color_map", &descriptor.colormap);
 					reader.get(children[i], "input_layout", &descriptor.inputlayout);
+					const char* name = reader.get_string(children[i], "name");
+					createMeshBuffer(name, descriptor);
+				}
+				else if (reader.matches(children[i], "mesh")) {
+					MeshDescriptor descriptor;
+					reader.get(children[i], "id", &descriptor.id);
+					reader.get(children[i], "position", &descriptor.position);
+					reader.get(children[i], "scale", &descriptor.scale);
+					reader.get(children[i], "rotation", &descriptor.rotation);
+					descriptor.fileName = reader.get_string(children[i], "fileName");
 					const char* name = reader.get_string(children[i], "name");
 					createMesh(name, descriptor);
 				}
@@ -1021,6 +1057,11 @@ namespace ds {
 		Mesh* getMesh(RID rid) {
 			uint32_t idx = getIndex(rid, ResourceType::MESH);
 			return _resCtx->meshes[idx];
+		}
+
+		MeshBuffer* getMeshBuffer(RID rid) {
+			uint32_t idx = getIndex(rid, ResourceType::MESHBUFFER);
+			return _resCtx->meshBuffers[idx];
 		}
 
 		QuadBuffer* getQuadBuffer(RID rid) {
