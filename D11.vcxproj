@@ -114,6 +114,7 @@
     <ClCompile Include="renderer\Bitmapfont.cpp" />
     <ClCompile Include="renderer\Camera.cpp" />
     <ClCompile Include="renderer\graphics.cpp" />
+    <ClCompile Include="renderer\MeshBuffer.cpp" />
     <ClCompile Include="renderer\QuadBuffer.cpp" />
     <ClCompile Include="renderer\sprites.cpp" />
     <ClCompile Include="resources\ResourceContainer.cpp" />
@@ -127,6 +128,7 @@
     <ClCompile Include="utils\mtrand.cpp" />
     <ClCompile Include="utils\ObjLoader.cpp" />
     <ClCompile Include="utils\Profiler.cpp" />
+    <ClCompile Include="utils\StateManager.cpp" />
     <ClCompile Include="utils\StringUtils.cpp" />
     <ClCompile Include="world\actions\AbstractAction.cpp" />
     <ClCompile Include="world\actions\AlphaFadeToAction.cpp" />
@@ -168,6 +170,7 @@
     <ClInclude Include="lib\BlockArray.h" />
     <ClInclude Include="lib\collection_types.h" />
     <ClInclude Include="lib\DataArray.h" />
+    <ClInclude Include="lib\Grid.h" />
     <ClInclude Include="math\BezierCurve.h" />
     <ClInclude Include="math\Bitset.h" />
     <ClInclude Include="math\CubicBezierPath.h" />
@@ -194,6 +197,7 @@
     <ClInclude Include="renderer\Bitmapfont.h" />
     <ClInclude Include="renderer\Camera.h" />
     <ClInclude Include="renderer\graphics.h" />
+    <ClInclude Include="renderer\MeshBuffer.h" />
     <ClInclude Include="renderer\QuadBuffer.h" />
     <ClInclude Include="renderer\render_types.h" />
     <ClInclude Include="renderer\sprites.h" />
@@ -213,6 +217,7 @@
     <ClInclude Include="utils\mtrand.h" />
     <ClInclude Include="utils\ObjLoader.h" />
     <ClInclude Include="utils\Profiler.h" />
+    <ClInclude Include="utils\StateManager.h" />
     <ClInclude Include="utils\StringUtils.h" />
     <ClInclude Include="world\actions\AbstractAction.h" />
     <ClInclude Include="world\actions\AlphaFadeToAction.h" />

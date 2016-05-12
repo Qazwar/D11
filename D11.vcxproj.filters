@@ -59,6 +59,9 @@
     <Filter Include="dialogs">
       <UniqueIdentifier>{8b070728-2af1-4142-8741-c1a4686a27ac}</UniqueIdentifier>
     </Filter>
+    <Filter Include="data">
+      <UniqueIdentifier>{5384c1d7-53b5-4997-baa4-5495a8bd7cf6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="utils\Log.cpp">
@@ -254,6 +257,12 @@
       <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="utils\ObjLoader.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\MeshBuffer.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\StateManager.cpp">
       <Filter>utils</Filter>
     </ClCompile>
   </ItemGroup>
@@ -507,6 +516,15 @@
     </ClInclude>
     <ClInclude Include="renderer\VertexTypes.h">
       <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\MeshBuffer.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Grid.h">
+      <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\StateManager.h">
+      <Filter>utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

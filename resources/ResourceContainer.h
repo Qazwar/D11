@@ -9,6 +9,7 @@
 #include "..\particles\ParticleManager.h"
 #include "..\dialogs\GUIDialog.h"
 #include "..\renderer\QuadBuffer.h"
+#include "..\renderer\MeshBuffer.h"
 
 namespace ds {
 
