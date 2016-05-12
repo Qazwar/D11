@@ -104,7 +104,7 @@ namespace ds {
 		ds::mat4 mvp = world * camera->getViewProjectionMatrix();
 		_buffer.viewProjectionMatrix = ds::matrix::mat4Transpose(mvp);
 		_buffer.worldMatrix = ds::matrix::mat4Transpose(world);
-		_buffer.cameraPos = camera->getTarget() - camera->getPosition();
+		_buffer.cameraPos = _lightPos;// camera->getTarget() - camera->getPosition();
 		_buffer.lightPos = _lightPos;
 
 		graphics::mapData(_descriptor.vertexBuffer, mesh->vertices.data(), mesh->vertices.size() * sizeof(PNTCVertex));
@@ -137,7 +137,7 @@ namespace ds {
 		ds::mat4 mvp = world * camera->getViewProjectionMatrix();
 		_buffer.viewProjectionMatrix = ds::matrix::mat4Transpose(mvp);
 		_buffer.worldMatrix = ds::matrix::mat4Transpose(world);
-		_buffer.cameraPos = camera->getTarget() - camera->getPosition();
+		_buffer.cameraPos = _lightPos;//camera->getTarget() - camera->getPosition();
 		_buffer.lightPos = _lightPos;
 
 		graphics::mapData(_descriptor.vertexBuffer, _vertices.data(), _vertices.size() * sizeof(PNTCVertex));
