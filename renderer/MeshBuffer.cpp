@@ -13,7 +13,7 @@ namespace ds {
 	// MeshBuffer
 	// ------------------------------------------------------
 	MeshBuffer::MeshBuffer(const MeshBufferDescriptor& descriptor) : _descriptor(descriptor) {
-		_lightPos = v3(0.0f, 300.0f, -50.0f);
+		_lightPos = v3(0, 8, -8);
 		_size = descriptor.size;
 	}
 
@@ -53,8 +53,28 @@ namespace ds {
 		for (int i = 0; i < mesh->vertices.size(); ++i) {
 			const PNTCVertex& v = mesh->vertices[i];
 			v3 p = world * v.position;
-			v3 n = world * v.normal;
+			//v3 n = world * v.normal;
+			v3 n = v.normal;
 			add(p, n, v.texture, v.color);
+		}
+	}
+
+	// ------------------------------------------------------
+	// add mesh
+	// ------------------------------------------------------
+	void MeshBuffer::add(Mesh* mesh, const v3& position, const Color& color, const v3& scale, const v3& rotation) {
+		mat4 rotY = matrix::mat4RotationY(rotation.y);
+		mat4 rotX = matrix::mat4RotationX(rotation.x);
+		mat4 rotZ = matrix::mat4RotationZ(rotation.z);
+		mat4 t = matrix::mat4Transform(position);
+		mat4 s = matrix::mat4Scale(scale);
+		mat4 world = rotZ * rotY * rotX * s * t;
+		for (int i = 0; i < mesh->vertices.size(); ++i) {
+			const PNTCVertex& v = mesh->vertices[i];
+			v3 p = world * v.position;
+			//v3 n = world * v.normal;
+			v3 n = v.normal;
+			add(p, n, v.texture, color);
 		}
 	}
 
@@ -104,7 +124,7 @@ namespace ds {
 		ds::mat4 mvp = world * camera->getViewProjectionMatrix();
 		_buffer.viewProjectionMatrix = ds::matrix::mat4Transpose(mvp);
 		_buffer.worldMatrix = ds::matrix::mat4Transpose(world);
-		_buffer.cameraPos = _lightPos;// camera->getTarget() - camera->getPosition();
+		_buffer.cameraPos = camera->getPosition();
 		_buffer.lightPos = _lightPos;
 
 		graphics::mapData(_descriptor.vertexBuffer, mesh->vertices.data(), mesh->vertices.size() * sizeof(PNTCVertex));
@@ -137,7 +157,7 @@ namespace ds {
 		ds::mat4 mvp = world * camera->getViewProjectionMatrix();
 		_buffer.viewProjectionMatrix = ds::matrix::mat4Transpose(mvp);
 		_buffer.worldMatrix = ds::matrix::mat4Transpose(world);
-		_buffer.cameraPos = _lightPos;//camera->getTarget() - camera->getPosition();
+		_buffer.cameraPos = camera->getPosition();
 		_buffer.lightPos = _lightPos;
 
 		graphics::mapData(_descriptor.vertexBuffer, _vertices.data(), _vertices.size() * sizeof(PNTCVertex));
