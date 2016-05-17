@@ -172,6 +172,9 @@ namespace ds {
 				if (shader->pixelShader != 0) {
 					shader->pixelShader->Release();
 				}
+				if (shader->geometryShader != 0) {
+					shader->geometryShader->Release();
+				}
 				if (shader->vertexShaderBuffer != 0) {
 					shader->vertexShaderBuffer->Release();
 				}
@@ -681,6 +684,17 @@ namespace ds {
 			return true;
 		}
 
+		static bool createGeometryShader(ID3DBlob* buffer, ID3D11GeometryShader** shader) {
+			HRESULT d3dResult = _resCtx->device->CreateGeometryShader(buffer->GetBufferPointer(), buffer->GetBufferSize(), 0, shader);
+			if (d3dResult < 0) {
+				if (buffer) {
+					buffer->Release();
+				}
+				return false;
+			}
+			return true;
+		}
+
 		static bool createPixelShader(ID3DBlob* buffer, ID3D11PixelShader** shader) {
 			HRESULT d3dResult = _resCtx->device->CreatePixelShader(buffer->GetBufferPointer(), buffer->GetBufferSize(), 0, shader);
 			if (d3dResult < 0) {
@@ -706,7 +720,7 @@ namespace ds {
 
 			if (FAILED(result))	{
 				if (errorBuffer != 0) {
-					OutputDebugStringA((char*)errorBuffer->GetBufferPointer());
+					LOGE << "Error compiling shader: " << (char*)errorBuffer->GetBufferPointer();
 					errorBuffer->Release();
 				}
 				return false;
@@ -744,6 +758,20 @@ namespace ds {
 				return -1;
 			}
 			psBuffer->Release();
+			if (descriptor.geometryShader != 0) {
+				ID3DBlob* psBuffer = 0;
+				compileResult = compileShader(descriptor.file, descriptor.geometryShader, "gs_4_0", &psBuffer);
+				if (!compileResult)	{
+					DXTRACE_MSG("Error compiling geometry shader!");
+					return -1;
+				}
+
+				if (!createGeometryShader(psBuffer, &s->geometryShader)) {
+					DXTRACE_MSG("Error creating geometry shader!");
+					return -1;
+				}
+				psBuffer->Release();
+			}
 			s->samplerState = getSamplerState(descriptor.samplerState);
 			_resCtx->shaders.push_back(s);
 			ri.index = idx;
@@ -816,6 +844,7 @@ namespace ds {
 					descriptor.file = reader.get_string(children[i], "file");
 					descriptor.vertexShader = reader.get_string(children[i], "vertex_shader");
 					descriptor.pixelShader = reader.get_string(children[i], "pixel_shader");
+					descriptor.geometryShader = reader.get_string(children[i], "geometry_shader");
 					descriptor.model = reader.get_string(children[i], "shader_model");
 					reader.get(children[i], "sampler_state", &descriptor.samplerState);
 					const char* name = reader.get_string(children[i], "name");

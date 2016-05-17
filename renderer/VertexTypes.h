@@ -27,8 +27,11 @@ namespace ds {
 	};
 
 	struct SpriteVertex {
+
 		v3 position;
 		v2 texture;
+		v2 size;
+		float rotation;
 		Color color;
 
 		SpriteVertex() : position(0, 0, 0) {}

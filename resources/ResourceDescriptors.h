@@ -5,6 +5,11 @@
 #include <Vector.h>
 
 namespace ds {
+
+	struct ResourceDescriptor {
+		uint16_t id;
+		uint32_t nameIndex;
+	};
 	
 	struct IndexBufferDescriptor {
 		uint16_t id;
@@ -42,9 +47,12 @@ namespace ds {
 		uint16_t id;
 		const char* vertexShader;
 		const char* pixelShader;
+		const char* geometryShader;
 		const char* model;
 		const char* file;
 		RID samplerState;
+
+		ShaderDescriptor() : vertexShader(0), pixelShader(0), geometryShader(0), model(0), file(0) {}
 	};
 
 	struct BlendStateDescriptor {
@@ -71,10 +79,12 @@ namespace ds {
 	struct Shader {
 		ID3D11VertexShader* vertexShader;
 		ID3D11PixelShader* pixelShader;
+		ID3D11GeometryShader* geometryShader;
 		ID3DBlob* vertexShaderBuffer;
 		ID3D11SamplerState* samplerState;
+		ID3DBlob* geometryShaderBuffer;
 
-		Shader() : vertexShader(0), pixelShader(0), vertexShaderBuffer(0), samplerState(0) {}
+		Shader() : vertexShader(0), pixelShader(0), vertexShaderBuffer(0), geometryShader(0), samplerState(0) {}
 
 	};
 
