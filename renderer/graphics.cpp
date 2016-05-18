@@ -398,15 +398,15 @@ namespace graphics {
 	// ------------------------------------------------------
 	void setShader(RID rid) {
 		ds::Shader* s = ds::res::getShader(rid);
-		if (s->vertexShader != 0) {
+		//if (s->vertexShader != 0) {
 			_context->d3dContext->VSSetShader(s->vertexShader, 0, 0);
-		}
-		if (s->pixelShader != 0) {
+		//}
+		//if (s->pixelShader != 0) {
 			_context->d3dContext->PSSetShader(s->pixelShader, 0, 0);
-		}
-		if (s->geometryShader != 0) {
+		//}
+		//if (s->geometryShader != 0) {
 			_context->d3dContext->GSSetShader(s->geometryShader, 0, 0);
-		}
+		//}
 		_context->d3dContext->PSSetSamplers(0, 1, &s->samplerState);
 	}
 
