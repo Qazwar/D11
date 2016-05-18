@@ -29,6 +29,7 @@ namespace ds {
 		SpriteVertex* _vertices;
 		int _maxSprites;
 		bool _started;
+		v4 _screenDimension;
 	};
 
 }

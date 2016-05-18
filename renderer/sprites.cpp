@@ -10,28 +10,12 @@
 
 namespace ds {
 
-	const v2 ARRAY[] = { v2(-0.5f, 0.5f), v2(0.5f, 0.5f), v2(0.5f, -0.5f), v2(-0.5f, -0.5f) };
-
-
-	v2 srt(const v2& v, const v2& u, float scaleX, float scaleY, float rotation) {
-		float sx = u.x * scaleX;
-		float sy = u.y * scaleY;
-		// rotation clock wise
-		//float xt = cosf(rotation) * sx + sinf(rotation) * sy;
-		//float yt = -sinf(rotation) * sx + cosf(rotation) * sy;
-		// rotation counter clock wise
-		float xt = cos(rotation) * sx - sin(rotation) * sy;
-		float yt = sin(rotation) * sx + cos(rotation) * sy;
-		xt += v.x;
-		yt += v.y;
-		return Vector2f(xt, yt);
-	}
-
 	SpriteBuffer::SpriteBuffer(const SpriteBufferDescriptor& descriptor) : _descriptor(descriptor), _index(0), _started(false) {
 		// create data
 		_maxSprites = descriptor.size;
 		_sprites = new Sprite[descriptor.size];
 		_vertices = new SpriteVertex[4 * descriptor.size];
+		_screenDimension = v4(graphics::getScreenWidth(), graphics::getScreenHeight(), 1024.0f, 1024.0f);
 	}
 
 	SpriteBuffer::~SpriteBuffer() {
@@ -168,17 +152,10 @@ namespace ds {
 
 		graphics::setInputLayout(_descriptor.inputlayout);
 		graphics::setVertexBuffer(_descriptor.vertexBuffer, &stride, &offset, D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-		//graphics::setIndexBuffer(_descriptor.indexBuffer);
 		graphics::setBlendState(_descriptor.blendstate);
 
 		graphics::setShader(_descriptor.shader);
 		graphics::setPixelShaderResourceView(_descriptor.colormap);
-
-		//ds::mat4 mvp = graphics::getViewProjectionMaxtrix();
-		ds::mat4 mvp = graphics::getCamera()->getViewProjectionMatrix();
-		mvp = ds::matrix::mat4Transpose(mvp);
-
-		v2 sc = graphics::getScreenCenter();
 		for (int i = 0; i < _index; i++) {
 			const Sprite& sprite = _sprites[i];
 			v4 t;
@@ -188,14 +165,11 @@ namespace ds {
 			t.w = sprite.texture.rect.height();
 			_vertices[i] = SpriteVertex(sprite.position, t, v3(sprite.scale.x,sprite.scale.y,sprite.rotation),sprite.color);
 		}
-
 		graphics::mapData(_descriptor.vertexBuffer, _vertices, _index * sizeof(SpriteVertex));
-
-		graphics::updateConstantBuffer(_descriptor.constantBuffer, &mvp);
+		graphics::updateConstantBuffer(_descriptor.constantBuffer, &_screenDimension);
 		graphics::setVertexShaderConstantBuffer(_descriptor.constantBuffer);
 		graphics::setGeometryShaderConstantBuffer(_descriptor.constantBuffer);
 		graphics::draw(_index);
-
 		_index = 0;
 	}
 
