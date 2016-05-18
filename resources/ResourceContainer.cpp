@@ -55,11 +55,8 @@ namespace ds {
 		static const InputElementDescriptor INPUT_ELEMENT_DESCRIPTIONS[] = {
 
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 12 },
-			{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 12 },
+			{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 16 },
 			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 8 },
-			{ "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 8 },
-			{ "TEXCOORD", 2, DXGI_FORMAT_R32G32_FLOAT, 8 },
-			{ "TEXCOORD", 3, DXGI_FORMAT_R32G32_FLOAT, 8 },
 			{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 12 }
 		};
 
@@ -643,17 +640,19 @@ namespace ds {
 			D3D11_INPUT_ELEMENT_DESC* descriptors = new D3D11_INPUT_ELEMENT_DESC[descriptor.num];
 			uint32_t index = 0;
 			uint32_t counter = 0;
+			int si[8] = { 0 };
 			for (int i = 0; i < descriptor.num; ++i) {
 				const InputElementDescriptor& d = INPUT_ELEMENT_DESCRIPTIONS[descriptor.indices[i]];
-				D3D11_INPUT_ELEMENT_DESC& descriptor = descriptors[counter++];
-				descriptor.SemanticName = d.semantic;
-				descriptor.SemanticIndex = d.semanticIndex;
-				descriptor.Format = d.format;
-				descriptor.InputSlot = 0;
-				descriptor.AlignedByteOffset = index;
-				descriptor.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-				descriptor.InstanceDataStepRate = 0;
+				D3D11_INPUT_ELEMENT_DESC& desc = descriptors[counter++];
+				desc.SemanticName = d.semantic;
+				desc.SemanticIndex = si[descriptor.indices[i]];// d.semanticIndex;
+				desc.Format = d.format;
+				desc.InputSlot = 0;
+				desc.AlignedByteOffset = index;
+				desc.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+				desc.InstanceDataStepRate = 0;
 				index += d.size;
+				si[descriptor.indices[i]] += 1;
 			}
 			ID3D11InputLayout* layout = 0;
 			const ResourceIndex& res_idx = _resCtx->resourceTable[descriptor.shader];
@@ -716,7 +715,7 @@ namespace ds {
 			ID3DBlob* errorBuffer = 0;
 			HRESULT result;
 
-			result = D3DX11CompileFromFile(filePath, 0, 0, entry, shaderModel, shaderFlags, 0, 0, buffer, &errorBuffer, 0);
+			 result = D3DX11CompileFromFile(filePath, 0, 0, entry, shaderModel, shaderFlags, 0, 0, buffer, &errorBuffer, 0);
 
 			if (FAILED(result))	{
 				if (errorBuffer != 0) {

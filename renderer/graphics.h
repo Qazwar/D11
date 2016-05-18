@@ -54,7 +54,7 @@ namespace graphics {
 
 	void setIndexBuffer(RID rid);
 
-	void setVertexBuffer(RID rid, uint32_t* stride, uint32_t* offset);
+	void setVertexBuffer(RID rid, uint32_t* stride, uint32_t* offset, D3D11_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	void mapData(RID rid, void* data, uint32_t size);
 
@@ -66,9 +66,13 @@ namespace graphics {
 
 	void setVertexShaderConstantBuffer(RID rid);
 
+	void setGeometryShaderConstantBuffer(RID rid);
+
 	void setBlendState(RID rid);
 
 	void drawIndexed(uint32_t num);
+
+	void draw(uint32_t num);
 
 	void endRendering();
 

@@ -167,8 +167,8 @@ namespace ds {
 		unsigned int offset = 0;
 
 		graphics::setInputLayout(_descriptor.inputlayout);
-		graphics::setVertexBuffer(_descriptor.vertexBuffer, &stride, &offset);
-		graphics::setIndexBuffer(_descriptor.indexBuffer);
+		graphics::setVertexBuffer(_descriptor.vertexBuffer, &stride, &offset, D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+		//graphics::setIndexBuffer(_descriptor.indexBuffer);
 		graphics::setBlendState(_descriptor.blendstate);
 
 		graphics::setShader(_descriptor.shader);
@@ -181,22 +181,20 @@ namespace ds {
 		v2 sc = graphics::getScreenCenter();
 		for (int i = 0; i < _index; i++) {
 			const Sprite& sprite = _sprites[i];
-			for (int j = 0; j < 4; ++j) {
-				v2 start = ARRAY[j];
-				start.x *= sprite.texture.dim.x;
-				start.y *= sprite.texture.dim.y;
-				v2 sp = sprite.position;
-				sp -= sc;
-				v2 p = srt(sp, start, sprite.scale.x, sprite.scale.y, sprite.rotation);
-				_vertices[i * 4 + j] = SpriteVertex(p, sprite.texture.getUV(j), sprite.color);
-			}
+			v4 t;
+			t.x = sprite.texture.rect.left;
+			t.y = sprite.texture.rect.top;
+			t.z = sprite.texture.rect.width();
+			t.w = sprite.texture.rect.height();
+			_vertices[i] = SpriteVertex(sprite.position, t, v3(sprite.scale.x,sprite.scale.y,sprite.rotation),sprite.color);
 		}
 
-		graphics::mapData(_descriptor.vertexBuffer, _vertices, _index * 4 * sizeof(SpriteVertex));
+		graphics::mapData(_descriptor.vertexBuffer, _vertices, _index * sizeof(SpriteVertex));
 
 		graphics::updateConstantBuffer(_descriptor.constantBuffer, &mvp);
 		graphics::setVertexShaderConstantBuffer(_descriptor.constantBuffer);
-		graphics::drawIndexed(_index * 6);
+		graphics::setGeometryShaderConstantBuffer(_descriptor.constantBuffer);
+		graphics::draw(_index);
 
 		_index = 0;
 	}

@@ -442,10 +442,10 @@ namespace graphics {
 		_context->d3dContext->PSSetShaderResources(slot, 1, &srv);
 	}
 
-	void setVertexBuffer(RID rid, uint32_t* stride, uint32_t* offset) {
+	void setVertexBuffer(RID rid, uint32_t* stride, uint32_t* offset, D3D11_PRIMITIVE_TOPOLOGY topology) {
 		ID3D11Buffer* buffer = ds::res::getVertexBuffer(rid);
 		_context->d3dContext->IASetVertexBuffers(0, 1, &buffer, stride, offset);
-		_context->d3dContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		_context->d3dContext->IASetPrimitiveTopology(topology);
 	}
 
 	void setVertexShaderConstantBuffer(RID rid) {
@@ -453,8 +453,17 @@ namespace graphics {
 		_context->d3dContext->VSSetConstantBuffers(0, 1, &buffer);
 	}
 
+	void setGeometryShaderConstantBuffer(RID rid) {
+		ID3D11Buffer* buffer = ds::res::getConstantBuffer(rid);
+		_context->d3dContext->GSSetConstantBuffers(0, 1, &buffer);
+	}
+
 	void drawIndexed(uint32_t num) {
 		_context->d3dContext->DrawIndexed(num, 0, 0);
+	}
+
+	void draw(uint32_t num) {
+		_context->d3dContext->Draw(num, 0);
 	}
 
 	float getScreenWidth() {

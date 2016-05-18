@@ -29,14 +29,14 @@ namespace ds {
 	struct SpriteVertex {
 
 		v3 position;
-		v2 texture;
-		v2 size;
-		float rotation;
+		v4 texture;
+		v3 size;
 		Color color;
 
 		SpriteVertex() : position(0, 0, 0) {}
-		SpriteVertex(const v3& p, const v2& t, const Color& c) : position(p), texture(t), color(c) {}
-		SpriteVertex(const v2& p, const v2& t, const Color& c) : position(p, 1.0f), texture(t), color(c) {}
+		SpriteVertex(const v3& p, const v4& t, const Color& c) : position(p), texture(t), color(c) {}
+		SpriteVertex(const v2& p, const v4& t, const Color& c) : position(p, 1.0f), texture(t), color(c) {}
+		SpriteVertex(const v2& p, const v4& t, const v3& s,const Color& c) : position(p, 1.0f), texture(t), size(s), color(c) {}
 	};
 
 }
