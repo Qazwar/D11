@@ -388,9 +388,15 @@ namespace graphics {
 	// ------------------------------------------------------
 	// update constant buffer
 	// ------------------------------------------------------
-	void updateConstantBuffer(RID rid, void* data) {
+	void updateConstantBuffer(RID rid, void* data,size_t size) {
 		ID3D11Buffer* buffer = ds::res::getConstantBuffer(rid);
-		_context->d3dContext->UpdateSubresource(buffer, 0, 0, data, 0, 0);
+		//_context->d3dContext->UpdateSubresource(buffer, 0, 0, data, 0, 0);
+		D3D11_MAPPED_SUBRESOURCE resource;
+		HRESULT hResult = _context->d3dContext->Map(buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
+		void* ptr = resource.pData;
+		// Copy the data into the vertex buffer.
+		memcpy(ptr, data, size);
+		_context->d3dContext->Unmap(buffer, 0);
 	}
 
 	// ------------------------------------------------------
@@ -451,6 +457,11 @@ namespace graphics {
 	void setVertexShaderConstantBuffer(RID rid) {
 		ID3D11Buffer* buffer = ds::res::getConstantBuffer(rid);
 		_context->d3dContext->VSSetConstantBuffers(0, 1, &buffer);
+	}
+
+	void setPixelShaderConstantBuffer(RID rid) {
+		ID3D11Buffer* buffer = ds::res::getConstantBuffer(rid);
+		_context->d3dContext->PSSetConstantBuffers(0, 1, &buffer);
 	}
 
 	void setGeometryShaderConstantBuffer(RID rid) {

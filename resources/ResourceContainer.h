@@ -52,15 +52,21 @@ namespace ds {
 
 		void parseJSONFile();
 
+		RID find(const char* name, ResourceType type);
+
 		ID3D11Buffer* getIndexBuffer(RID rid);
 
 		ID3D11BlendState* getBlendState(RID rid);
 
 		ID3D11Buffer* getConstantBuffer(RID rid);
 
+		ID3D11Buffer* getConstantBuffer(const char* name);
+
 		ID3D11Buffer* getVertexBuffer(RID rid);
 
 		ID3D11InputLayout* getInputLayout(RID rid);
+
+		ID3D11InputLayout* getInputLayout(const char* name);
 
 		ID3D11ShaderResourceView* getShaderResourceView(RID rid);
 
@@ -74,13 +80,19 @@ namespace ds {
 
 		GUIDialog* getGUIDialog(RID rid);
 
+		SpriteBuffer* getSpriteBuffer(const char* name);
+
 		SpriteBuffer* getSpriteBuffer(RID rid);
 
 		QuadBuffer* getQuadBuffer(RID rid);
 
 		MeshBuffer* getMeshBuffer(RID rid);
 
+		MeshBuffer* getMeshBuffer(const char* name);
+
 		Mesh* getMesh(RID rid);
+
+		Mesh* getMesh(const char* name);
 
 		int findInputElement(const char* name);
 

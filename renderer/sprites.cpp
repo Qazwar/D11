@@ -166,7 +166,7 @@ namespace ds {
 			_vertices[i] = SpriteVertex(sprite.position, t, v3(sprite.scale.x,sprite.scale.y,sprite.rotation),sprite.color);
 		}
 		graphics::mapData(_descriptor.vertexBuffer, _vertices, _index * sizeof(SpriteVertex));
-		graphics::updateConstantBuffer(_descriptor.constantBuffer, &_screenDimension);
+		graphics::updateConstantBuffer(_descriptor.constantBuffer, &_screenDimension, 16);
 		graphics::setVertexShaderConstantBuffer(_descriptor.constantBuffer);
 		graphics::setGeometryShaderConstantBuffer(_descriptor.constantBuffer);
 		graphics::draw(_index);

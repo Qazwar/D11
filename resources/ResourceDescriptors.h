@@ -9,6 +9,7 @@ namespace ds {
 	struct ResourceDescriptor {
 		uint16_t id;
 		uint32_t nameIndex;
+		IdString hash;
 	};
 	
 	struct IndexBufferDescriptor {

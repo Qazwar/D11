@@ -84,9 +84,9 @@ namespace ds {
 		perf::shutdown();		
 		events::shutdown();
 		input::shutdown();
-		delete _stateMachine;
-		delete gStringBuffer;
 		res::shutdown();
+		delete _stateMachine;
+		delete gStringBuffer;		
 		graphics::shutdown();
 		//gDefaultMemory->printOpenAllocations();
 		delete gDefaultMemory;
@@ -150,32 +150,34 @@ namespace ds {
 	}
 
 	void BaseApp::buildFrame() {
-		perf::reset();
-		events::reset();
-		tick();
-		renderFrame();
-		perf::finalize();
-		// check for internal events
-		if (events::num() > 0) {
-			for (uint32_t i = 0; i < events::num(); ++i) {
-				if (events::getType(i) == InternalEvents::ENGINE_SHUTDOWN) {
-					shutdown();
+		if (_alive) {
+			perf::reset();
+			events::reset();
+			tick();
+			renderFrame();
+			perf::finalize();
+			// check for internal events
+			if (events::num() > 0) {
+				for (uint32_t i = 0; i < events::num(); ++i) {
+					if (events::getType(i) == InternalEvents::ENGINE_SHUTDOWN) {
+						shutdown();
+					}
 				}
 			}
-		}
-		if (_updated && _createReport) {
-			char timeFormat[255];
-			time_t now;
-			time(&now);
-			tm *now_tm = localtime(&now);
-			strftime(timeFormat, 255, "%Y%m%d_%H%M%S", now_tm);
-			char filename[255];
-			sprintf_s(filename, "%s%s.html", _settings.reportingDirectory, timeFormat);
-			ReportWriter rw(filename);
-			perf::save(rw);
-			res::save(rw);
-			gDefaultMemory->save(rw);
-			_createReport = false;
+			if (_updated && _createReport) {
+				char timeFormat[255];
+				time_t now;
+				time(&now);
+				tm *now_tm = localtime(&now);
+				strftime(timeFormat, 255, "%Y%m%d_%H%M%S", now_tm);
+				char filename[255];
+				sprintf_s(filename, "%s%s.html", _settings.reportingDirectory, timeFormat);
+				ReportWriter rw(filename);
+				perf::save(rw);
+				res::save(rw);
+				gDefaultMemory->save(rw);
+				_createReport = false;
+			}
 		}
 	}
 
@@ -363,7 +365,7 @@ namespace ds {
 
 	void BaseApp::shutdown() {
 		_alive = false;
-		DestroyWindow(m_hWnd);
+		//DestroyWindow(m_hWnd);
 	}
 
 	bool BaseApp::isRunning() const {

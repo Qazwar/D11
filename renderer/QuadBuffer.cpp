@@ -41,32 +41,34 @@ namespace ds {
 	}
 
 	void QuadBuffer::flush() {
-		ZoneTracker("QuadBuffer::flush");
-		unsigned int stride = sizeof(PNTCVertex);
-		unsigned int offset = 0;
+		if (_index > 0) {
+			ZoneTracker("QuadBuffer::flush");
+			unsigned int stride = sizeof(PNTCVertex);
+			unsigned int offset = 0;
 
-		graphics::setInputLayout(_descriptor.inputlayout);
-		graphics::setVertexBuffer(_descriptor.vertexBuffer, &stride, &offset);
-		graphics::setIndexBuffer(_descriptor.indexBuffer);
-		graphics::setBlendState(_descriptor.blendstate);
+			graphics::setInputLayout(_descriptor.inputlayout);
+			graphics::setVertexBuffer(_descriptor.vertexBuffer, &stride, &offset);
+			graphics::setIndexBuffer(_descriptor.indexBuffer);
+			graphics::setBlendState(_descriptor.blendstate);
 
-		graphics::setShader(_descriptor.shader);
-		graphics::setPixelShaderResourceView(_descriptor.colormap);
+			graphics::setShader(_descriptor.shader);
+			graphics::setPixelShaderResourceView(_descriptor.colormap);
 
-		Camera* camera = graphics::getCamera();
+			Camera* camera = graphics::getCamera();
 
-		//ds::mat4 mvp = graphics::getViewProjectionMaxtrix();
-		ds::mat4 mvp = camera->getViewProjectionMatrix();
-		mvp = ds::matrix::mat4Transpose(mvp);
+			//ds::mat4 mvp = graphics::getViewProjectionMaxtrix();
+			ds::mat4 mvp = camera->getViewProjectionMatrix();
+			mvp = ds::matrix::mat4Transpose(mvp);
 
-		graphics::mapData(_descriptor.vertexBuffer, _vertices, _index * sizeof(PNTCVertex));
+			graphics::mapData(_descriptor.vertexBuffer, _vertices, _index * sizeof(PNTCVertex));
 
-		graphics::updateConstantBuffer(_descriptor.constantBuffer, &mvp);
-		
-		graphics::setVertexShaderConstantBuffer(_descriptor.constantBuffer);
-		graphics::drawIndexed(_index / 4 * 6);
+			graphics::updateConstantBuffer(_descriptor.constantBuffer, &mvp, sizeof(mat4));
 
-		_index = 0;
+			graphics::setVertexShaderConstantBuffer(_descriptor.constantBuffer);
+			graphics::drawIndexed(_index / 4 * 6);
+
+			_index = 0;
+		}
 	}
 
 }

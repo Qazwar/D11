@@ -46,7 +46,7 @@ namespace graphics {
 
 	float getScreenHeight();
 
-	void updateConstantBuffer(RID rid, void* data);
+	void updateConstantBuffer(RID rid, void* data, size_t size);
 
 	const ds::mat4& getViewProjectionMaxtrix();
 
@@ -65,6 +65,8 @@ namespace graphics {
 	void setPixelShaderResourceView(RID rid, uint32_t slot = 0);
 
 	void setVertexShaderConstantBuffer(RID rid);
+
+	void setPixelShaderConstantBuffer(RID rid);
 
 	void setGeometryShaderConstantBuffer(RID rid);
 

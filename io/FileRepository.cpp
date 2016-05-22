@@ -219,6 +219,7 @@ namespace ds {
 		// shutdown
 		// -----------------------------------------------------------
 		void shutdown() {
+			/*
 			if (_repository->mode == RM_DEBUG) {
 				LOG << "entries: " << _repository->entries.size();
 				FILE* fp = fopen("c.pak", "wb");
@@ -281,6 +282,7 @@ namespace ds {
 					fclose(f);
 				}
 			}
+			*/
 			delete _repository;
 		}
 

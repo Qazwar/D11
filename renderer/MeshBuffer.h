@@ -36,7 +36,7 @@ namespace ds {
 	public:
 		MeshBuffer(const MeshBufferDescriptor& descriptor);
 		~MeshBuffer();
-		void drawImmediate(Mesh* mesh, const v3& position, const v3& scale = v3(1, 1, 1), const v3& rotation = v3(0, 0, 0));
+		void drawImmediate(Mesh* mesh, const v3& position, const v3& scale = v3(1, 1, 1), const v3& rotation = v3(0, 0, 0), const Color& color = Color(255,255,255,255));
 		void add(const v3& position, const v3& normal, const v2& uv, const Color& color = Color(255, 255, 255, 255));
 		void add(const PNTCVertex& v);
 		void add(Mesh* mesh, const v3& position, const v3& scale = v3(1, 1, 1), const v3& rotation = v3(0, 0, 0));
@@ -50,9 +50,9 @@ namespace ds {
 		void rotateZ(float angle);
 		void translate(const v3& position);
 		void scale(const v3& scale);
-		v3* getLightPos() {
-			return &_lightPos;
-		}
+		//v3* getLightPos() {
+			//return &_lightPos;
+		//}
 	private:
 		void flush();
 		uint32_t _size;
@@ -60,6 +60,7 @@ namespace ds {
 		v3 _lightPos;
 		Array<PNTCVertex> _vertices;
 		PNTCConstantBuffer _buffer;
+		Color _diffuseColor;
 	};
 
 }

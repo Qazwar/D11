@@ -14,9 +14,10 @@ namespace ds {
 		mat4 viewProjectionMatrix;
 		mat4 worldMatrix;
 		v3 cameraPos;
-		v3 lightPos;
 		float tmp;
+		v3 lightPos;		
 		float more;
+		Color diffuseColor;
 	};
 
 	class QuadBuffer {
@@ -34,6 +35,7 @@ namespace ds {
 		QuadVertex* _vertices;
 		int _maxSprites;
 		bool _started;
+		Color _diffuseColor;
 	};
 
 }

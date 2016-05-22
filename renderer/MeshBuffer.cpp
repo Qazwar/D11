@@ -13,8 +13,14 @@ namespace ds {
 	// MeshBuffer
 	// ------------------------------------------------------
 	MeshBuffer::MeshBuffer(const MeshBufferDescriptor& descriptor) : _descriptor(descriptor) {
-		_lightPos = v3(0, 8, -8);
+		_lightPos = v3(0, 0, -1);
 		_size = descriptor.size;
+		_diffuseColor = Color::WHITE;
+		LOG << "=====> buffer size: " << sizeof(PNTCConstantBuffer);
+		_buffer.more = 1.0f;
+		_buffer.tmp = 1.0f;
+		_buffer.diffuseColor = _diffuseColor;
+		_buffer.lightPos = _lightPos;
 	}
 
 	MeshBuffer::~MeshBuffer() {
@@ -97,7 +103,7 @@ namespace ds {
 	// ------------------------------------------------------
 	// draw immediately
 	// ------------------------------------------------------
-	void MeshBuffer::drawImmediate(Mesh* mesh, const v3& position, const v3& scale, const v3& rotation) {
+	void MeshBuffer::drawImmediate(Mesh* mesh, const v3& position, const v3& scale, const v3& rotation, const Color& color) {
 		ZoneTracker("Mesh::drawImmediate");
 		flush();
 
@@ -126,11 +132,12 @@ namespace ds {
 		_buffer.worldMatrix = ds::matrix::mat4Transpose(world);
 		_buffer.cameraPos = camera->getPosition();
 		_buffer.lightPos = _lightPos;
-
+		_buffer.diffuseColor = Color(192,0,0,255);
 		graphics::mapData(_descriptor.vertexBuffer, mesh->vertices.data(), mesh->vertices.size() * sizeof(PNTCVertex));
 
-		graphics::updateConstantBuffer(_descriptor.constantBuffer, &_buffer);
+		graphics::updateConstantBuffer(_descriptor.constantBuffer, &_buffer, sizeof(PNTCConstantBuffer));
 		graphics::setVertexShaderConstantBuffer(_descriptor.constantBuffer);
+		//graphics::setPixelShaderConstantBuffer(_descriptor.constantBuffer);
 		graphics::drawIndexed(mesh->vertices.size() / 4 * 6);
 	}
 
@@ -138,34 +145,36 @@ namespace ds {
 	// flush
 	// ------------------------------------------------------
 	void MeshBuffer::flush() {
-		ZoneTracker("Mesh::flush");
+		if (!_vertices.empty()) {
+			ZoneTracker("Mesh::flush");
 
-		mat4 world = matrix::m4identity();		
-		unsigned int stride = sizeof(PNTCVertex);
-		unsigned int offset = 0;
+			mat4 world = matrix::m4identity();
+			unsigned int stride = sizeof(PNTCVertex);
+			unsigned int offset = 0;
 
-		graphics::setInputLayout(_descriptor.inputlayout);
-		graphics::setVertexBuffer(_descriptor.vertexBuffer, &stride, &offset);
-		graphics::setIndexBuffer(_descriptor.indexBuffer);
-		graphics::setBlendState(_descriptor.blendstate);
+			graphics::setInputLayout(_descriptor.inputlayout);
+			graphics::setVertexBuffer(_descriptor.vertexBuffer, &stride, &offset);
+			graphics::setIndexBuffer(_descriptor.indexBuffer);
+			graphics::setBlendState(_descriptor.blendstate);
 
-		graphics::setShader(_descriptor.shader);
-		graphics::setPixelShaderResourceView(_descriptor.colormap);
+			graphics::setShader(_descriptor.shader);
+			graphics::setPixelShaderResourceView(_descriptor.colormap);
 
-		Camera* camera = graphics::getCamera();
+			Camera* camera = graphics::getCamera();
 
-		ds::mat4 mvp = world * camera->getViewProjectionMatrix();
-		_buffer.viewProjectionMatrix = ds::matrix::mat4Transpose(mvp);
-		_buffer.worldMatrix = ds::matrix::mat4Transpose(world);
-		_buffer.cameraPos = camera->getPosition();
-		_buffer.lightPos = _lightPos;
+			ds::mat4 mvp = world * camera->getViewProjectionMatrix();
+			_buffer.viewProjectionMatrix = ds::matrix::mat4Transpose(mvp);
+			_buffer.worldMatrix = ds::matrix::mat4Transpose(world);
+			_buffer.cameraPos = camera->getPosition();
+			_buffer.lightPos = _lightPos;
+			_buffer.diffuseColor = _diffuseColor;
+			graphics::mapData(_descriptor.vertexBuffer, _vertices.data(), _vertices.size() * sizeof(PNTCVertex));
 
-		graphics::mapData(_descriptor.vertexBuffer, _vertices.data(), _vertices.size() * sizeof(PNTCVertex));
-
-		graphics::updateConstantBuffer(_descriptor.constantBuffer, &_buffer);
-		graphics::setVertexShaderConstantBuffer(_descriptor.constantBuffer);
-		graphics::drawIndexed(_vertices.size() / 4 * 6);
-		_vertices.clear();
+			graphics::updateConstantBuffer(_descriptor.constantBuffer, &_buffer, sizeof(PNTCConstantBuffer));
+			graphics::setVertexShaderConstantBuffer(_descriptor.constantBuffer);
+			graphics::drawIndexed(_vertices.size() / 4 * 6);
+			_vertices.clear();
+		}
 	}
 
 }
