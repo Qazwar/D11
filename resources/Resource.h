@@ -187,6 +187,19 @@ namespace ds {
 		}
 	};
 
+	class Scene;
+
+	class SceneResource : public AbstractResource<Scene*> {
+
+	public:
+		SceneResource(Scene* t) : AbstractResource(t) {}
+		virtual ~SceneResource() {
+			if (_data != 0) {
+				delete _data;
+			}
+		}
+	};
+
 	class ShaderResource : public AbstractResource<Shader*> {
 
 	public:

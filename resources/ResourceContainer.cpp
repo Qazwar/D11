@@ -558,6 +558,26 @@ namespace ds {
 		}
 
 		// ------------------------------------------------------
+		// create scene
+		// ------------------------------------------------------
+		static RID createScene(const char* name, const SceneDescriptor& descriptor) {
+			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
+			assert(ri.type == ResourceType::UNKNOWN);
+			Scene* scene = new Scene(descriptor.meshBuffer);
+			int idx = _resCtx->resources.size();
+			SceneResource* cbr = new SceneResource(scene);
+			_resCtx->resources.push_back(cbr);
+			IdString hash = string::murmur_hash(name);
+			ri.index = idx;
+			ri.id = descriptor.id;
+			ri.nameIndex = _resCtx->nameBuffer.size;
+			_resCtx->nameBuffer.append(name);
+			ri.type = ResourceType::SCENE;
+			_resCtx->lookup[hash] = ri;
+			return ri.id;
+		}
+
+		// ------------------------------------------------------
 		// create dialog
 		// ------------------------------------------------------
 		static RID createDialog(const char* name, const GUIDialogDescriptor& descriptor) {
@@ -868,6 +888,18 @@ namespace ds {
 		}
 
 		// ------------------------------------------------------
+		// parse scene
+		// ------------------------------------------------------
+		void parseScene(JSONReader& reader, int childIndex) {
+			SceneDescriptor descriptor;
+			reader.get(childIndex, "id", &descriptor.id);
+			reader.get(childIndex, "size", &descriptor.size);
+			descriptor.meshBuffer = reader.get_string(childIndex, "mesh_buffer");
+			const char* name = reader.get_string(childIndex, "name");
+			createScene(name, descriptor);
+		}
+
+		// ------------------------------------------------------
 		// parse input layout
 		// ------------------------------------------------------
 		void parseInputLayout(JSONReader& reader, int childIndex) {
@@ -1089,6 +1121,7 @@ namespace ds {
 			_resCtx->parsers[string::murmur_hash("mesh")] = parseMesh;
 			_resCtx->parsers[string::murmur_hash("mesh_buffer")] = parseMeshBuffer;
 			_resCtx->parsers[string::murmur_hash("quad_buffer")] = parseQuadBuffer;
+			_resCtx->parsers[string::murmur_hash("scene")] = parseScene;
 		}
 
 		// ------------------------------------------------------
@@ -1264,6 +1297,15 @@ namespace ds {
 			const ResourceIndex& res_idx = _resCtx->lookup[hash];
 			assert(res_idx.type == ResourceType::MESHBUFFER);
 			MeshBufferResource* res = static_cast<MeshBufferResource*>(_resCtx->resources[res_idx.index]);
+			return res->get();
+		}
+
+		Scene* getScene(const char* name) {
+			IdString hash = string::murmur_hash(name);
+			assert(_resCtx->lookup.find(hash) != _resCtx->lookup.end());
+			const ResourceIndex& res_idx = _resCtx->lookup[hash];
+			assert(res_idx.type == ResourceType::SCENE);
+			SceneResource* res = static_cast<SceneResource*>(_resCtx->resources[res_idx.index]);
 			return res->get();
 		}
 

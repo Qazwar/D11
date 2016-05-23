@@ -10,6 +10,7 @@
 #include "..\dialogs\GUIDialog.h"
 #include "..\renderer\QuadBuffer.h"
 #include "..\renderer\MeshBuffer.h"
+#include "..\renderer\Scene.h"
 
 namespace ds {
 
@@ -41,6 +42,7 @@ namespace ds {
 		QUADBUFFER,
 		MESHBUFFER,
 		MESH,
+		SCENE,
 		UNKNOWN
 	};
 
@@ -89,6 +91,8 @@ namespace ds {
 		MeshBuffer* getMeshBuffer(RID rid);
 
 		MeshBuffer* getMeshBuffer(const char* name);
+
+		Scene* getScene(const char* name);
 
 		Mesh* getMesh(RID rid);
 

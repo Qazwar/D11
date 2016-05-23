@@ -171,4 +171,10 @@ namespace ds {
 		const char* file;
 	};
 
+	struct SceneDescriptor {
+		uint16_t id;
+		const char* meshBuffer;
+		uint16_t size;
+	};
+
 }

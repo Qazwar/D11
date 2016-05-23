@@ -16,7 +16,6 @@ namespace ds {
 		_lightPos = v3(0, 0, -1);
 		_size = descriptor.size;
 		_diffuseColor = Color::WHITE;
-		LOG << "=====> buffer size: " << sizeof(PNTCConstantBuffer);
 		_buffer.more = 1.0f;
 		_buffer.tmp = 1.0f;
 		_buffer.diffuseColor = _diffuseColor;
