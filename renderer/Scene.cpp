@@ -23,7 +23,20 @@ namespace ds {
 		e.timer = 0.0f;
 		e.active = true;
 		e.type = -1;
+		e.world = matrix::mat4Transform(position);
+		e.parent = INVALID_ID;
+		e.value = 0;
 		return id;
+	}
+
+	// ------------------------------------
+	// attach
+	// ------------------------------------
+	void Scene::attach(ID child, ID parent)	{
+		if (_entities.contains(child) && _entities.contains(parent)) {
+			Entity& e = _entities.get(child);
+			e.parent = parent;
+		}
 	}
 
 	// ------------------------------------
@@ -33,7 +46,7 @@ namespace ds {
 		for (EntityList::iterator it = _entities.begin(); it != _entities.end(); ++it) {
 			const Entity& e = (*it);
 			if (e.active) {
-				_meshBuffer->drawImmediate(e.mesh, e.position, e.scale, e.rotation);
+				_meshBuffer->drawImmediate(e.mesh, e.world, e.scale, e.rotation, e.color);
 			}
 		}
 	}
@@ -50,6 +63,22 @@ namespace ds {
 			}
 		}
 		return cnt;
+	}
+
+	// ------------------------------------
+	// transform
+	// ------------------------------------
+	void Scene::transform() {
+		for (EntityList::iterator it = _entities.begin(); it != _entities.end(); ++it) {
+			Entity& e = (*it);
+			if (e.parent == INVALID_ID) {
+				e.world = matrix::mat4Transform(e.position);
+			}
+			else {
+				const Entity& parent = _entities.get(e.parent);
+				e.world = matrix::mat4Transform(e.position) * parent.world;
+			}
+		}
 	}
 
 	// ------------------------------------
@@ -70,6 +99,7 @@ namespace ds {
 	// remove entity
 	// ------------------------------------
 	void Scene::remove(ID id) {
+		// check if this is a parent to anyone and then remove this as well?
 		_entities.remove(id);
 	}
 

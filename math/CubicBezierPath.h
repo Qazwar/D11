@@ -7,7 +7,17 @@ namespace ds {
 
 	const int MAX_CBP_STEPS = 64;
 
-	class CubicBezierPath {
+	class Path {
+
+	public:
+		virtual void build() = 0;
+		virtual void get(float t, v2* p) = 0;
+		virtual void approx(float t, v2* p) = 0;
+		virtual void tanget(float u, v2* tangent) = 0;
+		virtual const int size() const = 0;
+	};
+	
+	class CubicBezierPath : public Path {
 
 	typedef Array<BezierCurve> BezierElements;
 

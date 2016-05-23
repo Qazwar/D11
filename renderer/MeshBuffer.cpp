@@ -103,16 +103,23 @@ namespace ds {
 	// draw immediately
 	// ------------------------------------------------------
 	void MeshBuffer::drawImmediate(Mesh* mesh, const v3& position, const v3& scale, const v3& rotation, const Color& color) {
+		mat4 t = matrix::mat4Transform(position);
+		drawImmediate(mesh, t, scale, rotation, color);
+	}
+
+	// ------------------------------------------------------
+	// draw immediately
+	// ------------------------------------------------------
+	void MeshBuffer::drawImmediate(Mesh* mesh, const mat4& world, const v3& scale, const v3& rotation, const Color& color) {
 		ZoneTracker("Mesh::drawImmediate");
 		flush();
 
-		mat4 world = matrix::m4identity();
+		mat4 w = matrix::m4identity();
 		mat4 rotY = matrix::mat4RotationY(rotation.y);
 		mat4 rotX = matrix::mat4RotationX(rotation.x);
 		mat4 rotZ = matrix::mat4RotationZ(rotation.z);
-		mat4 t = matrix::mat4Transform(position);
 		mat4 s = matrix::mat4Scale(scale);
-		world = rotZ * rotY * rotX * s * t;
+		w = rotZ * rotY * rotX * s * world;
 		unsigned int stride = sizeof(PNTCVertex);
 		unsigned int offset = 0;
 
@@ -126,12 +133,12 @@ namespace ds {
 
 		Camera* camera = graphics::getCamera();
 
-		ds::mat4 mvp = world * camera->getViewProjectionMatrix();
+		ds::mat4 mvp = w * camera->getViewProjectionMatrix();
 		_buffer.viewProjectionMatrix = ds::matrix::mat4Transpose(mvp);
-		_buffer.worldMatrix = ds::matrix::mat4Transpose(world);
+		_buffer.worldMatrix = ds::matrix::mat4Transpose(w);
 		_buffer.cameraPos = camera->getPosition();
 		_buffer.lightPos = _lightPos;
-		_buffer.diffuseColor = Color(192,0,0,255);
+		_buffer.diffuseColor = Color(192, 0, 0, 255);
 		graphics::mapData(_descriptor.vertexBuffer, mesh->vertices.data(), mesh->vertices.size() * sizeof(PNTCVertex));
 
 		graphics::updateConstantBuffer(_descriptor.constantBuffer, &_buffer, sizeof(PNTCConstantBuffer));

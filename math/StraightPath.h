@@ -13,7 +13,7 @@ namespace ds {
 
 	typedef Array<LineSegment> LineElements;
 
-	class StraightPath {
+	class StraightPath : public Path {
 
 	public:
 		StraightPath();

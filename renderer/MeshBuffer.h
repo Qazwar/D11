@@ -37,6 +37,7 @@ namespace ds {
 		MeshBuffer(const MeshBufferDescriptor& descriptor);
 		~MeshBuffer();
 		void drawImmediate(Mesh* mesh, const v3& position, const v3& scale = v3(1, 1, 1), const v3& rotation = v3(0, 0, 0), const Color& color = Color(255,255,255,255));
+		void drawImmediate(Mesh* mesh, const mat4& world, const v3& scale = v3(1, 1, 1), const v3& rotation = v3(0, 0, 0), const Color& color = Color(255, 255, 255, 255));
 		void add(const v3& position, const v3& normal, const v2& uv, const Color& color = Color(255, 255, 255, 255));
 		void add(const PNTCVertex& v);
 		void add(Mesh* mesh, const v3& position, const v3& scale = v3(1, 1, 1), const v3& rotation = v3(0, 0, 0));

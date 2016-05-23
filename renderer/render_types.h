@@ -2,17 +2,17 @@
 #include <stdint.h>
 #include <Vector.h>
 #include "..\math\math_types.h"
+#include "..\utils\Color.h"
+#include "..\Common.h"
 
 namespace ds {
 	
-	// -------------------------------------------------------
-	// Texture
-	// -------------------------------------------------------
-	struct TextureAsset {
-		//IdString name;
-		//LPDIRECT3DTEXTURE9 texture;
-		uint32_t width;
-		uint32_t height;
+	struct Material {
+		Color diffuse;
+		Color ambient;
+		RID blendState;
+		RID shader;
+		RID texture;
 	};
 
 	struct Texture {
