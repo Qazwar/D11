@@ -146,7 +146,7 @@ namespace ds {
 		_buffer.worldMatrix = ds::matrix::mat4Transpose(w);
 		_buffer.cameraPos = camera->getPosition();
 		_buffer.lightPos = _lightPos;
-		_buffer.diffuseColor = Color(192, 0, 0, 255);
+		_buffer.diffuseColor = color;// Color(192, 0, 0, 255);
 		graphics::mapData(_descriptor.vertexBuffer, mesh->vertices.data(), mesh->vertices.size() * sizeof(PNTCVertex));
 
 		graphics::updateConstantBuffer(_descriptor.constantBuffer, &_buffer, sizeof(PNTCConstantBuffer));
