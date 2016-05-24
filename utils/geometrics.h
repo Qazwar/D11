@@ -13,6 +13,8 @@ namespace ds {
 
 		void createPlane(Mesh* mesh, const v3& position, const Rect& textureRect, const v2& size, float rotation = 0.0f, const Color& color = Color::WHITE);
 
+		void createXYPlane(Mesh* mesh, const v3& position, const Rect& textureRect, const v2& size, float rotation = 0.0f, const Color& color = Color::WHITE);
+
 	}
 }
 

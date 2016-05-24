@@ -3,8 +3,10 @@
 
 namespace ds {
 
-	Scene::Scene(const char* meshBufferName) {
-		_meshBuffer = res::getMeshBuffer(meshBufferName);
+	Scene::Scene(const SceneDescriptor& descriptor) {
+		_meshBuffer = res::getMeshBuffer(descriptor.meshBuffer);
+		_camera = res::getCamera(descriptor.camera);
+		_depthEnabled = descriptor.depthEnabled;
 	}
 
 	Scene::~Scene()	{
@@ -13,10 +15,18 @@ namespace ds {
 	// ------------------------------------
 	// add entity
 	// ------------------------------------
-	ID Scene::add(const char* meshName, const v3& position) {
+	ID Scene::add(const char* meshName, const v3& position, DrawMode mode) {
+		Mesh* m = res::getMesh(meshName);
+		return add(m, position);
+	}
+	
+	// ------------------------------------
+	// add entity
+	// ------------------------------------
+	ID Scene::add(Mesh* mesh, const v3& position, DrawMode mode) {
 		ID id = _entities.add();
 		Entity& e = _entities.get(id);
-		e.mesh = res::getMesh(meshName);
+		e.mesh = mesh;
 		e.position = position;
 		e.scale = v3(1, 1, 1);
 		e.rotation = v3(0, 0, 0);
@@ -26,6 +36,7 @@ namespace ds {
 		e.world = matrix::mat4Transform(position);
 		e.parent = INVALID_ID;
 		e.value = 0;
+		e.mode = mode;
 		return id;
 	}
 
@@ -43,12 +54,27 @@ namespace ds {
 	// draw
 	// ------------------------------------
 	void Scene::draw() {
+		graphics::setCamera(_camera);
+		if (_depthEnabled) {
+			graphics::turnOnZBuffer();
+		}
+		else {
+			graphics::turnOffZBuffer();
+		}
+		_meshBuffer->begin();
 		for (EntityList::iterator it = _entities.begin(); it != _entities.end(); ++it) {
-			const Entity& e = (*it);
+			const Entity& e = (*it);			
 			if (e.active) {
-				_meshBuffer->drawImmediate(e.mesh, e.world, e.scale, e.rotation, e.color);
+				if (e.mode == DrawMode::IMMEDIATE) {
+					_meshBuffer->flush();
+					_meshBuffer->drawImmediate(e.mesh, e.world, e.scale, e.rotation, e.color);
+				}
+				else if (e.mode == DrawMode::TRANSFORM) {
+					_meshBuffer->add(e.mesh, e.position, e.scale, e.rotation);
+				}
 			}
 		}
+		_meshBuffer->end();
 	}
 
 	// ------------------------------------

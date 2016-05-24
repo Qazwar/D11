@@ -3,6 +3,17 @@
 
 const ds::Color ds::Color::WHITE(1.0f, 1.0f, 1.0f, 1.0f);
 
+ds::Color operator*=(ds::Color lhs, const ds::Color& rhs) {
+	for (int i = 0; i < 4; ++i) {
+		lhs.values[i] *= rhs.values[i];
+	}
+	return lhs;
+}
+
+ds::Color operator*(ds::Color lhs, const ds::Color& rhs) {
+	return lhs *= rhs;
+}
+
 namespace ds {
 
 	namespace color {

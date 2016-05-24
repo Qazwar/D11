@@ -48,19 +48,27 @@ namespace ds {
 	// ------------------------------------------------------
 	// add mesh
 	// ------------------------------------------------------
-	void MeshBuffer::add(Mesh* mesh, const v3& position, const v3& scale, const v3& rotation) {
+	void MeshBuffer::add(Mesh* mesh, const v3& position, const v3& scale, const v3& rotation, const Color& color) {
+		mat4 w = matrix::mat4Transform(position);
+		add(mesh, w, scale, rotation, color);
+	}
+
+	// ------------------------------------------------------
+	// add mesh
+	// ------------------------------------------------------
+	void MeshBuffer::add(Mesh* mesh, const mat4& world, const v3& scale, const v3& rotation, const Color& color) {
 		mat4 rotY = matrix::mat4RotationY(rotation.y);
 		mat4 rotX = matrix::mat4RotationX(rotation.x);
 		mat4 rotZ = matrix::mat4RotationZ(rotation.z);
-		mat4 t = matrix::mat4Transform(position);
 		mat4 s = matrix::mat4Scale(scale);
-		mat4 world = rotZ * rotY * rotX * s * t;
+		mat4 w = rotZ * rotY * rotX * s * world;
 		for (int i = 0; i < mesh->vertices.size(); ++i) {
 			const PNTCVertex& v = mesh->vertices[i];
-			v3 p = world * v.position;
+			v3 p = w * v.position;
 			//v3 n = world * v.normal;
+			// FIXME: we need to rotate normal!!!
 			v3 n = v.normal;
-			add(p, n, v.texture, v.color);
+			add(p, n, v.texture, v.color * color);
 		}
 	}
 

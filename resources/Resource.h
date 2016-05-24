@@ -200,6 +200,19 @@ namespace ds {
 		}
 	};
 
+	class Camera;
+
+	class CameraResource : public AbstractResource<Camera*> {
+
+	public:
+		CameraResource(Camera* t) : AbstractResource(t) {}
+		virtual ~CameraResource() {
+			if (_data != 0) {
+				delete _data;
+			}
+		}
+	};
+
 	class ShaderResource : public AbstractResource<Shader*> {
 
 	public:

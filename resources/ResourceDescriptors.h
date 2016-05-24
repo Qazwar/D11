@@ -171,10 +171,19 @@ namespace ds {
 		const char* file;
 	};
 
+	struct CameraDescriptor {
+		uint16_t id;
+		const char* type;
+		v3 position;
+		v3 target;
+	};
+
 	struct SceneDescriptor {
 		uint16_t id;
 		const char* meshBuffer;
 		uint16_t size;
+		const char* camera;
+		bool depthEnabled;
 	};
 
 }

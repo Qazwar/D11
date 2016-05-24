@@ -464,6 +464,16 @@ bool JSONReader::get_float(int category_id, const char* name, float* ret) const 
 	return false;
 }
 
+bool JSONReader::get(int category_id, const char* name, float* ret) const {
+	int idx = get_index(category_id, name);
+	if (idx != -1) {
+		*ret = get(_data_indices[idx]);
+		return true;
+	}
+	return false;
+}
+
+
 // -------------------------------------------
 // get v2
 // -------------------------------------------
@@ -473,6 +483,16 @@ bool JSONReader::get_vec2(int category_id, const char* name, v2* ret) const {
 		ret->x = get(_data_indices[idx]);
 		ret->y = get(_data_indices[idx] + 1);
 		return true;	
+	}
+	return false;
+}
+
+bool JSONReader::get(int category_id, const char* name, v2* ret) const {
+	int idx = get_index(category_id, name);
+	if (idx != -1) {
+		ret->x = get(_data_indices[idx]);
+		ret->y = get(_data_indices[idx] + 1);
+		return true;
 	}
 	return false;
 }

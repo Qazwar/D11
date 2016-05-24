@@ -120,6 +120,8 @@ namespace ds {
 			"QUADBUFFER",
 			"MESHBUFFER",
 			"MESH",
+			"SCENE",
+			"CAMERA",
 			"UNKNOWN"
 		};
 
@@ -558,12 +560,42 @@ namespace ds {
 		}
 
 		// ------------------------------------------------------
+		// create camera
+		// ------------------------------------------------------
+		static RID createCamera(const char* name, const CameraDescriptor& descriptor) {
+			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
+			assert(ri.type == ResourceType::UNKNOWN);
+			CameraResource* cbr = 0;
+			if (strcmp(descriptor.type, "orthographic") == 0) {
+				OrthoCamera* camera = new OrthoCamera(graphics::getScreenWidth(), graphics::getScreenHeight());
+				cbr = new CameraResource(camera);
+			}
+			else if (strcmp(descriptor.type, "fps") == 0) {
+				FPSCamera* camera = new FPSCamera(graphics::getScreenWidth(), graphics::getScreenHeight());
+				camera->setPosition(descriptor.position, descriptor.target);
+				camera->resetPitch(0.0f);
+				camera->resetYAngle();
+				cbr = new CameraResource(camera);
+			}
+			int idx = _resCtx->resources.size();
+			_resCtx->resources.push_back(cbr);
+			IdString hash = string::murmur_hash(name);
+			ri.index = idx;
+			ri.id = descriptor.id;
+			ri.nameIndex = _resCtx->nameBuffer.size;
+			_resCtx->nameBuffer.append(name);
+			ri.type = ResourceType::CAMERA;
+			_resCtx->lookup[hash] = ri;
+			return ri.id;
+		}
+
+		// ------------------------------------------------------
 		// create scene
 		// ------------------------------------------------------
 		static RID createScene(const char* name, const SceneDescriptor& descriptor) {
 			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
 			assert(ri.type == ResourceType::UNKNOWN);
-			Scene* scene = new Scene(descriptor.meshBuffer);
+			Scene* scene = new Scene(descriptor);
 			int idx = _resCtx->resources.size();
 			SceneResource* cbr = new SceneResource(scene);
 			_resCtx->resources.push_back(cbr);
@@ -895,8 +927,23 @@ namespace ds {
 			reader.get(childIndex, "id", &descriptor.id);
 			reader.get(childIndex, "size", &descriptor.size);
 			descriptor.meshBuffer = reader.get_string(childIndex, "mesh_buffer");
+			descriptor.camera = reader.get_string(childIndex, "camera");
+			reader.get(childIndex, "depth_enabled", &descriptor.depthEnabled);
 			const char* name = reader.get_string(childIndex, "name");
 			createScene(name, descriptor);
+		}
+
+		// ------------------------------------------------------
+		// parse camera
+		// ------------------------------------------------------
+		void parseCamera(JSONReader& reader, int childIndex) {
+			CameraDescriptor descriptor;
+			reader.get(childIndex, "id", &descriptor.id);
+			reader.get(childIndex, "position", &descriptor.position);
+			reader.get(childIndex, "target", &descriptor.target);
+			descriptor.type= reader.get_string(childIndex, "type");
+			const char* name = reader.get_string(childIndex, "name");
+			createCamera(name, descriptor);
 		}
 
 		// ------------------------------------------------------
@@ -1122,6 +1169,7 @@ namespace ds {
 			_resCtx->parsers[string::murmur_hash("mesh_buffer")] = parseMeshBuffer;
 			_resCtx->parsers[string::murmur_hash("quad_buffer")] = parseQuadBuffer;
 			_resCtx->parsers[string::murmur_hash("scene")] = parseScene;
+			_resCtx->parsers[string::murmur_hash("camera")] = parseCamera;
 		}
 
 		// ------------------------------------------------------
@@ -1306,6 +1354,15 @@ namespace ds {
 			const ResourceIndex& res_idx = _resCtx->lookup[hash];
 			assert(res_idx.type == ResourceType::SCENE);
 			SceneResource* res = static_cast<SceneResource*>(_resCtx->resources[res_idx.index]);
+			return res->get();
+		}
+
+		Camera* getCamera(const char* name) {
+			IdString hash = string::murmur_hash(name);
+			assert(_resCtx->lookup.find(hash) != _resCtx->lookup.end());
+			const ResourceIndex& res_idx = _resCtx->lookup[hash];
+			assert(res_idx.type == ResourceType::CAMERA);
+			CameraResource* res = static_cast<CameraResource*>(_resCtx->resources[res_idx.index]);
 			return res->get();
 		}
 

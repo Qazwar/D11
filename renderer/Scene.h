@@ -3,8 +3,15 @@
 #include <Vector.h>
 #include "..\Common.h"
 #include "MeshBuffer.h"
+#include "Camera.h"
 
 namespace ds {
+
+	enum DrawMode {
+		STATIC,
+		TRANSFORM,
+		IMMEDIATE
+	};
 
 	struct Entity {
 		ID id;
@@ -19,6 +26,7 @@ namespace ds {
 		ID parent;
 		Color color;
 		int value;
+		DrawMode mode;
 	};
 
 	typedef DataArray<Entity> EntityList;
@@ -26,9 +34,10 @@ namespace ds {
 	class Scene {
 
 	public:
-		Scene(const char* meshBufferName);
+		Scene(const SceneDescriptor& descriptor);
 		~Scene();
-		ID add(const char* meshName, const v3& position);
+		ID add(const char* meshName, const v3& position, DrawMode mode = IMMEDIATE);
+		ID add(Mesh* mesh, const v3& position, DrawMode mode = IMMEDIATE);
 		void attach(ID child, ID parent);
 		Entity& get(ID id);
 		const Entity& get(ID id) const;
@@ -39,6 +48,8 @@ namespace ds {
 	private:
 		EntityList _entities;
 		MeshBuffer* _meshBuffer;
+		Camera* _camera;
+		bool _depthEnabled;
 	};
 
 }

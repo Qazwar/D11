@@ -111,5 +111,28 @@ namespace ds {
 			}
 		}
 
+		// ---------------------------------------------------------------
+		// create XZ plane
+		// ---------------------------------------------------------------
+		void createXYPlane(Mesh* mesh, const v3& position, const Rect& textureRect, const v2& size, float rotation, const Color& color) {
+			v3 center = position;
+			mat3 R = matrix::mat3RotationY(rotation);
+			float px = 0.5f * size.x;
+			float py = 0.5f * size.y;
+			float pz = position.z;
+			ds::Texture t = math::buildTexture(textureRect);
+			v3 points[] = {
+				v3(-px,  py, pz),
+				v3( px,  py, pz),
+				v3( px, -py, pz),
+				v3(-px, -py, pz)
+			};
+			for (int i = 0; i < 4; ++i) {
+				v3 n = R * points[i];
+				n += center;
+				mesh->add(n, v3(0, 0, -1), t.getUV(i), color);
+			}
+		}
+
 	}
 }

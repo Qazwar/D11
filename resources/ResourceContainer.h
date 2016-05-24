@@ -43,6 +43,7 @@ namespace ds {
 		MESHBUFFER,
 		MESH,
 		SCENE,
+		CAMERA,
 		UNKNOWN
 	};
 
@@ -93,6 +94,8 @@ namespace ds {
 		MeshBuffer* getMeshBuffer(const char* name);
 
 		Scene* getScene(const char* name);
+
+		Camera* getCamera(const char* name);
 
 		Mesh* getMesh(RID rid);
 

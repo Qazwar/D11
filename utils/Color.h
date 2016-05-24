@@ -45,6 +45,8 @@ namespace ds {
 		static const Color WHITE;
 	};
 
+	
+
 	inline Color::Color(const Color& v) {
 		r = v.r;
 		g = v.g;
@@ -73,3 +75,7 @@ namespace ds {
 
 	}
 }
+
+ds::Color operator*=(ds::Color lhs, const ds::Color& rhs);
+
+ds::Color operator*(ds::Color lhs, const ds::Color& rhs);
