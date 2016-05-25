@@ -8,6 +8,7 @@
 #include "..\imgui\IMGUI.h"
 #include "InputSystem.h"
 #include <strsafe.h>
+#include "..\data\DynamicSettings.h"
 
 void ErrorExit(LPTSTR lpszFunction)
 {
@@ -76,10 +77,12 @@ namespace ds {
 		LOG << "size: " << _settings.screenWidth << " x " << _settings.screenHeight;
 		_start = std::chrono::steady_clock::now();
 		_num = 0;
+		settings::initialize();
 	}
 
 
 	BaseApp::~BaseApp() {
+		settings::shutdown();
 		repository::shutdown();
 		perf::shutdown();		
 		events::shutdown();

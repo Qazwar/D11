@@ -81,6 +81,7 @@ namespace ds {
 		bool get_vec3(int category_id, const char* name, v3* ret) const;
 		bool get(int category_id, const char* name, v3* ret) const;
 		bool get_color(int category_id, const char* name, Color* ret) const;
+		bool get(int category_id, const char* name, Color* ret) const;
 		bool get(int category_id, const char* name, Rect* ret) const;
 		bool get_color_path(int category_id, const char* name, ds::ColorPath* path) const;
 		bool get_vec2_path(int category_id, const char* name, ds::Vector2fPath* path) const;
@@ -89,6 +90,7 @@ namespace ds {
 		int get_array(int category_id, const char* name, int* values, int max) const;
 		const char* get_string(int category_id, const char* name) const;
 		const char* get_category_name(int category_id) const;
+		int num_properties(int category_id) const;
 	private:
 		int get_index(int category_id, const char* name) const;
 		void allocCategoryBuffer(int size);

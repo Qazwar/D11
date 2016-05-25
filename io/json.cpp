@@ -525,6 +525,15 @@ bool JSONReader::get(int category_id, const char* name, v3* ret) const {
 	return false;
 }
 
+int JSONReader::num_properties(int category_id) const {
+	int cnt = 0;
+	for (int i = 0; i < _data_buffer.size; ++i) {
+		if (_data_categories[i] == category_id) {
+			++cnt;
+		}
+	}
+	return cnt;
+}
 // -------------------------------------------
 // get index
 // -------------------------------------------
@@ -551,6 +560,18 @@ bool JSONReader::contains_property(int category_id, const char* name) const {
 // get color
 // -------------------------------------------
 bool JSONReader::get_color(int category_id, const char* name, Color* ret) const {
+	int idx = get_index(category_id, name);
+	if (idx != -1) {
+		ret->r = get(_data_indices[idx]) / 255.0f;
+		ret->g = get(_data_indices[idx] + 1) / 255.0f;
+		ret->b = get(_data_indices[idx] + 2) / 255.0f;
+		ret->a = get(_data_indices[idx] + 3) / 255.0f;
+		return true;
+	}
+	return false;
+}
+
+bool JSONReader::get(int category_id, const char* name, Color* ret) const {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
 		ret->r = get(_data_indices[idx]) / 255.0f;
