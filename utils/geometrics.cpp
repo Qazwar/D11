@@ -5,6 +5,65 @@ namespace ds {
 
 	namespace geometrics {
 
+		int find_edge(const v3& start, const v3& end) {
+			return -1;
+		}
+
+		void add_face(Geometry* geometry, v3* positions) {
+			Face f;
+			int idx = geometry->edges.size();
+			int cnt = idx;
+			for (int i = 0; i < 4; ++i) {
+				v3 start = positions[i];
+				v3 end;
+				if (i < 3) {
+					end = positions[i + 1];
+				}
+				else {
+					end = positions[0];
+				}
+				int idx = find_edge(start, end);
+				if (idx == -1) {
+					Edge e;
+					e.index = cnt;
+					e.next = cnt + 1;
+					if (e.next == 4) {
+						e.next = idx;
+					}
+					e.start = positions[i];
+					++cnt;
+					if (i < 3) {
+						e.end = positions[i + 1];
+					}
+					else {
+						e.end = positions[0];
+					}
+					f.edges[i] = e.index;
+					geometry->edges.push_back(e);
+				}
+				else {
+					f.edges[i] = idx;
+				}
+				// FIXME: build normal
+			}
+			geometry->faces.push_back(f);
+		}
+
+		void add_face(Geometry* geometry, const v3& position, const v2& size, const v3& normal) {
+
+		}
+
+		void convert(Geometry* geometry, Mesh* mesh) {
+			for (int i = 0; i < geometry->faces.size(); ++i) {
+				const Face& f = geometry->faces[i];
+				for (int j = 0; j < 4; ++j) {
+					int idx = f.edges[j];
+					const Edge& e = geometry->edges[idx];
+					mesh->add(e.start, f.n, v2(0,0));
+				}
+			}
+		}
+
 		void createCube(Mesh* mesh, const Rect& textureRect, const v3& center, const v3& size,const v3& rotation) {
 			float px = 0.5f * size.x;
 			float py = 0.5f * size.y;
