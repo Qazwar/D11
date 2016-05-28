@@ -55,6 +55,7 @@ namespace ds {
 		// moving the camera
 		void move(float unit);
 		void strafe(float unit);
+		void up(float unit);
 		void rotateLR(bool right);
 		void rotateUD(bool down);
 		void setPitch(float angle);
@@ -63,7 +64,7 @@ namespace ds {
 		void setYAngle(float angle);
 		void resetYAngle();
 
-		void update(float elapsedTime, const v2& mousePosition);
+		void update(float elapsedTime);
 		const float getAngle() const {
 			return _yaw;
 		}

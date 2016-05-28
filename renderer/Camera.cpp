@@ -104,12 +104,20 @@ namespace ds {
 
 	void FPSCamera::move(float unit) {
 		v3 tmp = _target * unit;
+		mat3 R = matrix::mat3RotationX(_pitch);
+		tmp = R * tmp;
 		_position = _position + tmp;
 		buildView();
 	}
 
 	void FPSCamera::strafe(float unit) {
 		v3 tmp = _right * unit;
+		_position = _position + tmp;
+		buildView();
+	}
+
+	void FPSCamera::up(float unit) {
+		v3 tmp = _up * unit;
 		_position = _position + tmp;
 		buildView();
 	}
@@ -154,7 +162,7 @@ namespace ds {
 		buildView();
 	}
 
-	void FPSCamera::update(float elapsedTime, const v2& mousePosition) {
+	void FPSCamera::update(float elapsedTime) {
 		if (input::getKeyState('W')) {
 			move(10.0f*elapsedTime);
 		}
@@ -166,6 +174,12 @@ namespace ds {
 		}
 		if (input::getKeyState('D')) {
 			strafe(10.0f*elapsedTime);
+		}
+		if (input::getKeyState('Q')) {
+			up(10.0f*elapsedTime);
+		}
+		if (input::getKeyState('E')) {
+			up(-10.0f*elapsedTime);
 		}
 		v2 mp = input::getMousePosition();
 		if (input::isMouseButtonPressed(0)) {
