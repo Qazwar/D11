@@ -19,6 +19,8 @@ namespace math {
 
 	ds::Texture buildTexture(const ds::Rect& r, float textureWidth = 1024.0f, float textureHeight = 1024.0f);
 
+	ds::Texture buildTexture(v2* positions, float textureWidth = 1024.0f, float textureHeight = 1024.0f);
+
 	void srt(const v2& v, const v2& u, const v2& scale, float rotation, v2* ret);
 
 	v2 srt(const v2& v, const v2& u, float scaleX, float scaleY, float rotation);

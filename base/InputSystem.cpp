@@ -33,34 +33,37 @@ namespace ds {
 		}
 
 		bool update(RAWINPUT* raw) {
-			if (raw->header.dwType == RIM_TYPEKEYBOARD)	{
-				const RAWKEYBOARD& rawKB = raw->data.keyboard;
-				UINT virtualKey = rawKB.VKey;
-				UINT scanCode = rawKB.MakeCode;
-				UINT flags = rawKB.Flags;
-				if (flags == 0) {
-					inputContext->keyboardState[virtualKey] = 80;
-				}
-				else {
-					inputContext->keyboardState[virtualKey] = 0;
+			HWND current = GetForegroundWindow();
+			if (current == inputContext->hwnd) {
+				if (raw->header.dwType == RIM_TYPEKEYBOARD) {
+					const RAWKEYBOARD& rawKB = raw->data.keyboard;
+					UINT virtualKey = rawKB.VKey;
+					UINT scanCode = rawKB.MakeCode;
+					UINT flags = rawKB.Flags;
+					if (flags == 0) {
+						inputContext->keyboardState[virtualKey] = 80;
+					}
+					else {
+						inputContext->keyboardState[virtualKey] = 0;
 
+					}
 				}
-			}
-			if (raw->header.dwType == RIM_TYPEMOUSE) {
-				//if (raw->data.mouse.ulButtons > 0) {
-					//LOG << "flags: " << raw->data.mouse.usFlags << " buttons: " << raw->data.mouse.ulButtons << " button flags: " << raw->data.mouse.usButtonFlags << " button data: " << raw->data.mouse.usButtonData << " button raw: " << raw->data.mouse.ulRawButtons << " button lastX: " << raw->data.mouse.lLastX << " button lastY: " << raw->data.mouse.lLastY;
-				//}
-				if (raw->data.mouse.ulButtons == 1) {
-					inputContext->mouseButtonState[0] = 1;
-				}
-				if (raw->data.mouse.ulButtons == 2) {
-					inputContext->mouseButtonState[0] = 0;
-				}
-				if (raw->data.mouse.ulButtons == 4) {
-					inputContext->mouseButtonState[1] = 1;
-				}
-				if (raw->data.mouse.ulButtons == 8) {
-					inputContext->mouseButtonState[1] = 0;
+				if (raw->header.dwType == RIM_TYPEMOUSE) {
+					//if (raw->data.mouse.ulButtons > 0) {
+						//LOG << "flags: " << raw->data.mouse.usFlags << " buttons: " << raw->data.mouse.ulButtons << " button flags: " << raw->data.mouse.usButtonFlags << " button data: " << raw->data.mouse.usButtonData << " button raw: " << raw->data.mouse.ulRawButtons << " button lastX: " << raw->data.mouse.lLastX << " button lastY: " << raw->data.mouse.lLastY;
+					//}
+					if (raw->data.mouse.ulButtons == 1) {
+						inputContext->mouseButtonState[0] = 1;
+					}
+					if (raw->data.mouse.ulButtons == 2) {
+						inputContext->mouseButtonState[0] = 0;
+					}
+					if (raw->data.mouse.ulButtons == 4) {
+						inputContext->mouseButtonState[1] = 1;
+					}
+					if (raw->data.mouse.ulButtons == 8) {
+						inputContext->mouseButtonState[1] = 0;
+					}
 				}
 			}
 			return true;

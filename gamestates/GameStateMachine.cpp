@@ -159,6 +159,10 @@ namespace ds {
 			_activeState->deactivate();
 		}
 		_activeState = _gameStates[newIndex];
+		if (!_activeState->isInitialized()) {
+			_activeState->init();
+			_activeState->endInitialisation();
+		}
 		//LOG << "activating " << _activeState->getName();
 		_activeState->activate();
 		_currentIndex = newIndex;

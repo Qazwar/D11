@@ -4,6 +4,8 @@
 #include "..\io\json.h"
 #include "..\io\FileRepository.h"
 
+#define EPSILON 0.000001
+
 namespace ds {
 
 	static const v3 CUBE_VERTICES[] = {
@@ -13,6 +15,18 @@ namespace ds {
 		v3(-0.5f,-0.5f,-0.5f)
 	};
 
+	bool equals(const v3& f, const v3& s) {
+		v3 d;
+		int cnt = 0;
+		for (int i = 0; i < 3; ++i) {
+			float d = f.data[i] - s.data[i];
+			if (fabs(d) < EPSILON) {
+				++cnt;
+			}
+		}
+		return cnt == 3;
+	}
+
 	MeshGen::MeshGen() {}
 
 	MeshGen::~MeshGen() {}
@@ -20,7 +34,7 @@ namespace ds {
 		int MeshGen::find_vertex(const v3& pos) {
 			for (int i = 0; i < _vertices.size(); ++i) {
 				const v3& v = _vertices[i];
-				if (v.x == pos.x && v.y == pos.y && v.z == pos.z) {
+				if (equals(v,pos)) {
 					return i;
 				}
 			}
@@ -28,17 +42,36 @@ namespace ds {
 		}
 
 		int MeshGen::find_edge(const v3& start, const v3& end) {
-			//LOG << "find_edge: " << DBG_V3(start) << " " << DBG_V3(end);
+			LOG << "find_edge: " << DBG_V3(start) << " " << DBG_V3(end);
 			for (int i = 0; i < _edges.size(); ++i) {
 				const Edge& e = _edges[i];
-				v3 es = _vertices[e.start];
-				v3 ee = _vertices[e.end];
+				v3 es = _vertices[e.vert_index];
+				v3 ee = _vertices[_edges[e.next].vert_index];
 				//LOG << "es: " << DBG_V3(es) << " ee: " << DBG_V3(ee);
 				if (start == es && end == ee) {
 					return i;
 				}
+				/*
+				v3 en = _vertices[_edges[e.prev].vert_index];
+				//LOG << "es: " << DBG_V3(es) << " ee: " << DBG_V3(ee);
+				if (start == es && end == en) {
+					return i;
+				}
+				*/
 			}
 			return -1;
+		}
+
+		// ----------------------------------------------
+		// add edge
+		// ----------------------------------------------
+		uint16_t MeshGen::add_edge(const v3& pos) {
+			Edge e;
+			e.vert_index = _vertices.size();
+			_vertices.push_back(pos);
+			int ret = _edges.size();
+			_edges.push_back(e);
+			return ret;
 		}
 
 		// ----------------------------------------------
@@ -47,13 +80,82 @@ namespace ds {
 		int MeshGen::add_vertex(const v3& pos) {
 			for (int i = 0; i < _vertices.size(); ++i) {
 				const v3& v = _vertices[i];
-				if (v.x == pos.x && v.y == pos.y && v.z == pos.z) {
+				if (equals(v,pos)) {
 					return i;
 				}
 			}
 			int ret = _vertices.size();
 			_vertices.push_back(pos);
 			return ret;
+		}
+
+		int intersect_triangle(const ds::Ray& ray,const v3& p0, const v3& p1, const v3& p2,double *t, double *u, double *v)	{
+			/* find vectors for two edges sharing vert0 */
+			v3 edge1 = p1 - p0;
+			v3 edge2 = p2 - p0;
+
+			/* begin calculating determinant - also used to calculate U parameter */
+			v3 pvec = cross(ray.direction, edge2);
+
+			/* if determinant is near zero, ray lies in plane of triangle */
+			float det = dot(edge1, pvec);
+
+			if (det > -EPSILON && det < EPSILON) {
+				return 0;
+			}
+			float inv_det = 1.0 / det;
+
+			/* calculate distance from vert0 to ray origin */
+			v3 tvec = ray.origin - p0;
+
+			/* calculate U parameter and test bounds */
+			*u = dot(tvec, pvec) * inv_det;
+			if (*u < 0.0 || *u > 1.0) {
+				return 0;
+			}
+			/* prepare to test V parameter */
+			v3 qvec = cross(tvec, edge1);
+
+			/* calculate V parameter and test bounds */
+			*v = dot(ray.direction, qvec) * inv_det;
+			if (*v < 0.0 || *u + *v > 1.0) {
+				return 0;
+			}
+			/* calculate t, ray intersects triangle */
+			*t = dot(edge2, qvec) * inv_det;
+			return 1;
+		}
+
+
+		int MeshGen::intersects(const ds::Ray& ray) {
+			float tmax = 10000.0f;
+			int face = -1;
+			for (int i = 0; i < _faces.size(); ++i) {
+				const Face& f = _faces[i];
+				const Edge& e1 = _edges[f.edge];
+				const Edge& e2 = _edges[e1.next];
+				const Edge& e3 = _edges[e2.next];
+				const Edge& e4 = _edges[e3.next];
+				double u, v, t;
+				int ret = intersect_triangle(ray, _vertices[e1.vert_index], _vertices[e2.vert_index], _vertices[e3.vert_index], &t, &u, &v);
+				if (ret != 0) {
+					//LOG << "1 - FOUND face: " << i << " u: " << u << " v: " << v << " t: " << t;
+					if (t < tmax) {
+						tmax = t;
+						face = i;
+					}
+				}
+				ret = intersect_triangle(ray, _vertices[e2.vert_index], _vertices[e3.vert_index], _vertices[e4.vert_index], &t, &u, &v);
+				if (ret != 0) {
+					//LOG << "1 - FOUND face: " << i << " u: " << u << " v: " << v << " t: " << t;
+					if (t < tmax) {
+						tmax = t;
+						face = i;
+					}
+				}
+			}
+			//LOG << "face: " << face;
+			return face;
 		}
 
 		// ----------------------------------------------
@@ -65,24 +167,42 @@ namespace ds {
 				const Face& f = _faces[i];
 				LOG << "=> edge: " << f.edge << " normal: " << DBG_V3(f.n) << " color: " << DBG_CLR(f.color);
 				const Edge& e = _edges[f.edge];
-				int idx = e.index;
+				int idx = f.edge;
 				for (int j = 0; j < 4; ++j) {
 					Edge& e = _edges[idx];
-					LOG << "edge: " << e.index << " start: " << e.start << " end: " << e.end << " next: " << e.next << " prev: " << e.prev << " start_pos: " << DBG_V3(_vertices[e.start]) << " end_pos: " << DBG_V3(_vertices[e.end]);
+					LOG << "edge: " << idx << " v: " << e.vert_index << " next: " << e.next << " prev: " << e.prev << " pos: " << DBG_V3(_vertices[e.vert_index]);
 					idx = e.next;
 				}
 			}
+		}
+
+		void MeshGen::debug_face(uint16_t face_index) {
+			const Face& f = _faces[face_index];
+			LOG << "=> Face: " << face_index << " edge: " << f.edge << " normal: " << DBG_V3(f.n) << " color: " << DBG_CLR(f.color);
+			const Edge& e = _edges[f.edge];
+			int idx = f.edge;
+			for (int j = 0; j < 4; ++j) {
+				Edge& e = _edges[idx];
+				debug_edge(idx);
+				idx = e.next;
+			}
+		}
+
+		void MeshGen::debug_edge(uint16_t edgeIndex) {
+			Edge& e = _edges[edgeIndex];
+			LOG << "edge: " << edgeIndex << " v: " << e.vert_index << " next: " << e.next << " prev: " << e.prev << " pos: " << DBG_V3(_vertices[e.vert_index]);
 		}
 
 		// ----------------------------------------------
 		// calculate normal
 		// ----------------------------------------------
 		void MeshGen::calculate_normal(Face* f) {
-			Edge e0 = _edges[f->edge];
-			Edge e3 = _edges[e0.prev];
-			v3 s = _vertices[e0.start];
-			v3 end1 = _vertices[e0.end];
-			v3 end2 = _vertices[e3.start];
+			const Edge& e0 = _edges[f->edge];
+			const Edge& e1 = _edges[e0.next];
+			const Edge& e3 = _edges[e0.prev];
+			v3 s = _vertices[e0.vert_index];
+			v3 end1 = _vertices[e1.vert_index];
+			v3 end2 = _vertices[e3.vert_index];
 			v3 a = end1 - s;
 			v3 b = end2 - s;
 			f->n = normalize(cross(a, b));
@@ -94,14 +214,7 @@ namespace ds {
 		void MeshGen::recalculate_normals() {
 			for (int i = 0; i < _faces.size(); ++i) {
 				Face& f = _faces[i];
-				Edge e0 = _edges[f.edge];
-				Edge e3 = _edges[e0.prev];
-				v3 s = _vertices[e0.start];
-				v3 end1 = _vertices[e0.end];
-				v3 end2 = _vertices[e3.start];
-				v3 a = end1 - s;
-				v3 b = end2 - s;
-				f.n = normalize(cross(a, b));
+				calculate_normal(&f);
 			}
 		}
 
@@ -109,57 +222,155 @@ namespace ds {
 		// check if edge is in clock wise direction
 		// ----------------------------------------------
 		bool MeshGen::is_clock_wise(uint16_t index) {
-			Edge& e = _edges[index];
-			float d = dot(cross(_vertices[e.start], _vertices[e.end]), v3(1, 0, 0));
-			LOG << "==> CW - start: " << DBG_V3(_vertices[e.start]) << " end: " << DBG_V3(_vertices[e.end]) << " dot: " << d;
-			return d == 0.0f;
+			const Edge& e0 = _edges[index];
+			const Edge& e1 = _edges[e0.next];
+			const Face& f = _faces[e0.face_index];
+			v3 c = cross(_vertices[e0.vert_index],_vertices[e1.vert_index]);
+			LOG << "==> CW - start: " << DBG_V3(_vertices[e0.vert_index]) << " end: " << DBG_V3(_vertices[e1.vert_index]) << "  NC : " << DBG_V3(c);
+			return c.z >= 0.0f;
 		}
 
 		// ----------------------------------------------
 		// extrude edge
 		// ----------------------------------------------
 		uint16_t MeshGen::extrude_edge(uint16_t edgeIndex, const v3& pos) {
-			Edge& e = _edges[edgeIndex];
+			const Edge& e0 = _edges[edgeIndex];
+			const Edge& e1 = _edges[e0.next];
 			v3 p[4];	
-			if (is_clock_wise(edgeIndex)) {
-				p[0] = _vertices[e.start];
+			//if (is_clock_wise(edgeIndex)) {
+				p[0] = _vertices[e0.vert_index];
 				p[1] = p[0] + pos;
-				p[2] = _vertices[e.end] + pos;
-				p[3] = _vertices[e.end];				
-			}
-			else {
-				p[0] = _vertices[e.end];
-				p[1] = _vertices[e.start];
-				p[2] = p[1] + pos;
-				p[3] = p[0] + pos;
-			}
+				p[2] = _vertices[e1.vert_index] + pos;
+				p[3] = _vertices[e1.vert_index];				
+			//}
+			//else {
+				//p[0] = _vertices[e.end];
+				//p[1] = _vertices[e.start];
+				//p[2] = p[1] + pos;
+				//p[3] = p[0] + pos;
+			//}
 			return add_face(p);
+		}
+
+		// ----------------------------------------------
+		// extrude face
+		// ----------------------------------------------
+		uint16_t MeshGen::extrude_face(uint16_t face_index, float factor) {
+			const Face& f = _faces[face_index];
+			int ei = f.edge;
+			v3 p[4];
+			v3 n = f.n * factor;
+			for (int i = 0; i < 4; ++i) {
+				Edge& e = _edges[ei];
+				p[i] = _vertices[e.vert_index];
+				p[i] += n;
+				ei = e.next;
+			}
+			uint16_t newFace = add_face(p);
+			const Face& nf = _faces[newFace];
+			LOG << "new face: " << newFace;
+			ei = f.edge;
+			int nei = nf.edge;
+			for (int i = 0; i < 4; ++i) {
+				Edge& e = _edges[ei];
+				Edge& ne = _edges[nei];
+				//h_combine(ne.index, e.index);
+				ei = e.next;
+				nei = ne.next;
+			}
+			return newFace;
 		}
 
 		// ----------------------------------------------
 		// combine two edges
 		// ----------------------------------------------
 		uint16_t MeshGen::combine(uint16_t first, uint16_t second) {
-			v3 p[4];
+			/*
 			const Edge& f = _edges[first];
 			const Edge& s = _edges[second];
-			if (is_clock_wise(first)) {
-				p[0] = _vertices[f.end];
-				p[2] = _vertices[f.start];
+			float d = dot(_vertices[f.end] - _vertices[f.start], _vertices[s.end] - _vertices[s.start]);
+			LOG << "DOT: " << d;
+			return add_face(_vertices[f.start], _vertices[s.end], _vertices[s.start], _vertices[f.end]);
+			*/
+			return 0;
+		}
+
+		uint16_t MeshGen::v_combine(uint16_t first, uint16_t second) {
+			/*
+			const Edge& f = _edges[first];
+			const Edge& s = _edges[second];
+			float d = dot(_vertices[f.end] - _vertices[f.start], _vertices[s.end] - _vertices[s.start]);
+			LOG << "V-DOT: " << d;
+			return add_face(_vertices[f.start], _vertices[s.end], _vertices[s.start], _vertices[f.end]);
+			*/
+			return 0;
+		}
+
+		uint16_t MeshGen::h_combine(uint16_t first, uint16_t second) {
+			/*
+			const Edge& f = _edges[first];
+			const Edge& s = _edges[second];
+			debug_edge(first);
+			debug_edge(second);
+			float d = dot(_vertices[f.end] - _vertices[f.start], _vertices[s.end] - _vertices[s.start]);
+			LOG << "H-DOT: " << d;
+			if (d < 0.0f) {
+				return add_face(_vertices[f.end], _vertices[f.start], _vertices[s.end], _vertices[s.start]);
 			}
 			else {
-				p[0] = _vertices[f.start];
-				p[2] = _vertices[f.end];
+				return add_face(_vertices[f.end], _vertices[f.start], _vertices[s.start], _vertices[s.end]);
 			}
-			if (is_clock_wise(second)) {
-				p[1] = _vertices[s.end];
-				p[3] = _vertices[s.start];
-			}
-			else {
-				p[1] = _vertices[s.start];
-				p[3] = _vertices[s.end];
-			}
+			*/
+			return 0;
+		}
+
+		uint16_t MeshGen::add_face(const v3& p0, const v3& p1, const v3& p2, const v3& p3) {
+			v3 p[] = { p0, p1, p2, p3 };
 			return add_face(p);
+		}
+
+		bool MeshGen::verify(uint16_t face_index) {
+			v3 p[4];
+			const Face& f = _faces[face_index];
+			int ei = f.edge;
+			for (int i = 0; i < 4; ++i) {
+				Edge& e0 = _edges[ei];
+				Edge& e1 = _edges[e0.next];
+				p[i] = _vertices[e1.vert_index] - _vertices[e0.vert_index];
+				ei = e0.next;
+			}
+			int cnt = 0;
+			for (int i = 0; i < 4; ++i) {
+				v3 a = p[i];
+				v3 b = p[(i + 1) % 4];
+				v3 c = cross(a, b);
+				if (c.z > 0.0f) {
+					++cnt;
+				}
+				else if ( c.z < 0.0f ) {
+					--cnt;
+				}
+			}
+			LOG << "CNT: " << cnt;
+			return cnt == 0;
+		}
+
+		// http://debian.fmi.uni-sofia.bg/~sergei/cgsr/docs/clockwise.htm
+		bool MeshGen::verify(v3* positions) {
+			int cnt = 0;
+			for (int i = 0; i < 4; ++i) {
+				v3 a = positions[i];
+				v3 b = positions[(i + 1) % 4];
+				v3 c = cross(a, b);
+				if (c.z > 0.0f) {
+					++cnt;
+				}
+				else if (c.z < 0.0f) {
+					--cnt;
+				}
+			}
+			LOG << "CNT: " << cnt;
+			return cnt == 0;
 		}
 
 		// ----------------------------------------------
@@ -168,36 +379,18 @@ namespace ds {
 		uint16_t MeshGen::add_face(v3* positions) {
 			Face f;
 			int idx = _edges.size();
-			int cnt = idx;
 			uint16_t fidx = _faces.size();
 			for (int i = 0; i < 4; ++i) {
 				v3 start = positions[i];
-				v3 end;
-				if (i < 3) {
-					end = positions[i + 1];
-				}
-				else {
-					end = positions[0];
-				}
+				v3 end = positions[(i + 1) % 4];
 				Edge e;
-				e.index = cnt;
-				e.next = cnt + 1;
-				e.prev = cnt - 1;
+				e.next = idx + (i + 1) % 4;
+				e.prev = idx + (i - 1) % 4;
 				if (i == 0) {
 					e.prev = idx + 3;
 				}
-				if (i == 3) {
-					e.next = idx;
-				}
-				e.start = add_vertex(positions[i]);
-				++cnt;
-				if (i < 3) {
-					e.end = add_vertex(positions[i + 1]);
-				}
-				else {
-					e.end = add_vertex(positions[0]);
-				}				
-				e.faceIndex = fidx;
+				e.vert_index = add_vertex(positions[i]);
+				e.face_index = fidx;
 				_edges.push_back(e);
 			}
 			f.edge = idx;
@@ -210,106 +403,176 @@ namespace ds {
 
 		int MeshGen::find_opposite_edge(uint16_t edgeIndex) {
 			Edge& e = _edges[edgeIndex];
-			Face& f = _faces[e.faceIndex];
+			Face& f = _faces[e.face_index];
 			uint16_t n = e.next;
 			Edge& ne = _edges[n];
 			return ne.next;
 		}
 
+		int MeshGen::find_opposite(uint16_t edgeIndex) {
+			const Edge& e = _edges[edgeIndex];
+			const Edge& next = _edges[e.next];
+			return find_edge(_vertices[next.vert_index], _vertices[e.vert_index]);
+		}
+
 		// ----------------------------------------------
 		// get edge index
 		// ----------------------------------------------
-		uint16_t MeshGen::get_edge_index(uint16_t faceIndex, int nr) {
-			LOG << "FACE: " << faceIndex;
-			const Face& f = _faces[faceIndex];
+		uint16_t MeshGen::get_edge_index(uint16_t face_index, int nr) {
+			LOG << "FACE: " << face_index;
+			const Face& f = _faces[face_index];
 			Edge& e = _edges[f.edge];
-			LOG << "top: " << e.index;
+			LOG << "top: " << f.edge;
 			for (int i = 0; i < nr; ++i) {
 				e = _edges[e.next];
 			}
-			LOG << "final: " << e.index;
-			return e.index;
+			LOG << "final: " << f.edge;
+			return f.edge;
 		}
 
 		// ----------------------------------------------
 		// texture face
 		// ----------------------------------------------
-		void MeshGen::texture_face(uint16_t faceIndex, const Texture& t) {
-			const Face& f = _faces[faceIndex];
-			int idx = f.edge;
-			for (int i = 0; i < 4; ++i) {
-				Edge& e = _edges[idx];
-				e.uv = t.getUV(i);
-				idx = e.next;
+		void MeshGen::texture_face(uint16_t face_index, const Texture& t) {
+			if (face_index < _faces.size()) {
+				const Face& f = _faces[face_index];
+				int idx = f.edge;
+				for (int i = 0; i < 4; ++i) {
+					Edge& e = _edges[idx];
+					e.uv = t.uv[i];
+					idx = e.next;
+				}
 			}
 		}
 
 		uint16_t MeshGen::make_face(uint16_t* edges) {
 			v3 p[4];
 			for (int i = 0; i < 4; ++i) {
-				p[i] = _vertices[_edges[edges[i]].end];
+				p[i] = _vertices[_edges[edges[i]].vert_index];
 			}
 			return add_face(p);
+		}
+
+		void MeshGen::connect(uint16_t f, uint16_t s, uint16_t t) {
+			Edge& fe = _edges[f];
+			Edge& se = _edges[s];
+			Edge& te = _edges[t];
+			fe.next = s;
+			se.prev = f;
+			se.next = t;
+			te.prev = s;
 		}
 
 		// ----------------------------------------------
 		// split edge
 		// ----------------------------------------------
 		uint16_t MeshGen::split_edge(uint16_t edgeIndex, float factor) {
-			Edge& e = _edges[edgeIndex];
-			Face& f = _faces[e.faceIndex];
-			Edge& r = _edges[e.next];
-			Edge& o = _edges[r.next];
-			v3 delta = (_vertices[e.end] - _vertices[e.start]) * factor;
-			v3 oldStart = _vertices[r.start];
-			v3 oldEnd = _vertices[r.end];
-			move_edge(r.index, -delta);
-			v3 p[] = { _vertices[r.start], oldStart, oldEnd, _vertices[r.end] };
-			uint16_t newFace = add_face(p);
-			int idx = find_edge(_vertices[r.end], _vertices[r.start]);
-			if (idx != -1) {			   
-				Edge& ne = _edges[idx];
-				if (ne.faceIndex != newFace) {
-					const Edge& top = _edges[_faces[newFace].edge];
-					const Edge& right = _edges[top.next];
-					const Edge& bottom = _edges[right.next];
-					ne.start = bottom.start;
-					ne.end = top.end;
-					Edge& nne = _edges[ne.next];
-					nne.start = top.end;
-					Edge& pe = _edges[ne.prev];
-					pe.end = bottom.start;
-					Face& f = _faces[ne.faceIndex];
-					calculate_normal(&f);
-				}
-			}
-			return newFace;
+			const Edge& e = _edges[edgeIndex];
+			const Edge& n = _edges[e.next];
+			const Edge& nn = _edges[n.next];
+			const Edge& nnn = _edges[nn.next];
+			Edge& prev = _edges[e.prev];
+			v3 delta = (_vertices[n.vert_index] - _vertices[e.vert_index]) * factor;
+			v3 np1 = _vertices[e.vert_index] + delta;
+			uint16_t na1 = add_edge(np1);
+			v3 d2 = (_vertices[nn.vert_index] - _vertices[nnn.vert_index]) * factor;
+			v3 np2 = _vertices[nnn.vert_index] + d2;
+			uint16_t na2 = add_edge(np2);
+			connect(edgeIndex, na1, na2);
+			connect(na1, na2, nn.next);
+			_edges[nn.next].next = edgeIndex;
+
+			uint16_t na3 = add_edge(np1);
+			Face f;
+			f.edge = na3;
+			int fi = _faces.size();
+			_faces.push_back(f);
+			uint16_t na4 = add_edge(_vertices[nn.vert_index]);// +(_vertices[nn.vert_index] - _vertices[nnn.vert_index]) * (1.0f - factor));
+			uint16_t na5 = add_edge(np2);
+			_edges[na3].face_index = fi;
+			_edges[na4].face_index = fi;
+			_edges[na5].face_index = fi;
+			_edges[e.next].face_index = fi;
+
+			connect(na3, e.next, na4);
+			connect(e.next, na4, na5);
+			connect(na5, na3, e.next);
+			
+			return 0;
 		}
 
 		// ----------------------------------------------
 		// move edge
 		// ----------------------------------------------
 		void MeshGen::move_edge(uint16_t edgeIndex, const v3& position) {
-			Edge& e = _edges[edgeIndex];
-			Face& f = _faces[e.faceIndex];
-			_vertices[e.start] += position;
-			_vertices[e.end] += position;
-			calculate_normal(&f);
+			const Edge& e0 = _edges[edgeIndex];
+			const Edge& e1 = _edges[e0.next];
+			Face& f = _faces[e0.face_index];
+			_vertices[e0.vert_index] += position;
+			_vertices[e1.vert_index] += position;
 		}
 
 		// ----------------------------------------------
 		// move face
 		// ----------------------------------------------
-		void MeshGen::move_face(uint16_t faceIndex, const v3& position) {
-			Face& f = _faces[faceIndex];
+		void MeshGen::move_face(uint16_t face_index, const v3& position) {
+			Face& f = _faces[face_index];
 			uint16_t idx = f.edge;			
+			uint16_t all[4];
+			v3 p[4];
 			for (int i = 0; i < 4; ++i) {
-				Edge& e = _edges[idx];
-				_vertices[e.start] += position;
-				_vertices[e.end] += position;
-				idx = e.next;
+				all[i] = idx;
+				Edge& e0 = _edges[idx];
+				p[i] = _vertices[e0.vert_index];
+				_vertices[e0.vert_index] += position;
+				//_vertices[e1.vert_index] += position;
+				idx = e0.next;
 			}
+			/*
+			for (int i = 0; i < 4; ++i) {
+				int oi = find_edge(p[(i + 1) % 4],p[i]);
+				LOG << "==> OI: " << oi;
+				if (oi != -1) {
+					const Edge& o = _edges[oi];
+					_vertices[o.vert_index] += position;
+				}
+			}
+			*/
 			calculate_normal(&f);
+		}
+
+		// ----------------------------------------------
+		// scale face
+		// ----------------------------------------------
+		void MeshGen::scale_face(uint16_t face_index, float scale) {
+			const Face& f = _faces[face_index];
+			int ei = f.edge;
+			float dir = 1.0f;
+			if (scale < 1.0f) {
+				dir = -1.0f;
+			}
+			for (int i = 0; i < 4; ++i) {
+				Edge& e0 = _edges[ei];
+				Edge& e1 = _edges[e0.next];
+				v3 c = normalize(cross(_vertices[e1.vert_index] - _vertices[e0.vert_index], f.n));				
+				c *= scale;
+				c *= dir;
+				_vertices[e0.vert_index] += c;
+				//_vertices[e.end] += c;
+				ei = e0.next;
+			}
+		}
+
+		v3 MeshGen::get_center(uint16_t face_index) {
+			const Face& f = _faces[face_index];
+			int ei = f.edge;
+			v3 ret;
+			for (int i = 0; i < 4; ++i) {
+				Edge& e = _edges[ei];
+				ret += _vertices[e.vert_index];
+				ei = e.next;
+			}
+			return ret / 4.0f;
 		}
 
 		// ----------------------------------------------
@@ -317,22 +580,17 @@ namespace ds {
 		// ----------------------------------------------
 		void MeshGen::move_vertex(uint16_t edgeIndex, bool start, const v3& position) {
 			Edge& e = _edges[edgeIndex];
-			Face& f = _faces[e.faceIndex];
-			if (start) {
-				_vertices[e.start] += position;
-			}
-			else {
-				_vertices[e.end] += position;
-			}
+			Face& f = _faces[e.face_index];
+			_vertices[e.vert_index] += position;
 			calculate_normal(&f);
 		}
 
 		// ----------------------------------------------
 		// set color
 		// ----------------------------------------------
-		void MeshGen::set_color(uint16_t faceIndex, const Color& color) {
-			if (faceIndex < _faces.size()) {
-				Face& f = _faces[faceIndex];
+		void MeshGen::set_color(uint16_t face_index, const Color& color) {
+			if (face_index < _faces.size()) {
+				Face& f = _faces[face_index];
 				f.color = color;
 			}
 		}
@@ -348,10 +606,10 @@ namespace ds {
 			for (int i = 0; i < _faces.size(); ++i) {
 				const Face& f = _faces[i];
 				const Edge& e = _edges[f.edge];
-				int idx = e.index;
+				int idx = f.edge;
 				for (int j = 0; j < 4; ++j) {
 					Edge& e = _edges[idx];
-					mesh->add(_vertices[e.start], f.n, e.uv, f.color);
+					mesh->add(_vertices[e.vert_index], f.n, e.uv, f.color);
 					idx = e.next;
 				}
 			}
@@ -427,6 +685,12 @@ namespace ds {
 			return faces[0];
 		}
 
+		void MeshGen::clear() {
+			_vertices.clear();
+			_edges.clear();
+			_faces.clear();
+		}
+
 		struct OpCode {
 
 			char name[32];
@@ -437,84 +701,129 @@ namespace ds {
 				return static_cast<int>(values[index]);
 			}
 
+			const float get_float(int index) const {
+				return values[index];
+			}
+
 			const v3 get_v3(int index) const {
 				return v3(values[index], values[index + 1], values[index + 2]);
 			}
+
+			const v2 get_v2(int index) const {
+				return v2(values[index], values[index + 1]);
+			}
+
 			const Color get_color(int index) const {
 				return Color(values[index] / 255.0f, values[index + 1] / 255.0f, values[index + 2] / 255.0f, values[index + 3] / 255.0f);
+			}
+
+			const Rect get_rect(int index) const {
+				return Rect(values[index], values[index + 1], values[index + 2], values[index + 3]);
 			}
 		};
 
 		void MeshGen::parse(const char* fileName) {
+			clear();
 			Array<OpCode> opcodes;
 			char buffer[256];
-			sprintf_s(buffer, 256, "content\\objects\\%s", fileName);
+			sprintf_s(buffer, 256, "content\\meshes\\%s", fileName);
 			int size = -1;
 			const char* txt = repository::load(buffer, &size);
-			Tokenizer t;
-			t.parse(txt);
-			LOG << "tokens: " << t.size();
-			int cnt = 0;
-			while (cnt < t.size()) {
-				Token& tk = t.get(cnt);
-				if (tk.type == Token::NAME) {	
-					OpCode oc;
-					strncpy(oc.name, txt + tk.index, tk.size);
-					oc.name[tk.size] = '\0';
-					oc.count = 0;
-					++cnt;			
-					tk = t.get(cnt);
-					while ((tk.type == Token::NUMBER)||(tk.type==Token::DELIMITER)) {						
+			if (size != -1) {
+				Tokenizer t;
+				t.parse(txt);
+				LOG << "tokens: " << t.size();
+				int cnt = 0;
+				while (cnt < t.size()) {
+					Token& tk = t.get(cnt);
+					if (tk.type == Token::NAME) {
+						OpCode oc;
+						strncpy(oc.name, txt + tk.index, tk.size);
+						oc.name[tk.size] = '\0';
+						oc.count = 0;
+						++cnt;
 						tk = t.get(cnt);
-						if (tk.type == Token::NUMBER) {
-							oc.values[oc.count++] = tk.value;
+						while ((tk.type == Token::NUMBER) || (tk.type == Token::DELIMITER)) {
+							tk = t.get(cnt);
+							if (tk.type == Token::NUMBER) {
+								oc.values[oc.count++] = tk.value;
+							}
+							++cnt;
 						}
-						++cnt;						
+						--cnt;
+						opcodes.push_back(oc);
 					}
-					--cnt;
-					opcodes.push_back(oc);
+					else {
+						++cnt;
+					}
 				}
-				else {
-					++cnt;
+				LOG << "opcodes: " << opcodes.size();
+				for (int i = 0; i < opcodes.size(); ++i) {
+					const OpCode& oc = opcodes[i];
+					LOG << "oc: " << oc.name << " values: " << oc.count;
+					if (strcmp(oc.name, "add_face") == 0) {
+						v3 p[4];
+						p[0] = oc.get_v3(0);
+						p[1] = oc.get_v3(3);
+						p[2] = oc.get_v3(6);
+						p[3] = oc.get_v3(9);
+						add_face(p);
+					}
+					else if (strcmp(oc.name, "add_cube") == 0) {
+						// add_cube 0,0,0 1.0,1.0,0.1
+						v3 pos = oc.get_v3(0);
+						v3 size = oc.get_v3(3);
+						add_cube(pos, size);
+					}
+					else if (strcmp(oc.name, "set_color") == 0) {
+						int idx = oc.get_int(0);
+						Color c = oc.get_color(1);
+						set_color(idx, c);
+					}
+					else if (strcmp(oc.name, "extrude_edge") == 0) {
+						// extrude_edge 1 0,0,2
+						int idx = oc.get_int(0);
+						v3 c = oc.get_v3(1);
+						extrude_edge(idx, c);
+					}
+					else if (strcmp(oc.name, "texture_face") == 0) {
+						// texture_face 5 260,650 324,650 324,714 260,714
+						int idx = oc.get_int(0);
+						v2 uv[4];
+						for (int i = 0; i < 4; ++i) {
+							uv[i] = oc.get_v2(i * 2 + 1);
+						}
+						texture_face(idx, math::buildTexture(uv));
+					}
+					else if (strcmp(oc.name, "texture_face_rect") == 0) {
+						// texture_face 5 260,650 324,650 324,714 260,714
+						int idx = oc.get_int(0);
+						Rect r = oc.get_rect(1);
+						texture_face(idx, math::buildTexture(r));
+					}
+					else if (strcmp(oc.name, "split_edge") == 0) {
+						// extrude_edge 1 0,0,2
+						int idx = oc.get_int(0);
+						float factor = oc.get_float(1);
+						split_edge(idx, factor);
+					}
+					else if (strcmp(oc.name, "move_edge") == 0) {
+						// move_edge 1 0,0,2
+						int idx = oc.get_int(0);
+						v3 c = oc.get_v3(1);
+						move_edge(idx, c);
+					}
+					else if (strcmp(oc.name, "move_face") == 0) {
+						// move_face 1 0,0,2
+						int idx = oc.get_int(0);
+						v3 c = oc.get_v3(1);
+						move_face(idx, c);
+					}
+
 				}
+				recalculate_normals();
+				delete txt;
 			}
-			LOG << "opcodes: " << opcodes.size();
-			for (int i = 0; i < opcodes.size(); ++i) {
-				const OpCode& oc = opcodes[i];
-				LOG << "oc: " << oc.name << " values: " << oc.count;
-				if (strcmp(oc.name, "add_face") == 0) {
-					v3 p[4];
-					p[0] = oc.get_v3(0);
-					p[1] = oc.get_v3(3);
-					p[2] = oc.get_v3(6);
-					p[3] = oc.get_v3(9);
-					add_face(p);
-				}
-				else if (strcmp(oc.name, "set_color") == 0) {
-					int idx = oc.get_int(0);
-					Color c = oc.get_color(1);
-					set_color(idx, c);
-				}
-				else if (strcmp(oc.name, "extrude_edge") == 0) {
-					// extrude_edge 1 0,0,2
-					int idx = oc.get_int(0);
-					v3 c = oc.get_v3(1);
-					extrude_edge(idx, c);
-				}
-				else if (strcmp(oc.name, "split_edge") == 0) {
-					// extrude_edge 1 0,0,2
-					int idx = oc.get_int(0);
-					split_edge(idx);
-				}
-				else if (strcmp(oc.name, "move_edge") == 0) {
-					// extrude_edge 1 0,0,2
-					int idx = oc.get_int(0);
-					v3 c = oc.get_v3(1);
-					move_edge(idx, c);
-				}
-				
-			}
-			delete txt;
 		}
 
 		void MeshGen::create_ring(float radius, float width, uint16_t segments) {
@@ -532,6 +841,38 @@ namespace ds {
 				angle += angleStep;
 				next_angle += angleStep;
 			}
+		}
+
+		void MeshGen::create_cube_ring(float radius, float width, uint16_t segments) {
+			float angleStep = TWO_PI / static_cast<float>(segments);
+			v3 p[4];
+			float angle = 0.0f;
+			float next_angle = angleStep;
+			float outer_radius = radius + width;
+			float half_size = width * 0.5f;
+			for (int i = 0; i < segments; ++i) {
+				p[0] = v3(radius * cos(next_angle), radius * sin(next_angle), -half_size);
+				p[1] = v3(outer_radius * cos(next_angle), outer_radius * sin(next_angle), -half_size);
+				p[2] = v3(outer_radius * cos(angle), outer_radius * sin(angle), -half_size);
+				p[3] = v3(radius * cos(angle), radius * sin(angle), -half_size);
+				add_face(p);
+				angle += angleStep;
+				next_angle += angleStep;
+			}
+			angle = 0.0f;
+			next_angle = angleStep;
+			for (int i = 0; i < segments; ++i) {
+				p[0] = v3(outer_radius * cos(next_angle), outer_radius * sin(next_angle), half_size);
+				p[1] = v3(radius * cos(next_angle), radius * sin(next_angle), half_size);	
+				p[2] = v3(radius * cos(angle), radius * sin(angle), half_size);
+				p[3] = v3(outer_radius * cos(angle), outer_radius * sin(angle), half_size);				
+				add_face(p);
+				//uint16_t ne = get_edge_index(nf, 1);
+				//extrude_edge(ne, v3(0, 0, width));
+				angle += angleStep;
+				next_angle += angleStep;
+			}
+			combine(1, 17);
 		}
 
 	namespace geometrics {
@@ -556,7 +897,7 @@ namespace ds {
 					v3 p = points[indices[i * 4 + j]];
 					p = RZ * RY * RX * p + center;
 					v3 nn = RZ * RY * RX * norms[i];
-					mesh->add(p, nn, t.getUV(j));
+					mesh->add(p, nn, t.uv[i]);
 				}
 			}
 		}
@@ -584,7 +925,7 @@ namespace ds {
 					v3 p = points[indices[i * 4 + j]];
 					p = RZ * RY * RX * p + center;
 					v3 nn = RZ * RY * RX * norms[i];
-					mesh->add(p, nn, t[i].getUV(j));
+					mesh->add(p, nn, t[i].uv[j]);
 				}
 			}
 		}
@@ -611,7 +952,7 @@ namespace ds {
 				for (int x = 0; x < countX; ++x) {
 					for (int i = 0; i < 4; ++i) {
 						v3 n = points[i] + center;
-						mesh->add(n, norm, t.getUV(i), color);
+						mesh->add(n, norm, t.uv[i], color);
 					}
 					center.x += cellSize;
 				}
@@ -638,7 +979,7 @@ namespace ds {
 			for (int i = 0; i < 4; ++i) {
 				v3 n = R * points[i];
 				n += center;
-				mesh->add(n, v3(0, 1, 0), t.getUV(i), color);
+				mesh->add(n, v3(0, 1, 0), t.uv[i], color);
 			}
 		}
 
@@ -661,7 +1002,7 @@ namespace ds {
 			for (int i = 0; i < 4; ++i) {
 				v3 n = R * points[i];
 				n += center;
-				mesh->add(n, v3(0, 0, -1), t.getUV(i), color);
+				mesh->add(n, v3(0, 0, -1), t.uv[i], color);
 			}
 		}
 

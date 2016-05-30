@@ -83,5 +83,7 @@ namespace graphics {
 	void turnOnZBuffer();
 
 	void turnOffZBuffer();
+
+	ds::Ray getCameraRay(ds::Camera* camera);
 }
 

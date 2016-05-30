@@ -26,6 +26,10 @@ namespace ds {
 			vertices.push_back(PNTCVertex(position, normal, uv, color));
 		}
 
+		void clear() {
+			vertices.clear();
+		}
+
 	};
 
 	// ------------------------------------------------------

@@ -6,6 +6,7 @@
 #include "..\math\matrix.h"
 #include "..\resources\ResourceContainer.h"
 #include "sprites.h"
+#include "..\base\InputSystem.h"
 
 namespace graphics {
 
@@ -491,6 +492,26 @@ namespace graphics {
 
 	void turnOffZBuffer() {
 		_context->d3dContext->OMSetDepthStencilState(_context->depthDisabledStencilState, 1);
+	}
+
+	ds::Ray getCameraRay(ds::Camera* camera) {
+		ds::Ray ray;
+		v2 mp = ds::input::getMousePosition();
+		ds::mat4 projection = camera->getProjectionMatrix();
+		float px = (((2.0f * mp.x) / _context->screenWidth) - 1.0f) / projection._11;
+
+		float py = (((2.0f * mp.y) / _context->screenHeight) - 1.0f) / projection._22;
+
+		ray.origin = v3(0.0f, 0.0f, 0.0f);
+		ray.direction = v3(px, py, 1.0f);
+
+		ds::mat4 view = camera->getViewMatrix();
+		view = ds::matrix::mat4Inverse(view);
+
+		ray.origin = ds::matrix::transformCoordinate(ray.origin, view);
+		ray.direction = ds::matrix::transformNormal(ray.direction, view);
+		ray.direction = normalize(ray.direction);
+		return ray;
 	}
 
 	// ------------------------------------------------------

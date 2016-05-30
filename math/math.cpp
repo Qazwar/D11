@@ -59,9 +59,30 @@ namespace math {
 		ds::Texture ret;
 		ds::Rect r(top, left, width, height);
 		ret.rect = r;
-		ret.uv = getTextureCoordinates(r, textureWidth, textureHeight);
+		v4 uv = getTextureCoordinates(r, textureWidth, textureHeight);
+		ret.uv[0] = v2(uv.x, uv.y);
+		ret.uv[1] = v2(uv.z, uv.y);
+		ret.uv[2] = v2(uv.z, uv.w);
+		ret.uv[3] = v2(uv.x, uv.w);
 		ret.textureID = 0;
-		ret.dim = Vector2f(width, height);
+		ret.dim = v2(width, height);
+		ret.textureSize.x = textureWidth;
+		ret.textureSize.y = textureHeight;
+		return ret;
+	}
+
+	ds::Texture buildTexture(v2* positions, float textureWidth, float textureHeight) {
+		ds::Texture ret;
+		ds::Rect r(positions[0].y, positions[0].x, positions[1].x - positions[0].x, positions[2].y - positions[0].y);
+		ret.rect = r;
+		for (int i = 0; i < 4; ++i) {
+			v2 c = positions[i];
+			c.x /= textureWidth;
+			c.y /= textureHeight;
+			ret.uv[i] = c;
+		}
+		ret.textureID = 0;
+		ret.dim = v2(positions[1].x - positions[0].x, positions[2].y - positions[0].y);
 		ret.textureSize.x = textureWidth;
 		ret.textureSize.y = textureHeight;
 		return ret;
@@ -70,15 +91,19 @@ namespace math {
 	ds::Texture buildTexture(const ds::Rect& r, float textureWidth, float textureHeight) {
 		ds::Texture ret;
 		ret.rect = r;
-		ret.uv = getTextureCoordinates(r, textureWidth, textureHeight);
+		v4 uv = getTextureCoordinates(r, textureWidth, textureHeight);
+		ret.uv[0] = v2(uv.x, uv.y);
+		ret.uv[1] = v2(uv.z, uv.y);
+		ret.uv[2] = v2(uv.z, uv.w);
+		ret.uv[3] = v2(uv.x, uv.w);
 		ret.textureID = 0;
-		ret.dim = Vector2f(r.width(), r.height());
+		ret.dim = v2(r.width(), r.height());
 		ret.textureSize.x = textureWidth;
 		ret.textureSize.y = textureHeight;
 		return ret;
 	}
 
-	void rotate(Vector2f& v, float angle) {
+	void rotate(v2& v, float angle) {
 		float xt = (v.x * cosf(angle)) + (v.y * sinf(angle));
 		float yt = (v.y * cosf(angle)) - (v.x * sinf(angle));
 		v.x = xt;
@@ -101,9 +126,9 @@ namespace math {
 	\param scaleX the x scale
 	\param scaleY the y scale
 	\param rotation the rotation in radians
-	\return a new Vector2f which is scaled and rotated and translated
+	\return a new v2 which is scaled and rotated and translated
 	*/
-	Vector2f srt(const Vector2f& v, const Vector2f& u, float scaleX, float scaleY, float rotation) {
+	v2 srt(const v2& v, const v2& u, float scaleX, float scaleY, float rotation) {
 		float sx = u.x * scaleX;
 		float sy = u.y * scaleY;
 
@@ -121,10 +146,10 @@ namespace math {
 		xt += v.x;
 		yt += v.y;
 
-		return Vector2f(xt, yt);
+		return v2(xt, yt);
 	}
 
-	void srt(const Vector2f& v, const Vector2f& u, const Vector2f& scale, float rotation, Vector2f* ret) {
+	void srt(const v2& v, const v2& u, const v2& scale, float rotation, v2* ret) {
 		float sx = u.x * scale.x;
 		float sy = u.y * scale.y;
 
@@ -144,7 +169,7 @@ namespace math {
 
 		ret->x = xt;
 		ret->y = yt;
-		//return Vector2f(xt, yt);
+		//return v2(xt, yt);
 	}
 
 	Vector3f srt(const Vector3f& v, const Vector3f& u, float scaleX, float scaleY, float rotation) {
@@ -169,7 +194,7 @@ namespace math {
 	}
 
 
-	void addRadial(Vector2f& v, float radius, float angle) {
+	void addRadial(v2& v, float radius, float angle) {
 		v.x += radius * fastCos(angle);
 		v.y += radius * fastSin(angle);
 	}
@@ -181,8 +206,8 @@ namespace math {
 		v.z += radius * cos(beta);
 	}
 
-	Vector2f calculateRadial(const Vector2f& v, float radius, float angle) {
-		Vector2f ret;
+	v2 calculateRadial(const v2& v, float radius, float angle) {
+		v2 ret;
 		//float ra = math::reflect(angle);
 		float ra = angle;
 		ret.x = v.x + radius * fastCos(ra);
@@ -190,8 +215,8 @@ namespace math {
 		return ret;
 	}
 
-	float calculateRotation(const Vector2f& v) {
-		Vector2f vn = normalize(v);
+	float calculateRotation(const v2& v) {
+		v2 vn = normalize(v);
 		if (vn != V2_RIGHT) {
 			float dt = clamp(dot(vn, V2_RIGHT), -1.0f, 1.0f);
 			float tmp = acos(dt);
@@ -206,12 +231,12 @@ namespace math {
 		}
 	}
 
-	float getAngle(const Vector2f& v1, const Vector2f& v2)  {
-		Vector2f diff = v2 - v1;
+	float getAngle(const v2& vec1, const v2& vec2)  {
+		v2 diff = vec2 - vec1;
 		return calculateRotation(diff);
 		/*
-		Vector2f vn1 = normalize(v1);
-		Vector2f vn2 = normalize(v2);
+		v2 vn1 = normalize(v1);
+		v2 vn2 = normalize(v2);
 		if ( vn1 != vn2 ) {
 		float dt = dot(vn1,vn2);
 		if ( dt < -1.0f ) {
@@ -233,13 +258,13 @@ namespace math {
 		*/
 	}
 
-	Vector2f getRadialVelocity(float angle, float velocity) {
+	v2 getRadialVelocity(float angle, float velocity) {
 		float vx = fastCos(angle) * velocity;
 		float vy = fastSin(angle) * velocity;
-		return Vector2f(vx, vy);
+		return v2(vx, vy);
 	}
 
-	void clamp(Vector2f& v, const Vector2f& min, const Vector2f& max) {
+	void clamp(v2& v, const v2& min, const v2& max) {
 		if (v.x > max.x) {
 			v.x = max.x;
 		}

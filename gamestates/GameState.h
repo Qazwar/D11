@@ -13,7 +13,7 @@ namespace ds {
 class GameState {
 
 public:
-	GameState(const char* name) : _name(name) {
+	GameState(const char* name) : _name(name) , _initialized(false) {
 		_hash = string::murmur_hash(name);
 	}
 	virtual ~GameState(void) {}
@@ -52,7 +52,14 @@ public:
 	const char* getName() const {
 		return _name;
 	}
+	bool isInitialized() const {
+		return _initialized;
+	}
+	void endInitialisation() {
+		_initialized = true;
+	}
 private:
+	bool _initialized;
 	GameState(const GameState& other) {}
 	const char* _name;
 	IdString _hash;

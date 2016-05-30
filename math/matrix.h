@@ -22,7 +22,18 @@ ds::mat4 operator * (const ds::mat4& m1,const ds::mat4& m2);
 
 ds::mat4 operator * (const ds::mat4& m,float v);
 
+ds::Quaternion operator * (const ds::Quaternion& q1, const ds::Quaternion& q2);
+
 namespace ds {
+
+	namespace quat {
+
+		Quaternion identity();
+
+		Quaternion conjugate(const Quaternion& q);
+
+		//Quaternion inverse(constQuaternion& q);
+	}
 
 	namespace matrix {
 

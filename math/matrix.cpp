@@ -114,7 +114,112 @@ ds::mat4 operator * (const ds::mat4& m,float v) {
 	return tmp;
 }
 
+ds::Quaternion operator * (const ds::Quaternion& q1, const ds::Quaternion& q2) {
+	ds::Quaternion q;
+	q.v = cross(q1.v, q2.v) + q2.w * q1.v + q1.w * q2.v;
+	q.w = q1.w * q2.w - dot(q1.v, q2.v);
+	return q;
+}
+
+/*
+Quaternion product(const Quaternion& rhs) const {
+return Quaternion(y()*rhs.z() - z()*rhs.y() + x()*rhs.w() + w()*rhs.x(),
+z()*rhs.x() - x()*rhs.z() + y()*rhs.w() + w()*rhs.y(),
+x()*rhs.y() - y()*rhs.x() + z()*rhs.w() + w()*rhs.z(),
+w()*rhs.w() - x()*rhs.x() - y()*rhs.y() - z()*rhs.z());
+}
+
+
+TMatrix4 matrix() const {
+double m[16] = {
+w(), -z(),  y(), x(),
+z(),  w(), -x(), y(),
+-y(),  x(),  w(), z(),
+-x(), -y(), -z(), w()
+};
+return TMatrix4(m);
+}
+
+TMatrix3 rotationMatrix() const {
+double m[9] = {
+1-2*y()*y()-2*z()*z(), 2*x()*y() - 2*z()*w(), 2*x()*z() + 2*y()*w(),
+2*x()*y() + 2*z()*w(), 1-2*x()*x()-2*z()*z(), 2*y()*z() - 2*x()*w(),
+2*x()*z() - 2*y()*w(), 2*y()*z() + 2*x()*w(), 1-2*x()*x()-2*y()*y()
+};
+return TMatrix3(m);
+}
+
+void euler(const TVector3& euler) {
+double c1 = cos(euler[2] * 0.5);
+double c2 = cos(euler[1] * 0.5);
+double c3 = cos(euler[0] * 0.5);
+double s1 = sin(euler[2] * 0.5);
+double s2 = sin(euler[1] * 0.5);
+double s3 = sin(euler[0] * 0.5);
+
+mData[0] = c1*c2*s3 - s1*s2*c3;
+mData[1] = c1*s2*c3 + s1*c2*s3;
+mData[2] = s1*c2*c3 - c1*s2*s3;
+mData[3] = c1*c2*c3 + s1*s2*s3;
+}
+
+TVector3 euler(void) const {
+TVector3 euler;
+const static double PI_OVER_2 = M_PI * 0.5;
+const static double EPSILON = 1e-10;
+double sqw, sqx, sqy, sqz;
+
+// quick conversion to Euler angles to give tilt to user
+sqw = mData[3]*mData[3];
+sqx = mData[0]*mData[0];
+sqy = mData[1]*mData[1];
+sqz = mData[2]*mData[2];
+
+euler[1] = asin(2.0 * (mData[3]*mData[1] - mData[0]*mData[2]));
+if (PI_OVER_2 - fabs(euler[1]) > EPSILON) {
+euler[2] = atan2(2.0 * (mData[0]*mData[1] + mData[3]*mData[2]),
+sqx - sqy - sqz + sqw);
+euler[0] = atan2(2.0 * (mData[3]*mData[0] + mData[1]*mData[2]),
+sqw - sqx - sqy + sqz);
+} else {
+// compute heading from local 'down' vector
+euler[2] = atan2(2*mData[1]*mData[2] - 2*mData[0]*mData[3],
+2*mData[0]*mData[2] + 2*mData[1]*mData[3]);
+euler[0] = 0.0;
+
+// If facing down, reverse yaw
+if (euler[1] < 0)
+euler[2] = M_PI - euler[2];
+}
+return euler;
+}
+
+*/
+
 namespace ds {
+
+	namespace quat {
+
+		Quaternion identity() {
+			return Quaternion(v3(0.0f,0.0f,0.0f),1.0f);
+		}
+
+		Quaternion conjugate(const Quaternion& q) {
+			return Quaternion(-q.v, q.w);
+		}
+		/*
+		Quaternion inverse(const Quaternion& q)
+		{
+			const float l = dot(q, q);
+			if (l > 0.0f) {
+				return conjugate(q) * -l;
+			}
+			else {
+				return identity();
+			}
+		}
+		*/
+	}
 
 namespace matrix {
 

@@ -98,6 +98,23 @@ inline mat4::mat4(float m11,float m12,float m13,float m14,float m21,float m22,fl
 	_44 = m44;
 }
 
+struct Quaternion {
+	v3 v;
+	float w;
+
+	Quaternion() : v(0, 0, 0), w(1.0f) {}
+
+	Quaternion(const v3& vv,float ww) : v(vv), w(ww) {}
+
+};
+
+struct Ray {
+
+	v3 origin;
+	v3 direction;
+
+};
+
 // -------------------------------------------------------
 // Rect
 // -------------------------------------------------------
