@@ -53,6 +53,7 @@ namespace ds {
 		void recalculate_normals();
 		void parse(const char* fileName);
 		void create_ring(float radius, float width, uint16_t segments);
+		void create_torus(float radius, float width, uint16_t segments);
 		void create_cube_ring(float radius, float width, uint16_t segments);
 		void debug_edge(uint16_t edgeIndex);
 		void debug_face(uint16_t faceIndex);

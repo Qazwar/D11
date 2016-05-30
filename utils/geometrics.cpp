@@ -826,6 +826,40 @@ namespace ds {
 			}
 		}
 
+		void MeshGen::create_torus(float radius, float width, uint16_t segments) {
+			float angleStep = TWO_PI / static_cast<float>(segments);
+			v3 p[4];
+			v3 pe[4];
+			float angle = 0.0f;
+			float next_angle = angleStep;
+			float outer_radius = radius + width;
+			float half_size = width * 0.5f;
+			for (int i = 0; i < segments; ++i) {
+				p[0] = v3(radius * cos(next_angle), radius * sin(next_angle), -half_size);
+				p[1] = v3(outer_radius * cos(next_angle), outer_radius * sin(next_angle), -half_size);
+				p[2] = v3(outer_radius * cos(angle), outer_radius * sin(angle), -half_size);
+				p[3] = v3(radius * cos(angle), radius * sin(angle), -half_size);
+				uint16_t f1 = add_face(p);
+				const Face& fc1 = _faces[f1];
+				const Edge& e1 = _edges[fc1.edge];
+				uint16_t f2 = extrude_edge(e1.next, v3(0, 0, width));
+				pe[0] = p[1];
+				pe[1] = p[0];
+				pe[2] = p[3];
+				pe[3] = p[2];
+				for (int j = 0; j < 4; ++j) {
+					pe[j].z += width;
+				}
+				uint16_t f3 = add_face(pe);
+				const Face& fc3 = _faces[f3];
+				const Edge& e2 = _edges[fc3.edge];
+				uint16_t f4 = extrude_edge(e2.next, v3(0, 0, -width));
+
+				angle += angleStep;
+				next_angle += angleStep;
+			}
+		}
+
 		void MeshGen::create_ring(float radius, float width, uint16_t segments) {
 			float angleStep = TWO_PI / static_cast<float>(segments);
 			v3 p[4];
