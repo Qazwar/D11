@@ -1,4 +1,4 @@
-#include "geometrics.h"
+#include "MeshGen.h"
 #include "..\math\math.h"
 #include "..\utils\Log.h"
 #include "..\io\json.h"
@@ -41,6 +41,18 @@ namespace ds {
 			return -1;
 		}
 
+		int MeshGen::find_edges(const v3& pos, uint16_t* ret, int max) {
+			int cnt = 0;
+			for (int i = 0; i < _edges.size(); ++i) {
+				const Edge& e = _edges[i];
+				v3 p = _vertices[e.vert_index];
+				if (equals(p, pos) && cnt < max) {
+					ret[cnt++] = i;
+				}
+			}
+			return cnt;
+		}
+
 		int MeshGen::find_edge(const v3& start, const v3& end) {
 			LOG << "find_edge: " << DBG_V3(start) << " " << DBG_V3(end);
 			for (int i = 0; i < _edges.size(); ++i) {
@@ -78,12 +90,14 @@ namespace ds {
 		// add vertex
 		// ----------------------------------------------
 		int MeshGen::add_vertex(const v3& pos) {
+			/*
 			for (int i = 0; i < _vertices.size(); ++i) {
 				const v3& v = _vertices[i];
 				if (equals(v,pos)) {
 					return i;
 				}
 			}
+			*/
 			int ret = _vertices.size();
 			_vertices.push_back(pos);
 			return ret;
@@ -237,18 +251,10 @@ namespace ds {
 			const Edge& e0 = _edges[edgeIndex];
 			const Edge& e1 = _edges[e0.next];
 			v3 p[4];	
-			//if (is_clock_wise(edgeIndex)) {
-				p[0] = _vertices[e0.vert_index];
-				p[1] = p[0] + pos;
-				p[2] = _vertices[e1.vert_index] + pos;
-				p[3] = _vertices[e1.vert_index];				
-			//}
-			//else {
-				//p[0] = _vertices[e.end];
-				//p[1] = _vertices[e.start];
-				//p[2] = p[1] + pos;
-				//p[3] = p[0] + pos;
-			//}
+			p[0] = _vertices[e0.vert_index];
+			p[1] = p[0] + pos;
+			p[2] = _vertices[e1.vert_index] + pos;
+			p[3] = _vertices[e1.vert_index];				
 			return add_face(p);
 		}
 
@@ -507,7 +513,17 @@ namespace ds {
 		void MeshGen::move_edge(uint16_t edgeIndex, const v3& position) {
 			const Edge& e0 = _edges[edgeIndex];
 			const Edge& e1 = _edges[e0.next];
-			Face& f = _faces[e0.face_index];
+			uint16_t connections[16];
+			v3 p[] = { _vertices[e0.vert_index], _vertices[e1.vert_index] };
+			for (int i = 0; i < 2; ++i) {
+				int num = find_edges(p[i], connections, 16);
+				for (int j = 0; j < num; ++j) {
+					const Edge& curr = _edges[connections[j]];
+					if (connections[j] != edgeIndex && connections[j] != e0.next) {
+						_vertices[curr.vert_index] += position;
+					}
+				}
+			}
 			_vertices[e0.vert_index] += position;
 			_vertices[e1.vert_index] += position;
 		}
@@ -517,27 +533,12 @@ namespace ds {
 		// ----------------------------------------------
 		void MeshGen::move_face(uint16_t face_index, const v3& position) {
 			Face& f = _faces[face_index];
-			uint16_t idx = f.edge;			
-			uint16_t all[4];
-			v3 p[4];
+			int ei = f.edge;
 			for (int i = 0; i < 4; ++i) {
-				all[i] = idx;
-				Edge& e0 = _edges[idx];
-				p[i] = _vertices[e0.vert_index];
-				_vertices[e0.vert_index] += position;
-				//_vertices[e1.vert_index] += position;
-				idx = e0.next;
+				const Edge& e = _edges[ei];
+				move_edge(ei, position);
+				ei = e.next;
 			}
-			/*
-			for (int i = 0; i < 4; ++i) {
-				int oi = find_edge(p[(i + 1) % 4],p[i]);
-				LOG << "==> OI: " << oi;
-				if (oi != -1) {
-					const Edge& o = _edges[oi];
-					_vertices[o.vert_index] += position;
-				}
-			}
-			*/
 			calculate_normal(&f);
 		}
 
@@ -546,19 +547,28 @@ namespace ds {
 		// ----------------------------------------------
 		void MeshGen::scale_face(uint16_t face_index, float scale) {
 			const Face& f = _faces[face_index];
+			uint16_t connections[16];
 			int ei = f.edge;
 			float dir = 1.0f;
 			if (scale < 1.0f) {
 				dir = -1.0f;
 			}
+			v3 center = get_center(face_index);
 			for (int i = 0; i < 4; ++i) {
 				Edge& e0 = _edges[ei];
-				Edge& e1 = _edges[e0.next];
-				v3 c = normalize(cross(_vertices[e1.vert_index] - _vertices[e0.vert_index], f.n));				
-				c *= scale;
+				v3 diff = _vertices[e0.vert_index] - center;
+				v3 c = normalize(diff);
+				float l = length(diff);
+				c *= (l * scale);
 				c *= dir;
+				int num = find_edges(_vertices[e0.vert_index], connections, 16);
+				for (int j = 0; j < num; ++j) {
+					const Edge& curr = _edges[connections[j]];
+					if (connections[j] != ei) {
+						_vertices[curr.vert_index] += c;
+					}
+				}
 				_vertices[e0.vert_index] += c;
-				//_vertices[e.end] += c;
 				ei = e0.next;
 			}
 		}
@@ -826,40 +836,80 @@ namespace ds {
 			}
 		}
 
-		void MeshGen::create_torus(float radius, float width, uint16_t segments) {
+		// ----------------------------------------------
+		// get connected faces
+		// ----------------------------------------------
+		int MeshGen::get_connected_faces(uint16_t face_index, uint16_t* ret, int max) {
+			const Face& f = _faces[face_index];
+			return 0;
+		}
+
+		// ----------------------------------------------
+		// create torus
+		// ----------------------------------------------
+		uint16_t MeshGen::create_torus(const v3& position, float radius, float width, float depth, uint16_t segments) {
 			float angleStep = TWO_PI / static_cast<float>(segments);
 			v3 p[4];
 			v3 pe[4];
+			uint16_t ret = 0;
 			float angle = 0.0f;
 			float next_angle = angleStep;
 			float outer_radius = radius + width;
-			float half_size = width * 0.5f;
+			float half_size = depth * 0.5f;
 			for (int i = 0; i < segments; ++i) {
-				p[0] = v3(radius * cos(next_angle), radius * sin(next_angle), -half_size);
-				p[1] = v3(outer_radius * cos(next_angle), outer_radius * sin(next_angle), -half_size);
-				p[2] = v3(outer_radius * cos(angle), outer_radius * sin(angle), -half_size);
-				p[3] = v3(radius * cos(angle), radius * sin(angle), -half_size);
+				p[0] = position + v3(radius * cos(next_angle), radius * sin(next_angle), -half_size);
+				p[1] = position + v3(outer_radius * cos(next_angle), outer_radius * sin(next_angle), -half_size);
+				p[2] = position + v3(outer_radius * cos(angle), outer_radius * sin(angle), -half_size);
+				p[3] = position + v3(radius * cos(angle), radius * sin(angle), -half_size);
 				uint16_t f1 = add_face(p);
+				if (i == 0) {
+					ret = f1;
+				}
 				const Face& fc1 = _faces[f1];
 				const Edge& e1 = _edges[fc1.edge];
-				uint16_t f2 = extrude_edge(e1.next, v3(0, 0, width));
+				uint16_t f2 = extrude_edge(e1.next, v3(0, 0, depth));
 				pe[0] = p[1];
 				pe[1] = p[0];
 				pe[2] = p[3];
 				pe[3] = p[2];
 				for (int j = 0; j < 4; ++j) {
-					pe[j].z += width;
+					pe[j].z += depth;
 				}
 				uint16_t f3 = add_face(pe);
 				const Face& fc3 = _faces[f3];
 				const Edge& e2 = _edges[fc3.edge];
-				uint16_t f4 = extrude_edge(e2.next, v3(0, 0, -width));
+				uint16_t f4 = extrude_edge(e2.next, v3(0, 0, -depth));
 
 				angle += angleStep;
 				next_angle += angleStep;
 			}
+			return ret;
 		}
 
+		// ----------------------------------------------
+		// find connections
+		// ----------------------------------------------
+		int MeshGen::find_connections(uint16_t face_index, EdgeConnection* connections, int max) {
+			const Face& f = _faces[face_index];
+			int ei = f.edge;
+			int cnt = 0;
+			for (int i = 0; i < 4; ++i) {
+				Edge& e = _edges[ei];
+				Edge& n = _edges[e.next];
+				int idx = find_edge(_vertices[n.vert_index], _vertices[e.vert_index]);
+				if (idx != -1 && cnt < max) {
+					EdgeConnection& c = connections[cnt++];
+					c.first = ei;
+					c.second = idx;
+				}
+				ei = e.next;
+			}
+			return cnt;
+		}
+
+		// ----------------------------------------------
+		// create ring
+		// ----------------------------------------------
 		void MeshGen::create_ring(float radius, float width, uint16_t segments) {
 			float angleStep = TWO_PI / static_cast<float>(segments);
 			v3 p[4];
@@ -877,6 +927,33 @@ namespace ds {
 			}
 		}
 
+		// ----------------------------------------------
+		// create grid
+		// ----------------------------------------------
+		void MeshGen::create_grid(const v2& size, int stepsX, int stepsY) {
+			v3 p[4];
+			float sx = -size.x / 2.0f * stepsX;
+			float sy = -size.y / 2.0f * stepsY;
+			float hsx = size.x * 0.5f;
+			float hsy = size.y * 0.5f;
+			float yp = sy;
+			for (int y = 0; y < stepsY; ++y) {
+				float xp = sx;
+				for (int x = 0; x < stepsX; ++x) {
+					p[0] = v3(xp - hsx, yp + hsy, 0.0f);
+					p[1] = v3(xp + hsx, yp + hsy, 0.0f);
+					p[2] = v3(xp + hsx, yp - hsy, 0.0f);
+					p[3] = v3(xp - hsx, yp - hsy, 0.0f);
+					add_face(p);
+					xp += size.x;
+				}
+				yp += size.y;
+			}
+		}
+
+		// ----------------------------------------------
+		// create cube ring
+		// ----------------------------------------------
 		void MeshGen::create_cube_ring(float radius, float width, uint16_t segments) {
 			float angleStep = TWO_PI / static_cast<float>(segments);
 			v3 p[4];
