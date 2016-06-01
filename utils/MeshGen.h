@@ -6,6 +6,7 @@ namespace ds {
 	namespace gen {
 
 	struct IndexList {
+
 		Array<uint16_t> indices;
 
 		bool add_unique(uint16_t idx) {
@@ -74,17 +75,23 @@ namespace ds {
 		void create_ring(float radius, float width, uint16_t segments);
 		uint16_t create_torus(const v3& position,float radius, float width, float depth, uint16_t segments);
 		void create_grid(const v2& size, int stepsX, int stepsY);
+		void create_sphere(float radius, int segments, int stacks);
 		void debug_edge(uint16_t edgeIndex);
 		void debug_face(uint16_t faceIndex);
 		int intersects(const ds::Ray& ray);
 		void clear();		
 		int get_connected_faces(uint16_t face_index, uint16_t* ret, int max);
+		int get_connected_edges(uint16_t edge_index, uint16_t* ret, int max);
 		void translate(const v3& position);
 		void scale(const v3& scale);
 		void rotate(const v3& rotation);
 		void transform(const v3& position, const v3& scale, const v3& rotation);
-		void add(MeshGen* other, const v3& position);
+		void add(const MeshGen& other, const v3& position,const v3& scale = v3(1,1,1),const v3& rotation = v3(0,0,0));
+		void find_adjacent_faces(uint16_t face_index, IndexList& list);
+		void smooth(const IndexList& list, float radius);
 	private:
+		MeshGen(const MeshGen& other) {}
+		//void find_adjacent_faces(uint16_t face_index, IndexList& list);
 		void calculate_normal(Face* f);
 		int add_vertex(const v3& pos);
 		int find_edges(const v3& pos, uint16_t* ret, int max);

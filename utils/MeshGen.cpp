@@ -53,17 +53,9 @@ namespace ds {
 				const Edge& e = _edges[i];
 				v3 es = _vertices[e.vert_index];
 				v3 ee = _vertices[_edges[e.next].vert_index];
-				//LOG << "es: " << DBG_V3(es) << " ee: " << DBG_V3(ee);
 				if (start == es && end == ee) {
 					return i;
 				}
-				/*
-				v3 en = _vertices[_edges[e.prev].vert_index];
-				//LOG << "es: " << DBG_V3(es) << " ee: " << DBG_V3(ee);
-				if (start == es && end == en) {
-					return i;
-				}
-				*/
 			}
 			return -1;
 		}
@@ -72,14 +64,6 @@ namespace ds {
 		// add vertex
 		// ----------------------------------------------
 		int MeshGen::add_vertex(const v3& pos) {
-			/*
-			for (int i = 0; i < _vertices.size(); ++i) {
-				const v3& v = _vertices[i];
-				if (equals(v,pos)) {
-					return i;
-				}
-			}
-			*/
 			int ret = _vertices.size();
 			_vertices.push_back(pos);
 			return ret;
@@ -323,6 +307,9 @@ namespace ds {
 			}
 		}
 
+		// ----------------------------------------------
+		// combine
+		// ----------------------------------------------
 		uint16_t MeshGen::make_face(uint16_t* edges) {
 			v3 p[4];
 			for (int i = 0; i < 4; ++i) {
@@ -531,6 +518,66 @@ namespace ds {
 		}
 
 		// ----------------------------------------------
+		// get connected edges
+		// ----------------------------------------------
+		int MeshGen::get_connected_edges(uint16_t edge_index, uint16_t* ret, int max) {
+			int cnt = 0;
+			const Edge& e0 = _edges[edge_index];
+			const Edge& e1 = _edges[e0.next];
+			uint16_t c[16];
+			int num = find_edges(_vertices[e0.vert_index], c, 16);
+			for (int i = 0; i < num; ++i) {
+				const Edge& ne0 = _edges[c[i]];
+				const Edge& ne1 = _edges[ne0.prev];
+				if (equals(_vertices[ne1.vert_index], _vertices[e1.vert_index])) {
+					ret[cnt++] = c[i];
+				}
+			}
+			return cnt;
+		}
+
+		void MeshGen::smooth(const IndexList& list, float radius) {
+			v3 center = v3(0, 0, 0); // FIXME: get center
+			IndexList verts;
+			for (int i = 0; i < list.indices.size(); ++i) {
+				const Face& f = _faces[list.indices[i]];
+				int ei = f.edge;
+				for (int j = 0; j < 4; ++j) {
+					const Edge& e = _edges[ei];
+					verts.add_unique(ei);					
+					ei = e.next;
+				}
+			}
+			for (int i = 0; i < verts.indices.size(); ++i) {
+				v3 d = center - _vertices[verts.indices[i]];
+				v3 dn = normalize(d);
+				float l = length(d);
+				float factor = radius / l;
+				_vertices[verts.indices[i]] *= factor;
+			}
+		}
+		// ----------------------------------------------
+		// find adjacent faces
+		// ----------------------------------------------
+		void MeshGen::find_adjacent_faces(uint16_t face_index, IndexList& list) {
+			const Face& f = _faces[face_index];
+			int ei = f.edge;
+			list.add_unique(face_index);
+			uint16_t connections[16];
+			for (int i = 0; i < 4; ++i) {
+				Edge& e0 = _edges[ei];
+				int num = get_connected_edges(ei, connections, 16);
+				for (int k = 0; k < num; ++k) {
+					const Edge& curr = _edges[connections[k]];
+					if (list.add_unique(curr.face_index)) {
+						find_adjacent_faces(curr.face_index, list);
+					}
+				}
+				ei = e0.next;
+			}
+		}
+
+		// ----------------------------------------------
 		// add cube
 		// ----------------------------------------------
 		uint16_t MeshGen::add_cube(const v3 & position, const v3 & size, const v3 & rotation) {
@@ -565,10 +612,16 @@ namespace ds {
 			return faces[0];
 		}
 
+		// ----------------------------------------------
+		// get face
+		// ----------------------------------------------
 		const Face& MeshGen::get_face(uint16_t face_index) const {
 			return _faces[face_index];
 		}
 
+		// ----------------------------------------------
+		// vertices
+		// ----------------------------------------------
 		void MeshGen::get_vertices(const Face& face, v3* ret) const {
 			int ei = face.edge;
 			for (int i = 0; i < 4; ++i) {
@@ -578,13 +631,22 @@ namespace ds {
 			}
 		}
 
-		void MeshGen::add(MeshGen* other, const v3& position) {
+		// ----------------------------------------------
+		// add other
+		// ----------------------------------------------
+		void MeshGen::add(const MeshGen& other, const v3& position, const v3& scale, const v3& rotation) {
 			v3 p[4];
-			for (int i = 0; i < other->num_faces(); ++i) {
-				const Face& f = other->get_face(i);
-				other->get_vertices(f,p);
+			mat4 rotY = matrix::mat4RotationY(rotation.y);
+			mat4 rotX = matrix::mat4RotationX(rotation.x);
+			mat4 rotZ = matrix::mat4RotationZ(rotation.z);
+			mat4 t = matrix::mat4Transform(position);
+			mat4 s = matrix::mat4Scale(scale);
+			mat4 world = rotZ * rotY * rotX * s * t;
+			for (int i = 0; i < other.num_faces(); ++i) {
+				const Face& f = other.get_face(i);
+				other.get_vertices(f,p);
 				for (int j = 0; j < 4; ++j) {
-					p[i] += position;
+					p[j] = world * p[j];
 				}
 				uint16_t ni = add_face(p);
 				Face& nf = _faces[ni];
@@ -593,6 +655,9 @@ namespace ds {
 			recalculate_normals();
 		}
 
+		// ----------------------------------------------
+		// clear mesh
+		// ----------------------------------------------
 		void MeshGen::clear() {
 			_vertices.clear();
 			_edges.clear();
@@ -748,6 +813,9 @@ namespace ds {
 			return 0;
 		}
 
+		void MeshGen::create_sphere(float radius, int segments, int stacks) {
+			float angleStep = TWO_PI / static_cast<float>(segments);
+		}
 		// ----------------------------------------------
 		// create torus
 		// ----------------------------------------------
@@ -855,9 +923,9 @@ namespace ds {
 			float sy = -size.y / 2.0f * stepsY;
 			float hsx = size.x * 0.5f;
 			float hsy = size.y * 0.5f;
-			float yp = sy;
+			float yp = sy + hsy;
 			for (int y = 0; y < stepsY; ++y) {
-				float xp = sx;
+				float xp = sx + hsx;
 				for (int x = 0; x < stepsX; ++x) {
 					p[0] = v3(xp - hsx, yp + hsy, 0.0f);
 					p[1] = v3(xp + hsx, yp + hsy, 0.0f);
