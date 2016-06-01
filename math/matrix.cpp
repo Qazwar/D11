@@ -207,7 +207,99 @@ namespace ds {
 		Quaternion conjugate(const Quaternion& q) {
 			return Quaternion(-q.v, q.w);
 		}
+
+		Quaternion euler2quat(float roll, float pitch, float yaw){
+			Quaternion quat;
+			float cr, cp, cy, sr, sp, sy, cpcy, spsy;
+			// calculate trig identities
+			cr = cos(roll / 2);
+			cp = cos(pitch / 2);
+			cy = cos(yaw / 2);
+			sr = sin(roll / 2);
+			sp = sin(pitch / 2);
+			sy = sin(yaw / 2);
+			cpcy = cp * cy;
+			spsy = sp * sy;
+			quat.w = cr * cpcy + sr * spsy;
+			quat.v.x = sr * cpcy - cr * spsy;
+			quat.v.y = cr * sp * cy + sr * cp * sy;
+			quat.v.z = cr * cp * sy - sr * sp * cy;
+			return quat;
+		}
+
+		mat4 quat2matrix(const Quaternion& quat) {
+
+			mat4 m;
+			// calculate coefficients
+			float x2 = quat.v.x + quat.v.x; 
+			float y2 = quat.v.y + quat.v.y;
+			float z2 = quat.v.z + quat.v.z;
+			float xx = quat.v.x * x2; 
+			float xy = quat.v.x * y2; 
+			float xz = quat.v.x * z2;
+			float yy = quat.v.y * y2; 
+			float yz = quat.v.y * z2; 
+			float zz = quat.v.z * z2;
+			float wx = quat.w * x2; 
+			float wy = quat.w * y2; 
+			float wz = quat.w * z2;
+
+			m._11 = 1.0 - (yy + zz); m._21 = xy - wz;
+			m._31 = xz + wy; m._41 = 0.0;
+
+			m._12 = xy + wz; m._22 = 1.0 - (xx + zz);
+			m._32 = yz - wx; m._42 = 0.0;
+
+
+			m._13 = xz - wy; m._23 = yz + wx;
+			m._33 = 1.0 - (xx + yy); m._42 = 0.0;
+
+
+			m._14 = 0; m._24 = 0;
+			m._34 = 0; m._44 = 1;
+			return m;
+
+		}
 		/*
+		http://www.gamasutra.com/view/feature/131686/rotating_objects_using_quaternions.php
+		QuatSlerp(QUAT * from, QUAT * to, float t, QUAT * res)
+		{
+		float           to1[4];
+		double        omega, cosom, sinom, scale0, scale1;
+		// calc cosine
+		cosom = from->x * to->x + from->y * to->y + from->z * to->z
+		+ from->w * to->w;
+		// adjust signs (if necessary)
+		if ( cosom <0.0 ){ cosom = -cosom; to1[0] = - to->x;
+		to1[1] = - to->y;
+		to1[2] = - to->z;
+		to1[3] = - to->w;
+		} else  {
+		to1[0] = to->x;
+		to1[1] = to->y;
+		to1[2] = to->z;
+		to1[3] = to->w;
+		}
+		// calculate coefficients
+		if ( (1.0 - cosom) > DELTA ) {
+		// standard case (slerp)
+		omega = acos(cosom);
+		sinom = sin(omega);
+		scale0 = sin((1.0 - t) * omega) / sinom;
+		scale1 = sin(t * omega) / sinom;
+		} else {
+		// "from" and "to" quaternions are very close
+		//  ... so we can do a linear interpolation
+		scale0 = 1.0 - t;
+		scale1 = t;
+		}
+		// calculate final values
+		res->x = scale0 * from->x + scale1 * to1[0];
+		res->y = scale0 * from->y + scale1 * to1[1];
+		res->z = scale0 * from->z + scale1 * to1[2];
+		res->w = scale0 * from->w + scale1 * to1[3];
+		}
+
 		Quaternion inverse(const Quaternion& q)
 		{
 			const float l = dot(q, q);

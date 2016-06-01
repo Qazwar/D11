@@ -25,6 +25,10 @@ namespace ds {
 			}
 			return false;
 		}
+
+		void clear() {
+			indices.clear();
+		}
 	};
 
 	struct Edge {

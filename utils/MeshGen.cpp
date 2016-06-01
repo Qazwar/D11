@@ -544,17 +544,47 @@ namespace ds {
 				int ei = f.edge;
 				for (int j = 0; j < 4; ++j) {
 					const Edge& e = _edges[ei];
-					verts.add_unique(ei);					
+					if (!verts.add_unique(ei)) {
+						LOG << "Vert already added";
+					}
 					ei = e.next;
 				}
 			}
 			for (int i = 0; i < verts.indices.size(); ++i) {
-				v3 d = center - _vertices[verts.indices[i]];
+				center += _vertices[verts.indices[i]];
+			}
+			center /= static_cast<float>(verts.indices.size());
+			LOG << "center: " << DBG_V3(center);
+			for (int i = 0; i < verts.indices.size(); ++i) {
+				/*
+				v3 v = _vertices[verts.indices[i]];// *2.0f / 1.0f - v3(1, 1, 1);
+				float x2 = v.x * v.x;
+				float y2 = v.y * v.y;
+				float z2 = v.z * v.z;
+				float t = sqrt(x2 + y2 + z2);
+				v3 s;
+				s.x = v.x / t;
+				s.y = v.y / t;
+				s.z = v.z / t;
+				*/
+				_vertices[verts.indices[i]] = normalize(_vertices[verts.indices[i]]) * radius;
+
+
+				/*
+
+				v3 d = _vertices[verts.indices[i]] - center;
 				v3 dn = normalize(d);
 				float l = length(d);
 				float factor = radius / l;
-				_vertices[verts.indices[i]] *= factor;
+				float t = _vertices[verts.indices[i]].x * _vertices[verts.indices[i]].y * _vertices[verts.indices[i]].z;
+				float vx = _vertices[verts.indices[i]].x * sqrt(1.0f - t * 0.5f);
+				float vy = _vertices[verts.indices[i]].y * sqrt(1.0f - t * 0.5f);
+				float vz = _vertices[verts.indices[i]].z * sqrt(1.0f - t * 0.5f);
+				//_vertices[verts.indices[i]] *= factor;
+				_vertices[verts.indices[i]] = v3(vx,vy,vz);
+				*/
 			}
+			recalculate_normals();
 		}
 		// ----------------------------------------------
 		// find adjacent faces

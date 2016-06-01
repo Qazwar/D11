@@ -32,7 +32,10 @@ namespace ds {
 
 		Quaternion conjugate(const Quaternion& q);
 
-		//Quaternion inverse(constQuaternion& q);
+		Quaternion euler2quat(float roll, float pitch, float yaw);
+
+		mat4 quat2matrix(const Quaternion& quat);
+
 	}
 
 	namespace matrix {
