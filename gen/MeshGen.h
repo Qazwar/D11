@@ -5,6 +5,9 @@ namespace ds {
 
 	namespace gen {
 
+	// ---------------------------------------
+	// UnqiueIndexList
+	// ---------------------------------------
 	struct IndexList {
 
 		Array<uint16_t> indices;
@@ -31,6 +34,9 @@ namespace ds {
 		}
 	};
 
+	// ---------------------------------------
+	// Edge
+	// ---------------------------------------
 	struct Edge {
 		uint16_t next;
 		uint16_t prev;
@@ -40,12 +46,36 @@ namespace ds {
 		v2 uv;
 	};
 
+	// ---------------------------------------
+	// Face
+	// ---------------------------------------
 	struct Face {
 		uint16_t edge;
 		v3 n;
 		Color color;
+		bool selected;
 	};
 
+	enum OpcodeType {
+		MGO_ADD_CUBE,
+		MGO_ADD_CUBE_ROT,
+		MGO_SET_COLOR,
+		MGO_UNKNOWN
+	};
+
+	struct MeshGenOpcode {
+
+		int type;
+		int offsets[6];
+		int data_types[6];
+		int args;
+
+		MeshGenOpcode() : type(OpcodeType::MGO_UNKNOWN), args(0) {}
+	};
+
+	// ---------------------------------------
+	// MeshGen
+	// ---------------------------------------
 	class MeshGen {
 
 	public:
@@ -58,6 +88,7 @@ namespace ds {
 		uint16_t add_cube(const v3& position, const v3& size, uint16_t* faces = 0);
 		uint16_t add_cube(const v3& position, const v3& size, const v3& rotation);
 		void set_color(uint16_t faceIndex, const Color& color);
+		void set_color(const Color& color);
 		uint16_t add_face(v3* positions);
 		uint16_t add_face(const v3& p0, const v3& p1, const v3& p2, const v3& p3);
 		void add_face(const v3& position, const v2& size, const v3& normal);
@@ -73,6 +104,7 @@ namespace ds {
 		uint16_t make_face(uint16_t* edges);
 		uint16_t extrude_edge(uint16_t edgeIndex, const v3& pos);
 		uint16_t extrude_face(uint16_t faceIndex,float factor);
+		const Color& get_color(uint16_t face_index) const;
 		void debug();
 		void recalculate_normals();
 		void parse(const char* fileName);
@@ -93,9 +125,20 @@ namespace ds {
 		void add(const MeshGen& other, const v3& position,const v3& scale = v3(1,1,1),const v3& rotation = v3(0,0,0));
 		void find_adjacent_faces(uint16_t face_index, IndexList& list);
 		void smooth(const IndexList& list, float radius);
+		// selection
+		bool select_face(uint16_t face_index);
+		void clear_selection();
+		
+		void save_bin(const char* fileName);
+		void save_text(const char* fileName);
+		void load_bin(const char* fileName);
 	private:
+		// recording
+		void record(const MeshGenOpcode& opcode);
+		void add_data(MeshGenOpcode& op,const v3& v);
+		void add_data(MeshGenOpcode& op, int v);
+		void add_data(MeshGenOpcode& op, const Color& v);
 		MeshGen(const MeshGen& other) {}
-		//void find_adjacent_faces(uint16_t face_index, IndexList& list);
 		void calculate_normal(Face* f);
 		int add_vertex(const v3& pos);
 		int find_edges(const v3& pos, uint16_t* ret, int max);
@@ -103,6 +146,9 @@ namespace ds {
 		Array<v3> _vertices;
 		Array<Edge> _edges;
 		Array<Face> _faces;
+		Color _selectionColor;
+		Array<float> _data;
+		Array<MeshGenOpcode> _opcodes;
 	};
 
 	}
