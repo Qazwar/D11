@@ -19,7 +19,6 @@ namespace ds {
 			ds::Mesh* mesh;
 			GenSelectionType selectionType;
 			ds::Array<uint16_t> selections;
-			int selectedFace;
 			ds::Array<float> data;
 		};
 

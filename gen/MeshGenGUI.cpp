@@ -27,7 +27,6 @@ namespace ds {
 			int state = 1;
 			gui::start(1, &pos, true);
 			gui::begin("MeshGen", &state);
-			gui::Value("Face", _ctx->selectedFace);
 			for (int i = 0; i < _commands.size(); ++i) {
 				ds::gen::MeshCommand* cmd = _commands[i];
 				if (cmd->isActive()) {

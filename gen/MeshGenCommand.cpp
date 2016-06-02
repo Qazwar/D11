@@ -56,10 +56,8 @@ namespace ds {
 				gui::InputColor("Color", &_color);
 				gui::beginGroup();
 				if (gui::Button("Apply")) {
-					if (_context->selectedFace != -1) {
-						_context->gen->set_color(_context->selectedFace, _color);
-						ret = true;
-					}
+					_context->gen->set_color(_color);
+					ret = true;
 					setActive(false);
 				}
 				if (gui::Button("Cancel")) {

@@ -98,6 +98,7 @@ namespace ds {
 		void texture_face(uint16_t faceIndex, const Texture& t);
 		void scale_face(uint16_t faceIndex, float scale);
 		v3 get_center(uint16_t faceIndex);
+		int slice(uint16_t face_index, int segments, uint16_t* faces = 0, int max = 0);
 		uint16_t hsplit_edge(uint16_t edgeIndex, float factor = 0.5f);
 		uint16_t vsplit_edge(uint16_t edgeIndex, float factor = 0.5f);
 		uint16_t get_edge_index(uint16_t faceIndex, int nr);
@@ -142,6 +143,7 @@ namespace ds {
 		void calculate_normal(Face* f);
 		int add_vertex(const v3& pos);
 		int find_edges(const v3& pos, uint16_t* ret, int max);
+		int find_vertices(const v3& pos, uint16_t* ret, int max);
 		int find_edge(const v3& start, const v3& end);
 		Array<v3> _vertices;
 		Array<Edge> _edges;

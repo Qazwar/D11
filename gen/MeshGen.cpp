@@ -42,6 +42,17 @@ namespace ds {
 
 		MeshGen::~MeshGen() {}
 
+		int MeshGen::find_vertices(const v3& pos, uint16_t* ret, int max) {
+			int cnt = 0;
+			for (int i = 0; i < _vertices.size(); ++i) {
+				v3 p = _vertices[i];
+				if (equals(p, pos) && cnt < max) {
+					ret[cnt++] = i;
+				}
+			}
+			return cnt;
+		}
+
 		int MeshGen::find_edges(const v3& pos, uint16_t* ret, int max) {
 			int cnt = 0;
 			for (int i = 0; i < _edges.size(); ++i) {
@@ -426,16 +437,13 @@ namespace ds {
 			uint16_t connections[16];
 			v3 p[] = { _vertices[e0.vert_index], _vertices[e1.vert_index] };
 			for (int i = 0; i < 2; ++i) {
-				int num = find_edges(p[i], connections, 16);
+				int num = find_vertices(p[i], connections, 16);
 				for (int j = 0; j < num; ++j) {
-					const Edge& curr = _edges[connections[j]];
-					if (connections[j] != edgeIndex && connections[j] != e0.next) {
-						_vertices[curr.vert_index] += position;
-					}
+					_vertices[connections[j]] += position;
 				}
 			}
-			_vertices[e0.vert_index] += position;
-			_vertices[e1.vert_index] += position;
+			//_vertices[e0.vert_index] += position;
+			//_vertices[e1.vert_index] += position;
 		}
 
 		// ----------------------------------------------
@@ -459,10 +467,6 @@ namespace ds {
 			const Face& f = _faces[face_index];
 			uint16_t connections[16];
 			int ei = f.edge;
-			float dir = 1.0f;
-			if (scale < 1.0f) {
-				dir = -1.0f;
-			}
 			v3 center = get_center(face_index);
 			for (int i = 0; i < 4; ++i) {
 				Edge& e0 = _edges[ei];
@@ -470,19 +474,21 @@ namespace ds {
 				v3 c = normalize(diff);
 				float l = length(diff);
 				c *= (l * scale);
-				c *= dir;
 				int num = find_edges(_vertices[e0.vert_index], connections, 16);
 				for (int j = 0; j < num; ++j) {
 					const Edge& curr = _edges[connections[j]];
-					if (connections[j] != ei) {
-						_vertices[curr.vert_index] += c;
-					}
+					//if (connections[j] != ei) {
+						_vertices[curr.vert_index] = c;
+					//}
 				}
-				_vertices[e0.vert_index] += c;
+				//_vertices[e0.vert_index] = c;
 				ei = e0.next;
 			}
 		}
 
+		// ----------------------------------------------
+		// get center of face
+		// ----------------------------------------------
 		v3 MeshGen::get_center(uint16_t face_index) {
 			const Face& f = _faces[face_index];
 			int ei = f.edge;
@@ -720,6 +726,47 @@ namespace ds {
 				const Edge& e = _edges[ei];
 				ei = e.next;
 			}
+		}
+
+		int MeshGen::slice(uint16_t face_index, int segments, uint16_t* faces, int max) {
+			const Face& f = _faces[face_index];
+			const Edge& e0 = _edges[f.edge];
+			const Edge& e1 = _edges[e0.next];
+			const Edge& e2 = _edges[e1.next];
+			const Edge& e3 = _edges[e2.next];
+
+			v3 n1 = normalize(_vertices[e1.vert_index] - _vertices[e0.vert_index]);
+			v3 n2 = normalize(_vertices[e2.vert_index] - _vertices[e1.vert_index]);
+			v3 n3 = normalize(_vertices[e3.vert_index] - _vertices[e0.vert_index]);
+
+			float sx = length(_vertices[e1.vert_index] - _vertices[e0.vert_index]) / static_cast<float>(segments);
+			float sy = length(_vertices[e2.vert_index] - _vertices[e1.vert_index]) / static_cast<float>(segments);
+
+			_vertices[e1.vert_index] = _vertices[e0.vert_index] + n1 * sx;
+			_vertices[e2.vert_index] = _vertices[e1.vert_index] + n2 * sy;
+			_vertices[e3.vert_index] = _vertices[e0.vert_index] + n3 * sy;			
+			LOG << "SX: " << sx << " SY: " << sy;
+			v3 s1 = n1 * sx;
+			v3 s2 = n3 * sy;
+			v3 sp = _vertices[e0.vert_index];
+			sp += n1 * sx * 0.5f;
+			sp += n3 * sy * 0.5f;
+			v3 p[4];
+			for (int y = 0; y < segments; ++y) {
+				for (int x = 0; x < segments; ++x) {
+					if ( x + y != 0 ) {
+						v3 sp = _vertices[e0.vert_index];
+						sp += s1 * static_cast<float>(x);
+						sp += s2 * static_cast<float>(y);
+						p[0] = sp;
+						p[1] = sp + s1;
+						p[2] = sp + s1 + s2;
+						p[3] = sp + s2;
+						add_face(p);
+					}
+				}
+			}
+			return 0;
 		}
 
 		// ----------------------------------------------
