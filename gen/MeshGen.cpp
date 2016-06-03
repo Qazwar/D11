@@ -757,6 +757,9 @@ namespace ds {
 			const Edge& e2 = _edges[e1.next];
 			const Edge& e3 = _edges[e2.next];
 			int cnt = 0;
+			if (faces != 0 && cnt < max) {
+				faces[cnt++] = face_index;
+			}
 			v3 n1 = normalize(_vertices[e1.vert_index] - _vertices[e0.vert_index]);
 			v3 n2 = normalize(_vertices[e2.vert_index] - _vertices[e1.vert_index]);
 			v3 n3 = normalize(_vertices[e3.vert_index] - _vertices[e0.vert_index]);
@@ -952,6 +955,7 @@ namespace ds {
 		// save mesh format
 		// ----------------------------------------------
 		void MeshGen::save_mesh(const char* fileName) {
+			recalculate_normals();
 			char buffer[256];
 			sprintf_s(buffer, 256, "content\\meshes\\%s.mesh", fileName);
 			BinaryFile b;
@@ -963,7 +967,7 @@ namespace ds {
 					for (int j = 0; j < 4; ++j) {
 						Edge& e = _edges[idx];
 						b.write(smooth_position(_vertices[e.vert_index]));
-						b.write(face.n);
+						b.write(smooth_position(face.n));
 						b.write(e.uv);
 						b.write(face.color);												
 						idx = e.next;
