@@ -109,10 +109,13 @@ namespace ds {
 		void debug();
 		void recalculate_normals();
 		void parse(const char* fileName);
+		// objects
 		void create_ring(float radius, float width, uint16_t segments);
+		void create_cylinder(float radius, float height, uint16_t segments);
 		uint16_t create_torus(const v3& position,float radius, float width, float depth, uint16_t segments);
 		void create_grid(const v2& size, int stepsX, int stepsY);
 		void create_sphere(float radius, int segments, int stacks);
+		
 		void debug_edge(uint16_t edgeIndex);
 		void debug_face(uint16_t faceIndex);
 		int intersects(const ds::Ray& ray);
@@ -133,6 +136,7 @@ namespace ds {
 		void save_bin(const char* fileName);
 		void save_text(const char* fileName);
 		void load_bin(const char* fileName);
+		void save_mesh(const char* fileName);
 	private:
 		// recording
 		void record(const MeshGenOpcode& opcode);

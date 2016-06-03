@@ -3,6 +3,7 @@
 #include "..\utils\Log.h"
 #include "..\io\json.h"
 #include "..\io\FileRepository.h"
+#include "..\io\BinaryFile.h"
 
 #define EPSILON 0.000001
 
@@ -22,6 +23,17 @@ namespace ds {
 			case 2: return "set_color"; break;
 			default: return "unknown"; break;
 		}
+	}
+
+	v3 smooth_position(const v3& p) {
+		v3 ret;
+		for (int i = 0; i < 3; ++i) {
+			ret.data[i] = p.data[i];
+			if (fabs(p.data[i]) < EPSILON) {
+				ret.data[i] = 0.0f;
+			}
+		}
+		return ret;
 	}
 
 	bool equals(const v3& f, const v3& s) {
@@ -541,10 +553,10 @@ namespace ds {
 				for (int j = 0; j < 4; ++j) {
 					Edge& e = _edges[idx];
 					if (f.selected) {
-						mesh->add(_vertices[e.vert_index], f.n, e.uv, _selectionColor);
+						mesh->add(smooth_position(_vertices[e.vert_index]), f.n, e.uv, _selectionColor);
 					}
 					else {
-						mesh->add(_vertices[e.vert_index], f.n, e.uv, f.color);
+						mesh->add(smooth_position(_vertices[e.vert_index]), f.n, e.uv, f.color);
 					}
 					idx = e.next;
 				}
@@ -557,27 +569,37 @@ namespace ds {
 		uint16_t MeshGen::add_cube(const v3 & position, const v3 & size, uint16_t* faces) {
 			v3 half_size = size * 0.5f;
 			uint16_t my_faces[6];
-			v3 p0[] = {
-				v3(-half_size.x,half_size.y,-half_size.z),
-				v3(half_size.x,half_size.y,-half_size.z),
-				v3(half_size.x,-half_size.y,-half_size.z),
+			v3 p0[4];
+			v3 p[] = {
+				v3(-half_size.x, half_size.y, half_size.z),
+				v3( half_size.x, half_size.y, half_size.z),
+				v3( half_size.x, half_size.y,-half_size.z),
+				v3(-half_size.x, half_size.y,-half_size.z),
+				v3(-half_size.x,-half_size.y, half_size.z),
+				v3( half_size.x,-half_size.y, half_size.z),
+				v3( half_size.x,-half_size.y,-half_size.z),
 				v3(-half_size.x,-half_size.y,-half_size.z)
 			};
-			for (int i = 0; i < 4; ++i) {
-				p0[i] += position;
+			int indices[] = { 
+				// front
+				3, 2, 6, 7, 
+				// right
+				2, 1, 5, 6,
+				// back
+				1, 0, 4, 5,
+				// left
+				0, 3, 7, 4,
+				// top
+				0, 1, 2, 3 ,
+				// bottom
+				5, 4, 7, 6
+			};
+			for (int j = 0; j < 6; ++j) {
+				for (int i = 0; i < 4; ++i) {
+					p0[i] = p[indices[j * 4 + i]] + position;
+				}
+				my_faces[j] = add_face(p0);
 			}
-			my_faces[0] = add_face(p0);
-			const Face& f = _faces[my_faces[0]];
-			// left
-			my_faces[1] = extrude_edge(f.edge + 1, v3(0.0f, 0.0f, size.z));
-			// back
-			my_faces[2] = extrude_edge(f.edge + 5, v3(-size.x, 0, 0));
-			// right
-			my_faces[3] = extrude_edge(f.edge + 9, v3(0, 0, -size.z));
-			// top
-			my_faces[4] = extrude_edge(f.edge + 8, v3(0, 0, -size.z));
-			// bottom
-			my_faces[5] = extrude_edge(f.edge + 2, v3(0, 0, size.z));
 			if (faces != 0) {
 				for (int i = 0; i < 6; ++i) {
 					faces[i] = my_faces[i];
@@ -734,7 +756,7 @@ namespace ds {
 			const Edge& e1 = _edges[e0.next];
 			const Edge& e2 = _edges[e1.next];
 			const Edge& e3 = _edges[e2.next];
-
+			int cnt = 0;
 			v3 n1 = normalize(_vertices[e1.vert_index] - _vertices[e0.vert_index]);
 			v3 n2 = normalize(_vertices[e2.vert_index] - _vertices[e1.vert_index]);
 			v3 n3 = normalize(_vertices[e3.vert_index] - _vertices[e0.vert_index]);
@@ -745,28 +767,27 @@ namespace ds {
 			_vertices[e1.vert_index] = _vertices[e0.vert_index] + n1 * sx;
 			_vertices[e2.vert_index] = _vertices[e1.vert_index] + n2 * sy;
 			_vertices[e3.vert_index] = _vertices[e0.vert_index] + n3 * sy;			
-			LOG << "SX: " << sx << " SY: " << sy;
 			v3 s1 = n1 * sx;
 			v3 s2 = n3 * sy;
-			v3 sp = _vertices[e0.vert_index];
-			sp += n1 * sx * 0.5f;
-			sp += n3 * sy * 0.5f;
 			v3 p[4];
+			v3 org = _vertices[e0.vert_index];
 			for (int y = 0; y < segments; ++y) {
 				for (int x = 0; x < segments; ++x) {
 					if ( x + y != 0 ) {
-						v3 sp = _vertices[e0.vert_index];
-						sp += s1 * static_cast<float>(x);
+						v3 sp = org + s1 * static_cast<float>(x);
 						sp += s2 * static_cast<float>(y);
 						p[0] = sp;
 						p[1] = sp + s1;
 						p[2] = sp + s1 + s2;
 						p[3] = sp + s2;
-						add_face(p);
+						uint16_t fi = add_face(p);
+						if (faces != 0 && cnt < max) {
+							faces[cnt++] = fi;
+						}
 					}
 				}
 			}
-			return 0;
+			return cnt;
 		}
 
 		// ----------------------------------------------
@@ -853,25 +874,26 @@ namespace ds {
 		// save binary format
 		// ----------------------------------------------
 		void MeshGen::save_bin(const char* fileName) {
-			FILE* f = fopen(fileName,"wb");
-			int size = _data.size();
-			fwrite(&size, sizeof(int), 1, f);
-			for (int i = 0; i < size; ++i) {
-				fwrite(&_data[i], sizeof(float), 1, f);
-			}
-			int os = _opcodes.size();
-			fwrite(&os, sizeof(int), 1, f);
-			for (int i = 0; i < os; ++i) {
-				const MeshGenOpcode& op = _opcodes[i];
-				fwrite(&op.type, sizeof(int), 1, f);
-				int args = op.args;
-				fwrite(&args, sizeof(int), 1, f);
-				for (int j = 0; j < args; ++j) {
-					fwrite(&op.offsets[j], sizeof(int), 1, f);
-					fwrite(&op.data_types[j], sizeof(int), 1, f);
+			BinaryFile b;
+			if (b.open(fileName,ds::FileMode::WRITE)) {
+				int size = _data.size();
+				b.write(size);
+				for (int i = 0; i < size; ++i) {
+					b.write(_data[i]);
+				}
+				int os = _opcodes.size();
+				b.write(os);
+				for (int i = 0; i < os; ++i) {
+					const MeshGenOpcode& op = _opcodes[i];
+					b.write(op.type);
+					int args = op.args;
+					b.write(args);
+					for (int j = 0; j < args; ++j) {
+						b.write(op.offsets[j]);
+						b.write(op.data_types[j]);
+					}
 				}
 			}
-			fclose(f);
 		}
 
 		// ----------------------------------------------
@@ -926,38 +948,32 @@ namespace ds {
 			fclose(f);
 		}
 
-		struct OpCode {
-
-			char name[32];
-			float values[16];
-			int count;
-
-			const int get_int(int index) const {
-				return static_cast<int>(values[index]);
+		// ----------------------------------------------
+		// save mesh format
+		// ----------------------------------------------
+		void MeshGen::save_mesh(const char* fileName) {
+			char buffer[256];
+			sprintf_s(buffer, 256, "content\\meshes\\%s.mesh", fileName);
+			BinaryFile b;
+			if (b.open(buffer,ds::FileMode::WRITE)) {
+				b.write(_faces.size() * 4);
+				for (int i = 0; i < _faces.size(); ++i) {
+					const Face& face = _faces[i];
+					int idx = face.edge;
+					for (int j = 0; j < 4; ++j) {
+						Edge& e = _edges[idx];
+						b.write(smooth_position(_vertices[e.vert_index]));
+						b.write(face.n);
+						b.write(e.uv);
+						b.write(face.color);												
+						idx = e.next;
+					}
+				}
 			}
-
-			const float get_float(int index) const {
-				return values[index];
-			}
-
-			const v3 get_v3(int index) const {
-				return v3(values[index], values[index + 1], values[index + 2]);
-			}
-
-			const v2 get_v2(int index) const {
-				return v2(values[index], values[index + 1]);
-			}
-
-			const Color get_color(int index) const {
-				return Color(values[index] / 255.0f, values[index + 1] / 255.0f, values[index + 2] / 255.0f, values[index + 3] / 255.0f);
-			}
-
-			const Rect get_rect(int index) const {
-				return Rect(values[index], values[index + 1], values[index + 2], values[index + 3]);
-			}
-		};
+		}
 
 		void MeshGen::parse(const char* fileName) {
+			/*
 			clear();
 			Array<OpCode> opcodes;
 			char buffer[256];
@@ -1065,6 +1081,7 @@ namespace ds {
 				recalculate_normals();
 				delete txt;
 			}
+			*/
 		}
 
 		// ----------------------------------------------
@@ -1153,6 +1170,27 @@ namespace ds {
 			mat4 world = rotZ * rotY * rotX * s * t;
 			for (int i = 0; i < _vertices.size(); ++i) {
 				_vertices[i] = world * _vertices[i];
+			}
+		}
+
+		// ----------------------------------------------
+		// create ring
+		// ----------------------------------------------
+		void MeshGen::create_cylinder(float radius, float height, uint16_t segments) {
+			float angleStep = TWO_PI / static_cast<float>(segments);
+			v3 p[4];
+			float angle = 0.0f;
+			float next_angle = angleStep;
+			float hh = height * 0.5f;
+			float outer_radius = radius;
+			for (int i = 0; i < segments; ++i) {
+				p[0] = v3(radius * cos(angle), hh, radius * sin(angle));
+				p[1] = v3(radius * cos(next_angle), hh, radius * sin(next_angle));
+				p[2] = v3(radius * cos(next_angle), -hh, radius * sin(next_angle));
+				p[3] = v3(radius * cos(angle), -hh, radius * sin(angle));
+				add_face(p);
+				angle += angleStep;
+				next_angle += angleStep;
 			}
 		}
 

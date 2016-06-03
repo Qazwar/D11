@@ -10,6 +10,40 @@
 namespace ds {
 
 	// ------------------------------------------------------
+	// Mesh - load
+	// ------------------------------------------------------
+	void Mesh::load(const char* fileName) {
+		char buffer[256];
+		sprintf_s(buffer, 256, "content\\meshes\\%s.mesh", fileName);
+		FILE* f = fopen(buffer, "rb");
+		if (f) {
+			int size = -1;
+			fread(&size, sizeof(uint32_t), 1, f);
+			for (int i = 0; i < size; ++i) {
+				v3 p;
+				for (int k = 0; k < 3; ++k) {
+					fread(&p.data[k], sizeof(float), 1, f);
+				}
+				v3 n;
+				for (int k = 0; k < 3; ++k) {
+					fread(&n.data[k], sizeof(float), 1, f);
+				}
+				v2 uv;
+				for (int k = 0; k < 2; ++k) {
+					fread(&uv.data[k], sizeof(float), 1, f);
+				}
+				Color color;
+				fread(&color.r, sizeof(float), 1, f);
+				fread(&color.g, sizeof(float), 1, f);
+				fread(&color.b, sizeof(float), 1, f);
+				fread(&color.a, sizeof(float), 1, f);
+				add(p, n, uv, color);
+			}
+			fclose(f);
+		}
+	}
+
+	// ------------------------------------------------------
 	// MeshBuffer
 	// ------------------------------------------------------
 	MeshBuffer::MeshBuffer(const MeshBufferDescriptor& descriptor) : _descriptor(descriptor) {

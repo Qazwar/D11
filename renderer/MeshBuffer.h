@@ -30,6 +30,8 @@ namespace ds {
 			vertices.clear();
 		}
 
+		void load(const char* fileName);
+
 	};
 
 	// ------------------------------------------------------
