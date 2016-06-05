@@ -21,6 +21,11 @@ namespace ds {
 			case 0: return "add_cube"; break;
 			case 1: return "add_cube_rot"; break;
 			case 2: return "set_color"; break;
+			case 3: return "slice_uniform"; break;
+			case 4: return "slice"; break;
+			case 5: return "move_edge"; break;
+			case 6: return "v_split"; break;
+			case 7: return "h_split"; break;
 			default: return "unknown"; break;
 		}
 	}
@@ -56,7 +61,7 @@ namespace ds {
 
 		int MeshGen::find_vertices(const v3& pos, uint16_t* ret, int max) {
 			int cnt = 0;
-			for (int i = 0; i < _vertices.size(); ++i) {
+			for (uint32_t i = 0; i < _vertices.size(); ++i) {
 				v3 p = _vertices[i];
 				if (equals(p, pos) && cnt < max) {
 					ret[cnt++] = i;
@@ -67,7 +72,7 @@ namespace ds {
 
 		int MeshGen::find_edges(const v3& pos, uint16_t* ret, int max) {
 			int cnt = 0;
-			for (int i = 0; i < _edges.size(); ++i) {
+			for (uint32_t i = 0; i < _edges.size(); ++i) {
 				const Edge& e = _edges[i];
 				v3 p = _vertices[e.vert_index];
 				if (equals(p, pos) && cnt < max) {
@@ -79,7 +84,7 @@ namespace ds {
 
 		int MeshGen::find_edge(const v3& start, const v3& end) {
 			LOG << "find_edge: " << DBG_V3(start) << " " << DBG_V3(end);
-			for (int i = 0; i < _edges.size(); ++i) {
+			for (uint32_t i = 0; i < _edges.size(); ++i) {
 				const Edge& e = _edges[i];
 				v3 es = _vertices[e.vert_index];
 				v3 ee = _vertices[_edges[e.next].vert_index];
@@ -99,7 +104,7 @@ namespace ds {
 			return ret;
 		}
 
-		int intersect_triangle(const ds::Ray& ray, const v3& p0, const v3& p1, const v3& p2, double *t, double *u, double *v) {
+		int intersect_triangle(const ds::Ray& ray, const v3& p0, const v3& p1, const v3& p2, float *t, float *u, float *v) {
 			/* find vectors for two edges sharing vert0 */
 			v3 edge1 = p1 - p0;
 			v3 edge2 = p2 - p0;
@@ -113,14 +118,14 @@ namespace ds {
 			if (det > -EPSILON && det < EPSILON) {
 				return 0;
 			}
-			float inv_det = 1.0 / det;
+			float inv_det = 1.0f / det;
 
 			/* calculate distance from vert0 to ray origin */
 			v3 tvec = ray.origin - p0;
 
 			/* calculate U parameter and test bounds */
 			*u = dot(tvec, pvec) * inv_det;
-			if (*u < 0.0 || *u > 1.0) {
+			if (*u < 0.0 || *u > 1.0f) {
 				return 0;
 			}
 			/* prepare to test V parameter */
@@ -128,7 +133,7 @@ namespace ds {
 
 			/* calculate V parameter and test bounds */
 			*v = dot(ray.direction, qvec) * inv_det;
-			if (*v < 0.0 || *u + *v > 1.0) {
+			if (*v < 0.0 || *u + *v > 1.0f) {
 				return 0;
 			}
 			/* calculate t, ray intersects triangle */
@@ -142,13 +147,13 @@ namespace ds {
 		int MeshGen::intersects(const ds::Ray& ray) {
 			float tmax = 10000.0f;
 			int face = -1;
-			for (int i = 0; i < _faces.size(); ++i) {
+			for (uint32_t i = 0; i < _faces.size(); ++i) {
 				const Face& f = _faces[i];
 				const Edge& e1 = _edges[f.edge];
 				const Edge& e2 = _edges[e1.next];
 				const Edge& e3 = _edges[e2.next];
 				const Edge& e4 = _edges[e3.next];
-				double u, v, t;
+				float u, v, t;
 				int ret = intersect_triangle(ray, _vertices[e4.vert_index], _vertices[e1.vert_index], _vertices[e2.vert_index], &t, &u, &v);
 				if (ret != 0) {
 					//LOG << "1 - FOUND face: " << i << " u: " << u << " v: " << v << " t: " << t;
@@ -182,7 +187,7 @@ namespace ds {
 		// ----------------------------------------------
 		void MeshGen::debug() {
 			LOG << "faces: " << _faces.size();
-			for (int i = 0; i < _faces.size(); ++i) {
+			for (uint32_t i = 0; i < _faces.size(); ++i) {
 				const Face& f = _faces[i];
 				LOG << "=> edge: " << f.edge << " normal: " << DBG_V3(f.n) << " color: " << DBG_CLR(f.color);
 				const Edge& e = _edges[f.edge];
@@ -236,7 +241,7 @@ namespace ds {
 		// recalculate all normals
 		// ----------------------------------------------
 		void MeshGen::recalculate_normals() {
-			for (int i = 0; i < _faces.size(); ++i) {
+			for (uint32_t i = 0; i < _faces.size(); ++i) {
 				Face& f = _faces[i];
 				calculate_normal(&f);
 			}
@@ -353,7 +358,7 @@ namespace ds {
 		// clear all selections
 		// ----------------------------------------------
 		void MeshGen::clear_selection() {
-			for (int i = 0; i < _faces.size(); ++i) {
+			for (uint32_t i = 0; i < _faces.size(); ++i) {
 				_faces[i].selected = false;
 			}
 		}
@@ -412,6 +417,11 @@ namespace ds {
 			_vertices[n.vert_index] -= delta;
 			_vertices[nn.vert_index] -= d2;
 			v3 p[] = { _vertices[n.vert_index] , o1, o2, _vertices[nn.vert_index] };
+			MeshGenOpcode op;
+			op.type = OpcodeType::MGO_H_SPLIT;
+			_store.add_data(op, edgeIndex);
+			_store.add_data(op, factor);
+			record(op);
 			return add_face(p);
 		}
 
@@ -430,6 +440,11 @@ namespace ds {
 			_vertices[n.vert_index] -= delta;
 			_vertices[nn.vert_index] -= d2;
 			v3 p[] = { o1, o2, _vertices[nn.vert_index] , _vertices[n.vert_index] };
+			MeshGenOpcode op;
+			op.type = OpcodeType::MGO_V_SPLIT;
+			_store.add_data(op, edgeIndex);
+			_store.add_data(op, factor);
+			record(op);
 			return add_face(p);
 		}
 
@@ -454,8 +469,11 @@ namespace ds {
 					_vertices[connections[j]] += position;
 				}
 			}
-			//_vertices[e0.vert_index] += position;
-			//_vertices[e1.vert_index] += position;
+			MeshGenOpcode op;
+			op.type = OpcodeType::MGO_MOVE_EDGE;
+			_store.add_data(op, edgeIndex);
+			_store.add_data(op, position);
+			record(op);
 		}
 
 		// ----------------------------------------------
@@ -517,7 +535,7 @@ namespace ds {
 		// set color on all selected faces
 		// ----------------------------------------------
 		void MeshGen::set_color(const Color& color) {
-			for (int i = 0; i < _faces.size(); ++i) {
+			for (uint32_t i = 0; i < _faces.size(); ++i) {
 				if (_faces[i].selected) {
 					_faces[i].color = color;
 				}
@@ -532,8 +550,8 @@ namespace ds {
 				_faces[face_index].color = color;
 				MeshGenOpcode op;
 				op.type = OpcodeType::MGO_SET_COLOR;
-				add_data(op, face_index);
-				add_data(op, color);
+				_store.add_data(op, face_index);
+				_store.add_data(op, color);
 				record(op);
 			}
 		}
@@ -546,7 +564,7 @@ namespace ds {
 		// convert geometry into mesh
 		// ----------------------------------------------
 		void MeshGen::build(Mesh* mesh) {
-			for (int i = 0; i < _faces.size(); ++i) {
+			for (uint32_t i = 0; i < _faces.size(); ++i) {
 				const Face& f = _faces[i];
 				const Edge& e = _edges[f.edge];
 				int idx = f.edge;
@@ -607,8 +625,8 @@ namespace ds {
 			}
 			MeshGenOpcode op;
 			op.type = OpcodeType::MGO_ADD_CUBE;
-			add_data(op, position);
-			add_data(op, size);
+			_store.add_data(op, position);
+			_store.add_data(op, size);
 			record(op);
 			return my_faces[0];
 		}
@@ -638,7 +656,7 @@ namespace ds {
 		void MeshGen::smooth(const IndexList& list, float radius) {
 			v3 center = v3(0, 0, 0); 
 			IndexList verts;
-			for (int i = 0; i < list.indices.size(); ++i) {
+			for (uint32_t i = 0; i < list.indices.size(); ++i) {
 				const Face& f = _faces[list.indices[i]];
 				int ei = f.edge;
 				for (int j = 0; j < 4; ++j) {
@@ -649,12 +667,12 @@ namespace ds {
 					ei = e.next;
 				}
 			}
-			for (int i = 0; i < verts.indices.size(); ++i) {
+			for (uint32_t i = 0; i < verts.indices.size(); ++i) {
 				center += _vertices[verts.indices[i]];
 			}
 			center /= static_cast<float>(verts.indices.size());
 			LOG << "center: " << DBG_V3(center);
-			for (int i = 0; i < verts.indices.size(); ++i) {
+			for (uint32_t i = 0; i < verts.indices.size(); ++i) {
 				v3 v = _vertices[verts.indices[i]];
 				float x2 = v.x * v.x;
 				float y2 = v.y * v.y;
@@ -724,9 +742,9 @@ namespace ds {
 			}
 			MeshGenOpcode op;
 			op.type = OpcodeType::MGO_ADD_CUBE_ROT;
-			add_data(op, position);
-			add_data(op, size);
-			add_data(op, rotation);
+			_store.add_data(op, position);
+			_store.add_data(op, size);
+			_store.add_data(op, rotation);
 			record(op);
 			return faces[0];
 		}
@@ -736,6 +754,19 @@ namespace ds {
 		// ----------------------------------------------
 		const Face& MeshGen::get_face(uint16_t face_index) const {
 			return _faces[face_index];
+		}
+
+		// ----------------------------------------------
+		// get edge from specific face
+		// ----------------------------------------------
+		uint16_t MeshGen::get_edge(uint16_t face_index, uint16_t edge_offset) {
+			const Face& f = _faces[face_index];
+			int ei = f.edge;
+			for (int i = 0; i < edge_offset; ++i) {
+				Edge& e = _edges[ei];
+				ei = e.next;
+			}
+			return ei;
 		}
 
 		// ----------------------------------------------
@@ -793,6 +824,55 @@ namespace ds {
 			return cnt;
 		}
 
+		int MeshGen::slice(uint16_t face_index, int stepsX, int stepsY, uint16_t* faces, int max) {
+			const Face& f = _faces[face_index];
+			const Edge& e0 = _edges[f.edge];
+			const Edge& e1 = _edges[e0.next];
+			const Edge& e2 = _edges[e1.next];
+			const Edge& e3 = _edges[e2.next];
+			int cnt = 0;
+			if (faces != 0 && cnt < max) {
+				faces[cnt++] = face_index;
+			}
+			v3 n1 = normalize(_vertices[e1.vert_index] - _vertices[e0.vert_index]);
+			v3 n2 = normalize(_vertices[e2.vert_index] - _vertices[e1.vert_index]);
+			v3 n3 = normalize(_vertices[e3.vert_index] - _vertices[e0.vert_index]);
+
+			float sx = length(_vertices[e1.vert_index] - _vertices[e0.vert_index]) / static_cast<float>(stepsX);
+			float sy = length(_vertices[e2.vert_index] - _vertices[e1.vert_index]) / static_cast<float>(stepsY);
+
+			_vertices[e1.vert_index] = _vertices[e0.vert_index] + n1 * sx;
+			_vertices[e2.vert_index] = _vertices[e1.vert_index] + n2 * sy;
+			_vertices[e3.vert_index] = _vertices[e0.vert_index] + n3 * sy;
+			v3 s1 = n1 * sx;
+			v3 s2 = n3 * sy;
+			v3 p[4];
+			v3 org = _vertices[e0.vert_index];
+			for (int y = 0; y < stepsY; ++y) {
+				for (int x = 0; x < stepsX; ++x) {
+					if (x + y != 0) {
+						v3 sp = org + s1 * static_cast<float>(x);
+						sp += s2 * static_cast<float>(y);
+						p[0] = sp;
+						p[1] = sp + s1;
+						p[2] = sp + s1 + s2;
+						p[3] = sp + s2;
+						uint16_t fi = add_face(p);
+						if (faces != 0 && cnt < max) {
+							faces[cnt++] = fi;
+						}
+					}
+				}
+			}
+			MeshGenOpcode op;
+			op.type = OpcodeType::MGO_SLICE;
+			_store.add_data(op, face_index);
+			_store.add_data(op, stepsX);
+			_store.add_data(op, stepsY);
+			record(op);
+			return cnt;
+		}
+
 		// ----------------------------------------------
 		// add other
 		// ----------------------------------------------
@@ -824,7 +904,7 @@ namespace ds {
 			_vertices.clear();
 			_edges.clear();
 			_faces.clear();
-			_data.clear();
+			_store.data.clear();
 			_opcodes.clear();
 		}
 
@@ -836,53 +916,17 @@ namespace ds {
 		}
 
 		// ----------------------------------------------
-		// add v3 data
-		// ----------------------------------------------
-		void MeshGen::add_data(MeshGenOpcode& op,const v3& v) {
-			int cnt = _data.size();
-			_data.push_back(v.x);
-			_data.push_back(v.y);
-			_data.push_back(v.z);
-			op.offsets[op.args] = cnt;
-			op.data_types[op.args] = 1;
-			++op.args;
-		}
-
-		// ----------------------------------------------
-		// add int data
-		// ----------------------------------------------
-		void MeshGen::add_data(MeshGenOpcode& op, int v) {
-			int cnt = _data.size();
-			_data.push_back(v);
-			op.offsets[op.args] = cnt;
-			op.data_types[op.args] = 2;		
-			++op.args;
-		}
-
-		// ----------------------------------------------
-		// add color data
-		// ----------------------------------------------
-		void MeshGen::add_data(MeshGenOpcode& op, const Color& v) {
-			int cnt = _data.size();
-			_data.push_back(v.r);
-			_data.push_back(v.g);
-			_data.push_back(v.b);
-			_data.push_back(v.a);
-			op.offsets[op.args] = cnt;
-			op.data_types[op.args] = 3;			
-			++op.args;
-		}
-
-		// ----------------------------------------------
 		// save binary format
 		// ----------------------------------------------
 		void MeshGen::save_bin(const char* fileName) {
+			char buffer[256];
+			sprintf_s(buffer, 256, "content\\meshes\\%s.bin", fileName);
 			BinaryFile b;
-			if (b.open(fileName,ds::FileMode::WRITE)) {
-				int size = _data.size();
+			if (b.open(buffer,ds::FileMode::WRITE)) {
+				int size = _store.data.size();
 				b.write(size);
 				for (int i = 0; i < size; ++i) {
-					b.write(_data[i]);
+					b.write(_store.data[i]);
 				}
 				int os = _opcodes.size();
 				b.write(os);
@@ -904,20 +948,20 @@ namespace ds {
 		// ----------------------------------------------
 		void MeshGen::save_text(const char* fileName) {
 			FILE* f = fopen(fileName, "w");
-			for (int i = 0; i < _opcodes.size(); ++i) {
+			for (uint32_t i = 0; i < _opcodes.size(); ++i) {
 				const MeshGenOpcode& op = _opcodes[i];
 				fprintf(f, "%s ", translateOpcode(op.type));
 				for (int j = 0; j < op.args; ++j) {
 					int dt = op.data_types[j];
 					int of = op.offsets[j];
 					if (dt == 1) {
-						fprintf(f, "%g,%g,%g ", _data[of], _data[of + 1], _data[of + 2]);
+						fprintf(f, "%g,%g,%g ", _store.data[of], _store.data[of + 1], _store.data[of + 2]);
 					}
 					else if (dt == 2) {
-						fprintf(f, "%d ", _data[of]);
+						fprintf(f, "%d ", static_cast<int>(_store.data[of]));
 					}
 					else if (dt == 3) {
-						fprintf(f, "%g,%g,%g,%g ", _data[of], _data[of + 1], _data[of + 2], _data[of + 3]);
+						fprintf(f, "%g,%g,%g,%g ", _store.data[of], _store.data[of + 1], _store.data[of + 2], _store.data[of + 3]);
 					}
 				}
 				fprintf(f, "\n");
@@ -929,12 +973,18 @@ namespace ds {
 		// load binary format
 		// ----------------------------------------------
 		void MeshGen::load_bin(const char* fileName) {
-			FILE* f = fopen(fileName, "rb");
+			clear();
+			char buffer[256];
+			sprintf_s(buffer, 256, "content\\meshes\\%s.bin", fileName);
+			Array<MeshGenOpcode> tmp_opcodes;
+			FILE* f = fopen(buffer, "rb");
 			int size = -1;
+			DataStore store;
 			fread(&size, sizeof(int), 1, f);
 			for (int i = 0; i < size; ++i) {
 				float v = 0.0f;
 				fread(&v, sizeof(float), 1, f);
+				store.data.push_back(v);
 			}
 			int os = -1;
 			fread(&os, sizeof(int), 1, f);
@@ -947,8 +997,73 @@ namespace ds {
 					fread(&op.offsets[j], sizeof(int), 1, f);
 					fread(&op.data_types[j], sizeof(int), 1, f);
 				}
+				tmp_opcodes.push_back(op);
 			}
 			fclose(f);
+			for (int i = 0; i < tmp_opcodes.size(); ++i) {
+				MeshGenOpcode& op = tmp_opcodes[i];
+				LOG << "executing " << i << " : " << translateOpcode(op.type);
+				switch (op.type) {
+					case OpcodeType::MGO_ADD_CUBE: {
+						v3 p;
+						v3 s;
+						store.get_data(op, 0, &p);
+						store.get_data(op, 1, &s);
+						add_cube(p, s);
+						break;
+					}
+					case OpcodeType::MGO_SLICE_UNIFORM: {
+						uint16_t face_index = 0;
+						int segments = 0;
+						store.get_data(op, 0, &face_index);
+						store.get_data(op, 1, &segments);
+						slice(face_index, segments);
+						break;
+					}
+					case OpcodeType::MGO_SLICE: {
+						uint16_t face_index = 0;
+						uint16_t stepsX = 0;
+						uint16_t stepsY = 0;
+						store.get_data(op, 0, &face_index);
+						store.get_data(op, 1, &stepsX);
+						store.get_data(op, 2, &stepsY);
+						slice(face_index, stepsX,stepsY);
+						break;
+					}
+					case OpcodeType::MGO_SET_COLOR: {
+						uint16_t face_index = 0;
+						Color color;
+						store.get_data(op, 0, &face_index);
+						store.get_data(op, 1, &color);
+						set_color(face_index, color);
+						break;
+					}
+					case OpcodeType::MGO_MOVE_EDGE: {
+						uint16_t edge_index = 0;
+						v3 p;
+						store.get_data(op, 0, &edge_index);
+						store.get_data(op, 1, &p);
+						move_edge(edge_index, p);
+						break;
+					}
+					case OpcodeType::MGO_V_SPLIT: {
+						uint16_t edge_index = 0;
+						float factor = 0.5f;
+						store.get_data(op, 0, &edge_index);
+						store.get_data(op, 1, &factor);
+						vsplit_edge(edge_index, factor);
+						break;
+					}
+					case OpcodeType::MGO_H_SPLIT: {
+						uint16_t edge_index = 0;
+						float factor = 0.5f;
+						store.get_data(op, 0, &edge_index);
+						store.get_data(op, 1, &factor);
+						hsplit_edge(edge_index, factor);
+						break;
+					}
+				}
+			}
 		}
 
 		// ----------------------------------------------
@@ -961,7 +1076,7 @@ namespace ds {
 			BinaryFile b;
 			if (b.open(buffer,ds::FileMode::WRITE)) {
 				b.write(_faces.size() * 4);
-				for (int i = 0; i < _faces.size(); ++i) {
+				for (uint32_t i = 0; i < _faces.size(); ++i) {
 					const Face& face = _faces[i];
 					int idx = face.edge;
 					for (int j = 0; j < 4; ++j) {
@@ -1172,7 +1287,7 @@ namespace ds {
 			mat4 t = matrix::mat4Transform(position);
 			mat4 s = matrix::mat4Scale(scale);
 			mat4 world = rotZ * rotY * rotX * s * t;
-			for (int i = 0; i < _vertices.size(); ++i) {
+			for (uint32_t i = 0; i < _vertices.size(); ++i) {
 				_vertices[i] = world * _vertices[i];
 			}
 		}

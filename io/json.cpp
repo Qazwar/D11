@@ -42,6 +42,10 @@ namespace ds {
 							break;
 						}
 					}
+					++p;
+					if (*p == 0) {
+						break;
+					}
 				}
 			}
 			else {
@@ -51,7 +55,8 @@ namespace ds {
 					case '(': token = Token(Token::OPEN_BRACKET); break;
 					case ')': token = Token(Token::CLOSE_BRACKET); break;
 					case '/': token = Token(Token::SLASH); break;
-					case ' ': case '\t': case '\n': case '\r': break;
+					case ' ': case '\t': case '\r': break;
+					case '\n': token = Token(Token::NEWLINE); break;
 					case ':': token = Token(Token::SEPARATOR); break;
 					case '=': token = Token(Token::ASSIGN); break;
 					case ';': token = Token(Token::SEMICOLON); break;
@@ -884,7 +889,7 @@ void JSONWriter::write(const char* name, bool value) {
 
 	writeLineIdent();
 	if (value) {
-		fprintf(f, "%s : true", name, value);
+		fprintf(f, "%s : true", name);
 	}
 	else {
 		fprintf(f, "%s : false", name);
@@ -920,10 +925,10 @@ void JSONWriter::write(const char* name, const v3& value) {
 void JSONWriter::write(const char* name, const Color& value) {
 
 	writeLineIdent();
-	int r = value.r * 255.0f;
-	int g = value.g * 255.0f;
-	int b = value.b * 255.0f;
-	int a = value.a * 255.0f;
+	int r = static_cast<int>(value.r * 255.0f);
+	int g = static_cast<int>(value.g * 255.0f);
+	int b = static_cast<int>(value.b * 255.0f);
+	int a = static_cast<int>(value.a * 255.0f);
 	fprintf(f, "%s : %d,%d,%d,%d", name, r, g, b, a);
 	++_items;
 }
@@ -934,10 +939,10 @@ void JSONWriter::write(const char* name, const Color& value) {
 void JSONWriter::write(const char* name, const Rect& value) {
 
 	writeLineIdent();
-	int top = value.top;
-	int left = value.left;
-	int w = value.width();
-	int h = value.height();
+	int top = static_cast<int>(value.top);
+	int left = static_cast<int>(value.left);
+	int w = static_cast<int>(value.width());
+	int h = static_cast<int>(value.height());
 	fprintf(f, "%s : %d,%d,%d,%d", name, top, left, w, h);
 	++_items;
 }
@@ -972,10 +977,10 @@ void JSONWriter::write(const char* name, const ds::ColorPath& path) {
 		const ds::Color& value = path.value(i);
 		float key = path.key(i);
 		writeLineIdent();
-		int r = value.r * 255.0f;
-		int g = value.g * 255.0f;
-		int b = value.b * 255.0f;
-		int a = value.a * 255.0f;
+		int r = static_cast<int>(value.r * 255.0f);
+		int g = static_cast<int>(value.g * 255.0f);
+		int b = static_cast<int>(value.b * 255.0f);
+		int a = static_cast<int>(value.a * 255.0f);
 		fprintf(f, "\"%g\" : \"%d,%d,%d,%d\"", key, r, g, b, a);
 		++_items;
 	}

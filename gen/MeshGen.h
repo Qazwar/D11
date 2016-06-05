@@ -21,7 +21,7 @@ namespace ds {
 		}
 
 		bool contains(uint16_t idx) const {
-			for (int i = 0; i < indices.size(); ++i) {
+			for (uint32_t i = 0; i < indices.size(); ++i) {
 				if (indices[i] == idx) {
 					return true;
 				}
@@ -60,6 +60,11 @@ namespace ds {
 		MGO_ADD_CUBE,
 		MGO_ADD_CUBE_ROT,
 		MGO_SET_COLOR,
+		MGO_SLICE_UNIFORM,
+		MGO_SLICE,
+		MGO_MOVE_EDGE,
+		MGO_V_SPLIT,
+		MGO_H_SPLIT,
 		MGO_UNKNOWN
 	};
 
@@ -73,6 +78,73 @@ namespace ds {
 		MeshGenOpcode() : type(OpcodeType::MGO_UNKNOWN), args(0) {}
 	};
 
+
+	struct DataStore {
+
+		Array<float> data;
+
+		void add_data(MeshGenOpcode& op, const v3& v) {
+			int cnt = data.size();
+			data.push_back(v.x);
+			data.push_back(v.y);
+			data.push_back(v.z);
+			op.offsets[op.args] = cnt;
+			op.data_types[op.args] = 1;
+			++op.args;
+		}
+
+		void add_data(MeshGenOpcode& op, int v) {
+			int cnt = data.size();
+			data.push_back(static_cast<float>(v));
+			op.offsets[op.args] = cnt;
+			op.data_types[op.args] = 2;
+			++op.args;
+		}
+
+		void add_data(MeshGenOpcode& op, const Color& v) {
+			int cnt = data.size();
+			data.push_back(v.r);
+			data.push_back(v.g);
+			data.push_back(v.b);
+			data.push_back(v.a);
+			op.offsets[op.args] = cnt;
+			op.data_types[op.args] = 3;
+			++op.args;
+		}
+
+		void get_data(const MeshGenOpcode& op, int index, v3* ret) {
+			int offset = op.offsets[index];
+			for (int i = 0; i < 3; ++i) {
+				ret->data[i] = data[offset + i];
+			}
+		}
+
+		void get_data(const MeshGenOpcode& op, int index, uint16_t* ret) {
+			int offset = op.offsets[index];
+			*ret = static_cast<uint16_t>(data[offset]);
+		}
+
+		void get_data(const MeshGenOpcode& op, int index, int* ret) {
+			int offset = op.offsets[index];
+			*ret = static_cast<int>(data[offset]);
+		}
+
+		void get_data(const MeshGenOpcode& op, int index, float* ret) {
+			int offset = op.offsets[index];
+			*ret = data[offset];
+		}
+
+		void get_data(const MeshGenOpcode& op, int index, Color* ret) {
+			int offset = op.offsets[index];
+			ret->r = static_cast<float>(data[offset]);
+			ret->g = static_cast<float>(data[offset + 1]);
+			ret->b = static_cast<float>(data[offset + 2]);
+			ret->a = static_cast<float>(data[offset + 3]);
+		}
+
+	};
+
+	
 	// ---------------------------------------
 	// MeshGen
 	// ---------------------------------------
@@ -84,6 +156,7 @@ namespace ds {
 		void build(Mesh* mesh);
 		int num_faces() const;
 		const Face& get_face(uint16_t face_index) const;
+		uint16_t get_edge(uint16_t face_index, uint16_t edge_offset);
 		void get_vertices(const Face& face,v3* ret) const;
 		uint16_t add_cube(const v3& position, const v3& size, uint16_t* faces = 0);
 		uint16_t add_cube(const v3& position, const v3& size, const v3& rotation);
@@ -99,6 +172,7 @@ namespace ds {
 		void scale_face(uint16_t faceIndex, float scale);
 		v3 get_center(uint16_t faceIndex);
 		int slice(uint16_t face_index, int segments, uint16_t* faces = 0, int max = 0);
+		int slice(uint16_t face_index, int stepsX, int stepsY, uint16_t* faces = 0, int max = 0);
 		uint16_t hsplit_edge(uint16_t edgeIndex, float factor = 0.5f);
 		uint16_t vsplit_edge(uint16_t edgeIndex, float factor = 0.5f);
 		uint16_t get_edge_index(uint16_t faceIndex, int nr);
@@ -140,9 +214,6 @@ namespace ds {
 	private:
 		// recording
 		void record(const MeshGenOpcode& opcode);
-		void add_data(MeshGenOpcode& op,const v3& v);
-		void add_data(MeshGenOpcode& op, int v);
-		void add_data(MeshGenOpcode& op, const Color& v);
 		MeshGen(const MeshGen& other) {}
 		void calculate_normal(Face* f);
 		int add_vertex(const v3& pos);
@@ -153,7 +224,7 @@ namespace ds {
 		Array<Edge> _edges;
 		Array<Face> _faces;
 		Color _selectionColor;
-		Array<float> _data;
+		DataStore _store;
 		Array<MeshGenOpcode> _opcodes;
 	};
 
