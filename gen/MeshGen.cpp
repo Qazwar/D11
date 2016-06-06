@@ -47,7 +47,7 @@ namespace ds {
 	// --------------------------------------------
 	// Opcode definitions
 	// --------------------------------------------
-	const int OPCODE_MAPPING_COUNT = 11;
+	const int OPCODE_MAPPING_COUNT = 12;
 
 	const OpcodeDefinition OPCODE_MAPPING[] = {
 		{ gen::OpcodeType::ADD_CUBE, "add_cube", 2, 1, 1 },
@@ -61,6 +61,7 @@ namespace ds {
 		{ gen::OpcodeType::MAKE_FACE, "make_face", 4, 2, 2, 2, 2 },
 		{ gen::OpcodeType::ADD_FACE, "add_face", 4, 1, 1, 1, 1 },
 		{ gen::OpcodeType::COMBINE_EDGES, "combine_edges", 2, 2, 2 },
+		{ gen::OpcodeType::DEBUG_COLORS, "debug_colors", 0 },
 	};
 
 	const OpcodeDefinition UNKNOWN_DEFINITION = OpcodeDefinition(gen::OpcodeType::UNKNOWN, "UNKNOWN");
@@ -143,40 +144,28 @@ namespace ds {
 	// --------------------------------------------
 	// check if a list of positions is convex
 	// --------------------------------------------
-	bool is_convex(v3* positions, int num) {
+	bool is_clockwise(const v3& n,v3* positions, int num) {
 		int cnt = 0;
 		for (int i = 0; i < num; ++i) {
 			v3 df1 = positions[(i + 1) % num] - positions[i];
 			v3 df2 = positions[(i + 2) % num] - positions[(i + 1) % num];
-			float d = cross(df1, df2).z;
-			if (d < 0.0f) {
+			v3 c = cross(df1, df2);
+			float dn = dot(n, c);
+			//LOG << "DN:" << dn;
+			//float d = cross(df1, df2).z;
+			float d = cross(positions[i], positions[(i + 1) % num]).z;
+			if (dn < 0.0f) {
 				--cnt;
 			}
 			else {
 				++cnt;
 			}
 		}
-		if (cnt == num || cnt == -num) {
+		//LOG << "CNT: " << cnt;
+		if (cnt == num) {
 			return true;
 		}
 		return false;
-	}
-
-	// --------------------------------------------
-	// check if a list of positions is clockwise
-	// --------------------------------------------
-	bool is_clockwise(v3* positions, int num) {
-		int cnt = 0;
-		float a = 0.0f;
-		for (int i = 0; i < num; ++i) {
-			v3 p0 = positions[i];
-			v3 p1 = positions[(i + 1) % num];
-			a += (p0.x * p1.y - p1.x * p0.y);
-		}
-		a *= 0.5f;
-		// A positive : counter clock wise / A negative: clock wise
-		LOG << "===> A: " << a;
-		return is_convex(positions,num);
 	}
 
 	namespace gen {
@@ -209,7 +198,7 @@ namespace ds {
 		}
 
 		int MeshGen::find_edge(const v3& start, const v3& end) {
-			LOG << "find_edge: " << DBG_V3(start) << " " << DBG_V3(end);
+			//LOG << "find_edge: " << DBG_V3(start) << " " << DBG_V3(end);
 			for (uint32_t i = 0; i < _edges.size(); ++i) {
 				const Edge& e = _edges[i];
 				v3 es = _vertices[e.vert_index];
@@ -403,7 +392,7 @@ namespace ds {
 			}
 			uint16_t newFace = add_face(p);
 			const Face& nf = _faces[newFace];
-			LOG << "new face: " << newFace;
+			//LOG << "new face: " << newFace;
 			ei = f.edge;
 			int nei = nf.edge;
 			for (int i = 0; i < 4; ++i) {
@@ -543,7 +532,7 @@ namespace ds {
 			p[1] = _vertices[e1.vert_index];
 			p[2] = _vertices[e3.vert_index];
 			p[3] = _vertices[e2.vert_index];
-			if (!is_clockwise(p,4)) {
+			if (!is_clockwise(n,p,4)) {
 				v3 t = p[0];
 				p[0] = p[1];
 				p[1] = t;
@@ -838,7 +827,7 @@ namespace ds {
 				center += _vertices[verts.indices[i]];
 			}
 			center /= static_cast<float>(verts.indices.size());
-			LOG << "center: " << DBG_V3(center);
+			//LOG << "center: " << DBG_V3(center);
 			for (uint32_t i = 0; i < verts.indices.size(); ++i) {
 				v3 v = _vertices[verts.indices[i]];
 				float x2 = v.x * v.x;
@@ -1065,6 +1054,19 @@ namespace ds {
 		}
 
 		// ----------------------------------------------
+		// fill all faces with random color
+		// ----------------------------------------------
+		void MeshGen::debug_colors() {
+			for (uint32_t i = 0; i < _faces.size(); ++i) {
+				set_color(i, ds::Color(math::random(0, 255), math::random(0, 255), math::random(0, 255), 255));
+			}
+			MeshGenOpcode op;
+			op.type = OpcodeType::DEBUG_COLORS;
+			op.offset = 0;
+			record(op);
+		}
+
+		// ----------------------------------------------
 		// clear mesh
 		// ----------------------------------------------
 		void MeshGen::clear() {
@@ -1110,18 +1112,18 @@ namespace ds {
 		// ----------------------------------------------
 		void MeshGen::save_text(const char* fileName) {
 			char buffer[256];
-			sprintf_s(buffer, 256, "content\\meshes\\%s.txt", fileName);
+			sprintf_s(buffer, 256, "resources\\meshes\\%s.txt", fileName);
 			FILE* f = fopen(buffer, "w");
 			for (uint32_t i = 0; i < _opcodes.size(); ++i) {
 				const MeshGenOpcode& op = _opcodes[i];
 				OpcodeDefinition def = find_opcode(op.type);
 				fprintf(f, "%s ", translateOpcode(op.type));
-				LOG << i << " : " << translateOpcode(op.type) << " args: " << def.args;
+				//LOG << i << " : " << translateOpcode(op.type) << " args: " << def.args;
 				int of = op.offset;
 				if (of != -1) {
 					for (int j = 0; j < def.args; ++j) {
 						int dt = def.types[j];
-						LOG << "dt: " << dt << " of: " << of;
+						//LOG << "dt: " << dt << " of: " << of;
 						if (dt == 0) {
 							fprintf(f, "%g ", _store.data[of]);
 						}
@@ -1148,7 +1150,6 @@ namespace ds {
 		void MeshGen::executeOpcodes(const Array<MeshGenOpcode>& opcodes, const DataStore& store) {
 			for (int i = 0; i < opcodes.size(); ++i) {
 				const MeshGenOpcode& op = opcodes[i];
-				LOG << "executing " << i << " : " << translateOpcode(op.type);
 				switch (op.type) {
 				case OpcodeType::ADD_CUBE: {
 					v3 p;
@@ -1232,6 +1233,9 @@ namespace ds {
 					combine_edges(e0, e1);
 					break;
 				}
+				case OpcodeType::DEBUG_COLORS: {
+					debug_colors();
+				}
 				}
 			}
 		}
@@ -1299,7 +1303,7 @@ namespace ds {
 		// ----------------------------------------------
 		void MeshGen::load_text(const char* fileName) {
 			char buffer[256];
-			sprintf_s(buffer, 256, "content\\meshes\\%s.txt", fileName);
+			sprintf_s(buffer, 256, "resources\\meshes\\%s.txt", fileName);
 			clear();
 			int size = -1;
 			char name[256];
@@ -1309,7 +1313,6 @@ namespace ds {
 			if (size != -1) {
 				Tokenizer t;
 				t.parse(txt);
-				LOG << "tokens: " << t.size();
 				int cnt = 0;
 				while (cnt < t.size()) {
 					Token& tk = t.get(cnt);

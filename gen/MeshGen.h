@@ -68,6 +68,7 @@ namespace ds {
 		MAKE_FACE,
 		ADD_FACE,
 		COMBINE_EDGES,
+		DEBUG_COLORS,
 		UNKNOWN
 	};
 
@@ -148,10 +149,13 @@ namespace ds {
 
 		void get_data(const MeshGenOpcode& op, int index, Color* ret) const {
 			int offset = op.offset + index;
-			ret->r = static_cast<float>(data[offset]);
-			ret->g = static_cast<float>(data[offset + 1]);
-			ret->b = static_cast<float>(data[offset + 2]);
-			ret->a = static_cast<float>(data[offset + 3]);
+			for (int i = 0; i < 4; ++i) {
+				float v = data[offset + i];
+				if (v > 1.0f) {
+					v /= 255.0f;
+				}
+				ret->values[i] = v;
+			}			
 		}
 
 	};
@@ -215,6 +219,7 @@ namespace ds {
 		void add(const MeshGen& other, const v3& position,const v3& scale = v3(1,1,1),const v3& rotation = v3(0,0,0));
 		void find_adjacent_faces(uint16_t face_index, IndexList& list);
 		void smooth(const IndexList& list, float radius);
+		void debug_colors();
 		// selection
 		bool select_face(uint16_t face_index);
 		void clear_selection();
