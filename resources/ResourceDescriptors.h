@@ -186,4 +186,8 @@ namespace ds {
 		bool depthEnabled;
 	};
 
+	struct RenderTargetDescriptor {
+		uint16_t id;
+	};
+
 }

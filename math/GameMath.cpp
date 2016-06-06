@@ -387,7 +387,13 @@ namespace ds {
 		}
 
 		bool checkCircleBoxIntersection(const v2& circlePos, float radius, const AABBox& aabBox) {
-			return checkCircleBoxIntersection(circlePos, radius, aabBox.position, aabBox.extent);
+			v2 p;
+			p.x = aabBox.position.x;
+			p.y = aabBox.position.y;
+			v2 e;
+			e.x = aabBox.extent.x;
+			e.y = aabBox.extent.y;
+			return checkCircleBoxIntersection(circlePos, radius, p, e);
 		}
 
 		bool checkCircleBoxIntersection(const v2& circlePos, float radius, const Rect& rectangle) {

@@ -53,7 +53,7 @@ namespace ds {
 
 		bool checkCircleBoxIntersection(const v2& circlePos, float radius, const v2& pos,const v2& dim);
 
-		bool checkCircleBoxIntersection(const v2& circlePos, float radius, const AABBox& aabBox);
+		bool checkCircleBoxIntersection(const v3& circlePos, float radius, const AABBox& aabBox);
 		// -------------------------------------------------------
 		// Check if two circles overlap
 		// -------------------------------------------------------

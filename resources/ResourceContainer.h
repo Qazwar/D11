@@ -44,6 +44,7 @@ namespace ds {
 		MESH,
 		SCENE,
 		CAMERA,
+		RENDERTARGET,
 		UNKNOWN
 	};
 

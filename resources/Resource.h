@@ -213,6 +213,19 @@ namespace ds {
 		}
 	};
 
+	class RenderTarget;
+
+	class RenderTargetResource : public AbstractResource<RenderTarget*> {
+
+	public:
+		RenderTargetResource(RenderTarget* t) : AbstractResource(t) {}
+		virtual ~RenderTargetResource() {
+			if (_data != 0) {
+				delete _data;
+			}
+		}
+	};
+
 	class ShaderResource : public AbstractResource<Shader*> {
 
 	public:

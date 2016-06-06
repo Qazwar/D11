@@ -10,6 +10,7 @@
 #include "..\imgui\IMGUI.h"
 #include "..\utils\ObjLoader.h"
 #include "Resource.h"
+#include "..\renderer\RenderTarget.h"
 
 namespace ds {
 
@@ -301,6 +302,26 @@ namespace ds {
 			ri.nameIndex = _resCtx->nameBuffer.size;
 			_resCtx->nameBuffer.append(name);
 			ri.type = ResourceType::CONSTANTBUFFER;
+			_resCtx->lookup[hash] = ri;
+			return ri.id;
+		}
+
+		// ------------------------------------------------------
+		// create render target
+		// ------------------------------------------------------
+		static RID createRenderTarget(const char* name, const RenderTargetDescriptor& descriptor) {
+			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
+			assert(ri.type == ResourceType::UNKNOWN);
+			int index = _resCtx->resources.size();
+			RenderTarget* rt= new RenderTarget(descriptor);
+			RenderTargetResource* cbr = new RenderTargetResource(rt);
+			_resCtx->resources.push_back(cbr);
+			IdString hash = string::murmur_hash(name);
+			ri.index = index;
+			ri.id = descriptor.id;
+			ri.nameIndex = _resCtx->nameBuffer.size;
+			_resCtx->nameBuffer.append(name);
+			ri.type = ResourceType::RENDERTARGET;
 			_resCtx->lookup[hash] = ri;
 			return ri.id;
 		}

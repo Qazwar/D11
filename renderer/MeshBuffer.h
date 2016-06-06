@@ -8,6 +8,7 @@
 #include "..\lib\collection_types.h"
 #include "VertexTypes.h"
 #include "QuadBuffer.h"
+#include "..\physics\physic_types.h"
 
 namespace ds {
 
@@ -16,6 +17,7 @@ namespace ds {
 	// ------------------------------------------------------
 	struct Mesh {
 
+		AABBox boundingBox;
 		Array<PNTCVertex> vertices;
 
 		void add(const v3& position, const v3& normal, const v2& uv) {
@@ -31,6 +33,8 @@ namespace ds {
 		}
 
 		void load(const char* fileName);
+
+		void buildBoundingBox();
 
 	};
 

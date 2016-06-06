@@ -43,6 +43,31 @@ namespace ds {
 		}
 	}
 
+	void Mesh::buildBoundingBox() {
+		// find center
+		v3 p = v3(0, 0, 0);
+		if (vertices.size() > 0) {
+			for (uint32_t i = 0; i < vertices.size(); ++i) {
+				p += vertices[i].position;
+			}
+			for (int i = 0; i < 3; ++i) {
+				p.data[i] /= vertices.size();
+			}
+			boundingBox.position = p;
+			v3 e = v3(0, 0, 0);
+			for (uint32_t i = 0; i < vertices.size(); ++i) {
+				v3 d = p - vertices[i].position;
+				for (int j = 0; j < 3; ++j) {
+					if (d.data[j] > e.data[j]) {
+						e.data[j] = d.data[j];
+					}
+				}
+			}
+			boundingBox.extent = e;
+		}
+		LOG << "center: " << DBG_V3(boundingBox.position) << " extent: " << DBG_V3(boundingBox.extent);
+	}
+
 	// ------------------------------------------------------
 	// MeshBuffer
 	// ------------------------------------------------------

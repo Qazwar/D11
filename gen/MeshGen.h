@@ -57,85 +57,97 @@ namespace ds {
 	};
 
 	enum OpcodeType {
-		MGO_ADD_CUBE,
-		MGO_ADD_CUBE_ROT,
-		MGO_SET_COLOR,
-		MGO_SLICE_UNIFORM,
-		MGO_SLICE,
-		MGO_MOVE_EDGE,
-		MGO_V_SPLIT,
-		MGO_H_SPLIT,
-		MGO_UNKNOWN
+		ADD_CUBE,
+		ADD_CUBE_ROT,
+		SET_COLOR,
+		SLICE_UNIFORM,
+		SLICE,
+		MOVE_EDGE,
+		V_SPLIT,
+		H_SPLIT,
+		MAKE_FACE,
+		ADD_FACE,
+		COMBINE_EDGES,
+		UNKNOWN
 	};
 
+	// ---------------------------------------
+	// MeshGenOpcode
+	// ---------------------------------------
 	struct MeshGenOpcode {
 
 		int type;
-		int offsets[6];
-		int data_types[6];
-		int args;
+		int offset;
 
-		MeshGenOpcode() : type(OpcodeType::MGO_UNKNOWN), args(0) {}
+		MeshGenOpcode() : type(OpcodeType::UNKNOWN), offset(-1) {}
 	};
 
-
+	// ---------------------------------------
+	// DataStore
+	// ---------------------------------------
 	struct DataStore {
 
 		Array<float> data;
 
-		void add_data(MeshGenOpcode& op, const v3& v) {
+		uint32_t add_data(const v3& v) {
 			int cnt = data.size();
 			data.push_back(v.x);
 			data.push_back(v.y);
 			data.push_back(v.z);
-			op.offsets[op.args] = cnt;
-			op.data_types[op.args] = 1;
-			++op.args;
+			return cnt;
 		}
 
-		void add_data(MeshGenOpcode& op, int v) {
+		uint32_t add_data(int v) {
 			int cnt = data.size();
 			data.push_back(static_cast<float>(v));
-			op.offsets[op.args] = cnt;
-			op.data_types[op.args] = 2;
-			++op.args;
+			return cnt;
 		}
 
-		void add_data(MeshGenOpcode& op, const Color& v) {
+		uint32_t add_data(float v) {
+			int cnt = data.size();
+			data.push_back(v);
+			return cnt;
+		}
+
+		uint32_t add_data(uint16_t v) {
+			int cnt = data.size();
+			data.push_back(static_cast<float>(v));
+			return cnt;
+		}
+
+		uint32_t add_data(MeshGenOpcode& op, const Color& v) {
 			int cnt = data.size();
 			data.push_back(v.r);
 			data.push_back(v.g);
 			data.push_back(v.b);
 			data.push_back(v.a);
-			op.offsets[op.args] = cnt;
-			op.data_types[op.args] = 3;
-			++op.args;
+			return cnt;
 		}
 
-		void get_data(const MeshGenOpcode& op, int index, v3* ret) {
-			int offset = op.offsets[index];
+		void get_data(const MeshGenOpcode& op, int index, v3* ret) const {
+			int offset = op.offset + index;
 			for (int i = 0; i < 3; ++i) {
 				ret->data[i] = data[offset + i];
 			}
 		}
 
-		void get_data(const MeshGenOpcode& op, int index, uint16_t* ret) {
-			int offset = op.offsets[index];
+		void get_data(const MeshGenOpcode& op, int index, uint16_t* ret) const {
+			int offset = op.offset + index;
 			*ret = static_cast<uint16_t>(data[offset]);
 		}
 
-		void get_data(const MeshGenOpcode& op, int index, int* ret) {
-			int offset = op.offsets[index];
+		void get_data(const MeshGenOpcode& op, int index, int* ret) const {
+			int offset = op.offset + index;
 			*ret = static_cast<int>(data[offset]);
 		}
 
-		void get_data(const MeshGenOpcode& op, int index, float* ret) {
-			int offset = op.offsets[index];
+		void get_data(const MeshGenOpcode& op, int index, float* ret) const {
+			int offset = op.offset + index;
 			*ret = data[offset];
 		}
 
-		void get_data(const MeshGenOpcode& op, int index, Color* ret) {
-			int offset = op.offsets[index];
+		void get_data(const MeshGenOpcode& op, int index, Color* ret) const {
+			int offset = op.offset + index;
 			ret->r = static_cast<float>(data[offset]);
 			ret->g = static_cast<float>(data[offset + 1]);
 			ret->b = static_cast<float>(data[offset + 2]);
@@ -177,12 +189,12 @@ namespace ds {
 		uint16_t vsplit_edge(uint16_t edgeIndex, float factor = 0.5f);
 		uint16_t get_edge_index(uint16_t faceIndex, int nr);
 		uint16_t make_face(uint16_t* edges);
+		uint16_t combine_edges(uint16_t edge0, uint16_t edge1);
 		uint16_t extrude_edge(uint16_t edgeIndex, const v3& pos);
 		uint16_t extrude_face(uint16_t faceIndex,float factor);
 		const Color& get_color(uint16_t face_index) const;
 		void debug();
 		void recalculate_normals();
-		void parse(const char* fileName);
 		// objects
 		void create_ring(float radius, float width, uint16_t segments);
 		void create_cylinder(float radius, float height, uint16_t segments);
@@ -209,9 +221,11 @@ namespace ds {
 		
 		void save_bin(const char* fileName);
 		void save_text(const char* fileName);
-		void load_bin(const char* fileName);
 		void save_mesh(const char* fileName);
+		void load_bin(const char* fileName);
+		void load_text(const char* fileName);
 	private:
+		void executeOpcodes(const Array<MeshGenOpcode>& opcodes, const DataStore& store);
 		// recording
 		void record(const MeshGenOpcode& opcode);
 		MeshGen(const MeshGen& other) {}

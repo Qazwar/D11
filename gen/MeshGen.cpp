@@ -4,6 +4,7 @@
 #include "..\io\json.h"
 #include "..\io\FileRepository.h"
 #include "..\io\BinaryFile.h"
+#include<stdarg.h>
 
 #define EPSILON 0.000001
 
@@ -16,20 +17,103 @@ namespace ds {
 		v3(-0.5f,-0.5f,-0.5f)
 	};
 
-	const char* translateOpcode(int t) {
-		switch (t) {
-			case 0: return "add_cube"; break;
-			case 1: return "add_cube_rot"; break;
-			case 2: return "set_color"; break;
-			case 3: return "slice_uniform"; break;
-			case 4: return "slice"; break;
-			case 5: return "move_edge"; break;
-			case 6: return "v_split"; break;
-			case 7: return "h_split"; break;
-			default: return "unknown"; break;
+	// --------------------------------------------
+	// Opcode definition
+	// --------------------------------------------
+	struct OpcodeDefinition {
+	
+		gen::OpcodeType type;
+		const char* name;
+		int args;
+		int types[8];
+
+		OpcodeDefinition(gen::OpcodeType t, const char* n) : type(t), name(n), args(0) {
 		}
+
+		OpcodeDefinition(gen::OpcodeType t, const char* n, int a, ...) : type(t), name(n) , args(a) {
+			va_list ap;
+			va_start(ap, a);
+			for (int i = 0; i < a; ++i) {
+				int d = va_arg(ap, int);
+				types[i] = d;
+			}
+			va_end(ap);
+		}
+	};
+
+	// float / v3 / int / color
+	const int OPCODE_DATASIZE[] = { 1, 3, 1, 4 };
+
+	// --------------------------------------------
+	// Opcode definitions
+	// --------------------------------------------
+	const int OPCODE_MAPPING_COUNT = 11;
+
+	const OpcodeDefinition OPCODE_MAPPING[] = {
+		{ gen::OpcodeType::ADD_CUBE, "add_cube", 2, 1, 1 },
+		{ gen::OpcodeType::ADD_CUBE_ROT, "add_cube_rot", 3, 1, 1, 1},
+		{ gen::OpcodeType::SET_COLOR, "set_color", 2, 2, 3 },
+		{ gen::OpcodeType::SLICE_UNIFORM, "slice_uniform", 2, 2, 2 },
+		{ gen::OpcodeType::SLICE, "slice", 3, 2, 2, 2 },
+		{ gen::OpcodeType::MOVE_EDGE, "move_edge", 2, 2, 1 },
+		{ gen::OpcodeType::V_SPLIT, "v_split", 2, 2, 0 },
+		{ gen::OpcodeType::H_SPLIT, "h_split", 2, 2, 0 },
+		{ gen::OpcodeType::MAKE_FACE, "make_face", 4, 2, 2, 2, 2 },
+		{ gen::OpcodeType::ADD_FACE, "add_face", 4, 1, 1, 1, 1 },
+		{ gen::OpcodeType::COMBINE_EDGES, "combine_edges", 2, 2, 2 },
+	};
+
+	const OpcodeDefinition UNKNOWN_DEFINITION = OpcodeDefinition(gen::OpcodeType::UNKNOWN, "UNKNOWN");
+
+	// --------------------------------------------
+	// translate opcode
+	// --------------------------------------------
+	const char* translateOpcode(int t) {
+		if (t < OPCODE_MAPPING_COUNT) {
+			return OPCODE_MAPPING[t].name;
+		}
+		return UNKNOWN_DEFINITION.name;
+	}
+	
+	// --------------------------------------------
+	// find opcode by type
+	// --------------------------------------------
+	gen::OpcodeType find_opcode_type(const char* name) {
+		for (int i = 0; i < OPCODE_MAPPING_COUNT; ++i) {
+			if (strcmp(OPCODE_MAPPING[i].name, name) == 0) {
+				return OPCODE_MAPPING[i].type;
+			}
+		}
+		return gen::OpcodeType::UNKNOWN;
 	}
 
+	// --------------------------------------------
+	// find opcode by name
+	// --------------------------------------------
+	OpcodeDefinition find_opcode(const char* name) {
+		for (int i = 0; i < OPCODE_MAPPING_COUNT; ++i) {
+			if (strcmp(OPCODE_MAPPING[i].name, name) == 0) {
+				return OPCODE_MAPPING[i];
+			}
+		}
+		return UNKNOWN_DEFINITION;
+	}
+
+	// --------------------------------------------
+	// find opcode by type
+	// --------------------------------------------
+	OpcodeDefinition find_opcode(int type) {
+		for (int i = 0; i < OPCODE_MAPPING_COUNT; ++i) {
+			if (OPCODE_MAPPING[i].type == type) {
+				return OPCODE_MAPPING[i];
+			}
+		}
+		return UNKNOWN_DEFINITION;
+	}
+
+	// --------------------------------------------
+	// smooth position
+	// --------------------------------------------
 	v3 smooth_position(const v3& p) {
 		v3 ret;
 		for (int i = 0; i < 3; ++i) {
@@ -41,6 +125,9 @@ namespace ds {
 		return ret;
 	}
 
+	// --------------------------------------------
+	// check if two vectors are nearly equals
+	// --------------------------------------------
 	bool equals(const v3& f, const v3& s) {
 		v3 d;
 		int cnt = 0;
@@ -51,6 +138,45 @@ namespace ds {
 			}
 		}
 		return cnt == 3;
+	}
+
+	// --------------------------------------------
+	// check if a list of positions is convex
+	// --------------------------------------------
+	bool is_convex(v3* positions, int num) {
+		int cnt = 0;
+		for (int i = 0; i < num; ++i) {
+			v3 df1 = positions[(i + 1) % num] - positions[i];
+			v3 df2 = positions[(i + 2) % num] - positions[(i + 1) % num];
+			float d = cross(df1, df2).z;
+			if (d < 0.0f) {
+				--cnt;
+			}
+			else {
+				++cnt;
+			}
+		}
+		if (cnt == num || cnt == -num) {
+			return true;
+		}
+		return false;
+	}
+
+	// --------------------------------------------
+	// check if a list of positions is clockwise
+	// --------------------------------------------
+	bool is_clockwise(v3* positions, int num) {
+		int cnt = 0;
+		float a = 0.0f;
+		for (int i = 0; i < num; ++i) {
+			v3 p0 = positions[i];
+			v3 p1 = positions[(i + 1) % num];
+			a += (p0.x * p1.y - p1.x * p0.y);
+		}
+		a *= 0.5f;
+		// A positive : counter clock wise / A negative: clock wise
+		LOG << "===> A: " << a;
+		return is_convex(positions,num);
 	}
 
 	namespace gen {
@@ -295,6 +421,13 @@ namespace ds {
 		// ----------------------------------------------
 		uint16_t MeshGen::add_face(const v3& p0, const v3& p1, const v3& p2, const v3& p3) {
 			v3 p[] = { p0, p1, p2, p3 };
+			MeshGenOpcode op;
+			op.type = OpcodeType::ADD_FACE;
+			op.offset = _store.add_data(p0);
+			_store.add_data(p1);
+			_store.add_data(p2);
+			_store.add_data(p3);
+			record(op);
 			return add_face(p);
 		}
 
@@ -323,7 +456,7 @@ namespace ds {
 			f.color = Color::WHITE;
 			calculate_normal(&f);
 			uint16_t fi = _faces.size();
-			_faces.push_back(f);
+			_faces.push_back(f);			
 			return fi;
 		}
 
@@ -386,6 +519,40 @@ namespace ds {
 			for (int i = 0; i < 4; ++i) {
 				p[i] = _vertices[_edges[edges[i]].vert_index];
 			}
+			MeshGenOpcode op;
+			op.type = OpcodeType::MAKE_FACE;
+			op.offset = _store.data.size();
+			for (int i = 0; i < 4; ++i) {
+				_store.add_data(edges[i]);
+			}
+			record(op);
+			return add_face(p);
+		}
+
+		// ----------------------------------------------
+		// combine edges
+		// ----------------------------------------------
+		uint16_t MeshGen::combine_edges(uint16_t edge0, uint16_t edge1) {
+			v3 p[4];
+			const Edge& e0 = _edges[edge0];
+			v3 n = _faces[e0.face_index].n;
+			const Edge& e1 = _edges[e0.next];
+			const Edge& e2 = _edges[edge1];
+			const Edge& e3 = _edges[e2.next];
+			p[0] = _vertices[e0.vert_index];
+			p[1] = _vertices[e1.vert_index];
+			p[2] = _vertices[e3.vert_index];
+			p[3] = _vertices[e2.vert_index];
+			if (!is_clockwise(p,4)) {
+				v3 t = p[0];
+				p[0] = p[1];
+				p[1] = t;
+			}
+			MeshGenOpcode op;
+			op.type = OpcodeType::COMBINE_EDGES;
+			op.offset = _store.add_data(edge0);
+			_store.add_data(edge1);
+			record(op);
 			return add_face(p);
 		}
 
@@ -418,9 +585,9 @@ namespace ds {
 			_vertices[nn.vert_index] -= d2;
 			v3 p[] = { _vertices[n.vert_index] , o1, o2, _vertices[nn.vert_index] };
 			MeshGenOpcode op;
-			op.type = OpcodeType::MGO_H_SPLIT;
-			_store.add_data(op, edgeIndex);
-			_store.add_data(op, factor);
+			op.type = OpcodeType::H_SPLIT;
+			op.offset = _store.add_data(edgeIndex);
+			_store.add_data(factor);
 			record(op);
 			return add_face(p);
 		}
@@ -441,9 +608,9 @@ namespace ds {
 			_vertices[nn.vert_index] -= d2;
 			v3 p[] = { o1, o2, _vertices[nn.vert_index] , _vertices[n.vert_index] };
 			MeshGenOpcode op;
-			op.type = OpcodeType::MGO_V_SPLIT;
-			_store.add_data(op, edgeIndex);
-			_store.add_data(op, factor);
+			op.type = OpcodeType::V_SPLIT;
+			op.offset = _store.add_data(edgeIndex);
+			_store.add_data(factor);
 			record(op);
 			return add_face(p);
 		}
@@ -470,9 +637,9 @@ namespace ds {
 				}
 			}
 			MeshGenOpcode op;
-			op.type = OpcodeType::MGO_MOVE_EDGE;
-			_store.add_data(op, edgeIndex);
-			_store.add_data(op, position);
+			op.type = OpcodeType::MOVE_EDGE;
+			op.offset = _store.add_data(edgeIndex);
+			_store.add_data(position);
 			record(op);
 		}
 
@@ -549,8 +716,8 @@ namespace ds {
 			if (face_index < _faces.size()) {
 				_faces[face_index].color = color;
 				MeshGenOpcode op;
-				op.type = OpcodeType::MGO_SET_COLOR;
-				_store.add_data(op, face_index);
+				op.type = OpcodeType::SET_COLOR;
+				op.offset = _store.add_data(face_index);
 				_store.add_data(op, color);
 				record(op);
 			}
@@ -624,9 +791,9 @@ namespace ds {
 				}
 			}
 			MeshGenOpcode op;
-			op.type = OpcodeType::MGO_ADD_CUBE;
-			_store.add_data(op, position);
-			_store.add_data(op, size);
+			op.type = OpcodeType::ADD_CUBE;
+			op.offset = _store.add_data(position);
+			_store.add_data(size);
 			record(op);
 			return my_faces[0];
 		}
@@ -741,10 +908,10 @@ namespace ds {
 				faces[i + 1] = extrude_edge(f.edge + indices[i], e[i]);
 			}
 			MeshGenOpcode op;
-			op.type = OpcodeType::MGO_ADD_CUBE_ROT;
-			_store.add_data(op, position);
-			_store.add_data(op, size);
-			_store.add_data(op, rotation);
+			op.type = OpcodeType::ADD_CUBE_ROT;
+			op.offset = _store.add_data(position);
+			_store.add_data(size);
+			_store.add_data(rotation);
 			record(op);
 			return faces[0];
 		}
@@ -865,10 +1032,10 @@ namespace ds {
 				}
 			}
 			MeshGenOpcode op;
-			op.type = OpcodeType::MGO_SLICE;
-			_store.add_data(op, face_index);
-			_store.add_data(op, stepsX);
-			_store.add_data(op, stepsY);
+			op.type = OpcodeType::SLICE;
+			op.offset = _store.add_data(face_index);
+			_store.add_data(stepsX);
+			_store.add_data(stepsY);
 			record(op);
 			return cnt;
 		}
@@ -933,12 +1100,7 @@ namespace ds {
 				for (int i = 0; i < os; ++i) {
 					const MeshGenOpcode& op = _opcodes[i];
 					b.write(op.type);
-					int args = op.args;
-					b.write(args);
-					for (int j = 0; j < args; ++j) {
-						b.write(op.offsets[j]);
-						b.write(op.data_types[j]);
-					}
+					b.write(op.offset);
 				}
 			}
 		}
@@ -947,28 +1109,132 @@ namespace ds {
 		// save text format
 		// ----------------------------------------------
 		void MeshGen::save_text(const char* fileName) {
-			FILE* f = fopen(fileName, "w");
+			char buffer[256];
+			sprintf_s(buffer, 256, "content\\meshes\\%s.txt", fileName);
+			FILE* f = fopen(buffer, "w");
 			for (uint32_t i = 0; i < _opcodes.size(); ++i) {
 				const MeshGenOpcode& op = _opcodes[i];
+				OpcodeDefinition def = find_opcode(op.type);
 				fprintf(f, "%s ", translateOpcode(op.type));
-				for (int j = 0; j < op.args; ++j) {
-					int dt = op.data_types[j];
-					int of = op.offsets[j];
-					if (dt == 1) {
-						fprintf(f, "%g,%g,%g ", _store.data[of], _store.data[of + 1], _store.data[of + 2]);
+				LOG << i << " : " << translateOpcode(op.type) << " args: " << def.args;
+				int of = op.offset;
+				if (of != -1) {
+					for (int j = 0; j < def.args; ++j) {
+						int dt = def.types[j];
+						LOG << "dt: " << dt << " of: " << of;
+						if (dt == 0) {
+							fprintf(f, "%g ", _store.data[of]);
+						}
+						else if (dt == 1) {
+							fprintf(f, "%g,%g,%g ", _store.data[of], _store.data[of + 1], _store.data[of + 2]);
+						}
+						else if (dt == 2) {
+							fprintf(f, "%d ", static_cast<int>(_store.data[of]));
+						}
+						else if (dt == 3) {
+							fprintf(f, "%g,%g,%g,%g ", _store.data[of], _store.data[of + 1], _store.data[of + 2], _store.data[of + 3]);
+						}
+						of += OPCODE_DATASIZE[dt];
 					}
-					else if (dt == 2) {
-						fprintf(f, "%d ", static_cast<int>(_store.data[of]));
-					}
-					else if (dt == 3) {
-						fprintf(f, "%g,%g,%g,%g ", _store.data[of], _store.data[of + 1], _store.data[of + 2], _store.data[of + 3]);
-					}
+				}
+				else {
+					LOGE << "No offset defined";
 				}
 				fprintf(f, "\n");
 			}
 			fclose(f);
 		}
 
+		void MeshGen::executeOpcodes(const Array<MeshGenOpcode>& opcodes, const DataStore& store) {
+			for (int i = 0; i < opcodes.size(); ++i) {
+				const MeshGenOpcode& op = opcodes[i];
+				LOG << "executing " << i << " : " << translateOpcode(op.type);
+				switch (op.type) {
+				case OpcodeType::ADD_CUBE: {
+					v3 p;
+					v3 s;
+					store.get_data(op, 0, &p);
+					store.get_data(op, 3, &s);
+					add_cube(p, s);
+					break;
+				}
+				case OpcodeType::SLICE_UNIFORM: {
+					uint16_t face_index = 0;
+					int segments = 0;
+					store.get_data(op, 0, &face_index);
+					store.get_data(op, 1, &segments);
+					slice(face_index, segments);
+					break;
+				}
+				case OpcodeType::SLICE: {
+					uint16_t face_index = 0;
+					uint16_t stepsX = 0;
+					uint16_t stepsY = 0;
+					store.get_data(op, 0, &face_index);
+					store.get_data(op, 1, &stepsX);
+					store.get_data(op, 2, &stepsY);
+					slice(face_index, stepsX, stepsY);
+					break;
+				}
+				case OpcodeType::SET_COLOR: {
+					uint16_t face_index = 0;
+					Color color;
+					store.get_data(op, 0, &face_index);
+					store.get_data(op, 1, &color);
+					set_color(face_index, color);
+					break;
+				}
+				case OpcodeType::MOVE_EDGE: {
+					uint16_t edge_index = 0;
+					v3 p;
+					store.get_data(op, 0, &edge_index);
+					store.get_data(op, 1, &p);
+					move_edge(edge_index, p);
+					break;
+				}
+				case OpcodeType::V_SPLIT: {
+					uint16_t edge_index = 0;
+					float factor = 0.5f;
+					store.get_data(op, 0, &edge_index);
+					store.get_data(op, 1, &factor);
+					vsplit_edge(edge_index, factor);
+					break;
+				}
+				case OpcodeType::H_SPLIT: {
+					uint16_t edge_index = 0;
+					float factor = 0.5f;
+					store.get_data(op, 0, &edge_index);
+					store.get_data(op, 1, &factor);
+					hsplit_edge(edge_index, factor);
+					break;
+				}
+				case OpcodeType::MAKE_FACE: {
+					uint16_t edges[4];
+					for (int i = 0; i < 4; ++i) {
+						store.get_data(op, i, &edges[i]);
+					}
+					make_face(edges);
+					break;
+				}
+				case OpcodeType::ADD_FACE: {
+					v3 p[4];
+					for (int i = 0; i < 4; ++i) {
+						store.get_data(op, i * 3, &p[i]);
+					}
+					add_face(p[0], p[1], p[2], p[3]);
+					break;
+				}
+				case OpcodeType::COMBINE_EDGES: {
+					uint16_t e0;
+					uint16_t e1;
+					store.get_data(op, 0, &e0);
+					store.get_data(op, 1, &e1);
+					combine_edges(e0, e1);
+					break;
+				}
+				}
+			}
+		}
 		// ----------------------------------------------
 		// load binary format
 		// ----------------------------------------------
@@ -978,91 +1244,28 @@ namespace ds {
 			sprintf_s(buffer, 256, "content\\meshes\\%s.bin", fileName);
 			Array<MeshGenOpcode> tmp_opcodes;
 			FILE* f = fopen(buffer, "rb");
-			int size = -1;
-			DataStore store;
-			fread(&size, sizeof(int), 1, f);
-			for (int i = 0; i < size; ++i) {
-				float v = 0.0f;
-				fread(&v, sizeof(float), 1, f);
-				store.data.push_back(v);
-			}
-			int os = -1;
-			fread(&os, sizeof(int), 1, f);
-			for (int i = 0; i < os; ++i) {
-				MeshGenOpcode op;				
-				fread(&op.type, sizeof(int), 1, f);
-				LOG << translateOpcode(op.type);
-				fread(&op.args, sizeof(int), 1, f);
-				for (int j = 0; j < op.args; ++j) {
-					fread(&op.offsets[j], sizeof(int), 1, f);
-					fread(&op.data_types[j], sizeof(int), 1, f);
+			if (f) {
+				int size = -1;
+				DataStore store;
+				fread(&size, sizeof(int), 1, f);
+				for (int i = 0; i < size; ++i) {
+					float v = 0.0f;
+					fread(&v, sizeof(float), 1, f);
+					store.data.push_back(v);
 				}
-				tmp_opcodes.push_back(op);
-			}
-			fclose(f);
-			for (int i = 0; i < tmp_opcodes.size(); ++i) {
-				MeshGenOpcode& op = tmp_opcodes[i];
-				LOG << "executing " << i << " : " << translateOpcode(op.type);
-				switch (op.type) {
-					case OpcodeType::MGO_ADD_CUBE: {
-						v3 p;
-						v3 s;
-						store.get_data(op, 0, &p);
-						store.get_data(op, 1, &s);
-						add_cube(p, s);
-						break;
-					}
-					case OpcodeType::MGO_SLICE_UNIFORM: {
-						uint16_t face_index = 0;
-						int segments = 0;
-						store.get_data(op, 0, &face_index);
-						store.get_data(op, 1, &segments);
-						slice(face_index, segments);
-						break;
-					}
-					case OpcodeType::MGO_SLICE: {
-						uint16_t face_index = 0;
-						uint16_t stepsX = 0;
-						uint16_t stepsY = 0;
-						store.get_data(op, 0, &face_index);
-						store.get_data(op, 1, &stepsX);
-						store.get_data(op, 2, &stepsY);
-						slice(face_index, stepsX,stepsY);
-						break;
-					}
-					case OpcodeType::MGO_SET_COLOR: {
-						uint16_t face_index = 0;
-						Color color;
-						store.get_data(op, 0, &face_index);
-						store.get_data(op, 1, &color);
-						set_color(face_index, color);
-						break;
-					}
-					case OpcodeType::MGO_MOVE_EDGE: {
-						uint16_t edge_index = 0;
-						v3 p;
-						store.get_data(op, 0, &edge_index);
-						store.get_data(op, 1, &p);
-						move_edge(edge_index, p);
-						break;
-					}
-					case OpcodeType::MGO_V_SPLIT: {
-						uint16_t edge_index = 0;
-						float factor = 0.5f;
-						store.get_data(op, 0, &edge_index);
-						store.get_data(op, 1, &factor);
-						vsplit_edge(edge_index, factor);
-						break;
-					}
-					case OpcodeType::MGO_H_SPLIT: {
-						uint16_t edge_index = 0;
-						float factor = 0.5f;
-						store.get_data(op, 0, &edge_index);
-						store.get_data(op, 1, &factor);
-						hsplit_edge(edge_index, factor);
-						break;
-					}
+				int os = -1;
+				fread(&os, sizeof(int), 1, f);
+				for (int i = 0; i < os; ++i) {
+					MeshGenOpcode op;
+					fread(&op.type, sizeof(int), 1, f);
+					fread(&op.offset, sizeof(int), 1, f);
+					tmp_opcodes.push_back(op);
 				}
+				fclose(f);
+				executeOpcodes(tmp_opcodes, store);
+			}
+			else {
+				LOGE << "No such file: " << buffer;
 			}
 		}
 
@@ -1091,13 +1294,17 @@ namespace ds {
 			}
 		}
 
-		void MeshGen::parse(const char* fileName) {
-			/*
-			clear();
-			Array<OpCode> opcodes;
+		// ----------------------------------------------
+		// load text format
+		// ----------------------------------------------
+		void MeshGen::load_text(const char* fileName) {
 			char buffer[256];
-			sprintf_s(buffer, 256, "content\\meshes\\%s", fileName);
+			sprintf_s(buffer, 256, "content\\meshes\\%s.txt", fileName);
+			clear();
 			int size = -1;
+			char name[256];
+			Array<MeshGenOpcode> tmp_opcodes;
+			DataStore store;
 			const char* txt = repository::load(buffer, &size);
 			if (size != -1) {
 				Tokenizer t;
@@ -1107,100 +1314,30 @@ namespace ds {
 				while (cnt < t.size()) {
 					Token& tk = t.get(cnt);
 					if (tk.type == Token::NAME) {
-						OpCode oc;
-						strncpy(oc.name, txt + tk.index, tk.size);
-						oc.name[tk.size] = '\0';
-						oc.count = 0;
+						MeshGenOpcode oc;
+						strncpy(name, txt + tk.index, tk.size);
+						name[tk.size] = '\0';
+						oc.type = find_opcode_type(name);		
+						oc.offset = store.data.size();
 						++cnt;
 						tk = t.get(cnt);
 						while ((tk.type == Token::NUMBER) || (tk.type == Token::DELIMITER)) {
 							tk = t.get(cnt);
 							if (tk.type == Token::NUMBER) {
-								oc.values[oc.count++] = tk.value;
+								store.add_data(tk.value);
 							}
 							++cnt;
 						}
-						--cnt;
-						opcodes.push_back(oc);
+						tmp_opcodes.push_back(oc);
 					}
 					else {
 						++cnt;
 					}
 				}
-				LOG << "opcodes: " << opcodes.size();
-				for (int i = 0; i < opcodes.size(); ++i) {
-					const OpCode& oc = opcodes[i];
-					LOG << "oc: " << oc.name << " values: " << oc.count;
-					if (strcmp(oc.name, "add_face") == 0) {
-						v3 p[4];
-						p[0] = oc.get_v3(0);
-						p[1] = oc.get_v3(3);
-						p[2] = oc.get_v3(6);
-						p[3] = oc.get_v3(9);
-						add_face(p);
-					}
-					else if (strcmp(oc.name, "add_cube") == 0) {
-						// add_cube 0,0,0 1.0,1.0,0.1
-						v3 pos = oc.get_v3(0);
-						v3 size = oc.get_v3(3);
-						add_cube(pos, size);
-					}
-					else if (strcmp(oc.name, "set_color") == 0) {
-						int idx = oc.get_int(0);
-						Color c = oc.get_color(1);
-						set_color(idx, c);
-					}
-					else if (strcmp(oc.name, "extrude_edge") == 0) {
-						// extrude_edge 1 0,0,2
-						int idx = oc.get_int(0);
-						v3 c = oc.get_v3(1);
-						extrude_edge(idx, c);
-					}
-					else if (strcmp(oc.name, "texture_face") == 0) {
-						// texture_face 5 260,650 324,650 324,714 260,714
-						int idx = oc.get_int(0);
-						v2 uv[4];
-						for (int i = 0; i < 4; ++i) {
-							uv[i] = oc.get_v2(i * 2 + 1);
-						}
-						texture_face(idx, math::buildTexture(uv));
-					}
-					else if (strcmp(oc.name, "texture_face_rect") == 0) {
-						// texture_face 5 260,650 324,650 324,714 260,714
-						int idx = oc.get_int(0);
-						Rect r = oc.get_rect(1);
-						texture_face(idx, math::buildTexture(r));
-					}
-					else if (strcmp(oc.name, "vsplit_edge") == 0) {
-						// extrude_edge 1 0,0,2
-						int idx = oc.get_int(0);
-						float factor = oc.get_float(1);
-						vsplit_edge(idx, factor);
-					}
-					else if (strcmp(oc.name, "hsplit_edge") == 0) {
-						// extrude_edge 1 0,0,2
-						int idx = oc.get_int(0);
-						float factor = oc.get_float(1);
-						hsplit_edge(idx, factor);
-					}
-					else if (strcmp(oc.name, "move_edge") == 0) {
-						// move_edge 1 0,0,2
-						int idx = oc.get_int(0);
-						v3 c = oc.get_v3(1);
-						move_edge(idx, c);
-					}
-					else if (strcmp(oc.name, "move_face") == 0) {
-						// move_face 1 0,0,2
-						int idx = oc.get_int(0);
-						v3 c = oc.get_v3(1);
-						move_face(idx, c);
-					}
-
-				}
+				executeOpcodes(tmp_opcodes, store);
 				recalculate_normals();
 				delete txt;
 			}
-			*/
 		}
 
 		// ----------------------------------------------

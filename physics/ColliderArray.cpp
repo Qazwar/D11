@@ -163,7 +163,7 @@ namespace ds {
 		}
 
 		// http://www.gamasutra.com/view/feature/131790/simple_intersection_tests_for_games.php?page=3
-		bool sweepTest(const AABBox& b1, const Vector2f& prev1, const AABBox& b2, const Vector2f& prev2, float* u0, float *u1) {
+		bool sweepTest(const AABBox& b1, const Vector3f& prev1, const AABBox& b2, const Vector3f& prev2, float* u0, float *u1) {
 			const AABBox A(prev1, b1.extent);//previous state of AABB A
 			const AABBox B(prev2, b2.extent);//previous state of AABB B
 			const Vector3f va = b1.position - prev1;//displacement of A
