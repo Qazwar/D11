@@ -9,6 +9,7 @@ namespace ds {
 		v3 extent;
 		v3 min;
 		v3 max;
+		v3 bounds[2];
 
 		AABBox() {}
 
@@ -17,6 +18,8 @@ namespace ds {
 			extent = ext * 0.5f;
 			min = vec_min(position - extent, position + extent);
 			max = vec_max(position - extent, position + extent);
+			bounds[0] = min;
+			bounds[1] = max;
 		}
 
 		void scale(const v3& s) {
@@ -24,12 +27,16 @@ namespace ds {
 			extent.y *= s.y;
 			min = vec_min(position - extent, position + extent);
 			max = vec_max(position - extent, position + extent);
+			bounds[0] = min;
+			bounds[1] = max;
 		}
 
 		void transpose(const v3& pos) {
 			position = pos;
 			min = vec_min(position - extent, position + extent);
 			max = vec_max(position - extent, position + extent);
+			bounds[0] = min;
+			bounds[1] = max;
 		}
 
 		v2 findClosestPoint(const v3& p) const {
@@ -78,6 +85,35 @@ namespace ds {
 
 		float max_value(int index) const {
 			return max[index];
+		}
+
+		// http://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
+		bool intersects(const Ray& ray, float* t0, float* t1) const {
+
+			float tmin = (bounds[ray.sign[0]].x - ray.origin.x) * ray.invDir.x;
+			float tmax = (bounds[1 - ray.sign[0]].x - ray.origin.x) * ray.invDir.x;
+			float tymin = (bounds[ray.sign[1]].y - ray.origin.y) * ray.invDir.y;
+			float tymax = (bounds[1 - ray.sign[1]].y - ray.origin.y) * ray.invDir.y;
+
+			if ((tmin > tymax) || (tymin > tmax))
+				return false;
+			if (tymin > tmin)
+				tmin = tymin;
+			if (tymax < tmax)
+				tmax = tymax;
+
+			float tzmin = (bounds[ray.sign[2]].z - ray.origin.z) * ray.invDir.z;
+			float tzmax = (bounds[1 - ray.sign[2]].z - ray.origin.z) * ray.invDir.z;
+
+			if ((tmin > tzmax) || (tzmin > tmax))
+				return false;
+			if (tzmin > tmin)
+				tmin = tzmin;
+			if (tzmax < tmax)
+				tmax = tzmax;
+			*t0 = tmin;
+			*t1 = tmax;
+			return true;
 		}
 	};
 

@@ -511,6 +511,10 @@ namespace graphics {
 		ray.origin = ds::matrix::transformCoordinate(ray.origin, view);
 		ray.direction = ds::matrix::transformNormal(ray.direction, view);
 		ray.direction = normalize(ray.direction);
+		for (int i = 0; i < 3; ++i) {
+			ray.invDir.data[i] = 1.0f / ray.direction.data[i];
+			ray.sign[i] = (ray.invDir.data[i] < 0.0f);
+		}
 		return ray;
 	}
 

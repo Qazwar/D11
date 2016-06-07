@@ -32,7 +32,9 @@ namespace ds {
 			vertices.clear();
 		}
 
-		void load(const char* fileName);
+		void load(const char* fileName, const v3& offset = v3(0,0,0));
+
+		void save(const char* fileName);
 
 		void buildBoundingBox();
 

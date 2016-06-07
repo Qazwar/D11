@@ -45,6 +45,7 @@ namespace ds {
 		void draw();
 		int find(int type, ID* ids, int max);
 		void transform();
+		ID intersects(const Ray& ray);
 	private:
 		EntityList _entities;
 		MeshBuffer* _meshBuffer;

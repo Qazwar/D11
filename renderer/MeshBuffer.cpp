@@ -6,13 +6,14 @@
 #include "..\resources\ResourceContainer.h"
 #include "..\utils\Log.h"
 #include "..\utils\Profiler.h"
+#include "..\io\BinaryFile.h"
 
 namespace ds {
 
 	// ------------------------------------------------------
 	// Mesh - load
 	// ------------------------------------------------------
-	void Mesh::load(const char* fileName) {
+	void Mesh::load(const char* fileName, const v3& offset) {
 		char buffer[256];
 		sprintf_s(buffer, 256, "content\\meshes\\%s.mesh", fileName);
 		FILE* f = fopen(buffer, "rb");
@@ -24,6 +25,7 @@ namespace ds {
 				for (int k = 0; k < 3; ++k) {
 					fread(&p.data[k], sizeof(float), 1, f);
 				}
+				p += offset;
 				v3 n;
 				for (int k = 0; k < 3; ++k) {
 					fread(&n.data[k], sizeof(float), 1, f);
@@ -40,9 +42,32 @@ namespace ds {
 				add(p, n, uv, color);
 			}
 			fclose(f);
+			buildBoundingBox();
 		}
 	}
 
+	// ------------------------------------------------------
+	// Mesh - save
+	// ------------------------------------------------------
+	void Mesh::save(const char* fileName) {
+		char buffer[256];
+		sprintf_s(buffer, 256, "content\\meshes\\%s.mesh", fileName);
+		BinaryFile bf;
+		if (bf.open(buffer, FileMode::WRITE)) {
+			bf.write(vertices.size());
+			for (int i = 0; i < vertices.size(); ++i) {
+				const PNTCVertex& v = vertices[i];
+				bf.write(v.position);
+				bf.write(v.normal);
+				bf.write(v.texture);
+				bf.write(v.color);
+			}
+		}
+	}
+	
+	// ------------------------------------------------------
+	// Mesh - build bounding AABBox
+	// ------------------------------------------------------
 	void Mesh::buildBoundingBox() {
 		// find center
 		v3 p = v3(0, 0, 0);
@@ -52,6 +77,9 @@ namespace ds {
 			}
 			for (int i = 0; i < 3; ++i) {
 				p.data[i] /= vertices.size();
+				if (p.data[i] < 0.0001f) {
+					p.data[i] = 0.0f;
+				}
 			}
 			boundingBox.position = p;
 			v3 e = v3(0, 0, 0);
@@ -67,7 +95,7 @@ namespace ds {
 		}
 		LOG << "center: " << DBG_V3(boundingBox.position) << " extent: " << DBG_V3(boundingBox.extent);
 	}
-
+	
 	// ------------------------------------------------------
 	// MeshBuffer
 	// ------------------------------------------------------

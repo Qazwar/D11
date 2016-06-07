@@ -60,26 +60,9 @@ namespace ds {
 				LOG << "selection: " << selection;
 				if (selection != -1) {
 					_ctx->gen->select_face(selection);
-					/*
-					if (_ctx->selectedFace != -1) {
-						_ctx->gen->set_color(_ctx->selectedFace, _prevColor);
-					}
-					_prevColor = _ctx->gen->get_color(selection);
-					_ctx->gen->set_color(selection, ds::Color(192, 192, 192, 255));
-					*/
 					rebuildMesh();
 					_ctx->gen->debug_face(selection);
 				}
-				/*
-				else {
-					if (_ctx->selectedFace != -1) {
-						_ctx->gen->set_color(_ctx->selectedFace, _prevColor);
-						rebuildMesh();
-					}
-				}
-				_ctx->selectedFace = selection;
-				_ctx->selectedFace = selection;
-				*/
 			}
 			if (!input::isMouseButtonPressed(0) && _pressed) {
 				_pressed = false;

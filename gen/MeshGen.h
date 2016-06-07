@@ -222,7 +222,9 @@ namespace ds {
 		void debug_colors();
 		// selection
 		bool select_face(uint16_t face_index);
+		bool select_ring(uint16_t face_index, int direction);
 		void clear_selection();
+		void show_edges(uint16_t face_index);
 		
 		void save_bin(const char* fileName);
 		void save_text(const char* fileName);

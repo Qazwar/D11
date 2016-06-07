@@ -112,7 +112,21 @@ struct Ray {
 
 	v3 origin;
 	v3 direction;
+	v3 invDir;
+	int sign[3];
 
+	Ray() : origin(0, 0, 0), direction(0, 0, 0), invDir(0, 0, 0) {
+		for (int i = 0; i < 3; ++i) {
+			sign[i] = 0;
+		}
+	}
+
+	Ray(const v3& o, const v3& d) : origin(o), direction(d) {
+		for (int i = 0; i < 3; ++i) {
+			invDir.data[i] = 1.0f / direction.data[i];
+			sign[i] = (invDir.data[i] < 0.0f);
+		}
+	}
 };
 
 // -------------------------------------------------------

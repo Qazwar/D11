@@ -654,20 +654,19 @@ namespace ds {
 			uint16_t connections[16];
 			int ei = f.edge;
 			v3 center = get_center(face_index);
+			v3 c[4];
 			for (int i = 0; i < 4; ++i) {
 				Edge& e0 = _edges[ei];
-				v3 diff = _vertices[e0.vert_index] - center;
-				v3 c = normalize(diff);
-				float l = length(diff);
-				c *= (l * scale);
-				int num = find_edges(_vertices[e0.vert_index], connections, 16);
-				for (int j = 0; j < num; ++j) {
-					const Edge& curr = _edges[connections[j]];
-					//if (connections[j] != ei) {
-						_vertices[curr.vert_index] = c;
-					//}
-				}
-				//_vertices[e0.vert_index] = c;
+				Edge& e1 = _edges[e0.next];
+				v3 ce = (_vertices[e0.vert_index] + _vertices[e1.vert_index]) / 2.0f;
+				c[i] = normalize(ce - center);
+				c[i] *= length(ce - center) * scale;
+				ei = e0.next;
+			}
+			ei = f.edge;
+			for (int i = 0; i < 4; ++i) {
+				Edge& e0 = _edges[ei];
+				move_edge(ei, c[i]);
 				ei = e0.next;
 			}
 		}
@@ -1494,6 +1493,29 @@ namespace ds {
 					xp += size.x;
 				}
 				yp += size.y;
+			}
+		}
+
+		void MeshGen::show_edges(uint16_t face_index) {
+			Color clr[] = { Color(255, 0, 0, 255), Color(0, 255, 0, 255), Color(0, 0, 255, 255), Color(255, 255, 0, 255) };
+			const Face& f = _faces[face_index];
+			int ei = f.edge;
+			for (int i = 0; i < 4; ++i) {
+				const Edge& e0 = _edges[ei];
+				const Edge& e1 = _edges[e0.next];
+				ei = e0.next;
+				v3 p0 = _vertices[e0.vert_index];
+				v3 p1 = _vertices[e1.vert_index];
+				v3 d = p1 - p0;
+				v3 cr = normalize(cross(d, f.n));
+				float dt = dot(p0, p1);
+				v3 p[4];
+				p[0] = v3(p0 + cr * 0.1f);
+				p[1] = v3(p1 + cr * 0.1f);
+				p[2] = p1;
+				p[3] = p0;
+				uint16_t f = add_face(p);
+				set_color(f,clr[i]);				
 			}
 		}
 

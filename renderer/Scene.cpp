@@ -129,4 +129,34 @@ namespace ds {
 		_entities.remove(id);
 	}
 
+	ID Scene::intersects(const Ray& ray) {
+		float t0 = 0.0f;
+		float t1 = 0.0f;
+		ID ret = INVALID_ID;
+		float tm = 0.0f;
+		for (EntityList::iterator it = _entities.begin(); it != _entities.end(); ++it) {
+			const Entity& e = (*it);
+			AABBox bb = e.mesh->boundingBox;
+			bb.transpose(e.position);
+			if (bb.intersects(ray, &t0, &t1)) {				
+				if (ret == INVALID_ID) {
+					tm = t0;
+					ret = e.id;
+				}
+				else {
+					if (t0 < tm) {
+						tm = t0;
+						ret = e.id;
+					}
+				}
+			}
+		}
+		if (ret != INVALID_ID) {
+			LOG << "INTERSECTION!!!! id: " << ret << " t0: " << t0 << " t1: " << t1;
+		}
+		else {
+			LOG << "NO intersection!";
+		}
+		return ret;
+	}
 }
