@@ -69,6 +69,11 @@ namespace ds {
 		ADD_FACE,
 		COMBINE_EDGES,
 		DEBUG_COLORS,
+		EXTRUDE_FACE,
+		SCALE_FACE,
+		ADD_COLOR_CUBE,
+		ADD_CYLINDER,
+		ADD_COL_CYLINDER,
 		UNKNOWN
 	};
 
@@ -116,7 +121,7 @@ namespace ds {
 			return cnt;
 		}
 
-		uint32_t add_data(MeshGenOpcode& op, const Color& v) {
+		uint32_t add_data(const Color& v) {
 			int cnt = data.size();
 			data.push_back(v.r);
 			data.push_back(v.g);
@@ -175,6 +180,7 @@ namespace ds {
 		uint16_t get_edge(uint16_t face_index, uint16_t edge_offset);
 		void get_vertices(const Face& face,v3* ret) const;
 		uint16_t add_cube(const v3& position, const v3& size, uint16_t* faces = 0);
+		uint16_t add_cube(const v3& position, const v3& size, const Color& c, uint16_t* faces = 0);
 		uint16_t add_cube(const v3& position, const v3& size, const v3& rotation);
 		void set_color(uint16_t faceIndex, const Color& color);
 		void set_color(const Color& color);
@@ -201,7 +207,7 @@ namespace ds {
 		void recalculate_normals();
 		// objects
 		void create_ring(float radius, float width, uint16_t segments);
-		void create_cylinder(float radius, float height, uint16_t segments);
+		void create_cylinder(const v3& pos, float bottomRadius, float topRadius, float height, uint16_t segments, const Color& clr = Color::WHITE);
 		uint16_t create_torus(const v3& position,float radius, float width, float depth, uint16_t segments);
 		void create_grid(const v2& size, int stepsX, int stepsY);
 		void create_sphere(float radius, int segments, int stacks);
@@ -226,10 +232,8 @@ namespace ds {
 		void clear_selection();
 		void show_edges(uint16_t face_index);
 		
-		void save_bin(const char* fileName);
 		void save_text(const char* fileName);
 		void save_mesh(const char* fileName);
-		void load_bin(const char* fileName);
 		void load_text(const char* fileName);
 	private:
 		void executeOpcodes(const Array<MeshGenOpcode>& opcodes, const DataStore& store);

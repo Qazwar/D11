@@ -100,7 +100,7 @@ namespace ds {
 	// MeshBuffer
 	// ------------------------------------------------------
 	MeshBuffer::MeshBuffer(const MeshBufferDescriptor& descriptor) : _descriptor(descriptor) {
-		_lightPos = v3(0.2f, 0.5f, -1.0f);
+		_lightPos = v3(0.25f, 0.5f, -0.5f);
 		_size = descriptor.size;
 		_diffuseColor = Color::WHITE;
 		_buffer.more = 1.0f;
