@@ -164,22 +164,22 @@ namespace ds {
 
 	void FPSCamera::update(float elapsedTime) {
 		if (input::getKeyState('W')) {
-			move(10.0f*elapsedTime);
+			move(5.0f*elapsedTime);
 		}
 		if (input::getKeyState('S')) {
-			move(-10.0f*elapsedTime);
+			move(-5.0f*elapsedTime);
 		}
 		if (input::getKeyState('A')) {
-			strafe(-10.0f*elapsedTime);
+			strafe(-5.0f*elapsedTime);
 		}
 		if (input::getKeyState('D')) {
-			strafe(10.0f*elapsedTime);
+			strafe(5.0f*elapsedTime);
 		}
 		if (input::getKeyState('Q')) {
-			up(10.0f*elapsedTime);
+			up(5.0f*elapsedTime);
 		}
 		if (input::getKeyState('E')) {
-			up(-10.0f*elapsedTime);
+			up(-5.0f*elapsedTime);
 		}
 		v2 mp = input::getMousePosition();
 		if (input::isMouseButtonPressed(0)) {

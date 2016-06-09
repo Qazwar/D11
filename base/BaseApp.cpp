@@ -289,9 +289,9 @@ namespace ds {
 				if (_running) {
 					{
 						ZoneTracker u2("UPDATE::main");
-						update(_dt);
+						update(elapsed);
 					}
-					_stateMachine->update(_dt);
+					_stateMachine->update(elapsed);
 				}
 				//_accu -= _dt;
 				_updated = true;
