@@ -13,6 +13,13 @@ namespace ds {
 		IMMEDIATE
 	};
 
+	struct StaticMesh {
+		ID id;
+		uint32_t index;
+		uint32_t size;
+		AABBox boundingBox;
+	};
+
 	struct Entity {
 		ID id;
 		Mesh* mesh;
@@ -27,6 +34,7 @@ namespace ds {
 		Color color;
 		int value;
 		DrawMode mode;
+		int staticIndex;
 	};
 
 	typedef DataArray<Entity> EntityList;
@@ -38,6 +46,7 @@ namespace ds {
 		~Scene();
 		ID add(const char* meshName, const v3& position, DrawMode mode = IMMEDIATE);
 		ID add(Mesh* mesh, const v3& position, DrawMode mode = IMMEDIATE);
+		ID addStatic(Mesh* mesh, const v3& position);
 		void attach(ID child, ID parent);
 		Entity& get(ID id);
 		const Entity& get(ID id) const;
@@ -46,11 +55,16 @@ namespace ds {
 		int find(int type, ID* ids, int max);
 		void transform();
 		ID intersects(const Ray& ray);
+		uint32_t numEntities() const {
+			return _entities.numObjects;
+		}
 	private:
 		EntityList _entities;
 		MeshBuffer* _meshBuffer;
 		Camera* _camera;
 		bool _depthEnabled;
+		Array<PNTCVertex> _staticVertices;
+		Array<StaticMesh> _staticMeshes;
 	};
 
 }

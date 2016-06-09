@@ -41,6 +41,37 @@ namespace ds {
 	}
 
 	// ------------------------------------
+	// add entity
+	// ------------------------------------
+	ID Scene::addStatic(Mesh* mesh, const v3& position) {
+		ID id = _entities.add();
+		Entity& e = _entities.get(id);
+		e.mesh = mesh;
+		e.position = position;
+		e.scale = v3(1, 1, 1);
+		e.rotation = v3(0, 0, 0);
+		e.timer = 0.0f;
+		e.active = true;
+		e.type = -1;
+		e.world = matrix::mat4Transform(position);
+		e.parent = INVALID_ID;
+		e.value = 0;
+		e.mode = STATIC;
+		e.staticIndex = _staticMeshes.size();
+		StaticMesh sm;
+		sm.id = e.id;
+		sm.index = _staticVertices.size();
+		sm.size = mesh->vertices.size();
+		for (int i = 0; i < mesh->vertices.size(); ++i) {
+			PNTCVertex v = mesh->vertices[i];
+			v.position = e.world * v.position;
+			_staticVertices.push_back(v);
+		}
+		_staticMeshes.push_back(sm);
+		return id;
+	}
+
+	// ------------------------------------
 	// attach
 	// ------------------------------------
 	void Scene::attach(ID child, ID parent)	{
@@ -54,6 +85,7 @@ namespace ds {
 	// draw
 	// ------------------------------------
 	void Scene::draw() {
+		ZoneTracker z("Scene::draw");
 		graphics::setCamera(_camera);
 		if (_depthEnabled) {
 			graphics::turnOnZBuffer();
@@ -70,7 +102,11 @@ namespace ds {
 					_meshBuffer->drawImmediate(e.mesh, e.world, e.scale, e.rotation, e.color);
 				}
 				else if (e.mode == DrawMode::TRANSFORM) {
-					_meshBuffer->add(e.mesh, e.position, e.scale, e.rotation);
+					_meshBuffer->add(e.mesh, e.world,e.color);
+				}
+				else if (e.mode == DrawMode::STATIC) {
+					const StaticMesh& sm = _staticMeshes[e.staticIndex];
+					_meshBuffer->add(_staticVertices.data() + sm.index,sm.size);
 				}
 			}
 		}
@@ -95,6 +131,7 @@ namespace ds {
 	// transform
 	// ------------------------------------
 	void Scene::transform() {
+		ZoneTracker z("Scene::transform");
 		for (EntityList::iterator it = _entities.begin(); it != _entities.end(); ++it) {
 			Entity& e = (*it);
 			if (e.parent == INVALID_ID) {

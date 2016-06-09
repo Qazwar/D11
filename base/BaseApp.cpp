@@ -9,6 +9,7 @@
 #include "InputSystem.h"
 #include <strsafe.h>
 #include "..\data\DynamicSettings.h"
+#include "..\stats\DrawCounter.h"
 
 void ErrorExit(LPTSTR lpszFunction)
 {
@@ -59,6 +60,7 @@ namespace ds {
 		repository::initialize(repository::RM_DEBUG);
 		_stateMachine = new GameStateMachine;
 		events::init();
+		gDrawCounter = new DrawCounter;
 		JSONReader reader;
 		bool ret = reader.parse("content\\engine_settings.json");
 		assert(ret);
@@ -88,6 +90,7 @@ namespace ds {
 		events::shutdown();
 		input::shutdown();
 		res::shutdown();
+		delete gDrawCounter;
 		delete _stateMachine;
 		delete gStringBuffer;		
 		graphics::shutdown();
@@ -154,6 +157,7 @@ namespace ds {
 
 	void BaseApp::buildFrame() {
 		if (_alive) {
+			gDrawCounter->reset();
 			perf::reset();
 			events::reset();
 			tick();
@@ -176,9 +180,10 @@ namespace ds {
 				char filename[255];
 				sprintf_s(filename, "%s%s.html", _settings.reportingDirectory, timeFormat);
 				ReportWriter rw(filename);
+				gDrawCounter->save(rw);
 				perf::save(rw);
 				res::save(rw);
-				gDefaultMemory->save(rw);
+				gDefaultMemory->save(rw);				
 				_createReport = false;
 			}
 		}
@@ -280,7 +285,7 @@ namespace ds {
 		perf::tickFPS(elapsed);
 		{
 			ZoneTracker u1("UPDATE");
-			while (_accu >= _dt) {
+			//while (_accu >= _dt) {
 				if (_running) {
 					{
 						ZoneTracker u2("UPDATE::main");
@@ -288,9 +293,9 @@ namespace ds {
 					}
 					_stateMachine->update(_dt);
 				}
-				_accu -= _dt;
+				//_accu -= _dt;
 				_updated = true;
-			}
+			//}
 		}
 		
 	}

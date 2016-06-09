@@ -52,8 +52,11 @@ namespace ds {
 		void drawImmediate(Mesh* mesh, const mat4& world, const v3& scale = v3(1, 1, 1), const v3& rotation = v3(0, 0, 0), const Color& color = Color(255, 255, 255, 255));
 		void add(const v3& position, const v3& normal, const v2& uv, const Color& color = Color(255, 255, 255, 255));
 		void add(const PNTCVertex& v);
+		void add(Mesh* mesh);
+		void add(PNTCVertex* vertices,int num);
 		void add(Mesh* mesh, const v3& position, const v3& scale = v3(1, 1, 1), const v3& rotation = v3(0, 0, 0), const Color& color = Color(255, 255, 255, 255));
 		void add(Mesh* mesh, const mat4& world, const v3& scale = v3(1, 1, 1), const v3& rotation = v3(0, 0, 0), const Color& color = Color(255, 255, 255, 255));
+		void add(Mesh* mesh, const mat4& world, const Color& color = Color(255, 255, 255, 255));
 		void add(Mesh* mesh, const v3& position, const Color& color, const v3& scale = v3(1, 1, 1), const v3& rotation = v3(0, 0, 0));
 		void begin();
 		void end();
@@ -68,7 +71,9 @@ namespace ds {
 		uint32_t _size;
 		MeshBufferDescriptor _descriptor;
 		v3 _lightPos;
-		Array<PNTCVertex> _vertices;
+		//Array<PNTCVertex> _vertices;
+		PNTCVertex* _vertices;
+		uint32_t _index;
 		PNTCConstantBuffer _buffer;
 		Color _diffuseColor;
 	};

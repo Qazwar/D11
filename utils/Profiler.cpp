@@ -155,6 +155,7 @@ namespace perf {
 		QueryPerformanceCounter(&event.started);
 		event.ident = zoneTrackerCtx->ident++;
 		event.hash = ds::string::murmur_hash(name);
+		event.duration = -1.0f;
 		int idx = findHash(event.hash);
 		if (idx == -1) {
 			event.name_index = zoneTrackerCtx->names.size;
@@ -174,6 +175,7 @@ namespace perf {
 	}
 
 	void end(int index) {
+
 		ZoneTrackerEvent& event = zoneTrackerCtx->events[index];
 		LARGE_INTEGER EndingTime;
 		QueryPerformanceCounter(&EndingTime);

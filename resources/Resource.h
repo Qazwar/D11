@@ -41,25 +41,35 @@ namespace ds {
 	class InputLayoutResource : public AbstractResource<ID3D11InputLayout*> {
 
 	public:
-		InputLayoutResource(ID3D11InputLayout* t) : AbstractResource(t) {}
+		InputLayoutResource(ID3D11InputLayout* t,int size) : AbstractResource(t) , _size(size) {}
 		virtual ~InputLayoutResource() {
 			if (_data != 0) {
 				_data->Release();
 				_data = 0;
 			}
 		}
+		int size() const {
+			return _size;
+		}
+	private:
+		int _size;
 	};
 
 	class VertexBufferResource : public AbstractResource<ID3D11Buffer*> {
 
 	public:
-		VertexBufferResource(ID3D11Buffer* t) : AbstractResource(t) {}
+		VertexBufferResource(ID3D11Buffer* t,int size) : AbstractResource(t) , _size(size) {}
 		virtual ~VertexBufferResource() {
 			if (_data != 0) {
 				_data->Release();
 				_data = 0;
 			}
 		}
+		int size() const {
+			return _size;
+		}
+	private:
+		int _size;
 	};
 
 	class BitmapfontResource : public AbstractResource<Bitmapfont*> {

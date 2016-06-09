@@ -421,6 +421,7 @@ namespace graphics {
 	// map data to vertex buffer
 	// ------------------------------------------------------
 	void mapData(RID rid, void* data, uint32_t size) {
+		
 		ID3D11Buffer* buffer = ds::res::getVertexBuffer(rid);
 		D3D11_MAPPED_SUBRESOURCE resource;
 		HRESULT hResult = _context->d3dContext->Map(buffer, 0,D3D11_MAP_WRITE_DISCARD, 0, &resource);

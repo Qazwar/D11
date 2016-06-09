@@ -665,6 +665,13 @@ namespace ds {
 		static RID createVertexBuffer(const char* name, const VertexBufferDescriptor& descriptor) {
 			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
 			assert(ri.type == ResourceType::UNKNOWN);
+			
+
+			const ResourceIndex& lyt_idx = _resCtx->resourceTable[descriptor.layout];
+			assert(lyt_idx.type == ResourceType::INPUTLAYOUT);
+			InputLayoutResource* res = static_cast<InputLayoutResource*>(_resCtx->resources[lyt_idx.index]);
+			UINT size = descriptor.size * res->size();
+
 			D3D11_BUFFER_DESC bufferDesciption;
 			ZeroMemory(&bufferDesciption, sizeof(bufferDesciption));
 			if (descriptor.dynamic) {
@@ -676,7 +683,7 @@ namespace ds {
 				bufferDesciption.CPUAccessFlags = 0;
 			}
 			bufferDesciption.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-			bufferDesciption.ByteWidth = descriptor.size;
+			bufferDesciption.ByteWidth = size;
 
 			ID3D11Buffer* buffer = 0;
 			HRESULT d3dResult = _resCtx->device->CreateBuffer(&bufferDesciption, 0, &buffer);
@@ -685,7 +692,7 @@ namespace ds {
 				return -1;
 			}
 			int idx = _resCtx->resources.size();
-			VertexBufferResource* cbr = new VertexBufferResource(buffer);
+			VertexBufferResource* cbr = new VertexBufferResource(buffer, size);
 			_resCtx->resources.push_back(cbr);
 			IdString hash = string::murmur_hash(name);
 			ri.index = idx;
@@ -694,6 +701,7 @@ namespace ds {
 			_resCtx->nameBuffer.append(name);
 			ri.type = ResourceType::VERTEXBUFFER;
 			_resCtx->lookup[hash] = ri;
+			LOG << "VertexBuffer '" << name << "' id: " << ri.id << " size: " << size;
 			return ri.id;
 		}
 
@@ -706,7 +714,7 @@ namespace ds {
 			int idx = _resCtx->resources.size();
 			D3D11_INPUT_ELEMENT_DESC* descriptors = new D3D11_INPUT_ELEMENT_DESC[descriptor.num];
 			uint32_t index = 0;
-			uint32_t counter = 0;
+			uint32_t counter = 0;			
 			int si[8] = { 0 };
 			for (int i = 0; i < descriptor.num; ++i) {
 				const InputElementDescriptor& d = INPUT_ELEMENT_DESCRIPTIONS[descriptor.indices[i]];
@@ -733,7 +741,7 @@ namespace ds {
 				return INVALID_RID;
 			}
 			delete[] descriptors;
-			InputLayoutResource* ilr = new InputLayoutResource(layout);
+			InputLayoutResource* ilr = new InputLayoutResource(layout,index);
 			_resCtx->resources.push_back(ilr);
 			ri.index = idx;
 			ri.id = descriptor.id;

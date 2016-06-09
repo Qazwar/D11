@@ -7,6 +7,7 @@
 #include "..\utils\Log.h"
 #include "..\utils\Profiler.h"
 #include "..\io\BinaryFile.h"
+#include "..\stats\DrawCounter.h"
 
 namespace ds {
 
@@ -42,7 +43,8 @@ namespace ds {
 				add(p, n, uv, color);
 			}
 			fclose(f);
-			buildBoundingBox();
+			LOG << "mesh '" << fileName << "' loaded - entries: " << vertices.size();
+			buildBoundingBox();			
 		}
 	}
 
@@ -93,7 +95,7 @@ namespace ds {
 			}
 			boundingBox.extent = e;
 		}
-		LOG << "center: " << DBG_V3(boundingBox.position) << " extent: " << DBG_V3(boundingBox.extent);
+		LOG << "AABBox - center: " << DBG_V3(boundingBox.position) << " extent: " << DBG_V3(boundingBox.extent);
 	}
 	
 	// ------------------------------------------------------
@@ -107,43 +109,61 @@ namespace ds {
 		_buffer.tmp = 1.0f;
 		_buffer.diffuseColor = _diffuseColor;
 		_buffer.lightPos = _lightPos;
+		_vertices = new PNTCVertex[_size];
 	}
 
 	MeshBuffer::~MeshBuffer() {
+		delete[] _vertices;
 	}
 
 	// ------------------------------------------------------
 	// add vertex
 	// ------------------------------------------------------
 	void MeshBuffer::add(const v3& position, const v3& normal, const v2& uv, const Color& color) {
-		if (_vertices.size() + 1 > _size) {
+		if (_index + 1 > _size) {
 			flush();
 		}
-		_vertices.push_back(PNTCVertex(position, normal, uv, color));
+		//_vertices.push_back(PNTCVertex(position, normal, uv, color));
+		_vertices[_index++] = PNTCVertex(position, normal, uv, color);
 	}
 
 	// ------------------------------------------------------
 	// add vertex
 	// ------------------------------------------------------
 	void MeshBuffer::add(const PNTCVertex& v) {
-		if (_vertices.size() + 1 >= _size) {
+		if (_index + 1 >= _size) {
 			flush();
 		}
-		_vertices.push_back(v);
+		_vertices[_index++] = v;
+		//_vertices.push_back(v);
 	}
 
 	// ------------------------------------------------------
 	// add mesh
 	// ------------------------------------------------------
 	void MeshBuffer::add(Mesh* mesh, const v3& position, const v3& scale, const v3& rotation, const Color& color) {
+		ZoneTracker z("MeshBuffer::addMesh3");
 		mat4 w = matrix::mat4Transform(position);
 		add(mesh, w, scale, rotation, color);
+	}
+
+	void MeshBuffer::add(Mesh* mesh, const mat4& world, const Color& color) {
+		ZoneTracker z("MeshBuffer::addMesh4");
+		for (int i = 0; i < mesh->vertices.size(); ++i) {
+			const PNTCVertex& v = mesh->vertices[i];
+			v3 p = world * v.position;
+			//v3 n = world * v.normal;
+			// FIXME: we need to rotate normal!!!
+			v3 n = v.normal;
+			add(p, n, v.texture, v.color * color);
+		}
 	}
 
 	// ------------------------------------------------------
 	// add mesh
 	// ------------------------------------------------------
 	void MeshBuffer::add(Mesh* mesh, const mat4& world, const v3& scale, const v3& rotation, const Color& color) {
+		ZoneTracker z("MeshBuffer::addMesh2");
 		mat4 rotY = matrix::mat4RotationY(rotation.y);
 		mat4 rotX = matrix::mat4RotationX(rotation.x);
 		mat4 rotZ = matrix::mat4RotationZ(rotation.z);
@@ -162,7 +182,33 @@ namespace ds {
 	// ------------------------------------------------------
 	// add mesh
 	// ------------------------------------------------------
+	void MeshBuffer::add(Mesh* mesh) {
+		ZoneTracker z("MeshBuffer::addMesh");
+		for (int i = 0; i < mesh->vertices.size(); ++i) {
+			add(mesh->vertices[i]);
+		}
+	}
+
+	// ------------------------------------------------------
+	// add mesh
+	// ------------------------------------------------------
+	void MeshBuffer::add(PNTCVertex* vertices,int size) {
+		ZoneTracker z("MeshBuffer::addMesh5");
+		if (_index + size >= _size) {
+			flush();
+		}
+		memcpy(_vertices + _index, vertices, size * sizeof(PNTCVertex));
+		_index += size;
+		//for (int i = 0; i < mesh->vertices.size(); ++i) {
+			//add(mesh->vertices[i]);
+		//}
+	}
+
+	// ------------------------------------------------------
+	// add mesh
+	// ------------------------------------------------------
 	void MeshBuffer::add(Mesh* mesh, const v3& position, const Color& color, const v3& scale, const v3& rotation) {
+		ZoneTracker z("MeshBuffer::addMesh1");
 		mat4 rotY = matrix::mat4RotationY(rotation.y);
 		mat4 rotX = matrix::mat4RotationX(rotation.x);
 		mat4 rotZ = matrix::mat4RotationZ(rotation.z);
@@ -182,14 +228,16 @@ namespace ds {
 	// begin
 	// ------------------------------------------------------
 	void MeshBuffer::begin() {
-		_vertices.clear();
+		//_vertices.clear();
+		_index = 0;
 	}
 
 	// ------------------------------------------------------
 	// end
 	// ------------------------------------------------------
 	void MeshBuffer::end() {
-		if (_vertices.size() > 0) {
+		//if (_vertices.size() > 0) {
+		if (_index > 0) {
 			flush();
 		}
 	}
@@ -205,10 +253,9 @@ namespace ds {
 	// ------------------------------------------------------
 	// draw immediately
 	// ------------------------------------------------------
-	void MeshBuffer::drawImmediate(Mesh* mesh, const mat4& world, const v3& scale, const v3& rotation, const Color& color) {
-		ZoneTracker("Mesh::drawImmediate");
+	void MeshBuffer::drawImmediate(Mesh* mesh, const mat4& world, const v3& scale, const v3& rotation, const Color& color) {		
 		flush();
-
+		ZoneTracker("Mesh::drawImmediate");
 		mat4 w = matrix::m4identity();
 		mat4 rotY = matrix::mat4RotationY(rotation.y);
 		mat4 rotX = matrix::mat4RotationX(rotation.x);
@@ -240,13 +287,15 @@ namespace ds {
 		graphics::setVertexShaderConstantBuffer(_descriptor.constantBuffer);
 		//graphics::setPixelShaderConstantBuffer(_descriptor.constantBuffer);
 		graphics::drawIndexed(mesh->vertices.size() / 4 * 6);
+		++gDrawCounter->flushes;
+		gDrawCounter->vertices += mesh->vertices.size();
 	}
 
 	// ------------------------------------------------------
 	// flush
 	// ------------------------------------------------------
 	void MeshBuffer::flush() {
-		if (!_vertices.empty()) {
+		if (_index > 0) {
 			ZoneTracker("Mesh::flush");
 
 			mat4 world = matrix::m4identity();
@@ -269,12 +318,15 @@ namespace ds {
 			_buffer.cameraPos = camera->getPosition();
 			_buffer.lightPos = _lightPos;
 			_buffer.diffuseColor = _diffuseColor;
-			graphics::mapData(_descriptor.vertexBuffer, _vertices.data(), _vertices.size() * sizeof(PNTCVertex));
+			//graphics::mapData(_descriptor.vertexBuffer, _vertices.data(), _vertices.size() * sizeof(PNTCVertex));
+			graphics::mapData(_descriptor.vertexBuffer, _vertices, _index * sizeof(PNTCVertex));
 
 			graphics::updateConstantBuffer(_descriptor.constantBuffer, &_buffer, sizeof(PNTCConstantBuffer));
 			graphics::setVertexShaderConstantBuffer(_descriptor.constantBuffer);
-			graphics::drawIndexed(_vertices.size() / 4 * 6);
-			_vertices.clear();
+			graphics::drawIndexed(_index / 4 * 6);
+			++gDrawCounter->flushes;
+			gDrawCounter->vertices += _index;
+			_index = 0;			
 		}
 	}
 
