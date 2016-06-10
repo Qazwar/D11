@@ -243,6 +243,15 @@ namespace ds {
 			return cnt;
 		}
 
+		bool contains(const T& t) const {
+			for (uint32_t i = 0; i < _size; ++i) {
+				if (_items[i] == t) {
+					return true;
+				}
+			}
+			return false;
+		}
+
 		uint32_t size() const {
 			return _size;
 		}
