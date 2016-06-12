@@ -56,7 +56,7 @@ namespace ds {
 	// --------------------------------------------
 	// Opcode definitions
 	// --------------------------------------------
-	const int OPCODE_MAPPING_COUNT = 17;
+	const int OPCODE_MAPPING_COUNT = 19;
 
 	const OpcodeDefinition OPCODE_MAPPING[] = {
 		{ gen::OpcodeType::ADD_CUBE, "add_cube", 2, OCDataTypes::VEC3, OCDataTypes::VEC3 },
@@ -76,6 +76,8 @@ namespace ds {
 		{ gen::OpcodeType::ADD_COLOR_CUBE, "add_color_cube", 3, OCDataTypes::VEC3, OCDataTypes::VEC3, OCDataTypes::COLOR },
 		{ gen::OpcodeType::ADD_CYLINDER, "add_cylinder", 5, OCDataTypes::VEC3, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::INT },
 		{ gen::OpcodeType::ADD_COL_CYLINDER, "add_col_cylinder", 6, OCDataTypes::VEC3, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::INT , OCDataTypes::COLOR },
+		{ gen::OpcodeType::MOVE_VERTEX, "move_vertex", 2, OCDataTypes::INT, OCDataTypes::VEC3},
+		{ gen::OpcodeType::ADD_HEXAGON, "add_hexagon", 1, OCDataTypes::FLOAT },
 	};
 
 	const OpcodeDefinition UNKNOWN_DEFINITION = OpcodeDefinition(gen::OpcodeType::UNKNOWN, "UNKNOWN");
@@ -323,7 +325,7 @@ namespace ds {
 				int idx = f.edge;
 				for (int j = 0; j < 4; ++j) {
 					Edge& e = _edges[idx];
-					LOG << "edge: " << idx << " v: " << e.vert_index << " next: " << e.next << " prev: " << e.prev << " pos: " << DBG_V3(_vertices[e.vert_index]);
+					LOG << "edge: " << idx << " v: " << e.vert_index << " next: " << e.next << " prev: " << e.prev << " vertex (" << e.vert_index<< ") : " << DBG_V3(_vertices[e.vert_index]);
 					idx = e.next;
 				}
 			}
@@ -348,7 +350,7 @@ namespace ds {
 
 		void MeshGen::debug_edge(uint16_t edgeIndex) {
 			Edge& e = _edges[edgeIndex];
-			LOG << "edge: " << edgeIndex << " v: " << e.vert_index << " next: " << e.next << " prev: " << e.prev << " pos: " << DBG_V3(_vertices[e.vert_index]);
+			LOG << "edge: " << edgeIndex << " v: " << e.vert_index << " next: " << e.next << " prev: " << e.prev << " vertex (" << e.vert_index << ") : " << DBG_V3(_vertices[e.vert_index]);
 		}
 
 		// ----------------------------------------------
@@ -639,6 +641,22 @@ namespace ds {
 		// ----------------------------------------------
 		int MeshGen::num_faces() const {
 			return _faces.size();
+		}
+
+		// ----------------------------------------------
+		// move vertex
+		// ----------------------------------------------
+		void MeshGen::move_vertex(uint16_t vert_index, const v3& position) {
+			uint16_t connections[16];
+			int num = find_vertices(_vertices[vert_index], connections, 16);
+			for (int j = 0; j < num; ++j) {
+				_vertices[connections[j]] += position;
+			}
+			MeshGenOpcode op;
+			op.type = OpcodeType::MOVE_VERTEX;
+			op.offset = _store.add_data(vert_index);
+			_store.add_data(position);
+			record(op);
 		}
 
 		// ----------------------------------------------
@@ -1355,6 +1373,21 @@ namespace ds {
 				}
 				case OpcodeType::DEBUG_COLORS: {
 					debug_colors();
+					break;
+				}
+				case OpcodeType::MOVE_VERTEX: {
+					uint16_t vert_index;
+					v3 p;
+					store.get_data(op, 0, &vert_index);
+					store.get_data(op, 1, &p);
+					move_vertex(vert_index, p);
+					break;
+				}
+				case OpcodeType::ADD_HEXAGON: {
+					float radius;
+					store.get_data(op, 0, &radius);
+					create_hexagon(radius);
+					break;
 				}
 				}
 			}
@@ -1421,11 +1454,17 @@ namespace ds {
 							++cnt;
 						}
 						// check args
+						bool valid = true;
 						const OpcodeDefinition& def = find_opcode(oc.type);
-						if (vars != def.var_count) {
-							LOGE << "Missing argument - opcode: " << name << " required: " << def.var_count << " but got: " << vars;
+						if (def.type == OpcodeType::UNKNOWN) {
+							LOGE << "Unknown opcode: " << name;
+							valid = false;
 						}
-						else {
+						if (valid && vars != def.var_count) {
+							LOGE << "Missing argument - opcode: " << name << " required: " << def.var_count << " but got: " << vars;
+							valid = false;
+						}
+						if ( valid) {
 							tmp_opcodes.push_back(oc);
 						}
 					}
@@ -1528,6 +1567,24 @@ namespace ds {
 			}
 		}
 
+		void MeshGen::create_hexagon(float radius) {
+			v3 p[6];
+			for (int i = 0; i < 6; ++i) {
+				float angle = DEGTORAD(static_cast<float>(i) * 60.0f);
+				p[i] = v3(radius*cos(angle), 0.0f, radius*sin(angle));
+			}
+			v3 pp[4];
+			pp[0] = p[3];
+			pp[1] = p[2];
+			pp[2] = p[1];
+			pp[3] = p[0];
+			add_face(pp);
+			pp[0] = p[3];
+			pp[1] = p[0];
+			pp[2] = p[5];
+			pp[3] = p[4];
+			add_face(pp);
+		}
 		// ----------------------------------------------
 		// create ring
 		// ----------------------------------------------

@@ -134,12 +134,14 @@ namespace ds {
 		ZoneTracker z("Scene::transform");
 		for (EntityList::iterator it = _entities.begin(); it != _entities.end(); ++it) {
 			Entity& e = (*it);
-			if (e.parent == INVALID_ID) {
-				e.world = matrix::mat4Transform(e.position);
-			}
-			else {
-				const Entity& parent = _entities.get(e.parent);
-				e.world = matrix::mat4Transform(e.position) * parent.world;
+			if (e.mode != DrawMode::STATIC) {
+				if (e.parent == INVALID_ID) {
+					e.world = matrix::mat4Transform(e.position);
+				}
+				else {
+					const Entity& parent = _entities.get(e.parent);
+					e.world = matrix::mat4Transform(e.position) * parent.world;
+				}
 			}
 		}
 	}

@@ -74,6 +74,9 @@ namespace ds {
 		ADD_COLOR_CUBE,
 		ADD_CYLINDER,
 		ADD_COL_CYLINDER,
+		MOVE_VERTEX,
+		EXTRUDE_EDGE,
+		ADD_HEXAGON,
 		UNKNOWN
 	};
 
@@ -188,6 +191,7 @@ namespace ds {
 		uint16_t add_face(const v3& p0, const v3& p1, const v3& p2, const v3& p3);
 		void add_face(const v3& position, const v2& size, const v3& normal);
 		void subdivide(uint16_t face_index);
+		void move_vertex(uint16_t vert_index, const v3& position);
 		void move_edge(uint16_t edgeIndex, const v3& position);
 		void move_face(uint16_t faceIndex, const v3& position);
 		void texture_face(uint16_t faceIndex, const Texture& t);
@@ -207,6 +211,7 @@ namespace ds {
 		void recalculate_normals();
 		// objects
 		void create_ring(float radius, float width, uint16_t segments);
+		void create_hexagon(float radius);
 		void create_cylinder(const v3& pos, float bottomRadius, float topRadius, float height, uint16_t segments, const Color& clr = Color::WHITE);
 		uint16_t create_torus(const v3& position,float radius, float width, float depth, uint16_t segments);
 		void create_grid(const v2& size, int stepsX, int stepsY);
