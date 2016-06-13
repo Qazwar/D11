@@ -494,7 +494,7 @@ namespace ds {
 			}
 			f.selected = false;
 			f.edge = idx;
-			f.color = Color::WHITE;
+			f.color = _selectedColor;
 			f.group = _currentGroup;
 			calculate_normal(&f);
 			uint16_t fi = _faces.size();
@@ -1457,7 +1457,7 @@ namespace ds {
 					store.get_data(op, 4, &top);
 					store.get_data(op, 5, &height);
 					store.get_data(op, 6, &segments);
-					create_cylinder(p, bottom, top, height, segments);
+					create_cylinder(p, bottom, top, height, segments, _selectedColor);
 					break;
 				}
 				case OpcodeType::ADD_COL_CYLINDER: {
