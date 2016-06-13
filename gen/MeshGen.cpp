@@ -56,7 +56,7 @@ namespace ds {
 	// --------------------------------------------
 	// Opcode definitions
 	// --------------------------------------------
-	const int OPCODE_MAPPING_COUNT = 19;
+	const int OPCODE_MAPPING_COUNT = 28;
 
 	const OpcodeDefinition OPCODE_MAPPING[] = {
 		{ gen::OpcodeType::ADD_CUBE, "add_cube", 2, OCDataTypes::VEC3, OCDataTypes::VEC3 },
@@ -78,6 +78,15 @@ namespace ds {
 		{ gen::OpcodeType::ADD_COL_CYLINDER, "add_col_cylinder", 6, OCDataTypes::VEC3, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::INT , OCDataTypes::COLOR },
 		{ gen::OpcodeType::MOVE_VERTEX, "move_vertex", 2, OCDataTypes::INT, OCDataTypes::VEC3},
 		{ gen::OpcodeType::ADD_HEXAGON, "add_hexagon", 1, OCDataTypes::FLOAT },
+		{ gen::OpcodeType::MOVE_FACE, "move_face", 2, OCDataTypes::INT, OCDataTypes::VEC3 },
+		{ gen::OpcodeType::EXTRUDE_EDGE_NORMAL, "extrude_edge_normal", 2, OCDataTypes::INT, OCDataTypes::FLOAT},
+		{ gen::OpcodeType::ADD_RING, "add_ring", 3, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::INT },
+		{ gen::OpcodeType::SELECT_COLOR, "select_color", 1, OCDataTypes::COLOR },
+		{ gen::OpcodeType::START_GROUP, "start_group", 0},
+		{ gen::OpcodeType::END_GROUP, "end_group", 0 },
+		{ gen::OpcodeType::ROTATE_GROUP, "rotate_group", 2, OCDataTypes::INT, OCDataTypes::VEC3 },
+		{ gen::OpcodeType::MOVE_GROUP, "move_group", 2, OCDataTypes::INT, OCDataTypes::VEC3 },
+		{ gen::OpcodeType::COPY_GROUP, "copy_group", 2, OCDataTypes::INT, OCDataTypes::VEC3 },
 	};
 
 	const OpcodeDefinition UNKNOWN_DEFINITION = OpcodeDefinition(gen::OpcodeType::UNKNOWN, "UNKNOWN");
@@ -186,7 +195,7 @@ namespace ds {
 
 	namespace gen {
 
-		MeshGen::MeshGen() : _selectionColor(Color(192,192,192,255)) {}
+		MeshGen::MeshGen() : _selectionColor(Color(192, 192, 192, 255)), _selectedColor(Color::WHITE), _currentGroup(-1) , _groupCounter(0) {}
 
 		MeshGen::~MeshGen() {}
 
@@ -320,7 +329,7 @@ namespace ds {
 			LOG << "faces: " << _faces.size();
 			for (uint32_t i = 0; i < _faces.size(); ++i) {
 				const Face& f = _faces[i];
-				LOG << "=> edge: " << f.edge << " normal: " << DBG_V3(f.n) << " color: " << DBG_CLR(f.color);
+				LOG << "=> edge: " << f.edge << " normal: " << DBG_V3(f.n) << " color: " << DBG_CLR(f.color) << " group: " << f.group;
 				const Edge& e = _edges[f.edge];
 				int idx = f.edge;
 				for (int j = 0; j < 4; ++j) {
@@ -334,7 +343,7 @@ namespace ds {
 		void MeshGen::debug_face(uint16_t face_index) {
 			if (face_index < _faces.size()) {
 				const Face& f = _faces[face_index];
-				LOG << "=> Face: " << face_index << " edge: " << f.edge << " normal: " << DBG_V3(f.n) << " color: " << DBG_CLR(f.color);
+				LOG << "=> Face: " << face_index << " edge: " << f.edge << " normal: " << DBG_V3(f.n) << " color: " << DBG_CLR(f.color) << " group: " << f.group;
 				const Edge& e = _edges[f.edge];
 				int idx = f.edge;
 				for (int j = 0; j < 4; ++j) {
@@ -389,6 +398,23 @@ namespace ds {
 			p[1] = p[0] + pos;
 			p[2] = _vertices[e1.vert_index] + pos;
 			p[3] = _vertices[e1.vert_index];
+			return add_face(p);
+		}
+
+		// ----------------------------------------------
+		// extrude edge along normal by factor
+		// ----------------------------------------------
+		uint16_t MeshGen::extrude_edge(uint16_t edgeIndex, float factor) {
+			const Edge& e0 = _edges[edgeIndex];
+			const Edge& e1 = _edges[e0.next];
+			v3 c = get_center(e0.face_index);
+			v3 ce = (_vertices[e0.vert_index] + _vertices[e1.vert_index]) / 2.0f;
+			v3 n = normalize(ce - c);
+			v3 p[4];
+			p[0] = _vertices[e0.vert_index] + n * factor;
+			p[1] = _vertices[e1.vert_index] + n * factor;
+			p[2] = _vertices[e1.vert_index];
+			p[3] = _vertices[e0.vert_index];
 			return add_face(p);
 		}
 
@@ -469,6 +495,7 @@ namespace ds {
 			f.selected = false;
 			f.edge = idx;
 			f.color = Color::WHITE;
+			f.group = _currentGroup;
 			calculate_normal(&f);
 			uint16_t fi = _faces.size();
 			_faces.push_back(f);			
@@ -568,7 +595,9 @@ namespace ds {
 			op.offset = _store.add_data(edge0);
 			_store.add_data(edge1);
 			record(op);
-			return add_face(p);
+			uint16_t fi = add_face(p);
+			set_color(fi, _selectedColor);
+			return fi;
 		}
 
 		// ----------------------------------------------
@@ -686,9 +715,14 @@ namespace ds {
 		void MeshGen::move_face(uint16_t face_index, const v3& position) {
 			Face& f = _faces[face_index];
 			int ei = f.edge;
+			uint16_t connections[16];
 			for (int i = 0; i < 4; ++i) {
 				const Edge& e = _edges[ei];
-				move_edge(ei, position);
+				//move_edge(ei, position);
+				int num = find_vertices(_vertices[e.vert_index], connections, 16);
+				for (int j = 0; j < num; ++j) {
+					_vertices[connections[j]] += position;
+				}
 				ei = e.next;
 			}
 			calculate_normal(&f);
@@ -706,19 +740,20 @@ namespace ds {
 				Edge& e0 = _edges[ei];
 				Edge& e1 = _edges[e0.next];
 				v3 ce = (_vertices[e0.vert_index] + _vertices[e1.vert_index]) / 2.0f;
-				c[i] = normalize(ce - center);
-				c[i] *= length(ce - center) * scale;
+				v3 cde = ce - center;
+				if (scale > 1.0f) {
+					c[i] = cde * (1.0f - scale);
+				}
+				else {
+					c[i] = cde * -scale;
+				}
 				ei = e0.next;
 			}
 			ei = f.edge;
+			uint16_t connections[16];
 			for (int i = 0; i < 4; ++i) {
 				Edge& e0 = _edges[ei];
-				if (scale < 1.0f) {
-					move_edge(ei, -c[i]);
-				}
-				else {
-					move_edge(ei, c[i]);
-				}
+				move_edge(ei, c[i]);
 				ei = e0.next;
 			}
 		}
@@ -824,6 +859,7 @@ namespace ds {
 					p0[i] = p[indices[j * 4 + i]] + position;
 				}
 				my_faces[j] = add_face(p0);
+				set_color(my_faces[j], _selectedColor);
 			}
 			if (faces != 0) {
 				for (int i = 0; i < 6; ++i) {
@@ -964,6 +1000,64 @@ namespace ds {
 					}
 				}
 				ei = e0.next;
+			}
+		}
+
+		// ----------------------------------------------
+		// rotate group
+		// ----------------------------------------------
+		void MeshGen::rotateGroup(int group, const v3& rotation) {
+			mat4 rotY = matrix::mat4RotationY(rotation.y);
+			mat4 rotX = matrix::mat4RotationX(rotation.x);
+			mat4 rotZ = matrix::mat4RotationZ(rotation.z);
+			mat4 world = rotZ * rotY * rotX;
+			for (int i = 0; i < _faces.size(); ++i) {
+				const Face& f = _faces[i];
+				int ei = f.edge;
+				if (f.group == group) {
+					for (int j = 0; j < 4; ++j) {
+						const Edge& e = _edges[ei];
+						_vertices[e.vert_index] = _vertices[e.vert_index] * world;
+						ei = e.next;
+					}
+				}
+			}
+		}
+
+		// ----------------------------------------------
+		// copy group
+		// ----------------------------------------------
+		void MeshGen::copyGroup(int group, const v3& pos) {
+			v3 p[4];
+			for (int i = 0; i < _faces.size(); ++i) {
+				const Face& f = _faces[i];
+				int ei = f.edge;
+				if (f.group == group) {
+					for (int j = 0; j < 4; ++j) {
+						const Edge& e = _edges[ei];
+						p[j] = _vertices[e.vert_index] + pos;
+						ei = e.next;
+					}
+					uint16_t fi = add_face(p);
+					set_color(fi, f.color);
+				}
+			}
+		}
+
+		// ----------------------------------------------
+		// move group
+		// ----------------------------------------------
+		void MeshGen::moveGroup(int group, const v3& pos) {
+			for (int i = 0; i < _faces.size(); ++i) {
+				const Face& f = _faces[i];
+				int ei = f.edge;
+				if (f.group == group) {
+					for (int j = 0; j < 4; ++j) {
+						const Edge& e = _edges[ei];
+						_vertices[e.vert_index] += pos;
+						ei = e.next;
+					}
+				}
 			}
 		}
 
@@ -1180,6 +1274,8 @@ namespace ds {
 			_faces.clear();
 			_store.data.clear();
 			_opcodes.clear();
+			_groupCounter = 0;
+			_currentGroup = -1;
 		}
 
 		// ----------------------------------------------
@@ -1187,6 +1283,15 @@ namespace ds {
 		// ----------------------------------------------
 		void MeshGen::record(const MeshGenOpcode& opcode) {
 			_opcodes.push_back(opcode);
+		}
+
+		int MeshGen::startGroup() {
+			_currentGroup = _groupCounter++;
+			return _currentGroup;
+		}
+
+		void MeshGen::endGroup() {
+			_currentGroup = -1;
 		}
 
 		// ----------------------------------------------
@@ -1383,10 +1488,75 @@ namespace ds {
 					move_vertex(vert_index, p);
 					break;
 				}
+				case OpcodeType::EXTRUDE_EDGE_NORMAL: {
+					uint16_t edge_index;
+					float factor = 0.0f;
+					store.get_data(op, 0, &edge_index);
+					store.get_data(op, 1, &factor);
+					extrude_edge(edge_index, factor);
+					break;
+				}
+				case OpcodeType::MOVE_FACE: {
+					uint16_t vert_index;
+					v3 p;
+					store.get_data(op, 0, &vert_index);
+					store.get_data(op, 1, &p);
+					move_face(vert_index, p);
+					break;
+				}
 				case OpcodeType::ADD_HEXAGON: {
 					float radius;
 					store.get_data(op, 0, &radius);
 					create_hexagon(radius);
+					break;
+				}
+				case OpcodeType::SELECT_COLOR: {
+					store.get_data(op, 0, &_selectedColor);
+					break;
+				}
+				case OpcodeType::ADD_RING: {
+					float radius;
+					float width;
+					uint16_t segments;
+					store.get_data(op, 0, &radius);
+					store.get_data(op, 1, &width);
+					store.get_data(op, 2, &segments);
+					create_ring(radius, width, segments);
+					break;
+				}
+				case OpcodeType::START_GROUP: {
+					startGroup();
+					break;
+				}
+				case OpcodeType::END_GROUP: {
+					endGroup();
+					break;
+				}
+				case OpcodeType::ROTATE_GROUP: {
+					int group;
+					v3 p;
+					store.get_data(op, 0, &group);
+					store.get_data(op, 1, &p);
+					for (int i = 0; i < 3; ++i) {
+						p.data[i] = DEGTORAD(p[i]);
+					}
+					rotateGroup(group, p);
+					break;
+				}
+				case OpcodeType::MOVE_GROUP: {
+					int group;
+					v3 p;
+					store.get_data(op, 0, &group);
+					store.get_data(op, 1, &p);
+					moveGroup(group, p);
+					break;
+				}
+				case OpcodeType::COPY_GROUP: {
+					int group;
+					v3 p;
+					store.get_data(op, 0, &group);
+					store.get_data(op, 1, &p);
+					copyGroup(group, p);
 					break;
 				}
 				}
@@ -1662,11 +1832,12 @@ namespace ds {
 			float next_angle = angleStep;
 			float outer_radius = radius + width;
 			for (int i = 0; i < segments; ++i) {
-				p[0] = v3(radius * cos(next_angle), radius * sin(next_angle), 0.0f);
-				p[1] = v3(outer_radius * cos(next_angle), outer_radius * sin(next_angle), 0.0f);
-				p[2] = v3(outer_radius * cos(angle), outer_radius * sin(angle), 0.0f);
-				p[3] = v3(radius * cos(angle), radius * sin(angle), 0.0f);
-				add_face(p);
+				p[0] = v3(radius * cos(next_angle), 0.0f, radius * sin(next_angle));
+				p[1] = v3(outer_radius * cos(next_angle), 0.0f, outer_radius * sin(next_angle));
+				p[2] = v3(outer_radius * cos(angle), 0.0f, outer_radius * sin(angle));
+				p[3] = v3(radius * cos(angle), 0.0f, radius * sin(angle));
+				uint16_t fi = add_face(p);
+				set_color(fi, _selectedColor);
 				angle += angleStep;
 				next_angle += angleStep;
 			}

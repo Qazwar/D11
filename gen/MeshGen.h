@@ -54,6 +54,7 @@ namespace ds {
 		v3 n;
 		Color color;
 		bool selected;
+		int group;
 	};
 
 	enum OpcodeType {
@@ -77,6 +78,15 @@ namespace ds {
 		MOVE_VERTEX,
 		EXTRUDE_EDGE,
 		ADD_HEXAGON,
+		MOVE_FACE,
+		EXTRUDE_EDGE_NORMAL,
+		ADD_RING,
+		SELECT_COLOR,
+		START_GROUP,
+		END_GROUP,
+		ROTATE_GROUP,
+		MOVE_GROUP,
+		COPY_GROUP,
 		UNKNOWN
 	};
 
@@ -205,6 +215,7 @@ namespace ds {
 		uint16_t make_face(uint16_t* edges);
 		uint16_t combine_edges(uint16_t edge0, uint16_t edge1);
 		uint16_t extrude_edge(uint16_t edgeIndex, const v3& pos);
+		uint16_t extrude_edge(uint16_t edgeIndex, float factor);
 		uint16_t extrude_face(uint16_t faceIndex,float factor);
 		const Color& get_color(uint16_t face_index) const;
 		void debug();
@@ -236,7 +247,13 @@ namespace ds {
 		bool select_ring(uint16_t face_index, int direction);
 		void clear_selection();
 		void show_edges(uint16_t face_index);
-		
+
+		int startGroup();
+		void endGroup();
+		void rotateGroup(int group, const v3& rotation);
+		void moveGroup(int group, const v3& pos);
+		void copyGroup(int group, const v3& pos);
+
 		void save_text(const char* fileName);
 		void save_mesh(const char* fileName);
 		void load_text(const char* fileName);
@@ -256,6 +273,9 @@ namespace ds {
 		Color _selectionColor;
 		DataStore _store;
 		Array<MeshGenOpcode> _opcodes;
+		Color _selectedColor;
+		int _currentGroup;
+		int _groupCounter;
 	};
 
 	}
