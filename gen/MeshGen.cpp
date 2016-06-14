@@ -56,7 +56,7 @@ namespace ds {
 	// --------------------------------------------
 	// Opcode definitions
 	// --------------------------------------------
-	const int OPCODE_MAPPING_COUNT = 28;
+	const int OPCODE_MAPPING_COUNT = 31;
 
 	const OpcodeDefinition OPCODE_MAPPING[] = {
 		{ gen::OpcodeType::ADD_CUBE, "add_cube", 2, OCDataTypes::VEC3, OCDataTypes::VEC3 },
@@ -86,7 +86,10 @@ namespace ds {
 		{ gen::OpcodeType::END_GROUP, "end_group", 0 },
 		{ gen::OpcodeType::ROTATE_GROUP, "rotate_group", 2, OCDataTypes::INT, OCDataTypes::VEC3 },
 		{ gen::OpcodeType::MOVE_GROUP, "move_group", 2, OCDataTypes::INT, OCDataTypes::VEC3 },
-		{ gen::OpcodeType::COPY_GROUP, "copy_group", 2, OCDataTypes::INT, OCDataTypes::VEC3 },
+		{ gen::OpcodeType::COPY_GROUP, "copy_group", 2, OCDataTypes::INT, OCDataTypes::VEC3 },		
+		{ gen::OpcodeType::ADD_TUBE, "add_tube", 6, OCDataTypes::VEC3, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::INT },
+		{ gen::OpcodeType::REMOVE_FACE, "remove_face", 1, OCDataTypes::INT},
+		{ gen::OpcodeType::CUT, "cut", 2, OCDataTypes::VEC3, OCDataTypes::VEC3 },
 	};
 
 	const OpcodeDefinition UNKNOWN_DEFINITION = OpcodeDefinition(gen::OpcodeType::UNKNOWN, "UNKNOWN");
@@ -289,29 +292,28 @@ namespace ds {
 			int face = -1;
 			for (uint32_t i = 0; i < _faces.size(); ++i) {
 				const Face& f = _faces[i];
-				const Edge& e1 = _edges[f.edge];
-				const Edge& e2 = _edges[e1.next];
-				const Edge& e3 = _edges[e2.next];
-				const Edge& e4 = _edges[e3.next];
-				float u, v, t;
-				int ret = intersect_triangle(ray, _vertices[e4.vert_index], _vertices[e1.vert_index], _vertices[e2.vert_index], &t, &u, &v);
-				if (ret != 0) {
-					//LOG << "1 - FOUND face: " << i << " u: " << u << " v: " << v << " t: " << t;
-					if (t < tmax) {
-						tmax = t;
-						face = i;
+				if (!f.deleted) {
+					const Edge& e1 = _edges[f.edge];
+					const Edge& e2 = _edges[e1.next];
+					const Edge& e3 = _edges[e2.next];
+					const Edge& e4 = _edges[e3.next];
+					float u, v, t;
+					int ret = intersect_triangle(ray, _vertices[e4.vert_index], _vertices[e1.vert_index], _vertices[e2.vert_index], &t, &u, &v);
+					if (ret != 0) {
+						if (t < tmax) {
+							tmax = t;
+							face = i;
+						}
 					}
-				}
-				ret = intersect_triangle(ray, _vertices[e2.vert_index], _vertices[e3.vert_index], _vertices[e4.vert_index], &t, &u, &v);
-				if (ret != 0) {
-					//LOG << "1 - FOUND face: " << i << " u: " << u << " v: " << v << " t: " << t;
-					if (t < tmax) {
-						tmax = t;
-						face = i;
+					ret = intersect_triangle(ray, _vertices[e2.vert_index], _vertices[e3.vert_index], _vertices[e4.vert_index], &t, &u, &v);
+					if (ret != 0) {
+						if (t < tmax) {
+							tmax = t;
+							face = i;
+						}
 					}
 				}
 			}
-			//LOG << "face: " << face;
 			return face;
 		}
 
@@ -806,19 +808,22 @@ namespace ds {
 		// convert geometry into mesh
 		// ----------------------------------------------
 		void MeshGen::build(Mesh* mesh) {
+			recalculate_normals();
 			for (uint32_t i = 0; i < _faces.size(); ++i) {
 				const Face& f = _faces[i];
-				const Edge& e = _edges[f.edge];
-				int idx = f.edge;
-				for (int j = 0; j < 4; ++j) {
-					Edge& e = _edges[idx];
-					if (f.selected) {
-						mesh->add(smooth_position(_vertices[e.vert_index]), f.n, e.uv, _selectionColor);
+				if (!f.deleted) {
+					const Edge& e = _edges[f.edge];
+					int idx = f.edge;
+					for (int j = 0; j < 4; ++j) {
+						Edge& e = _edges[idx];
+						if (f.selected) {
+							mesh->add(smooth_position(_vertices[e.vert_index]), smooth_position(f.n), e.uv, _selectionColor);
+						}
+						else {
+							mesh->add(smooth_position(_vertices[e.vert_index]), smooth_position(f.n), e.uv, f.color);
+						}
+						idx = e.next;
 					}
-					else {
-						mesh->add(smooth_position(_vertices[e.vert_index]), f.n, e.uv, f.color);
-					}
-					idx = e.next;
 				}
 			}
 		}
@@ -980,6 +985,80 @@ namespace ds {
 				_vertices[verts.indices[i]] = nv;
 			}
 			recalculate_normals();
+		}
+
+		float dist(const v3& p, const Plane& pl, v3* ret) {
+			float    sb, sn, sd;
+
+			sn = -dot(pl.normal, (p - pl.position));
+			sd = dot(pl.normal, pl.normal);
+			sb = sn / sd;
+
+			*ret = p + sb * pl.normal;
+			return length(p - *ret);
+		}
+
+		int MeshGen::is_edge_below(uint16_t edge_index,const Plane& pl) {
+			int ret = 0;
+			const Edge& e0 = _edges[edge_index];
+			const Edge& e1 = _edges[e0.next];
+			if (dot(pl.normal, _vertices[e0.vert_index] - pl.position) < 0.0f) {
+				ret |= 1;
+			}
+			if (dot(pl.normal, _vertices[e1.vert_index] - pl.position) < 0.0f) {
+				ret |= 2;
+			}
+			return ret;
+		}
+
+		void MeshGen::cut(const v3& p, const v3& n) {
+			Plane pl(p, normalize(n));
+			Array<v3> verts;
+			for (uint32_t i = 0; i < _faces.size(); ++i) {
+				Face& f = _faces[i];
+				int ei = f.edge;
+				int cnt = 0;
+				v3 pp;
+				for (int j = 0; j < 4; ++j) {
+					const Edge& e = _edges[ei];
+					int r = is_edge_below(ei, pl);
+					//LOG << "P: " << DBG_V3(_vertices[e.vert_index]) << " R: " << r;
+					if (r == 1) {
+						float dst = dist(_vertices[e.vert_index], pl, &pp);
+						_vertices[e.vert_index] = pp;
+					}
+					else if (r == 2) {
+						const Edge& next = _edges[e.next];
+						float dst = dist(_vertices[next.vert_index], pl, &pp);
+						_vertices[next.vert_index] = pp;
+					}
+					else if (r == 3) {
+						++cnt;
+						//LOG << "Entire edge below: " << ei;
+					}
+					ei = e.next;
+				}				
+				if (cnt == 4) {
+					//LOG << "removing face: " << i;
+					f.deleted = true;
+					v3 fp[4];
+					int fei = f.edge;
+					for (int j = 0; j < 4; ++j) {
+						const Edge& e = _edges[fei];
+						float dst = dist(_vertices[e.vert_index], pl, &pp);
+						verts.push_back(pp);
+						fei = e.next;
+					}
+				}
+			}
+			int s = verts.size() / 4;
+			v3 fp[4];
+			for (int i = 0; i < s; ++i ) {					
+				for (int j = 0; j < 4; ++j) {
+					fp[j] = verts[i * 4 + j];
+				}
+				add_face(fp);
+			}
 		}
 
 		// ----------------------------------------------
@@ -1334,6 +1413,10 @@ namespace ds {
 			fclose(f);
 		}
 
+		void MeshGen::remove_face(uint16_t face_index) {
+			_faces[face_index].deleted = true;
+		}
+
 		void MeshGen::executeOpcodes(const Array<MeshGenOpcode>& opcodes, const DataStore& store) {
 			for (uint32_t i = 0; i < opcodes.size(); ++i) {
 				const MeshGenOpcode& op = opcodes[i];
@@ -1504,6 +1587,12 @@ namespace ds {
 					move_face(vert_index, p);
 					break;
 				}
+				case OpcodeType::REMOVE_FACE: {
+					uint16_t vert_index;
+					store.get_data(op, 0, &vert_index);
+					remove_face(vert_index);
+					break;
+				}
 				case OpcodeType::ADD_HEXAGON: {
 					float radius;
 					store.get_data(op, 0, &radius);
@@ -1551,6 +1640,14 @@ namespace ds {
 					moveGroup(group, p);
 					break;
 				}
+				case OpcodeType::CUT: {					
+					v3 p;
+					v3 n;
+					store.get_data(op, 0, &p);
+					store.get_data(op, 3, &n);
+					cut(p, n);
+					break;
+				}
 				case OpcodeType::COPY_GROUP: {
 					int group;
 					v3 p;
@@ -1558,6 +1655,21 @@ namespace ds {
 					store.get_data(op, 1, &p);
 					copyGroup(group, p);
 					break;
+				}
+				case OpcodeType::ADD_TUBE: {
+					v3 p;
+					float bottomRadius;
+					float topRadius;
+					float height;
+					float width;
+					uint16_t segments;
+					store.get_data(op, 0, &p);
+					store.get_data(op, 3, &bottomRadius);
+					store.get_data(op, 4, &topRadius);
+					store.get_data(op, 5, &height);
+					store.get_data(op, 6, &width);
+					store.get_data(op, 7, &segments);
+					create_tube(p, bottomRadius, topRadius, height, width, segments);
 				}
 				}
 			}
@@ -1822,6 +1934,53 @@ namespace ds {
 			record(op);
 		}
 
+		void MeshGen::create_tube(const v3& pos, float bottomRadius, float topRadius, float height, float width, uint16_t segments) {
+			float angleStep = TWO_PI / static_cast<float>(segments);
+			v3 p[4];
+			float angle = 0.0f;
+			float next_angle = angleStep;
+			float hh = height * 0.5f;
+			float top_inner = topRadius - width;
+			float bottom_inner = bottomRadius - width;
+			for (int i = 0; i < segments; ++i) {
+				// right side
+				p[0] = pos + v3(topRadius * cos(angle), hh, topRadius * sin(angle));
+				p[1] = pos + v3(topRadius * cos(next_angle), hh, topRadius * sin(next_angle));
+				p[2] = pos + v3(bottomRadius * cos(next_angle), -hh, bottomRadius * sin(next_angle));
+				p[3] = pos + v3(bottomRadius * cos(angle), -hh, bottomRadius * sin(angle));
+				uint16_t fi = add_face(p);
+				set_color(fi, _selectedColor);
+				// top
+				p[0] = pos + v3(top_inner * cos(next_angle), hh, top_inner * sin(next_angle));
+				p[1] = pos + v3(topRadius * cos(next_angle), hh, topRadius * sin(next_angle));
+				p[2] = pos + v3(topRadius * cos(angle), hh, topRadius * sin(angle));
+				p[3] = pos + v3(top_inner * cos(angle), hh, top_inner * sin(angle));
+				fi = add_face(p);
+				set_color(fi, _selectedColor);
+				// inner
+				p[1] = pos + v3(top_inner * cos(angle), hh, top_inner * sin(angle));
+				p[0] = pos + v3(top_inner * cos(next_angle), hh, top_inner * sin(next_angle));
+				p[3] = pos + v3(bottom_inner * cos(next_angle), -hh, bottom_inner * sin(next_angle));
+				p[2] = pos + v3(bottom_inner * cos(angle), -hh, bottom_inner * sin(angle));
+				fi = add_face(p);
+				set_color(fi, _selectedColor);
+				// bottom
+				p[1] = pos + v3(bottom_inner * cos(next_angle), -hh, bottom_inner * sin(next_angle));
+				p[0] = pos + v3(bottomRadius * cos(next_angle), -hh, bottomRadius * sin(next_angle));
+				p[3] = pos + v3(bottomRadius * cos(angle), -hh, bottomRadius * sin(angle));
+				p[2] = pos + v3(bottom_inner * cos(angle), -hh, bottom_inner * sin(angle));
+				fi = add_face(p);
+				set_color(fi, _selectedColor);
+
+
+				angle += angleStep;
+				next_angle += angleStep;
+			}
+		}
+
+		void MeshGen::set_color_selection(const Color& color) {
+			_selectedColor = color;
+		}
 		// ----------------------------------------------
 		// create ring
 		// ----------------------------------------------

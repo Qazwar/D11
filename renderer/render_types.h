@@ -43,14 +43,5 @@ namespace ds {
 		}
 		*/
 	};
-
-	struct Plane {
-
-		v3 position;
-		v2 size;
-		Texture texture;
-
-
-	};
 	
 }

@@ -4,6 +4,7 @@
 #include <map>
 #include "..\math\Bitset.h"
 #include "..\lib\collection_types.h"
+#include <Point.h>
 
 namespace ds {
 
@@ -62,11 +63,11 @@ namespace ds {
 	class SpatialGridCollisionDetector : public PotentialCollisionDetector {
 
 	public:
-		SpatialGridCollisionDetector(const Point& gridSize) : PotentialCollisionDetector() , _gridSize(gridSize) {}
+		SpatialGridCollisionDetector(const p2i& gridSize) : PotentialCollisionDetector() , _gridSize(gridSize) {}
 		virtual ~SpatialGridCollisionDetector() {}
 		void add(int firstIndex, SID first, int firstType, int secondIndex, SID second, int secondType);
 	private:
-		Point _gridSize;
+		p2i _gridSize;
 	};
 
 	class PhysicalWorld {

@@ -2,6 +2,7 @@
 #include "..\lib\collection_types.h"
 #include "..\math\math_types.h"
 #include "..\utils\Log.h"
+#include <Point.h>
 
 namespace ds {
 
@@ -11,8 +12,8 @@ namespace ds {
 template<class T>
 struct DroppedCell {
 
-	Point from;
-	Point to;
+	p2i from;
+	p2i to;
 	T data;
 };
 // ------------------------------------------------
@@ -22,13 +23,13 @@ template<class T>
 class Grid {
 
 struct GridNode {
-	Point point;
+	p2i p2i;
     T data;
     bool used;
 
-	GridNode() : point(-1, -1), used(false) {}
+	GridNode() : p2i(-1, -1), used(false) {}
 
-	GridNode(const GridNode& other) : point(other.point), data(other.data), used(other.used) {}
+	GridNode(const GridNode& other) : p2i(other.p2i), data(other.data), used(other.used) {}
 
 };
 
@@ -41,11 +42,11 @@ public:
     void clear(const T& t);
     const T& get(int x,int y) const;
 	T& get(int x,int y);
-	const T& get(const Point& p) const;
-	T& get(const Point& p);
+	const T& get(const p2i& p) const;
+	T& get(const p2i& p);
     void set(int x,int y,const T& t);
     bool remove(int x,int y);    
-    void remove(const Array<Point>& points,bool shift);  
+    void remove(const Array<p2i>& p2is,bool shift);  
     const int width() const {
         return m_Width;
     }
@@ -55,8 +56,8 @@ public:
 	bool isValid(int x, int y) const {
 		return getIndex(x, y) != -1;
 	}
-	void findMatchingNeighbours(int x, int y, Array<Point>& entries);
-	void findMatchingNeighbours(int x, int y, const T& node, Array<Point>& entries);
+	void findMatchingNeighbours(int x, int y, Array<p2i>& entries);
+	void findMatchingNeighbours(int x, int y, const T& node, Array<p2i>& entries);
     void fillRow(int row,const T& t);
     void fillColumn(int column,const T& t);
     void copyRow(int oldRow,int newRow);
@@ -71,8 +72,8 @@ public:
     void dropRow(int x);
     void dropCell(int x,int y);
 	void dropCells(Array<DroppedCell<T>>& droppedCells);
-	void swap(const Point& first, const Point& second);
-	bool isValid(const Point& p) const {
+	void swap(const p2i& first, const p2i& second);
+	bool isValid(const p2i& p) const {
 		return getIndex(p) != -1;
 	}
 	int getMaxColumn() const;
@@ -80,7 +81,7 @@ protected:
     virtual bool isMatch(const T& first,const T& right) = 0;
 private:
     const int getIndex(int x,int y) const;
-	const int getIndex(const Point& p) const;	
+	const int getIndex(const p2i& p) const;	
 	void findMatching(int x, int y, GridNode* providedNode, Array<GridNode*>& gridNodes);
 	void simpleFindMatching(int x, int y, GridNode* providedNode, Array<GridNode*>& gridNodes);
     int m_Width;
@@ -100,7 +101,7 @@ Grid<T>::Grid(int width,int height) : m_Width(width) , m_Height(height) {
         for ( int y = 0; y < height; ++y ) {
             int index = getIndex(x,y);
             GridNode* node = &m_Data[index];
-			node->point = Point(x, y);
+			node->p2i = p2i(x, y);
             node->used = false;
         }
     }
@@ -159,7 +160,7 @@ inline const T& Grid<T>::get(int x,int y) const {
 // Gets the object at given position
 // ------------------------------------------------
 template<class T>
-inline T& Grid<T>::get(const Point& p) {
+inline T& Grid<T>::get(const p2i& p) {
 	int idx = getIndex(p);
 	return m_Data[idx].data;
 }
@@ -168,7 +169,7 @@ inline T& Grid<T>::get(const Point& p) {
 // Gets the object at given position
 // ------------------------------------------------
 template<class T>
-inline const T& Grid<T>::get(const Point& p) const {
+inline const T& Grid<T>::get(const p2i& p) const {
 	int idx = getIndex(p);
 	return m_Data[idx].data;
 }
@@ -236,7 +237,7 @@ inline const int Grid<T>::getIndex(int x, int y) const {
 // Returns the index into array if valid or -1
 // ------------------------------------------------
 template<class T>
-inline const int Grid<T>::getIndex(const Point& p) const {
+inline const int Grid<T>::getIndex(const p2i& p) const {
 	return getIndex(p.x, p.y);
 }
 
@@ -244,7 +245,7 @@ inline const int Grid<T>::getIndex(const Point& p) const {
 // findMatchingNeighbours
 // ------------------------------------------------
 template<class T>
-inline void Grid<T>::findMatchingNeighbours(int x, int y, Array<Point>& entries) {
+inline void Grid<T>::findMatchingNeighbours(int x, int y, Array<p2i>& entries) {
     int idx = getIndex(x,y);
 	Array<GridNode*> gridNodes;
     if ( idx != -1 ) {    
@@ -256,17 +257,17 @@ inline void Grid<T>::findMatchingNeighbours(int x, int y, Array<Point>& entries)
     if ( !gridNodes.empty()) {
         for ( std::size_t i = 0; i < gridNodes.size(); ++i ) {
             GridNode* node = gridNodes[i];
-            entries.push_back(node->point);
+            entries.push_back(node->p2i);
         }
     }
 }
 
 template<class T>
-inline void Grid<T>::findMatchingNeighbours(int x, int y, const T& node, Array<Point>& entries) {
+inline void Grid<T>::findMatchingNeighbours(int x, int y, const T& node, Array<p2i>& entries) {
 	Array<GridNode*> gridNodes;
 	if ( !isFree(x,y)) {
 		GridNode tmp;
-		tmp.point = Point(x, y);
+		tmp.p2i = p2i(x, y);
 		tmp.data = node;
 		tmp.used = true;
 		simpleFindMatching(x,y,&tmp,gridNodes);
@@ -274,7 +275,7 @@ inline void Grid<T>::findMatchingNeighbours(int x, int y, const T& node, Array<P
 	if ( !gridNodes.empty()) {
 		for ( std::size_t i = 0; i < gridNodes.size(); ++i ) {
 			GridNode* node = gridNodes[i];
-			entries.push_back(node->point);
+			entries.push_back(node->p2i);
 		}
 	}
 }
@@ -311,7 +312,7 @@ inline void Grid<T>::findMatching(int x, int y, GridNode* providedNode, Array<Gr
             bool found = false;
             for ( size_t i = 0; i < gridNodes.size(); ++i ) {
                 GridNode* savedNode = gridNodes[i];
-                if ( savedNode->point == currentNode->point ) {
+                if ( savedNode->p2i == currentNode->p2i ) {
                     found = true;
                 }
             }
@@ -471,8 +472,8 @@ inline void Grid<T>::dropCells(Array<DroppedCell<T>>& droppedCells) {
 				if ( !isFree(x,sy)) {
 					DroppedCell<T> dc;
 					dc.data = get(x, sy);
-					dc.from = Point(x,sy);
-					dc.to = Point(x,y);
+					dc.from = p2i(x,sy);
+					dc.to = p2i(x,y);
 					droppedCells.push_back(dc);
 					set(x,y,get(x,sy));
 					if (!remove(x, sy)) {
@@ -513,12 +514,12 @@ bool Grid<T>::isRowEmpty(int row) const {
 }
 
 // ------------------------------------------------
-// Remove grid points
+// Remove grid p2is
 // ------------------------------------------------
 template<class T>
-inline void Grid<T>::remove(const Array<Point>& points,bool shift) {
-    for ( std::size_t i = 0; i < points.size(); ++i ) {
-        Point gp = points[i];
+inline void Grid<T>::remove(const Array<p2i>& p2is,bool shift) {
+    for ( std::size_t i = 0; i < p2is.size(); ++i ) {
+        p2i gp = p2is[i];
 		if (!remove(gp.x, gp.y)) {
 			LOG << "cannot remove cell at " << gp.x << " " << gp.y;
 		}
@@ -534,7 +535,7 @@ inline void Grid<T>::remove(const Array<Point>& points,bool shift) {
 }
 
 template<class T>
-inline void Grid<T>::swap(const Point& first, const Point& second) {
+inline void Grid<T>::swap(const p2i& first, const p2i& second) {
 	int fi = getIndex(first);
 	int si = getIndex(second);
 	GridNode n = m_Data[fi];

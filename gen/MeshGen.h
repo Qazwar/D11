@@ -38,23 +38,30 @@ namespace ds {
 	// Edge
 	// ---------------------------------------
 	struct Edge {
+
 		uint16_t next;
 		uint16_t prev;
 		uint16_t vert_index;
 		uint16_t face_index;
 		uint16_t opposite;
 		v2 uv;
+
 	};
 
 	// ---------------------------------------
 	// Face
 	// ---------------------------------------
 	struct Face {
+
 		uint16_t edge;
 		v3 n;
 		Color color;
 		bool selected;
 		int group;
+		bool deleted;
+
+		Face() : edge(0), n(0, 0, 0), color(Color::WHITE), selected(false), group(-1), deleted(false) {}
+
 	};
 
 	enum OpcodeType {
@@ -87,6 +94,9 @@ namespace ds {
 		ROTATE_GROUP,
 		MOVE_GROUP,
 		COPY_GROUP,
+		ADD_TUBE,
+		REMOVE_FACE,
+		CUT,
 		UNKNOWN
 	};
 
@@ -217,6 +227,8 @@ namespace ds {
 		uint16_t extrude_edge(uint16_t edgeIndex, const v3& pos);
 		uint16_t extrude_edge(uint16_t edgeIndex, float factor);
 		uint16_t extrude_face(uint16_t faceIndex,float factor);
+		void remove_face(uint16_t face_index);
+		void cut(const v3& p, const v3& n);
 		const Color& get_color(uint16_t face_index) const;
 		void debug();
 		void recalculate_normals();
@@ -224,6 +236,7 @@ namespace ds {
 		void create_ring(float radius, float width, uint16_t segments);
 		void create_hexagon(float radius);
 		void create_cylinder(const v3& pos, float bottomRadius, float topRadius, float height, uint16_t segments, const Color& clr = Color::WHITE);
+		void create_tube(const v3& pos, float bottomRadius, float topRadius, float height, float width, uint16_t segments);
 		uint16_t create_torus(const v3& position,float radius, float width, float depth, uint16_t segments);
 		void create_grid(const v2& size, int stepsX, int stepsY);
 		void create_sphere(float radius, int segments, int stacks);
@@ -247,6 +260,7 @@ namespace ds {
 		bool select_ring(uint16_t face_index, int direction);
 		void clear_selection();
 		void show_edges(uint16_t face_index);
+		void set_color_selection(const Color& color);
 
 		int startGroup();
 		void endGroup();
@@ -258,6 +272,7 @@ namespace ds {
 		void save_mesh(const char* fileName);
 		void load_text(const char* fileName);
 	private:
+		int is_edge_below(uint16_t edge_index, const Plane& pl);
 		void executeOpcodes(const Array<MeshGenOpcode>& opcodes, const DataStore& store);
 		// recording
 		void record(const MeshGenOpcode& opcode);
