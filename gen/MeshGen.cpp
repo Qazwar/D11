@@ -56,7 +56,7 @@ namespace ds {
 	// --------------------------------------------
 	// Opcode definitions
 	// --------------------------------------------
-	const int OPCODE_MAPPING_COUNT = 31;
+	const int OPCODE_MAPPING_COUNT = 33;
 
 	const OpcodeDefinition OPCODE_MAPPING[] = {
 		{ gen::OpcodeType::ADD_CUBE, "add_cube", 2, OCDataTypes::VEC3, OCDataTypes::VEC3 },
@@ -89,7 +89,9 @@ namespace ds {
 		{ gen::OpcodeType::COPY_GROUP, "copy_group", 2, OCDataTypes::INT, OCDataTypes::VEC3 },		
 		{ gen::OpcodeType::ADD_TUBE, "add_tube", 6, OCDataTypes::VEC3, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::INT },
 		{ gen::OpcodeType::REMOVE_FACE, "remove_face", 1, OCDataTypes::INT},
-		{ gen::OpcodeType::CUT, "cut", 2, OCDataTypes::VEC3, OCDataTypes::VEC3 },
+		{ gen::OpcodeType::CUT, "cut", 2, OCDataTypes::VEC3, OCDataTypes::VEC3 },		
+		{ gen::OpcodeType::ADD_SPHERE, "add_sphere", 4, OCDataTypes::VEC3, OCDataTypes::FLOAT, OCDataTypes::INT, OCDataTypes::INT },
+		{ gen::OpcodeType::EXTRUDE_EDGE, "extrude_edge", 2, OCDataTypes::INT, OCDataTypes::VEC3 },
 	};
 
 	const OpcodeDefinition UNKNOWN_DEFINITION = OpcodeDefinition(gen::OpcodeType::UNKNOWN, "UNKNOWN");
@@ -428,9 +430,9 @@ namespace ds {
 			int ei = f.edge;
 			v3 p[4];
 			v3 n = f.n * factor;
-			if (factor < 0.0f) {
-				n *= -1.0f;
-			}
+			//if (factor < 0.0f) {
+				//n *= -1.0f;
+			//}
 			for (int i = 0; i < 4; ++i) {
 				Edge& e = _edges[ei];
 				p[i] = _vertices[e.vert_index];
@@ -438,7 +440,7 @@ namespace ds {
 				ei = e.next;
 			}
 			uint16_t newFace = add_face(p);
-			set_color(newFace, f.color);
+			set_color(newFace, _selectedColor);
 			const Face& nf = _faces[newFace];
 			//LOG << "new face: " << newFace;
 			ei = f.edge;
@@ -447,7 +449,7 @@ namespace ds {
 				Edge& e = _edges[ei];
 				Edge& ne = _edges[nei];
 				uint16_t nnf = combine_edges(ei,nei);
-				set_color(nnf, f.color);
+				set_color(nnf, _selectedColor);
 				ei = e.next;
 				nei = ne.next;
 			}
@@ -499,9 +501,8 @@ namespace ds {
 			f.color = _selectedColor;
 			f.group = _currentGroup;
 			calculate_normal(&f);
-			uint16_t fi = _faces.size();
 			_faces.push_back(f);			
-			return fi;
+			return fidx;
 		}
 
 		// ----------------------------------------------
@@ -1011,7 +1012,7 @@ namespace ds {
 			return ret;
 		}
 
-		void MeshGen::cut(const v3& p, const v3& n) {
+		void MeshGen::cut(const v3& p, const v3& n, bool fill) {
 			Plane pl(p, normalize(n));
 			Array<v3> verts;
 			for (uint32_t i = 0; i < _faces.size(); ++i) {
@@ -1051,13 +1052,15 @@ namespace ds {
 					}
 				}
 			}
-			int s = verts.size() / 4;
-			v3 fp[4];
-			for (int i = 0; i < s; ++i ) {					
-				for (int j = 0; j < 4; ++j) {
-					fp[j] = verts[i * 4 + j];
+			if (fill) {
+				int s = verts.size() / 4;
+				v3 fp[4];
+				for (int i = 0; i < s; ++i) {
+					for (int j = 0; j < 4; ++j) {
+						fp[j] = verts[i * 4 + j];
+					}
+					add_face(fp);
 				}
-				add_face(fp);
 			}
 		}
 
@@ -1097,6 +1100,24 @@ namespace ds {
 					for (int j = 0; j < 4; ++j) {
 						const Edge& e = _edges[ei];
 						_vertices[e.vert_index] = _vertices[e.vert_index] * world;
+						ei = e.next;
+					}
+				}
+			}
+		}
+
+		// ----------------------------------------------
+		// scale group
+		// ----------------------------------------------
+		void MeshGen::scaleGroup(int group, const v3& scale) {
+			mat4 s = matrix::mat4Scale(scale);
+			for (int i = 0; i < _faces.size(); ++i) {
+				const Face& f = _faces[i];
+				int ei = f.edge;
+				if (f.group == group) {
+					for (int j = 0; j < 4; ++j) {
+						const Edge& e = _edges[ei];
+						_vertices[e.vert_index] = _vertices[e.vert_index] * s;
 						ei = e.next;
 					}
 				}
@@ -1258,7 +1279,8 @@ namespace ds {
 		}
 
 		int MeshGen::slice(uint16_t face_index, int stepsX, int stepsY, uint16_t* faces, int max) {
-			const Face& f = _faces[face_index];
+			const Face& f = _faces[face_index];			
+			Color clr = f.color;
 			const Edge& e0 = _edges[f.edge];
 			const Edge& e1 = _edges[e0.next];
 			const Edge& e2 = _edges[e1.next];
@@ -1291,7 +1313,7 @@ namespace ds {
 						p[2] = sp + s1 + s2;
 						p[3] = sp + s2;
 						uint16_t fi = add_face(p);
-						set_color(fi, f.color);
+						set_color(fi, clr);
 						if (faces != 0 && cnt < max) {
 							faces[cnt++] = fi;
 						}
@@ -1579,6 +1601,14 @@ namespace ds {
 					extrude_edge(edge_index, factor);
 					break;
 				}
+				case OpcodeType::EXTRUDE_EDGE: {
+					uint16_t edge_index;
+					v3 p;
+					store.get_data(op, 0, &edge_index);
+					store.get_data(op, 1, &p);
+					extrude_edge(edge_index, p);
+					break;
+				}
 				case OpcodeType::MOVE_FACE: {
 					uint16_t vert_index;
 					v3 p;
@@ -1645,7 +1675,7 @@ namespace ds {
 					v3 n;
 					store.get_data(op, 0, &p);
 					store.get_data(op, 3, &n);
-					cut(p, n);
+					cut(p, n, false);
 					break;
 				}
 				case OpcodeType::COPY_GROUP: {
@@ -1670,6 +1700,17 @@ namespace ds {
 					store.get_data(op, 6, &width);
 					store.get_data(op, 7, &segments);
 					create_tube(p, bottomRadius, topRadius, height, width, segments);
+				}
+				case OpcodeType::ADD_SPHERE: {
+					v3 p;
+					float radius;
+					uint16_t segments;
+					uint16_t stacks;
+					store.get_data(op, 0, &p);
+					store.get_data(op, 3, &radius);
+					store.get_data(op, 4, &segments);
+					store.get_data(op, 5, &stacks);
+					create_sphere(p, radius, segments, stacks);
 				}
 				}
 			}
@@ -1768,9 +1809,24 @@ namespace ds {
 			return 0;
 		}
 
-		void MeshGen::create_sphere(float radius, int segments, int stacks) {
-			float angleStep = TWO_PI / static_cast<float>(segments);
+		// ----------------------------------------------
+		// create sphere
+		// ----------------------------------------------
+		void MeshGen::create_sphere(const v3& pos,float radius, int segments, int stacks) {
+			uint16_t faces[6];
+			int group = startGroup();
+			add_cube(v3(0,0,0), v3(2, 2, 2),faces);
+			for (int i = 0; i < 6; ++i) {
+				slice(faces[i], segments, stacks);
+			}
+			IndexList il;
+			find_adjacent_faces(0, il);
+			smooth(il, 1.0f);
+			endGroup();			
+			scaleGroup(group, v3(radius, radius, radius));
+			moveGroup(group, pos);
 		}
+
 		// ----------------------------------------------
 		// create torus
 		// ----------------------------------------------

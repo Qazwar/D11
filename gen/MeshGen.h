@@ -97,6 +97,7 @@ namespace ds {
 		ADD_TUBE,
 		REMOVE_FACE,
 		CUT,
+		ADD_SPHERE,
 		UNKNOWN
 	};
 
@@ -228,7 +229,7 @@ namespace ds {
 		uint16_t extrude_edge(uint16_t edgeIndex, float factor);
 		uint16_t extrude_face(uint16_t faceIndex,float factor);
 		void remove_face(uint16_t face_index);
-		void cut(const v3& p, const v3& n);
+		void cut(const v3& p, const v3& n, bool fill = true);
 		const Color& get_color(uint16_t face_index) const;
 		void debug();
 		void recalculate_normals();
@@ -239,7 +240,7 @@ namespace ds {
 		void create_tube(const v3& pos, float bottomRadius, float topRadius, float height, float width, uint16_t segments);
 		uint16_t create_torus(const v3& position,float radius, float width, float depth, uint16_t segments);
 		void create_grid(const v2& size, int stepsX, int stepsY);
-		void create_sphere(float radius, int segments, int stacks);
+		void create_sphere(const v3& pos, float radius, int segments, int stacks);
 		
 		void debug_edge(uint16_t edgeIndex);
 		void debug_face(uint16_t faceIndex);
@@ -266,6 +267,7 @@ namespace ds {
 		void endGroup();
 		void rotateGroup(int group, const v3& rotation);
 		void moveGroup(int group, const v3& pos);
+		void scaleGroup(int group, const v3& scale);
 		void copyGroup(int group, const v3& pos);
 
 		void save_text(const char* fileName);
