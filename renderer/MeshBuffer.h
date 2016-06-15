@@ -67,6 +67,9 @@ namespace ds {
 		void rotateZ(float angle);
 		void translate(const v3& position);
 		void scale(const v3& scale);
+		v3* getLightPos() {
+			return &_lightPos;
+		}
 	private:
 		uint32_t _size;
 		MeshBufferDescriptor _descriptor;

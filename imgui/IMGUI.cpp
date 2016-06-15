@@ -308,6 +308,13 @@ namespace gui {
 			keyInput.num = 0;
 			modal = false;
 			useHeader = true;
+			grouped = false;
+			clicked = false;
+			visible = false;
+			buttonPressed = false;
+			window.reset();
+			hot = -1;
+			active = -1;
 			settings[GS_LABELSIZE] = 80.0f;
 			settings[GS_LINE_HEIGHT] = 26.0f;
 		}
@@ -497,8 +504,17 @@ namespace gui {
 	// handle mouse interaction
 	// -------------------------------------------------------
 	bool isClicked(const v2& pos, const v2& size) {
+		/*
 		if (guiContext->clicked && isCursorInside(pos, size)) {
 			return true;
+		}
+		*/
+		if (guiContext->clicked) {
+			v2 p = pos;
+			p.x += size.x * 0.5f;
+			if (guiContext->clicked && isCursorInside(p, size)) {
+				return true;
+			}
 		}
 		return false;
 	}
@@ -1065,10 +1081,10 @@ namespace gui {
 	// input color
 	// -------------------------------------------------------
 	void InputColor(const char* label, ds::Color* v) {
-		int r = v->r * 255.0f;
-		int g = v->g * 255.0f;
-		int b = v->b * 255.0f;
-		int a = v->a * 255.0f;
+		int r = static_cast<int>(v->r * 255.0f);
+		int g = static_cast<int>(v->g * 255.0f);
+		int b = static_cast<int>(v->b * 255.0f);
+		int a = static_cast<int>(v->a * 255.0f);
 		v2 p = guiContext->position;
 		guiContext->addText(p, label);
 		HashedId hash = HashPointer(v);
@@ -1434,10 +1450,10 @@ namespace gui {
 	void ColorSlider(const char* label, ds::Color* v,int* state) {
 		static char* PREFIXES[] = { "r:", "g:", "b:", "a:" };
 		int colors[4];
-		colors[0] = v->r * 255.0f;
-		colors[1] = v->g * 255.0f;
-		colors[2] = v->b * 255.0f;
-		colors[3] = v->a * 255.0f;
+		colors[0] = static_cast<int>(v->r * 255.0f);
+		colors[1] = static_cast<int>(v->g * 255.0f);
+		colors[2] = static_cast<int>(v->b * 255.0f);
+		colors[3] = static_cast<int>(v->a * 255.0f);
 		v2 p = guiContext->position;
 		guiContext->addText(p, label);
 		p.x += guiContext->settings[GS_LABELSIZE];
@@ -1561,7 +1577,7 @@ namespace gui {
 		p.x = guiContext->position.x + (width - textDim.x) / 2.0f;
 		guiContext->addText(p,label, textDim);
 		guiContext->nextPosition(guiContext->settings[GS_LINE_HEIGHT] + 4.0f);
-		return isBoxSelected(id, p, v2(width, BUTTON_HEIGHT));
+		return isClicked(p, v2(width, BUTTON_HEIGHT));
 	}
 
 	int ButtonBar(const ds::Array<const char*>& entries) {
