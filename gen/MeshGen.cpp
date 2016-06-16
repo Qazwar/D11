@@ -509,15 +509,14 @@ namespace ds {
 		// get edge index
 		// ----------------------------------------------
 		uint16_t MeshGen::get_edge_index(uint16_t face_index, int nr) {
-			LOG << "FACE: " << face_index;
 			const Face& f = _faces[face_index];
-			Edge& e = _edges[f.edge];
-			LOG << "top: " << f.edge;
+			int ei = f.edge;
 			for (int i = 0; i < nr; ++i) {
-				e = _edges[e.next];
+				const Edge& e = _edges[ei];
+				ei = e.next;
 			}
-			LOG << "final: " << f.edge;
-			return f.edge;
+			LOG << "Face: " << face_index << " top: " << f.edge << " final: " << ei;
+			return ei;
 		}
 
 		// ----------------------------------------------
@@ -730,6 +729,33 @@ namespace ds {
 			}
 			calculate_normal(&f);
 		}
+		
+		// ----------------------------------------------
+		// expand face
+		// ----------------------------------------------
+		void MeshGen::expand_face(uint16_t center_face, uint16_t* adjacents, float factor) {
+			v3 center = get_center(center_face);
+			const Face& f = _faces[center_face];
+			int indices[] = { 0, 1, 1, 2, 2, 3, 3, 0 };
+			int edge_indices[] = { 2, 3, 0, 1 };
+			int ei = f.edge;
+			v3 d[4];
+			for (int i = 0; i < 4; ++i) {
+				const Edge& e0 = _edges[ei];
+				const Edge& e1 = _edges[e0.next];
+				v3 ce = (_vertices[e0.vert_index] + _vertices[e1.vert_index]) / 2.0f;
+				d[i] = normalize(ce - center) * factor;
+				LOG << "CE: " << DBG_V3(ce) << " D: " << DBG_V3(d[i]);
+				ei = e0.next;
+			}
+
+			for (int i = 0; i < 4; ++i) {
+				int eidx = get_edge_index(adjacents[indices[i * 2]], edge_indices[i]);
+				move_edge(eidx, d[i]);
+				int neidx = get_edge_index(adjacents[indices[i * 2 + 1]], edge_indices[i]);
+				move_edge(neidx, d[i]);
+			}
+		}
 
 		// ----------------------------------------------
 		// scale face
@@ -745,7 +771,7 @@ namespace ds {
 				v3 ce = (_vertices[e0.vert_index] + _vertices[e1.vert_index]) / 2.0f;
 				v3 cde = ce - center;
 				if (scale > 1.0f) {
-					c[i] = cde * (1.0f - scale);
+					c[i] = cde * (scale - 1.0f);
 				}
 				else {
 					c[i] = cde * -scale;

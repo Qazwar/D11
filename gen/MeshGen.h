@@ -217,6 +217,7 @@ namespace ds {
 		void move_face(uint16_t faceIndex, const v3& position);
 		void texture_face(uint16_t faceIndex, const Texture& t);
 		void scale_face(uint16_t faceIndex, float scale);
+		void expand_face(uint16_t center_face, uint16_t* adjacents, float scale);
 		v3 get_center(uint16_t faceIndex);
 		int slice(uint16_t face_index, int segments, uint16_t* faces = 0, int max = 0);
 		int slice(uint16_t face_index, int stepsX, int stepsY, uint16_t* faces = 0, int max = 0);
