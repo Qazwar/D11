@@ -32,16 +32,32 @@ namespace ds {
 	// --------------------------------------------
 	struct OpcodeDefinition {
 	
-		gen::OpcodeType type;
 		const char* name;
+		IdString hash;
 		int args;
 		int types[8];
 		int var_count;
+		gen::MeshGenFunc func;
 
-		OpcodeDefinition(gen::OpcodeType t, const char* n) : type(t), name(n), args(0) , var_count(0) {
+		OpcodeDefinition(const char* n) : name(n), args(0) , var_count(0) {
+			hash = string::murmur_hash(n);
 		}
 
-		OpcodeDefinition(gen::OpcodeType t, const char* n, int a, ...) : type(t), name(n) , args(a) {
+		OpcodeDefinition(const char* n, int a, ...) : name(n) , args(a) {
+			hash = string::murmur_hash(n);
+			va_list ap;
+			va_start(ap, a);
+			for (int i = 0; i < a; ++i) {
+				int d = va_arg(ap, int);
+				types[i] = d;
+				var_count += OPCODE_DATASIZE[d];
+			}
+			va_end(ap);
+		}
+
+		OpcodeDefinition(const char* n,gen::MeshGenFunc fn, int a, ...) : name(n), args(a) {
+			hash = string::murmur_hash(n);
+			func = fn;
 			va_list ap;
 			va_start(ap, a);
 			for (int i = 0; i < a; ++i) {
@@ -56,92 +72,113 @@ namespace ds {
 	// --------------------------------------------
 	// Opcode definitions
 	// --------------------------------------------
-	const int OPCODE_MAPPING_COUNT = 33;
+	const int OPCODE_MAPPING_COUNT = 34;
 
 	const OpcodeDefinition OPCODE_MAPPING[] = {
-		{ gen::OpcodeType::ADD_CUBE, "add_cube", 2, OCDataTypes::VEC3, OCDataTypes::VEC3 },
-		{ gen::OpcodeType::ADD_CUBE_ROT, "add_cube_rot", 3, OCDataTypes::VEC3, OCDataTypes::VEC3, OCDataTypes::VEC3 },
-		{ gen::OpcodeType::SET_COLOR, "set_color", 2, 2, OCDataTypes::COLOR },
-		{ gen::OpcodeType::SLICE_UNIFORM, "slice_uniform", 2, OCDataTypes::INT, OCDataTypes::INT },
-		{ gen::OpcodeType::SLICE, "slice", 3, OCDataTypes::INT, OCDataTypes::INT, OCDataTypes::INT },
-		{ gen::OpcodeType::MOVE_EDGE, "move_edge", 2, 2, OCDataTypes::VEC3 },
-		{ gen::OpcodeType::V_SPLIT, "v_split", 2, OCDataTypes::INT, OCDataTypes::FLOAT },
-		{ gen::OpcodeType::H_SPLIT, "h_split", 2, OCDataTypes::INT, OCDataTypes::FLOAT },
-		{ gen::OpcodeType::MAKE_FACE, "make_face", 4, OCDataTypes::INT, OCDataTypes::INT, OCDataTypes::INT, OCDataTypes::INT },
-		{ gen::OpcodeType::ADD_FACE, "add_face", 4, OCDataTypes::VEC3, OCDataTypes::VEC3, OCDataTypes::VEC3, OCDataTypes::VEC3 },
-		{ gen::OpcodeType::COMBINE_EDGES, "combine_edges", 2, OCDataTypes::INT, OCDataTypes::INT },
-		{ gen::OpcodeType::DEBUG_COLORS, "debug_colors", 0 },
-		{ gen::OpcodeType::EXTRUDE_FACE, "extrude_face", 2, OCDataTypes::INT, OCDataTypes::INT },
-		{ gen::OpcodeType::SCALE_FACE, "scale_face", 2, OCDataTypes::INT, OCDataTypes::FLOAT },
-		{ gen::OpcodeType::ADD_COLOR_CUBE, "add_color_cube", 3, OCDataTypes::VEC3, OCDataTypes::VEC3, OCDataTypes::COLOR },
-		{ gen::OpcodeType::ADD_CYLINDER, "add_cylinder", 5, OCDataTypes::VEC3, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::INT },
-		{ gen::OpcodeType::ADD_COL_CYLINDER, "add_col_cylinder", 6, OCDataTypes::VEC3, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::INT , OCDataTypes::COLOR },
-		{ gen::OpcodeType::MOVE_VERTEX, "move_vertex", 2, OCDataTypes::INT, OCDataTypes::VEC3},
-		{ gen::OpcodeType::ADD_HEXAGON, "add_hexagon", 1, OCDataTypes::FLOAT },
-		{ gen::OpcodeType::MOVE_FACE, "move_face", 2, OCDataTypes::INT, OCDataTypes::VEC3 },
-		{ gen::OpcodeType::EXTRUDE_EDGE_NORMAL, "extrude_edge_normal", 2, OCDataTypes::INT, OCDataTypes::FLOAT},
-		{ gen::OpcodeType::ADD_RING, "add_ring", 3, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::INT },
-		{ gen::OpcodeType::SELECT_COLOR, "select_color", 1, OCDataTypes::COLOR },
-		{ gen::OpcodeType::START_GROUP, "start_group", 0},
-		{ gen::OpcodeType::END_GROUP, "end_group", 0 },
-		{ gen::OpcodeType::ROTATE_GROUP, "rotate_group", 2, OCDataTypes::INT, OCDataTypes::VEC3 },
-		{ gen::OpcodeType::MOVE_GROUP, "move_group", 2, OCDataTypes::INT, OCDataTypes::VEC3 },
-		{ gen::OpcodeType::COPY_GROUP, "copy_group", 2, OCDataTypes::INT, OCDataTypes::VEC3 },		
-		{ gen::OpcodeType::ADD_TUBE, "add_tube", 6, OCDataTypes::VEC3, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::INT },
-		{ gen::OpcodeType::REMOVE_FACE, "remove_face", 1, OCDataTypes::INT},
-		{ gen::OpcodeType::CUT, "cut", 2, OCDataTypes::VEC3, OCDataTypes::VEC3 },		
-		{ gen::OpcodeType::ADD_SPHERE, "add_sphere", 4, OCDataTypes::VEC3, OCDataTypes::FLOAT, OCDataTypes::INT, OCDataTypes::INT },
-		{ gen::OpcodeType::EXTRUDE_EDGE, "extrude_edge", 2, OCDataTypes::INT, OCDataTypes::VEC3 },
+		{ "add_cube", &gen::add_cube, 2, OCDataTypes::VEC3, OCDataTypes::VEC3 },
+		{ "add_cube_rot", &gen::add_color_cube, 3, OCDataTypes::VEC3, OCDataTypes::VEC3, OCDataTypes::VEC3 },
+		{ "set_color", &gen::set_color, 2, 2, OCDataTypes::COLOR },
+		{ "slice_uniform", &gen::slice_uniform, 2, OCDataTypes::INT, OCDataTypes::INT },
+		{ "slice", &gen::slice, 3, OCDataTypes::INT, OCDataTypes::INT, OCDataTypes::INT },
+		{ "move_edge", &gen::move_edge, 2, 2, OCDataTypes::VEC3 },
+		{ "v_split", &gen::v_split, 2, OCDataTypes::INT, OCDataTypes::FLOAT },
+		{ "h_split", &gen::h_split, 2, OCDataTypes::INT, OCDataTypes::FLOAT },
+		{ "make_face", &gen::make_face, 4, OCDataTypes::INT, OCDataTypes::INT, OCDataTypes::INT, OCDataTypes::INT },
+		{ "add_face", &gen::add_face, 4, OCDataTypes::VEC3, OCDataTypes::VEC3, OCDataTypes::VEC3, OCDataTypes::VEC3 },
+		{ "combine_edges", &gen::combine_edges, 2, OCDataTypes::INT, OCDataTypes::INT },
+		{ "debug_colors", &gen::debug_colors, 0 },
+		{ "extrude_face", &gen::extrude_face, 2, OCDataTypes::INT, OCDataTypes::INT },
+		{ "scale_face", &gen::scale_face, 2, OCDataTypes::INT, OCDataTypes::FLOAT },
+		{ "add_color_cube", &gen::add_color_cube, 3, OCDataTypes::VEC3, OCDataTypes::VEC3, OCDataTypes::COLOR },
+		{ "add_cylinder", &gen::add_cylinder, 5, OCDataTypes::VEC3, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::INT },
+		{ "add_col_cylinder", &gen::add_colored_cylinder, 6, OCDataTypes::VEC3, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::INT, OCDataTypes::COLOR },
+		{ "move_vertex", &gen::move_vertex, 2, OCDataTypes::INT, OCDataTypes::VEC3 },
+		{ "add_hexagon", &gen::add_hexagon, 1, OCDataTypes::FLOAT },
+		{ "move_face", &gen::move_face, 2, OCDataTypes::INT, OCDataTypes::VEC3 },
+		{ "extrude_edge_normal", &gen::extrude_edge_normal, 2, OCDataTypes::INT, OCDataTypes::FLOAT },
+		{ "add_ring", &gen::add_ring, 3, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::INT },
+		{ "select_color", &gen::select_color, 1, OCDataTypes::COLOR },
+		{ "start_group", &gen::start_group, 0 },
+		{ "end_group", &gen::end_group, 0 },
+		{ "rotate_group", &gen::rotate_group, 2, OCDataTypes::INT, OCDataTypes::VEC3 },
+		{ "move_group", &gen::move_group, 2, OCDataTypes::INT, OCDataTypes::VEC3 },
+		{ "copy_group", &gen::copy_group, 2, OCDataTypes::INT, OCDataTypes::VEC3 },
+		{ "add_tube", &gen::add_tube, 6, OCDataTypes::VEC3, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::FLOAT, OCDataTypes::INT },
+		{  "remove_face", &gen::remove_face, 1, OCDataTypes::INT },
+		{ "cut", &gen::cut, 2, OCDataTypes::VEC3, OCDataTypes::VEC3 },
+		{ "add_sphere", &gen::add_sphere, 4, OCDataTypes::VEC3, OCDataTypes::FLOAT, OCDataTypes::INT, OCDataTypes::INT },
+		{ "extrude_edge", &gen::extrude_edge, 2, OCDataTypes::INT, OCDataTypes::VEC3 },
+		{ "expand_face", &gen::expand_face, 7, OCDataTypes::INT, OCDataTypes::INT, OCDataTypes::INT, OCDataTypes::INT, OCDataTypes::INT, OCDataTypes::FLOAT, OCDataTypes::FLOAT },
 	};
 
-	const OpcodeDefinition UNKNOWN_DEFINITION = OpcodeDefinition(gen::OpcodeType::UNKNOWN, "UNKNOWN");
+	const OpcodeDefinition UNKNOWN_DEFINITION = OpcodeDefinition("UNKNOWN");
 
 	// --------------------------------------------
 	// translate opcode
 	// --------------------------------------------
 	const char* translateOpcode(int t) {
-		if (t < OPCODE_MAPPING_COUNT) {
+		if (t >= 0 && t < OPCODE_MAPPING_COUNT) {
 			return OPCODE_MAPPING[t].name;
 		}
+		//if (t < OPCODE_MAPPING_COUNT) {
+			//return OPCODE_MAPPING[t].name;
+		//}
 		return UNKNOWN_DEFINITION.name;
 	}
 	
 	// --------------------------------------------
 	// find opcode by type
 	// --------------------------------------------
+	/*
 	gen::OpcodeType find_opcode_type(const char* name) {
+		IdString hash = string::murmur_hash(name);
 		for (int i = 0; i < OPCODE_MAPPING_COUNT; ++i) {
-			if (strcmp(OPCODE_MAPPING[i].name, name) == 0) {
+			if (OPCODE_MAPPING[i].hash == hash) {
 				return OPCODE_MAPPING[i].type;
 			}
 		}
 		return gen::OpcodeType::UNKNOWN;
 	}
-
+	*/
 	// --------------------------------------------
 	// find opcode by name
 	// --------------------------------------------
-	OpcodeDefinition find_opcode(const char* name) {
+	OpcodeDefinition find_opcode_definition(const char* name) {
+		IdString hash = string::murmur_hash(name);
 		for (int i = 0; i < OPCODE_MAPPING_COUNT; ++i) {
-			if (strcmp(OPCODE_MAPPING[i].name, name) == 0) {
+			if (OPCODE_MAPPING[i].hash == hash) {
 				return OPCODE_MAPPING[i];
 			}
 		}
 		return UNKNOWN_DEFINITION;
+	}
+
+	// --------------------------------------------
+	// find opcode by name
+	// --------------------------------------------
+	int find_definition_index(const char* name) {
+		IdString hash = string::murmur_hash(name);
+		for (int i = 0; i < OPCODE_MAPPING_COUNT; ++i) {
+			if (OPCODE_MAPPING[i].hash == hash) {
+				return i;
+			}
+		}
+		return -1;
 	}
 
 	// --------------------------------------------
 	// find opcode by type
 	// --------------------------------------------
-	OpcodeDefinition find_opcode(int type) {
+	/*
+	int find_opcode(int type) {
 		for (int i = 0; i < OPCODE_MAPPING_COUNT; ++i) {
 			if (OPCODE_MAPPING[i].type == type) {
-				return OPCODE_MAPPING[i];
+				return i;
 			}
 		}
-		return UNKNOWN_DEFINITION;
+		return -1;
 	}
-
+	*/
 	// --------------------------------------------
 	// smooth position
 	// --------------------------------------------
@@ -733,19 +770,20 @@ namespace ds {
 		// ----------------------------------------------
 		// expand face
 		// ----------------------------------------------
-		void MeshGen::expand_face(uint16_t center_face, uint16_t* adjacents, float factor) {
+		void MeshGen::expand_face(uint16_t center_face, uint16_t* adjacents, float w, float h) {
 			v3 center = get_center(center_face);
 			const Face& f = _faces[center_face];
 			int indices[] = { 0, 1, 1, 2, 2, 3, 3, 0 };
 			int edge_indices[] = { 2, 3, 0, 1 };
+			float wh[] = { h, w, h, w };
 			int ei = f.edge;
 			v3 d[4];
 			for (int i = 0; i < 4; ++i) {
 				const Edge& e0 = _edges[ei];
 				const Edge& e1 = _edges[e0.next];
 				v3 ce = (_vertices[e0.vert_index] + _vertices[e1.vert_index]) / 2.0f;
-				d[i] = normalize(ce - center) * factor;
-				LOG << "CE: " << DBG_V3(ce) << " D: " << DBG_V3(d[i]);
+				d[i] = normalize(ce - center) * wh[i];
+				LOG << "CE: " << DBG_V3(ce);// << " D: " << DBG_V3(d[i]);
 				ei = e0.next;
 			}
 
@@ -754,6 +792,7 @@ namespace ds {
 				move_edge(eidx, d[i]);
 				int neidx = get_edge_index(adjacents[indices[i * 2 + 1]], edge_indices[i]);
 				move_edge(neidx, d[i]);
+				LOG << "EIDX: " << eidx << " NEIDX: " << neidx << " D: " << DBG_V3(d[i]);
 			}
 		}
 
@@ -949,12 +988,12 @@ namespace ds {
 					faces[i] = my_faces[i];
 				}
 			}
-			MeshGenOpcode op;
-			op.type = OpcodeType::ADD_COLOR_CUBE;
-			op.offset = _store.add_data(position);
+			//MeshGenOpcode op;
+			//op.type = OpcodeType::ADD_COLOR_CUBE;
+			int offset = _store.add_data(position);
 			_store.add_data(size);
 			_store.add_data(c);
-			record(op);
+			record("add_color_cube",offset);
 			return my_faces[0];
 		}
 
@@ -1412,6 +1451,16 @@ namespace ds {
 			_opcodes.push_back(opcode);
 		}
 
+		void MeshGen::record(const char* command, int offset) {
+			int def_idx = find_definition_index(command);
+			if (def_idx != -1) {
+				MeshGenOpcode opcode;
+				opcode.index = def_idx;
+				opcode.offset = offset;
+				_opcodes.push_back(opcode);
+			}
+		}
+
 		int MeshGen::startGroup() {
 			_currentGroup = _groupCounter++;
 			return _currentGroup;
@@ -1430,8 +1479,9 @@ namespace ds {
 			FILE* f = fopen(buffer, "w");
 			for (uint32_t i = 0; i < _opcodes.size(); ++i) {
 				const MeshGenOpcode& op = _opcodes[i];
-				OpcodeDefinition def = find_opcode(op.type);
-				fprintf(f, "%s ", translateOpcode(op.type));
+				//int def_idx = op.index;// find_opcode(op.type);
+				const OpcodeDefinition& def = OPCODE_MAPPING[op.index];
+				fprintf(f, "%s ", def.name);
 				//LOG << i << " : " << translateOpcode(op.type) << " args: " << def.args;
 				int of = op.offset;
 				if (of != -1) {
@@ -1462,282 +1512,16 @@ namespace ds {
 		}
 
 		void MeshGen::remove_face(uint16_t face_index) {
+			assert(face_index < _faces.size());
 			_faces[face_index].deleted = true;
 		}
 
 		void MeshGen::executeOpcodes(const Array<MeshGenOpcode>& opcodes, const DataStore& store) {
 			for (uint32_t i = 0; i < opcodes.size(); ++i) {
 				const MeshGenOpcode& op = opcodes[i];
-				switch (op.type) {
-				case OpcodeType::ADD_CUBE: {
-					v3 p;
-					v3 s;
-					store.get_data(op, 0, &p);
-					store.get_data(op, 3, &s);
-					add_cube(p, s);
-					break;
-				}
-				case OpcodeType::ADD_COLOR_CUBE: {
-					v3 p;
-					v3 s;
-					Color clr;
-					store.get_data(op, 0, &p);
-					store.get_data(op, 3, &s);
-					store.get_data(op, 6, &clr);
-					add_cube(p, s, clr);
-					break;
-				}
-				case OpcodeType::SLICE_UNIFORM: {
-					uint16_t face_index = 0;
-					int segments = 0;
-					store.get_data(op, 0, &face_index);
-					store.get_data(op, 1, &segments);
-					slice(face_index, segments);
-					break;
-				}
-				case OpcodeType::SLICE: {
-					uint16_t face_index = 0;
-					uint16_t stepsX = 0;
-					uint16_t stepsY = 0;
-					store.get_data(op, 0, &face_index);
-					store.get_data(op, 1, &stepsX);
-					store.get_data(op, 2, &stepsY);
-					slice(face_index, stepsX, stepsY);
-					break;
-				}
-				case OpcodeType::SET_COLOR: {
-					uint16_t face_index = 0;
-					Color color;
-					store.get_data(op, 0, &face_index);
-					store.get_data(op, 1, &color);
-					set_color(face_index, color);
-					break;
-				}
-				case OpcodeType::MOVE_EDGE: {
-					uint16_t edge_index = 0;
-					v3 p;
-					store.get_data(op, 0, &edge_index);
-					store.get_data(op, 1, &p);
-					move_edge(edge_index, p);
-					break;
-				}
-				case OpcodeType::V_SPLIT: {
-					uint16_t edge_index = 0;
-					float factor = 0.5f;
-					store.get_data(op, 0, &edge_index);
-					store.get_data(op, 1, &factor);
-					vsplit_edge(edge_index, factor);
-					break;
-				}
-				case OpcodeType::H_SPLIT: {
-					uint16_t edge_index = 0;
-					float factor = 0.5f;
-					store.get_data(op, 0, &edge_index);
-					store.get_data(op, 1, &factor);
-					hsplit_edge(edge_index, factor);
-					break;
-				}
-				case OpcodeType::MAKE_FACE: {
-					uint16_t edges[4];
-					for (int i = 0; i < 4; ++i) {
-						store.get_data(op, i, &edges[i]);
-					}
-					make_face(edges);
-					break;
-				}
-				case OpcodeType::ADD_FACE: {
-					v3 p[4];
-					for (int i = 0; i < 4; ++i) {
-						store.get_data(op, i * 3, &p[i]);
-					}
-					add_face(p[0], p[1], p[2], p[3]);
-					break;
-				}
-				case OpcodeType::COMBINE_EDGES: {
-					uint16_t e0;
-					uint16_t e1;
-					store.get_data(op, 0, &e0);
-					store.get_data(op, 1, &e1);
-					combine_edges(e0, e1);
-					break;
-				}
-				case OpcodeType::EXTRUDE_FACE: {
-					uint16_t face;
-					float factor;
-					store.get_data(op, 0, &face);
-					store.get_data(op, 1, &factor);
-					extrude_face(face, factor);
-					break;
-				}
-				case OpcodeType::SCALE_FACE: {
-					uint16_t face;
-					float factor;
-					store.get_data(op, 0, &face);
-					store.get_data(op, 1, &factor);
-					scale_face(face, factor);
-					break;
-				}
-				case OpcodeType::ADD_CYLINDER: {
-					v3 p;
-					float bottom;
-					float top;
-					float height;
-					uint16_t segments;
-					store.get_data(op, 0, &p);
-					store.get_data(op, 3, &bottom);
-					store.get_data(op, 4, &top);
-					store.get_data(op, 5, &height);
-					store.get_data(op, 6, &segments);
-					create_cylinder(p, bottom, top, height, segments, _selectedColor);
-					break;
-				}
-				case OpcodeType::ADD_COL_CYLINDER: {
-					v3 p;
-					float bottom;
-					float top;
-					float height;
-					uint16_t segments;
-					Color clr;
-					store.get_data(op, 0, &p);
-					store.get_data(op, 3, &bottom);
-					store.get_data(op, 4, &top);
-					store.get_data(op, 5, &height);
-					store.get_data(op, 6, &segments);
-					store.get_data(op, 7, &clr);
-					create_cylinder(p, bottom, top, height, segments, clr);
-					break;
-				}
-				case OpcodeType::DEBUG_COLORS: {
-					debug_colors();
-					break;
-				}
-				case OpcodeType::MOVE_VERTEX: {
-					uint16_t vert_index;
-					v3 p;
-					store.get_data(op, 0, &vert_index);
-					store.get_data(op, 1, &p);
-					move_vertex(vert_index, p);
-					break;
-				}
-				case OpcodeType::EXTRUDE_EDGE_NORMAL: {
-					uint16_t edge_index;
-					float factor = 0.0f;
-					store.get_data(op, 0, &edge_index);
-					store.get_data(op, 1, &factor);
-					extrude_edge(edge_index, factor);
-					break;
-				}
-				case OpcodeType::EXTRUDE_EDGE: {
-					uint16_t edge_index;
-					v3 p;
-					store.get_data(op, 0, &edge_index);
-					store.get_data(op, 1, &p);
-					extrude_edge(edge_index, p);
-					break;
-				}
-				case OpcodeType::MOVE_FACE: {
-					uint16_t vert_index;
-					v3 p;
-					store.get_data(op, 0, &vert_index);
-					store.get_data(op, 1, &p);
-					move_face(vert_index, p);
-					break;
-				}
-				case OpcodeType::REMOVE_FACE: {
-					uint16_t vert_index;
-					store.get_data(op, 0, &vert_index);
-					remove_face(vert_index);
-					break;
-				}
-				case OpcodeType::ADD_HEXAGON: {
-					float radius;
-					store.get_data(op, 0, &radius);
-					create_hexagon(radius);
-					break;
-				}
-				case OpcodeType::SELECT_COLOR: {
-					store.get_data(op, 0, &_selectedColor);
-					break;
-				}
-				case OpcodeType::ADD_RING: {
-					float radius;
-					float width;
-					uint16_t segments;
-					store.get_data(op, 0, &radius);
-					store.get_data(op, 1, &width);
-					store.get_data(op, 2, &segments);
-					create_ring(radius, width, segments);
-					break;
-				}
-				case OpcodeType::START_GROUP: {
-					startGroup();
-					break;
-				}
-				case OpcodeType::END_GROUP: {
-					endGroup();
-					break;
-				}
-				case OpcodeType::ROTATE_GROUP: {
-					int group;
-					v3 p;
-					store.get_data(op, 0, &group);
-					store.get_data(op, 1, &p);
-					for (int i = 0; i < 3; ++i) {
-						p.data[i] = DEGTORAD(p[i]);
-					}
-					rotateGroup(group, p);
-					break;
-				}
-				case OpcodeType::MOVE_GROUP: {
-					int group;
-					v3 p;
-					store.get_data(op, 0, &group);
-					store.get_data(op, 1, &p);
-					moveGroup(group, p);
-					break;
-				}
-				case OpcodeType::CUT: {					
-					v3 p;
-					v3 n;
-					store.get_data(op, 0, &p);
-					store.get_data(op, 3, &n);
-					cut(p, n, false);
-					break;
-				}
-				case OpcodeType::COPY_GROUP: {
-					int group;
-					v3 p;
-					store.get_data(op, 0, &group);
-					store.get_data(op, 1, &p);
-					copyGroup(group, p);
-					break;
-				}
-				case OpcodeType::ADD_TUBE: {
-					v3 p;
-					float bottomRadius;
-					float topRadius;
-					float height;
-					float width;
-					uint16_t segments;
-					store.get_data(op, 0, &p);
-					store.get_data(op, 3, &bottomRadius);
-					store.get_data(op, 4, &topRadius);
-					store.get_data(op, 5, &height);
-					store.get_data(op, 6, &width);
-					store.get_data(op, 7, &segments);
-					create_tube(p, bottomRadius, topRadius, height, width, segments);
-				}
-				case OpcodeType::ADD_SPHERE: {
-					v3 p;
-					float radius;
-					uint16_t segments;
-					uint16_t stacks;
-					store.get_data(op, 0, &p);
-					store.get_data(op, 3, &radius);
-					store.get_data(op, 4, &segments);
-					store.get_data(op, 5, &stacks);
-					create_sphere(p, radius, segments, stacks);
-				}
+				if (op.index != -1) {
+					const OpcodeDefinition& def = OPCODE_MAPPING[op.index];
+					(*def.func)(this, op, store);
 				}
 			}
 		}
@@ -1804,16 +1588,20 @@ namespace ds {
 						}
 						// check args
 						bool valid = true;
-						const OpcodeDefinition& def = find_opcode(oc.type);
-						if (def.type == OpcodeType::UNKNOWN) {
+						int def_idx = find_opcode(oc.type);		
+						oc.index = def_idx;
+						if (def_idx == -1) {
 							LOGE << "Unknown opcode: " << name;
 							valid = false;
 						}
-						if (valid && vars != def.var_count) {
-							LOGE << "Missing argument - opcode: " << name << " required: " << def.var_count << " but got: " << vars;
-							valid = false;
+						else {
+							const OpcodeDefinition& def = OPCODE_MAPPING[def_idx];
+							if (valid && vars != def.var_count) {
+								LOGE << "Missing argument - opcode: " << name << " required: " << def.var_count << " but got: " << vars;
+								valid = false;
+							}
 						}
-						if ( valid) {
+						if (valid) {
 							tmp_opcodes.push_back(oc);
 						}
 					}
@@ -1952,7 +1740,7 @@ namespace ds {
 		// ----------------------------------------------
 		// create ring
 		// ----------------------------------------------
-		void MeshGen::create_cylinder(const v3& pos, float bottomRadius, float topRadius, float height, uint16_t segments, const Color& clr) {
+		void MeshGen::create_cylinder(const v3& pos, float bottomRadius, float topRadius, float height, uint16_t segments) {
 			float angleStep = TWO_PI / static_cast<float>(segments);
 			v3 p[4];
 			float angle = 0.0f;
@@ -1966,7 +1754,7 @@ namespace ds {
 				p[2] = pos + v3(bottomRadius * cos(next_angle), -hh, bottomRadius * sin(next_angle));
 				p[3] = pos + v3(bottomRadius * cos(angle), -hh, bottomRadius * sin(angle));
 				uint16_t fi = add_face(p);
-				set_color(fi, clr);
+				set_color(fi, _selectedColor);
 				topPoints[i] = p[0];
 				bottomPoints[i] = p[3];
 				angle += angleStep;
@@ -1991,7 +1779,7 @@ namespace ds {
 				p[2] = topPoints[(cnt + 2) % segments];
 				p[3] = topPoints[(cnt + 1) % segments];
 				uint16_t fi = add_face(p);
-				set_color(fi, clr);
+				set_color(fi, _selectedColor);
 				cnt += 2;
 			}
 			cnt = 0;
@@ -2001,7 +1789,7 @@ namespace ds {
 				p[2] = bottomPoints[(cnt + 2) % segments];				
 				p[3] = bottomCenter;
 				uint16_t fi = add_face(p);
-				set_color(fi, clr);
+				set_color(fi, _selectedColor);
 				cnt += 2;
 			}
 			delete[] bottomPoints;
@@ -2012,7 +1800,6 @@ namespace ds {
 			_store.add_data(topRadius);
 			_store.add_data(height);
 			_store.add_data(segments);
-			_store.add_data(clr);
 			record(op);
 		}
 
@@ -2129,6 +1916,301 @@ namespace ds {
 				uint16_t f = add_face(p);
 				set_color(f,clr[i]);				
 			}
+		}
+
+		// ----------------------------------------------
+		// functions
+		// ----------------------------------------------
+
+		// ----------------------------------------------
+		// add cube
+		// ----------------------------------------------
+		void add_cube(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			v3 p;
+			v3 s;
+			store.get_data(op, 0, &p);
+			store.get_data(op, 3, &s);
+			gen->add_cube(p, s);
+		}
+
+		void add_color_cube(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			v3 p;
+			v3 s;
+			Color clr;
+			store.get_data(op, 0, &p);
+			store.get_data(op, 3, &s);
+			store.get_data(op, 6, &clr);
+			gen->add_cube(p, s, clr);
+		}
+
+		void slice_uniform(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			uint16_t face_index = 0;
+			int segments = 0;
+			store.get_data(op, 0, &face_index);
+			store.get_data(op, 1, &segments);
+			gen->slice(face_index, segments);
+		}
+
+		void slice(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			uint16_t face_index = 0;
+			uint16_t stepsX = 0;
+			uint16_t stepsY = 0;
+			store.get_data(op, 0, &face_index);
+			store.get_data(op, 1, &stepsX);
+			store.get_data(op, 2, &stepsY);
+			gen->slice(face_index, stepsX, stepsY);
+		}
+
+		void set_color(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			uint16_t face_index = 0;
+			Color color;
+			store.get_data(op, 0, &face_index);
+			store.get_data(op, 1, &color);
+			gen->set_color(face_index, color);
+		}
+
+		void move_edge(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			uint16_t edge_index = 0;
+			v3 p;
+			store.get_data(op, 0, &edge_index);
+			store.get_data(op, 1, &p);
+			gen->move_edge(edge_index, p);
+		}
+
+		void v_split(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			uint16_t edge_index = 0;
+			float factor = 0.5f;
+			store.get_data(op, 0, &edge_index);
+			store.get_data(op, 1, &factor);
+			gen->vsplit_edge(edge_index, factor);
+		}
+
+		void h_split(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			uint16_t edge_index = 0;
+			float factor = 0.5f;
+			store.get_data(op, 0, &edge_index);
+			store.get_data(op, 1, &factor);
+			gen->hsplit_edge(edge_index, factor);
+		}
+
+		void make_face(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			uint16_t edges[4];
+			for (int i = 0; i < 4; ++i) {
+				store.get_data(op, i, &edges[i]);
+			}
+			gen->make_face(edges);
+		}
+
+		void add_face(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			v3 p[4];
+			for (int i = 0; i < 4; ++i) {
+				store.get_data(op, i * 3, &p[i]);
+			}
+			gen->add_face(p[0], p[1], p[2], p[3]);
+		}
+
+		void combine_edges(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			uint16_t e0;
+			uint16_t e1;
+			store.get_data(op, 0, &e0);
+			store.get_data(op, 1, &e1);
+			gen->combine_edges(e0, e1);
+		}
+
+		void extrude_face(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			uint16_t face;
+			float factor;
+			store.get_data(op, 0, &face);
+			store.get_data(op, 1, &factor);
+			gen->extrude_face(face, factor);
+		}
+
+		void scale_face(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			uint16_t face;
+			float factor;
+			store.get_data(op, 0, &face);
+			store.get_data(op, 1, &factor);
+			gen->scale_face(face, factor);
+		}
+
+		void add_cylinder(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			v3 p;
+			float bottom;
+			float top;
+			float height;
+			uint16_t segments;
+			store.get_data(op, 0, &p);
+			store.get_data(op, 3, &bottom);
+			store.get_data(op, 4, &top);
+			store.get_data(op, 5, &height);
+			store.get_data(op, 6, &segments);
+			gen->create_cylinder(p, bottom, top, height, segments);// , _selectedColor);
+		}
+
+		void add_colored_cylinder(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			v3 p;
+			float bottom;
+			float top;
+			float height;
+			uint16_t segments;
+			Color clr;
+			store.get_data(op, 0, &p);
+			store.get_data(op, 3, &bottom);
+			store.get_data(op, 4, &top);
+			store.get_data(op, 5, &height);
+			store.get_data(op, 6, &segments);
+			store.get_data(op, 7, &clr);
+			gen->create_cylinder(p, bottom, top, height, segments);
+		}
+
+		void debug_colors(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			gen->debug_colors();
+		}
+
+		void move_vertex(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			uint16_t vert_index;
+			v3 p;
+			store.get_data(op, 0, &vert_index);
+			store.get_data(op, 1, &p);
+			gen->move_vertex(vert_index, p);
+		}
+
+		void extrude_edge_normal(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			uint16_t edge_index;
+			float factor = 0.0f;
+			store.get_data(op, 0, &edge_index);
+			store.get_data(op, 1, &factor);
+			gen->extrude_edge(edge_index, factor);
+		}
+
+		void extrude_edge(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			uint16_t edge_index;
+			v3 p;
+			store.get_data(op, 0, &edge_index);
+			store.get_data(op, 1, &p);
+			gen->extrude_edge(edge_index, p);
+		}
+
+		void move_face(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			uint16_t vert_index;
+			v3 p;
+			store.get_data(op, 0, &vert_index);
+			store.get_data(op, 1, &p);
+			gen->move_face(vert_index, p);
+		}
+
+		void remove_face(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			uint16_t vert_index;
+			store.get_data(op, 0, &vert_index);
+			gen->remove_face(vert_index);
+		}
+
+		void add_hexagon(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			float radius;
+			store.get_data(op, 0, &radius);
+			gen->create_hexagon(radius);
+		}
+
+		void select_color(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			Color clr;
+			store.get_data(op, 0, &clr);
+			gen->set_color_selection(clr);
+		}
+
+		void add_ring(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			float radius;
+			float width;
+			uint16_t segments;
+			store.get_data(op, 0, &radius);
+			store.get_data(op, 1, &width);
+			store.get_data(op, 2, &segments);
+			gen->create_ring(radius, width, segments);
+		}
+
+		void start_group(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			gen->startGroup();
+		}
+
+		void end_group(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			gen->endGroup();
+		}
+
+		void rotate_group(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			int group;
+			v3 p;
+			store.get_data(op, 0, &group);
+			store.get_data(op, 1, &p);
+			for (int i = 0; i < 3; ++i) {
+				p.data[i] = DEGTORAD(p[i]);
+			}
+			gen->rotateGroup(group, p);
+		}
+
+		void move_group(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			int group;
+			v3 p;
+			store.get_data(op, 0, &group);
+			store.get_data(op, 1, &p);
+			gen->moveGroup(group, p);
+		}
+
+		void cut(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			v3 p;
+			v3 n;
+			store.get_data(op, 0, &p);
+			store.get_data(op, 3, &n);
+			gen->cut(p, n, false);
+		}
+
+		void copy_group(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			int group;
+			v3 p;
+			store.get_data(op, 0, &group);
+			store.get_data(op, 1, &p);
+			gen->copyGroup(group, p);
+		}
+
+		void add_tube(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			v3 p;
+			float bottomRadius;
+			float topRadius;
+			float height;
+			float width;
+			uint16_t segments;
+			store.get_data(op, 0, &p);
+			store.get_data(op, 3, &bottomRadius);
+			store.get_data(op, 4, &topRadius);
+			store.get_data(op, 5, &height);
+			store.get_data(op, 6, &width);
+			store.get_data(op, 7, &segments);
+			gen->create_tube(p, bottomRadius, topRadius, height, width, segments);
+		}
+
+		void expand_face(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			uint16_t center;
+			uint16_t adjacents[4];
+			float w;
+			float h;
+			store.get_data(op, 0, &center);
+			store.get_data(op, 1, &adjacents[0]);
+			store.get_data(op, 2, &adjacents[1]);
+			store.get_data(op, 3, &adjacents[2]);
+			store.get_data(op, 4, &adjacents[3]);
+			store.get_data(op, 5, &w);
+			store.get_data(op, 6, &h);
+			gen->expand_face(center, adjacents, w, h);
+		}
+
+		void add_sphere(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store) {
+			v3 p;
+			float radius;
+			uint16_t segments;
+			uint16_t stacks;
+			store.get_data(op, 0, &p);
+			store.get_data(op, 3, &radius);
+			store.get_data(op, 4, &segments);
+			store.get_data(op, 5, &stacks);
+			gen->create_sphere(p, radius, segments, stacks);
 		}
 
 	}	

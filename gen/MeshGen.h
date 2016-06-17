@@ -63,7 +63,7 @@ namespace ds {
 		Face() : edge(0), n(0, 0, 0), color(Color::WHITE), selected(false), group(-1), deleted(false) {}
 
 	};
-
+	/*
 	enum OpcodeType {
 		ADD_CUBE,
 		ADD_CUBE_ROT,
@@ -98,9 +98,10 @@ namespace ds {
 		REMOVE_FACE,
 		CUT,
 		ADD_SPHERE,
+		EXPAND_FACE,
 		UNKNOWN
 	};
-
+	*/
 	// ---------------------------------------
 	// MeshGenOpcode
 	// ---------------------------------------
@@ -108,8 +109,9 @@ namespace ds {
 
 		int type;
 		int offset;
+		int index;
 
-		MeshGenOpcode() : type(OpcodeType::UNKNOWN), offset(-1) {}
+		MeshGenOpcode() : type(OpcodeType::UNKNOWN), offset(-1) , index(-1) {}
 	};
 
 	// ---------------------------------------
@@ -217,7 +219,7 @@ namespace ds {
 		void move_face(uint16_t faceIndex, const v3& position);
 		void texture_face(uint16_t faceIndex, const Texture& t);
 		void scale_face(uint16_t faceIndex, float scale);
-		void expand_face(uint16_t center_face, uint16_t* adjacents, float scale);
+		void expand_face(uint16_t center_face, uint16_t* adjacents, float w,float h);
 		v3 get_center(uint16_t faceIndex);
 		int slice(uint16_t face_index, int segments, uint16_t* faces = 0, int max = 0);
 		int slice(uint16_t face_index, int stepsX, int stepsY, uint16_t* faces = 0, int max = 0);
@@ -237,7 +239,7 @@ namespace ds {
 		// objects
 		void create_ring(float radius, float width, uint16_t segments);
 		void create_hexagon(float radius);
-		void create_cylinder(const v3& pos, float bottomRadius, float topRadius, float height, uint16_t segments, const Color& clr = Color::WHITE);
+		void create_cylinder(const v3& pos, float bottomRadius, float topRadius, float height, uint16_t segments);
 		void create_tube(const v3& pos, float bottomRadius, float topRadius, float height, float width, uint16_t segments);
 		uint16_t create_torus(const v3& position,float radius, float width, float depth, uint16_t segments);
 		void create_grid(const v2& size, int stepsX, int stepsY);
@@ -279,6 +281,7 @@ namespace ds {
 		void executeOpcodes(const Array<MeshGenOpcode>& opcodes, const DataStore& store);
 		// recording
 		void record(const MeshGenOpcode& opcode);
+		void record(const char* command, int offset);
 		MeshGen(const MeshGen& other) {}
 		void calculate_normal(Face* f);
 		int add_vertex(const v3& pos);
@@ -295,6 +298,45 @@ namespace ds {
 		int _currentGroup;
 		int _groupCounter;
 	};
+
+	typedef void(*MeshGenFunc)(MeshGen*, const MeshGenOpcode&, const DataStore&);
+	// ----------------------------------------------------------
+	// mesh gen functions
+	// ----------------------------------------------------------
+	void add_cube(MeshGen*, const MeshGenOpcode&, const DataStore& store);
+	void add_color_cube(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void slice_uniform(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void slice(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void set_color(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void move_edge(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void v_split(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void h_split(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void make_face(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void add_face(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void combine_edges(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void extrude_face(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void scale_face(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void add_cylinder(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void add_colored_cylinder(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void debug_colors(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void move_vertex(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void extrude_edge_normal(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void extrude_edge(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void move_face(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void remove_face(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void add_hexagon(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void select_color(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void add_ring(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void start_group(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void end_group(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void rotate_group(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void move_group(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void cut(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void copy_group(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void add_tube(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void expand_face(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+	void add_sphere(MeshGen* gen, const MeshGenOpcode& op, const DataStore& store);
+
 
 	}
 }
