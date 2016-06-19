@@ -24,6 +24,8 @@ namespace ds {
 		void write(const v3& v);
 		void write(const v2& v);
 		void write(const Color& color);
+		void read(int* v);
+		void read(uint32_t* v);
 	private:
 		FILE* _file;
 		FileMode _mode;

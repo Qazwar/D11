@@ -107,11 +107,10 @@ namespace ds {
 	// ---------------------------------------
 	struct MeshGenOpcode {
 
-		int type;
 		int offset;
 		int index;
 
-		MeshGenOpcode() : type(OpcodeType::UNKNOWN), offset(-1) , index(-1) {}
+		MeshGenOpcode() : offset(-1) , index(-1) {}
 	};
 
 	// ---------------------------------------
@@ -230,7 +229,7 @@ namespace ds {
 		uint16_t combine_edges(uint16_t edge0, uint16_t edge1);
 		uint16_t extrude_edge(uint16_t edgeIndex, const v3& pos);
 		uint16_t extrude_edge(uint16_t edgeIndex, float factor);
-		uint16_t extrude_face(uint16_t faceIndex,float factor);
+		uint16_t extrude_face(uint16_t faceIndex,float factor, uint16_t* faces = 0);
 		void remove_face(uint16_t face_index);
 		void cut(const v3& p, const v3& n, bool fill = true);
 		const Color& get_color(uint16_t face_index) const;

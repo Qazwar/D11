@@ -1,5 +1,6 @@
 #pragma once
 #include <Vector.h>
+#include <Point.h>
 #include "..\renderer\BitmapFont.h"
 #include "..\renderer\render_types.h"
 #include "..\lib\collection_types.h"
@@ -141,6 +142,8 @@ namespace gui {
 	void InputInt(const char* label, int* v,int minValue, int maxValue, int step);
 
 	void InputVec2(const char* label, v2* v);
+
+	void Input(const char* label, p2i* v);
 
 	void InputVec3(const char* label, v3* v);
 

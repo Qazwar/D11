@@ -394,7 +394,7 @@ namespace ds {
 			assert(ri.type == ResourceType::UNKNOWN);
 			int index = _resCtx->resources.size();
 			Mesh* mesh = new Mesh;
-			obj::parse(descriptor.fileName, mesh);
+			mesh->load(descriptor.fileName);
 			MeshResource* cbr = new MeshResource(mesh);
 			_resCtx->resources.push_back(cbr);
 			IdString hash = string::murmur_hash(name);
@@ -1123,8 +1123,8 @@ namespace ds {
 			reader.get(childIndex, "position", &descriptor.position);
 			reader.get(childIndex, "scale", &descriptor.scale);
 			reader.get(childIndex, "rotation", &descriptor.rotation);
-			descriptor.fileName = reader.get_string(childIndex, "fileName");
 			const char* name = reader.get_string(childIndex, "name");
+			descriptor.fileName = name;
 			createMesh(name, descriptor);
 		}
 
@@ -1202,25 +1202,43 @@ namespace ds {
 		}
 
 		// ------------------------------------------------------
-		// parse json file
+		// parse specific json file
 		// ------------------------------------------------------
-		void parseJSONFile() {
+		void parseJSONFile(const char* fileName) {
 			JSONReader reader;
-			bool ret = reader.parse("content\\resources.json");
+			char buffer[256];
+			IdString importHash = string::murmur_hash("import");
+			sprintf_s(buffer, 256, "content\\%s", fileName);
+			LOG << "Loading resource file: " << fileName;
+			bool ret = reader.parse(buffer);
 			assert(ret);
 			int children[256];
 			int num = reader.get_categories(children, 256);
 			for (int i = 0; i < num; ++i) {
 				IdString hash = string::murmur_hash(reader.get_category_name(i));
-				if (_resCtx->parsers.find(hash) != _resCtx->parsers.end()) {
-					ParseFunc f = _resCtx->parsers[hash];
-					LOG << "Parsing '" << reader.get_category_name(i) << "'";
-					(*f)(reader, i);
+				// special category to import other files
+				if (hash == importHash) {
+					const char* fileName = reader.get_string(children[i], "file");
+					parseJSONFile(fileName);
 				}
 				else {
-					LOG << "No matching parser for '" << reader.get_category_name(i) << "'";
+					if (_resCtx->parsers.find(hash) != _resCtx->parsers.end()) {
+						ParseFunc f = _resCtx->parsers[hash];
+						LOG << "Parsing '" << reader.get_category_name(i) << "'";
+						(*f)(reader, i);
+					}
+					else {
+						LOG << "No matching parser for '" << reader.get_category_name(i) << "'";
+					}
 				}
 			}
+		}
+
+		// ------------------------------------------------------
+		// parse json file
+		// ------------------------------------------------------
+		void parseJSONFile() {
+			parseJSONFile("resources.json");
 		}
 
 		uint32_t getIndex(RID rid, ResourceType type) {

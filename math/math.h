@@ -71,4 +71,8 @@ namespace math {
 	// get random between 0 - 100 and returns true if below min
 	// -------------------------------------------------------
 	bool chanceRoll(int min);
+
+	v3 min_val(const v3& r, const v3& l);
+
+	v3 max_val(const v3& r, const v3& l);
 }

@@ -82,5 +82,16 @@ namespace ds {
 		fwrite(&v.a, sizeof(float), 1, _file);
 	}
 
+	void BinaryFile::read(int* v) {
+		assert(_file != 0);
+		assert(_mode == FileMode::READ);
+		fread(v, sizeof(int), 1, _file);
+	}
+
+	void BinaryFile::read(uint32_t* v) {
+		assert(_file != 0);
+		assert(_mode == FileMode::READ);
+		fread(v, sizeof(uint32_t), 1, _file);
+	}
 	
 }

@@ -1078,6 +1078,18 @@ namespace gui {
 	}
 
 	// -------------------------------------------------------
+	// input p2i
+	// -------------------------------------------------------
+	void Input(const char* label, p2i* v) {
+		HashedId id = HashPointer(v);
+		v2 p = guiContext->position;
+		guiContext->addText(p, label);
+		InputScalar(id, 0, &v->x);
+		InputScalar(id, 1, &v->y);
+		guiContext->nextPosition();
+	}
+
+	// -------------------------------------------------------
 	// input color
 	// -------------------------------------------------------
 	void InputColor(const char* label, ds::Color* v) {

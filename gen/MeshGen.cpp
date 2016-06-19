@@ -462,14 +462,12 @@ namespace ds {
 		// ----------------------------------------------
 		// extrude face
 		// ----------------------------------------------
-		uint16_t MeshGen::extrude_face(uint16_t face_index, float factor) {
+		uint16_t MeshGen::extrude_face(uint16_t face_index, float factor, uint16_t* faces) {
+			int cnt = 0;
 			const Face& f = _faces[face_index];
 			int ei = f.edge;
 			v3 p[4];
 			v3 n = f.n * factor;
-			//if (factor < 0.0f) {
-				//n *= -1.0f;
-			//}
 			for (int i = 0; i < 4; ++i) {
 				Edge& e = _edges[ei];
 				p[i] = _vertices[e.vert_index];
@@ -477,24 +475,27 @@ namespace ds {
 				ei = e.next;
 			}
 			uint16_t newFace = add_face(p);
+			if (faces != 0) {
+				faces[cnt++] = newFace;
+			}
 			set_color(newFace, _selectedColor);
 			const Face& nf = _faces[newFace];
-			//LOG << "new face: " << newFace;
 			ei = f.edge;
 			int nei = nf.edge;
 			for (int i = 0; i < 4; ++i) {
 				Edge& e = _edges[ei];
 				Edge& ne = _edges[nei];
 				uint16_t nnf = combine_edges(ei,nei);
+				if (faces != 0) {
+					faces[cnt++] = nnf;
+				}
 				set_color(nnf, _selectedColor);
 				ei = e.next;
 				nei = ne.next;
 			}
-			MeshGenOpcode op;
-			op.type = OpcodeType::EXTRUDE_FACE;
-			op.offset = _store.add_data(face_index);
+			int offset = _store.add_data(face_index);
 			_store.add_data(factor);
-			record(op);
+			record("extrude_face",offset);
 			return newFace;
 		}
 
@@ -504,12 +505,11 @@ namespace ds {
 		uint16_t MeshGen::add_face(const v3& p0, const v3& p1, const v3& p2, const v3& p3) {
 			v3 p[] = { p0, p1, p2, p3 };
 			MeshGenOpcode op;
-			op.type = OpcodeType::ADD_FACE;
-			op.offset = _store.add_data(p0);
+			int offset = _store.add_data(p0);
 			_store.add_data(p1);
 			_store.add_data(p2);
 			_store.add_data(p3);
-			record(op);
+			record("add_face",offset);
 			return add_face(p);
 		}
 
@@ -552,7 +552,7 @@ namespace ds {
 				const Edge& e = _edges[ei];
 				ei = e.next;
 			}
-			LOG << "Face: " << face_index << " top: " << f.edge << " final: " << ei;
+			//LOG << "Face: " << face_index << " top: " << f.edge << " final: " << ei;
 			return ei;
 		}
 
@@ -600,13 +600,11 @@ namespace ds {
 			for (int i = 0; i < 4; ++i) {
 				p[i] = _vertices[_edges[edges[i]].vert_index];
 			}
-			MeshGenOpcode op;
-			op.type = OpcodeType::MAKE_FACE;
-			op.offset = _store.data.size();
+			int offset = _store.data.size();
 			for (int i = 0; i < 4; ++i) {
 				_store.add_data(edges[i]);
 			}
-			record(op);
+			record("make_face",offset);
 			return add_face(p);
 		}
 
@@ -629,11 +627,9 @@ namespace ds {
 				p[0] = p[1];
 				p[1] = t;
 			}
-			MeshGenOpcode op;
-			op.type = OpcodeType::COMBINE_EDGES;
-			op.offset = _store.add_data(edge0);
+			int offset = _store.add_data(edge0);
 			_store.add_data(edge1);
-			record(op);
+			record("combine_edges",offset);
 			uint16_t fi = add_face(p);
 			set_color(fi, _selectedColor);
 			return fi;
@@ -668,10 +664,9 @@ namespace ds {
 			_vertices[nn.vert_index] -= d2;
 			v3 p[] = { _vertices[n.vert_index] , o1, o2, _vertices[nn.vert_index] };
 			MeshGenOpcode op;
-			op.type = OpcodeType::H_SPLIT;
-			op.offset = _store.add_data(edgeIndex);
+			int offset = _store.add_data(edgeIndex);
 			_store.add_data(factor);
-			record(op);
+			record("h_split",offset);
 			const Face& face = _faces[e.face_index];
 			uint16_t f = add_face(p);
 			set_color(f, face.color);
@@ -693,11 +688,9 @@ namespace ds {
 			_vertices[n.vert_index] -= delta;
 			_vertices[nn.vert_index] -= d2;
 			v3 p[] = { o1, o2, _vertices[nn.vert_index] , _vertices[n.vert_index] };
-			MeshGenOpcode op;
-			op.type = OpcodeType::V_SPLIT;
-			op.offset = _store.add_data(edgeIndex);
+			int offset = _store.add_data(edgeIndex);
 			_store.add_data(factor);
-			record(op);
+			record("v_split",offset);
 			const Face& face = _faces[e.face_index];
 			uint16_t f = add_face(p);
 			set_color(f, face.color);
@@ -720,11 +713,9 @@ namespace ds {
 			for (int j = 0; j < num; ++j) {
 				_vertices[connections[j]] += position;
 			}
-			MeshGenOpcode op;
-			op.type = OpcodeType::MOVE_VERTEX;
-			op.offset = _store.add_data(vert_index);
+			int offset = _store.add_data(vert_index);
 			_store.add_data(position);
-			record(op);
+			record("move_vertex",offset);
 		}
 
 		// ----------------------------------------------
@@ -741,11 +732,9 @@ namespace ds {
 					_vertices[connections[j]] += position;
 				}
 			}
-			MeshGenOpcode op;
-			op.type = OpcodeType::MOVE_EDGE;
-			op.offset = _store.add_data(edgeIndex);
+			int offset = _store.add_data(edgeIndex);
 			_store.add_data(position);
-			record(op);
+			record("mave_edge",offset);
 		}
 
 		// ----------------------------------------------
@@ -783,7 +772,7 @@ namespace ds {
 				const Edge& e1 = _edges[e0.next];
 				v3 ce = (_vertices[e0.vert_index] + _vertices[e1.vert_index]) / 2.0f;
 				d[i] = normalize(ce - center) * wh[i];
-				LOG << "CE: " << DBG_V3(ce);// << " D: " << DBG_V3(d[i]);
+				//LOG << "CE: " << DBG_V3(ce);// << " D: " << DBG_V3(d[i]);
 				ei = e0.next;
 			}
 
@@ -792,7 +781,7 @@ namespace ds {
 				move_edge(eidx, d[i]);
 				int neidx = get_edge_index(adjacents[indices[i * 2 + 1]], edge_indices[i]);
 				move_edge(neidx, d[i]);
-				LOG << "EIDX: " << eidx << " NEIDX: " << neidx << " D: " << DBG_V3(d[i]);
+				//LOG << "EIDX: " << eidx << " NEIDX: " << neidx << " D: " << DBG_V3(d[i]);
 			}
 		}
 
@@ -858,11 +847,9 @@ namespace ds {
 		void MeshGen::set_color(uint16_t face_index, const Color& color) {
 			if (face_index < _faces.size()) {
 				_faces[face_index].color = color;
-				MeshGenOpcode op;
-				op.type = OpcodeType::SET_COLOR;
-				op.offset = _store.add_data(face_index);
+				int offset = _store.add_data(face_index);
 				_store.add_data(color);
-				record(op);
+				record("set_color",offset);
 			}
 		}
 
@@ -937,11 +924,9 @@ namespace ds {
 					faces[i] = my_faces[i];
 				}
 			}
-			MeshGenOpcode op;
-			op.type = OpcodeType::ADD_CUBE;
-			op.offset = _store.add_data(position);
+			int offset = _store.add_data(position);
 			_store.add_data(size);
-			record(op);
+			record("add_cube",offset);
 			return my_faces[0];
 		}
 
@@ -1258,12 +1243,10 @@ namespace ds {
 			for (int i = 0; i < 5; ++i) {
 				faces[i + 1] = extrude_edge(f.edge + indices[i], e[i]);
 			}
-			MeshGenOpcode op;
-			op.type = OpcodeType::ADD_CUBE_ROT;
-			op.offset = _store.add_data(position);
+			int offset = _store.add_data(position);
 			_store.add_data(size);
 			_store.add_data(rotation);
-			record(op);
+			record("add_cube_rot",offset);
 			return faces[0];
 		}
 
@@ -1385,12 +1368,10 @@ namespace ds {
 					}
 				}
 			}
-			MeshGenOpcode op;
-			op.type = OpcodeType::SLICE;
-			op.offset = _store.add_data(face_index);
+			int offset = _store.add_data(face_index);
 			_store.add_data(stepsX);
 			_store.add_data(stepsY);
-			record(op);
+			record("slice",offset);
 			return cnt;
 		}
 
@@ -1425,10 +1406,7 @@ namespace ds {
 			for (uint32_t i = 0; i < _faces.size(); ++i) {
 				set_color(i, ds::Color(math::random(0, 255), math::random(0, 255), math::random(0, 255), 255));
 			}
-			MeshGenOpcode op;
-			op.type = OpcodeType::DEBUG_COLORS;
-			op.offset = 0;
-			record(op);
+			record("debug_colors",0);
 		}
 
 		// ----------------------------------------------
@@ -1573,7 +1551,9 @@ namespace ds {
 						MeshGenOpcode oc;
 						strncpy(name, txt + tk.index, tk.size);
 						name[tk.size] = '\0';
-						oc.type = find_opcode_type(name);		
+						//oc.type = find_opcode_type(name);		
+						int def_idx = find_definition_index(name);
+						oc.index = def_idx;
 						oc.offset = store.data.size();
 						++cnt;
 						tk = t.get(cnt);
@@ -1588,8 +1568,8 @@ namespace ds {
 						}
 						// check args
 						bool valid = true;
-						int def_idx = find_opcode(oc.type);		
-						oc.index = def_idx;
+						//int def_idx = OPCODE_MAPPING[oc.index];// (oc.type);
+						//oc.index = def_idx;
 						if (def_idx == -1) {
 							LOGE << "Unknown opcode: " << name;
 							valid = false;
@@ -1794,13 +1774,11 @@ namespace ds {
 			}
 			delete[] bottomPoints;
 			delete[] topPoints;
-			MeshGenOpcode op;
-			op.type = OpcodeType::ADD_CYLINDER;
-			op.offset = _store.add_data(bottomRadius);
+			int offset = _store.add_data(bottomRadius);
 			_store.add_data(topRadius);
 			_store.add_data(height);
 			_store.add_data(segments);
-			record(op);
+			record("add_cylinder",offset);
 		}
 
 		void MeshGen::create_tube(const v3& pos, float bottomRadius, float topRadius, float height, float width, uint16_t segments) {

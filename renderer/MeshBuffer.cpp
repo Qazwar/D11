@@ -71,29 +71,16 @@ namespace ds {
 	// Mesh - build bounding AABBox
 	// ------------------------------------------------------
 	void Mesh::buildBoundingBox() {
-		// find center
-		v3 p = v3(0, 0, 0);
 		if (vertices.size() > 0) {
-			for (uint32_t i = 0; i < vertices.size(); ++i) {
-				p += vertices[i].position;
-			}
-			for (int i = 0; i < 3; ++i) {
-				p.data[i] /= vertices.size();
-				if (p.data[i] < 0.0001f) {
-					p.data[i] = 0.0f;
-				}
-			}
-			boundingBox.position = p;
+			v3 min_p = v3(10000.0f);
+			v3 max_p = v3(0.0f);
 			v3 e = v3(0, 0, 0);
 			for (uint32_t i = 0; i < vertices.size(); ++i) {
-				v3 d = p - vertices[i].position;
-				for (int j = 0; j < 3; ++j) {
-					if (d.data[j] > e.data[j]) {
-						e.data[j] = d.data[j];
-					}
-				}
+				min_p = math::min_val(min_p, vertices[i].position);
+				max_p = math::max_val(max_p, vertices[i].position);
 			}
-			boundingBox.extent = e;
+			boundingBox.position = (min_p + max_p) * 0.5f;
+			boundingBox.extent = (max_p - min_p) * 0.5f;
 		}
 		LOG << "AABBox - center: " << DBG_V3(boundingBox.position) << " extent: " << DBG_V3(boundingBox.extent);
 	}

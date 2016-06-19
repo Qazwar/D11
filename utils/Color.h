@@ -19,6 +19,7 @@ namespace ds {
 		Color(float _r, float _g, float _b, float _a) : r(_r), g(_g), b(_b), a(_a) {}
 		Color(float _r, float _g, float _b) : r(_r), g(_g), b(_b), a(1.0f) {}
 		Color(int r, int g, int b, int a);
+		Color(int r, int g, int b);
 		Color(int* array);
 		Color(const Color& v);
 		Color(float* colorValues) {
@@ -59,6 +60,13 @@ namespace ds {
 		g = (float)gc / 255.0f;
 		b = (float)bc / 255.0f;
 		a = (float)ac / 255.0f;
+	}
+
+	inline Color::Color(int rc, int gc, int bc) {
+		r = (float)rc / 255.0f;
+		g = (float)gc / 255.0f;
+		b = (float)bc / 255.0f;
+		a = 1.0f;
 	}
 
 	inline Color::Color(int* array) {

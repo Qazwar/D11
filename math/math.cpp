@@ -1,4 +1,5 @@
 #include "math.h"
+#include <algorithm>
 #include "..\utils\mtrand.h"
 
 namespace math {
@@ -335,5 +336,21 @@ namespace math {
 	bool chanceRoll(int min) {
 		int r = random(0, 100);
 		return r <= min;
+	}
+
+	v3 min_val(const v3& r, const v3& l) {
+		v3 p;
+		for (int i = 0; i < 3; ++i) {
+			p.data[i] = std::min(r.data[i], l.data[i]);
+		}
+		return p;
+	}
+
+	v3 max_val(const v3& r, const v3& l) {
+		v3 p;
+		for (int i = 0; i < 3; ++i) {
+			p.data[i] = std::max(r.data[i], l.data[i]);
+		}
+		return p;
 	}
 }
