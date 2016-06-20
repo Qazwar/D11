@@ -552,7 +552,6 @@ namespace ds {
 				const Edge& e = _edges[ei];
 				ei = e.next;
 			}
-			//LOG << "Face: " << face_index << " top: " << f.edge << " final: " << ei;
 			return ei;
 		}
 
@@ -1280,6 +1279,47 @@ namespace ds {
 				const Edge& e = _edges[ei];
 				ei = e.next;
 			}
+		}
+
+		bool MeshGen::find_connection(uint16_t first_face, uint16_t second_face, uint16_t* edges) {
+			const Face& f = _faces[first_face];
+			int ei = f.edge;
+			for (int i = 0; i < 4; ++i) {
+				const Edge& e0 = _edges[ei];
+				const Edge& e1 = _edges[e0.next];
+				int idx = find_edge(_vertices[e1.vert_index], _vertices[e0.vert_index]);
+				if (idx != -1) {
+					const Edge& tmp = _edges[idx];
+					if (tmp.face_index == second_face) {
+						LOG << "FOUND IT!!!!!";
+						edges[0] = ei;
+						edges[1] = idx;
+						return true;
+					}
+				}
+				ei = e0.next;
+			}
+			return false;
+		}
+
+		int MeshGen::join_faces(uint16_t first_face, uint16_t second_face) {
+			uint16_t connection[2];
+			v3 p[4];
+			if (find_connection(first_face, second_face, connection)) {
+				const Edge& e1 = _edges[connection[0]];
+				const Edge& e2 = _edges[connection[1]];
+				int e1p = e1.prev;
+				int e2n = e2.next;
+				p[0] = _vertices[_edges[_edges[e1p].prev].vert_index];
+				p[1] = _vertices[_edges[e1p].vert_index];
+				p[2] = _vertices[_edges[_edges[e2n].next].vert_index];
+				p[3] = _vertices[_edges[e2.prev].vert_index];
+				uint16_t nfi = add_face(p);
+				remove_face(first_face);
+				remove_face(second_face);
+				return nfi;
+			}
+			return -1;
 		}
 
 		int MeshGen::slice(uint16_t face_index, int segments, uint16_t* faces, int max) {

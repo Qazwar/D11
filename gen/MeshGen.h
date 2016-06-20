@@ -63,45 +63,7 @@ namespace ds {
 		Face() : edge(0), n(0, 0, 0), color(Color::WHITE), selected(false), group(-1), deleted(false) {}
 
 	};
-	/*
-	enum OpcodeType {
-		ADD_CUBE,
-		ADD_CUBE_ROT,
-		SET_COLOR,
-		SLICE_UNIFORM,
-		SLICE,
-		MOVE_EDGE,
-		V_SPLIT,
-		H_SPLIT,
-		MAKE_FACE,
-		ADD_FACE,
-		COMBINE_EDGES,
-		DEBUG_COLORS,
-		EXTRUDE_FACE,
-		SCALE_FACE,
-		ADD_COLOR_CUBE,
-		ADD_CYLINDER,
-		ADD_COL_CYLINDER,
-		MOVE_VERTEX,
-		EXTRUDE_EDGE,
-		ADD_HEXAGON,
-		MOVE_FACE,
-		EXTRUDE_EDGE_NORMAL,
-		ADD_RING,
-		SELECT_COLOR,
-		START_GROUP,
-		END_GROUP,
-		ROTATE_GROUP,
-		MOVE_GROUP,
-		COPY_GROUP,
-		ADD_TUBE,
-		REMOVE_FACE,
-		CUT,
-		ADD_SPHERE,
-		EXPAND_FACE,
-		UNKNOWN
-	};
-	*/
+	
 	// ---------------------------------------
 	// MeshGenOpcode
 	// ---------------------------------------
@@ -212,6 +174,7 @@ namespace ds {
 		uint16_t add_face(v3* positions);
 		uint16_t add_face(const v3& p0, const v3& p1, const v3& p2, const v3& p3);
 		void add_face(const v3& position, const v2& size, const v3& normal);
+		int join_faces(uint16_t first_face, uint16_t second_face);
 		void subdivide(uint16_t face_index);
 		void move_vertex(uint16_t vert_index, const v3& position);
 		void move_edge(uint16_t edgeIndex, const v3& position);
@@ -287,6 +250,7 @@ namespace ds {
 		int find_edges(const v3& pos, uint16_t* ret, int max);
 		int find_vertices(const v3& pos, uint16_t* ret, int max);
 		int find_edge(const v3& start, const v3& end);
+		bool find_connection(uint16_t first_face, uint16_t second_face, uint16_t* edges);
 		Array<v3> _vertices;
 		Array<Edge> _edges;
 		Array<Face> _faces;
