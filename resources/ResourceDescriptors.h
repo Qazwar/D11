@@ -190,4 +190,17 @@ namespace ds {
 		uint16_t id;
 	};
 
+	struct SkyBoxDescriptor {
+		uint16_t id;
+		uint32_t size;
+		RID indexBuffer;
+		RID constantBuffer;
+		RID vertexBuffer;
+		RID shader;
+		RID blendstate;
+		RID colormap;
+		RID inputlayout;
+		float scale;
+	};
+
 }

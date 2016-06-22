@@ -11,6 +11,7 @@
 #include "..\utils\ObjLoader.h"
 #include "Resource.h"
 #include "..\renderer\RenderTarget.h"
+#include "..\renderer\SkyBox.h"
 
 namespace ds {
 
@@ -123,6 +124,8 @@ namespace ds {
 			"MESH",
 			"SCENE",
 			"CAMERA",
+			"TEXTURECUBE",
+			"SKYBOX",
 			"UNKNOWN"
 		};
 
@@ -180,7 +183,19 @@ namespace ds {
 			delete _resCtx;
 		}
 
-
+		// ------------------------------------------------------
+		// cretate internal resource entry
+		// ------------------------------------------------------
+		static RID create(ResourceIndex& ri, const char* name, uint16_t id, int index, ResourceType type) {
+			IdString hash = string::murmur_hash(name);
+			ri.index = index;
+			ri.id = id;
+			ri.nameIndex = _resCtx->nameBuffer.size;
+			_resCtx->nameBuffer.append(name);
+			ri.type = type;
+			_resCtx->lookup[hash] = ri;
+			return ri.id;
+		}
 
 		// ------------------------------------------------------
 		// cretate quad index buffer
@@ -386,6 +401,31 @@ namespace ds {
 			return ri.id;
 		}
 
+		
+
+		// ------------------------------------------------------
+		// create skybox
+		// ------------------------------------------------------
+		static RID createSkyBox(const char* name, const SkyBoxDescriptor& descriptor) {
+			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
+			assert(ri.type == ResourceType::UNKNOWN);
+			int index = _resCtx->resources.size();
+			SkyBox* buffer = new SkyBox(descriptor);
+			SkyBoxResource* cbr = new SkyBoxResource(buffer);
+			_resCtx->resources.push_back(cbr);
+			return create(ri, name, descriptor.id, index, ResourceType::SKYBOX);
+			/*
+			IdString hash = string::murmur_hash(name);
+			ri.index = index;
+			ri.id = descriptor.id;
+			ri.nameIndex = _resCtx->nameBuffer.size;
+			_resCtx->nameBuffer.append(name);
+			ri.type = ResourceType::SKYBOX;
+			_resCtx->lookup[hash] = ri;
+			return ri.id;
+			*/
+		}
+
 		// ------------------------------------------------------
 		// create mesh 
 		// ------------------------------------------------------
@@ -462,6 +502,54 @@ namespace ds {
 			ShaderResourceViewResource* cbr = new ShaderResourceViewResource(srv);
 			_resCtx->resources.push_back(cbr);
 			IdString hash = string::murmur_hash(name);			
+			ri.index = idx;
+			ri.id = descriptor.id;
+			ri.nameIndex = _resCtx->nameBuffer.size;
+			_resCtx->nameBuffer.append(name);
+			ri.type = ResourceType::TEXTURE;
+			_resCtx->lookup[hash] = ri;
+			return ri.id;
+		}
+
+		// ------------------------------------------------------
+		// load texture cube
+		// ------------------------------------------------------
+		static RID loadTextureCube(const char* name, const TextureDescriptor& descriptor) {
+			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
+			assert(ri.type == ResourceType::UNKNOWN);
+			int idx = _resCtx->resources.size();
+			ID3D11ShaderResourceView* srv = 0;
+			char buffer[256];
+			sprintf_s(buffer, 256, "content\\textures\\%s", descriptor.name);
+
+			D3DX11_IMAGE_LOAD_INFO loadSMInfo;
+			loadSMInfo.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
+
+			//Load the texture
+			ID3D11Texture2D* SMTexture = 0;
+			HRESULT hr = D3DX11CreateTextureFromFile(_resCtx->device, buffer, &loadSMInfo, 0, (ID3D11Resource**)&SMTexture, 0);
+
+			//Create the textures description
+			D3D11_TEXTURE2D_DESC SMTextureDesc;
+			SMTexture->GetDesc(&SMTextureDesc);
+
+			//Tell D3D We have a cube texture, which is an array of 2D textures
+			D3D11_SHADER_RESOURCE_VIEW_DESC SMViewDesc;
+			SMViewDesc.Format = SMTextureDesc.Format;
+			SMViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
+			SMViewDesc.TextureCube.MipLevels = SMTextureDesc.MipLevels;
+			SMViewDesc.TextureCube.MostDetailedMip = 0;
+
+			//Create the Resource view
+			hr = _resCtx->device->CreateShaderResourceView(SMTexture, &SMViewDesc, &srv);
+			
+			if (FAILED(hr)) {
+				DXTRACE_MSG("Failed to load the texture image!");
+				return INVALID_RID;
+			}
+			ShaderResourceViewResource* cbr = new ShaderResourceViewResource(srv);
+			_resCtx->resources.push_back(cbr);
+			IdString hash = string::murmur_hash(name);
 			ri.index = idx;
 			ri.id = descriptor.id;
 			ri.nameIndex = _resCtx->nameBuffer.size;
@@ -888,6 +976,17 @@ namespace ds {
 		}
 
 		// ------------------------------------------------------
+		// parse quad index buffer
+		// ------------------------------------------------------
+		void parseIndexBuffer(JSONReader& reader, int childIndex) {
+			IndexBufferDescriptor descriptor;
+			reader.get(childIndex, "id", &descriptor.id);
+			reader.get(childIndex, "size", &descriptor.size);
+			const char* name = reader.get_string(childIndex, "name");
+			createIndexBuffer(name, descriptor);
+		}
+
+		// ------------------------------------------------------
 		// parse vertex buffer
 		// ------------------------------------------------------
 		void parseVertexBuffer(JSONReader& reader, int childIndex) {
@@ -946,6 +1045,17 @@ namespace ds {
 			descriptor.name = reader.get_string(childIndex, "file");
 			const char* name = reader.get_string(childIndex, "name");
 			loadTexture(name, descriptor);
+		}
+
+		// ------------------------------------------------------
+		// parse texture cube
+		// ------------------------------------------------------
+		void parseTextureCube(JSONReader& reader, int childIndex) {
+			TextureDescriptor descriptor;
+			reader.get(childIndex, "id", &descriptor.id);
+			descriptor.name = reader.get_string(childIndex, "file");
+			const char* name = reader.get_string(childIndex, "name");
+			loadTextureCube(name, descriptor);
 		}
 
 		// ------------------------------------------------------
@@ -1115,6 +1225,30 @@ namespace ds {
 		}
 
 		// ------------------------------------------------------
+		// parse Mesh buffer
+		// ------------------------------------------------------
+		void parseSkyBox(JSONReader& reader, int childIndex) {
+			SkyBoxDescriptor descriptor;
+			reader.get(childIndex, "id", &descriptor.id);
+			reader.get(childIndex, "scale", &descriptor.scale);
+			const char* indexBufferName = reader.get_string(childIndex, "index_buffer");
+			descriptor.indexBuffer = find(indexBufferName, ResourceType::INDEXBUFFER);
+			const char* constantBufferName = reader.get_string(childIndex, "constant_buffer");
+			descriptor.constantBuffer = find(constantBufferName, ResourceType::CONSTANTBUFFER);
+			const char* vertexBufferName = reader.get_string(childIndex, "vertex_buffer");
+			descriptor.vertexBuffer = find(vertexBufferName, ResourceType::VERTEXBUFFER);
+			const char* shaderName = reader.get_string(childIndex, "shader");
+			descriptor.shader = find(shaderName, ResourceType::SHADER);
+			const char* blendStateName = reader.get_string(childIndex, "blend_state");
+			descriptor.blendstate = find(blendStateName, ResourceType::BLENDSTATE);
+			reader.get(childIndex, "color_map", &descriptor.colormap);
+			const char* inputLayoutName = reader.get_string(childIndex, "input_layout");
+			descriptor.inputlayout = find(inputLayoutName, ResourceType::INPUTLAYOUT);
+			const char* name = reader.get_string(childIndex, "name");
+			createSkyBox(name, descriptor);
+		}
+
+		// ------------------------------------------------------
 		// parse Mesh
 		// ------------------------------------------------------
 		void parseMesh(JSONReader& reader, int childIndex) {
@@ -1184,6 +1318,7 @@ namespace ds {
 			}
 			_resCtx->parsers[string::murmur_hash("constant_buffer")] = parseConstantBuffer;
 			_resCtx->parsers[string::murmur_hash("quad_index_buffer")] = parseQuadIndexBuffer;
+			_resCtx->parsers[string::murmur_hash("index_buffer")] = parseIndexBuffer;
 			_resCtx->parsers[string::murmur_hash("dialog")] = parseDialog;
 			_resCtx->parsers[string::murmur_hash("sprite_buffer")] = parseSpriteBuffer;
 			_resCtx->parsers[string::murmur_hash("shader")] = parseShader;
@@ -1199,6 +1334,8 @@ namespace ds {
 			_resCtx->parsers[string::murmur_hash("quad_buffer")] = parseQuadBuffer;
 			_resCtx->parsers[string::murmur_hash("scene")] = parseScene;
 			_resCtx->parsers[string::murmur_hash("camera")] = parseCamera;
+			_resCtx->parsers[string::murmur_hash("texture_cube")] = parseTextureCube;
+			_resCtx->parsers[string::murmur_hash("skybox")] = parseSkyBox;
 		}
 
 		// ------------------------------------------------------
@@ -1259,6 +1396,11 @@ namespace ds {
 			assert(res_idx.type == ResourceType::BLENDSTATE);
 			BlendStateResource* res = static_cast<BlendStateResource*>(_resCtx->resources[res_idx.index]);
 			return res->get();
+		}
+
+		bool contains(RID rid, ResourceType type) {
+			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
+			return res_idx.type == type;
 		}
 
 		RID find(const char* name, ResourceType type) {
@@ -1376,6 +1518,15 @@ namespace ds {
 			const ResourceIndex& res_idx = _resCtx->lookup[hash];
 			assert(res_idx.type == ResourceType::MESH);
 			MeshResource* res = static_cast<MeshResource*>(_resCtx->resources[res_idx.index]);
+			return res->get();
+		}
+
+		SkyBox* getSkyBox(const char* name) {
+			IdString hash = string::murmur_hash(name);
+			assert(_resCtx->lookup.find(hash) != _resCtx->lookup.end());
+			const ResourceIndex& res_idx = _resCtx->lookup[hash];
+			assert(res_idx.type == ResourceType::SKYBOX);
+			SkyBoxResource* res = static_cast<SkyBoxResource*>(_resCtx->resources[res_idx.index]);
 			return res->get();
 		}
 

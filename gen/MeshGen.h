@@ -63,6 +63,12 @@ namespace ds {
 		Face() : edge(0), n(0, 0, 0), color(Color::WHITE), selected(false), group(-1), deleted(false) {}
 
 	};
+
+	struct Bone {
+		int parent;
+		mat4 mat;
+		Array<int> vertices;
+	};
 	
 	// ---------------------------------------
 	// MeshGenOpcode

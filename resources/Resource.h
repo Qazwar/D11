@@ -263,4 +263,16 @@ namespace ds {
 		}
 	};
 
+	class SkyBox;
+
+	class SkyBoxResource : public AbstractResource<SkyBox*> {
+
+	public:
+		SkyBoxResource(SkyBox* t) : AbstractResource(t) {}
+		virtual ~SkyBoxResource() {
+			if (_data != 0) {
+				delete _data;
+			}
+		}
+	};
 }

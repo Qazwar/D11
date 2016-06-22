@@ -11,6 +11,7 @@
 #include "..\renderer\QuadBuffer.h"
 #include "..\renderer\MeshBuffer.h"
 #include "..\renderer\Scene.h"
+#include "..\renderer\SkyBox.h"
 
 namespace ds {
 
@@ -45,6 +46,7 @@ namespace ds {
 		SCENE,
 		CAMERA,
 		RENDERTARGET,
+		SKYBOX,
 		UNKNOWN
 	};
 
@@ -57,6 +59,8 @@ namespace ds {
 		void parseJSONFile();
 
 		RID find(const char* name, ResourceType type);
+
+		bool contains(RID rid, ResourceType type);
 
 		ID3D11Buffer* getIndexBuffer(RID rid);
 
@@ -101,6 +105,8 @@ namespace ds {
 		Mesh* getMesh(RID rid);
 
 		Mesh* getMesh(const char* name);
+
+		SkyBox* getSkyBox(const char* name);
 
 		int findInputElement(const char* name);
 

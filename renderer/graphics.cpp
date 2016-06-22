@@ -422,7 +422,14 @@ namespace graphics {
 	// ------------------------------------------------------
 	void mapData(RID rid, void* data, uint32_t size) {
 		
-		ID3D11Buffer* buffer = ds::res::getVertexBuffer(rid);
+		ID3D11Buffer* buffer = 0;
+		if (ds::res::contains(rid, ds::ResourceType::VERTEXBUFFER)) {
+			buffer = ds::res::getVertexBuffer(rid);
+		}
+		if (ds::res::contains(rid, ds::ResourceType::INDEXBUFFER)) {
+			buffer = ds::res::getIndexBuffer(rid);
+		}
+		assert(buffer != 0);
 		D3D11_MAPPED_SUBRESOURCE resource;
 		HRESULT hResult = _context->d3dContext->Map(buffer, 0,D3D11_MAP_WRITE_DISCARD, 0, &resource);
 		// This will be S_OK
