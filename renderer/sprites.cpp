@@ -150,7 +150,7 @@ namespace ds {
 		unsigned int stride = sizeof(SpriteVertex);
 		unsigned int offset = 0;
 
-		graphics::setInputLayout(_descriptor.inputlayout);
+		//graphics::setInputLayout(_descriptor.inputlayout);
 		graphics::setVertexBuffer(_descriptor.vertexBuffer, &stride, &offset, D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 		graphics::setBlendState(_descriptor.blendstate);
 

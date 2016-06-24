@@ -46,7 +46,7 @@ namespace ds {
 			unsigned int stride = sizeof(PNTCVertex);
 			unsigned int offset = 0;
 
-			graphics::setInputLayout(_descriptor.inputlayout);
+			//graphics::setInputLayout(_descriptor.inputlayout);
 			graphics::setVertexBuffer(_descriptor.vertexBuffer, &stride, &offset);
 			graphics::setIndexBuffer(_descriptor.indexBuffer);
 			graphics::setBlendState(_descriptor.blendstate);

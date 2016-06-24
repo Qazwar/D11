@@ -7,6 +7,7 @@
 #include "..\resources\ResourceContainer.h"
 #include "sprites.h"
 #include "..\base\InputSystem.h"
+#include "..\resources\Resource.h"
 
 namespace graphics {
 
@@ -458,7 +459,10 @@ namespace graphics {
 	}
 
 	void setVertexBuffer(RID rid, uint32_t* stride, uint32_t* offset, D3D11_PRIMITIVE_TOPOLOGY topology) {
-		ID3D11Buffer* buffer = ds::res::getVertexBuffer(rid);
+		ds::VertexBufferResource* res = static_cast<ds::VertexBufferResource*>(ds::res::getResource(rid, ds::ResourceType::VERTEXBUFFER));
+		ID3D11InputLayout* layout = ds::res::getInputLayout(res->getInputLayout());
+		_context->d3dContext->IASetInputLayout(layout);
+		ID3D11Buffer* buffer = res->get();
 		_context->d3dContext->IASetVertexBuffers(0, 1, &buffer, stride, offset);
 		_context->d3dContext->IASetPrimitiveTopology(topology);
 	}

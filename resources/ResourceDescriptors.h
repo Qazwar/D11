@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <d3d11.h>
 #include "..\Common.h"
+#include "..\utils\Color.h"
 #include <Vector.h>
 
 namespace ds {
@@ -201,6 +202,16 @@ namespace ds {
 		RID colormap;
 		RID inputlayout;
 		float scale;
+	};
+
+	struct MaterialDescriptor {
+		uint16_t id;
+		uint32_t size;
+		RID shader;
+		RID blendstate;
+		RID texture;
+		Color diffuse;
+		Color ambient;
 	};
 
 }

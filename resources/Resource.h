@@ -1,4 +1,5 @@
 #pragma once
+#include "..\Common.h"
 
 namespace ds {
 
@@ -58,7 +59,7 @@ namespace ds {
 	class VertexBufferResource : public AbstractResource<ID3D11Buffer*> {
 
 	public:
-		VertexBufferResource(ID3D11Buffer* t,int size) : AbstractResource(t) , _size(size) {}
+		VertexBufferResource(ID3D11Buffer* t,int size,RID inputLayout) : AbstractResource(t) , _size(size) , _inputLayout(inputLayout) {}
 		virtual ~VertexBufferResource() {
 			if (_data != 0) {
 				_data->Release();
@@ -68,7 +69,11 @@ namespace ds {
 		int size() const {
 			return _size;
 		}
+		RID getInputLayout() const {
+			return _inputLayout;
+		}
 	private:
+		RID _inputLayout;
 		int _size;
 	};
 
@@ -197,8 +202,6 @@ namespace ds {
 		}
 	};
 
-	class Scene;
-
 	class SceneResource : public AbstractResource<Scene*> {
 
 	public:
@@ -222,8 +225,6 @@ namespace ds {
 			}
 		}
 	};
-
-	class RenderTarget;
 
 	class RenderTargetResource : public AbstractResource<RenderTarget*> {
 
@@ -263,13 +264,22 @@ namespace ds {
 		}
 	};
 
-	class SkyBox;
-
 	class SkyBoxResource : public AbstractResource<SkyBox*> {
 
 	public:
 		SkyBoxResource(SkyBox* t) : AbstractResource(t) {}
 		virtual ~SkyBoxResource() {
+			if (_data != 0) {
+				delete _data;
+			}
+		}
+	};
+
+	class MaterialResource : public AbstractResource<Material*> {
+
+	public:
+		MaterialResource(Material* t) : AbstractResource(t) {}
+		virtual ~MaterialResource() {
 			if (_data != 0) {
 				delete _data;
 			}

@@ -289,13 +289,13 @@
     <ClCompile Include="utils\TileMapReader.cpp">
       <Filter>utils</Filter>
     </ClCompile>
-    <ClCompile Include="renderer\RenderTarget.cpp">
-      <Filter>renderer</Filter>
-    </ClCompile>
     <ClCompile Include="stats\DrawCounter.cpp">
       <Filter>stats</Filter>
     </ClCompile>
     <ClCompile Include="renderer\SkyBox.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\RenderTarget.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
   </ItemGroup>
@@ -580,16 +580,13 @@
     <ClInclude Include="utils\TileMapReader.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="renderer\RenderTarget.h">
-      <Filter>renderer</Filter>
-    </ClInclude>
     <ClInclude Include="stats\DrawCounter.h">
       <Filter>stats</Filter>
     </ClInclude>
-    <ClInclude Include="lib\TileMap.h">
-      <Filter>lib</Filter>
-    </ClInclude>
     <ClInclude Include="renderer\SkyBox.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\RenderTarget.h">
       <Filter>renderer</Filter>
     </ClInclude>
   </ItemGroup>

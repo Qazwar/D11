@@ -8,10 +8,10 @@
 #include "..\utils\Log.h"
 #include "..\renderer\render_types.h"
 #include "..\imgui\IMGUI.h"
-#include "..\utils\ObjLoader.h"
+//#include "..\utils\ObjLoader.h"
+//#include "..\renderer\RenderTarget.h"
+//#include "..\renderer\SkyBox.h"
 #include "Resource.h"
-#include "..\renderer\RenderTarget.h"
-#include "..\renderer\SkyBox.h"
 
 namespace ds {
 
@@ -126,6 +126,7 @@ namespace ds {
 			"CAMERA",
 			"TEXTURECUBE",
 			"SKYBOX",
+			"MATERIAL",
 			"UNKNOWN"
 		};
 
@@ -317,6 +318,31 @@ namespace ds {
 			ri.nameIndex = _resCtx->nameBuffer.size;
 			_resCtx->nameBuffer.append(name);
 			ri.type = ResourceType::CONSTANTBUFFER;
+			_resCtx->lookup[hash] = ri;
+			return ri.id;
+		}
+
+		// ------------------------------------------------------
+		// create material
+		// ------------------------------------------------------
+		static RID createMaterial(const char* name, const MaterialDescriptor& descriptor) {
+			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
+			assert(ri.type == ResourceType::UNKNOWN);
+			int index = _resCtx->resources.size();
+			Material* m = new Material;
+			m->ambient = descriptor.ambient;
+			m->diffuse = descriptor.diffuse;
+			m->blendState = descriptor.blendstate;
+			m->shader = descriptor.shader;
+			m->texture = descriptor.texture;
+			MaterialResource* cbr = new MaterialResource(m);
+			_resCtx->resources.push_back(cbr);
+			IdString hash = string::murmur_hash(name);
+			ri.index = index;
+			ri.id = descriptor.id;
+			ri.nameIndex = _resCtx->nameBuffer.size;
+			_resCtx->nameBuffer.append(name);
+			ri.type = ResourceType::MATERIAL;
 			_resCtx->lookup[hash] = ri;
 			return ri.id;
 		}
@@ -780,7 +806,7 @@ namespace ds {
 				return -1;
 			}
 			int idx = _resCtx->resources.size();
-			VertexBufferResource* cbr = new VertexBufferResource(buffer, size);
+			VertexBufferResource* cbr = new VertexBufferResource(buffer, size, descriptor.layout);
 			_resCtx->resources.push_back(cbr);
 			IdString hash = string::murmur_hash(name);
 			ri.index = idx;
@@ -984,6 +1010,29 @@ namespace ds {
 			reader.get(childIndex, "size", &descriptor.size);
 			const char* name = reader.get_string(childIndex, "name");
 			createIndexBuffer(name, descriptor);
+		}
+
+		// ------------------------------------------------------
+		// parse material
+		// ------------------------------------------------------
+		void parseMaterial(JSONReader& reader, int childIndex) {
+			MaterialDescriptor descriptor;
+			reader.get(childIndex, "id", &descriptor.id);
+			const char* shaderName = reader.get_string(childIndex, "shader");
+			descriptor.shader = find(shaderName, ResourceType::SHADER);
+			const char* bsName = reader.get_string(childIndex, "blend_state");
+			descriptor.blendstate = find(bsName, ResourceType::BLENDSTATE);
+			const char* name = reader.get_string(childIndex, "name");
+			reader.get(childIndex, "diffuse", descriptor.diffuse);
+			reader.get(childIndex, "ambient", descriptor.ambient);
+			if (reader.contains_property(childIndex, "texture")) {
+				const char* texName = reader.get_string(childIndex, "texture");
+				descriptor.texture = find(texName, ResourceType::TEXTURE);
+			}
+			else {
+				descriptor.texture = INVALID_RID;
+			}
+			createMaterial(name, descriptor);
 		}
 
 		// ------------------------------------------------------
@@ -1521,6 +1570,16 @@ namespace ds {
 			return res->get();
 		}
 
+		Material* getMaterial(const char* name) {
+			int idx = find(name, ResourceType::MATERIAL);
+			//IdString hash = string::murmur_hash(name);
+			//assert(_resCtx->lookup.find(hash) != _resCtx->lookup.end());
+			//const ResourceIndex& res_idx = _resCtx->lookup[hash];
+			//assert(res_idx.type == ResourceType::MATERIAL);
+			MaterialResource* res = static_cast<MaterialResource*>(_resCtx->resources[idx]);
+			return res->get();
+		}
+
 		SkyBox* getSkyBox(const char* name) {
 			IdString hash = string::murmur_hash(name);
 			assert(_resCtx->lookup.find(hash) != _resCtx->lookup.end());
@@ -1576,6 +1635,12 @@ namespace ds {
 			assert(res_idx.type == ResourceType::GUIDIALOG);
 			GUIDialogResource* res = static_cast<GUIDialogResource*>(_resCtx->resources[res_idx.index]);
 			return res->get();
+		}
+
+		BaseResource* getResource(RID rid, ResourceType type) {
+			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
+			assert(res_idx.type == type);
+			return _resCtx->resources[res_idx.index];
 		}
 
 		ParticleManager* getParticleManager() {

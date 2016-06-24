@@ -80,7 +80,7 @@ namespace ds {
 		unsigned int stride = sizeof(PNTCVertex);
 		unsigned int offset = 0;
 
-		graphics::setInputLayout(_descriptor.inputlayout);
+		//graphics::setInputLayout(_descriptor.inputlayout);
 		graphics::setVertexBuffer(_descriptor.vertexBuffer, &stride, &offset);
 
 		graphics::mapData(_descriptor.indexBuffer, _cubeIndices, 36 * sizeof(int));

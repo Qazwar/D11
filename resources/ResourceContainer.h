@@ -12,6 +12,8 @@
 #include "..\renderer\MeshBuffer.h"
 #include "..\renderer\Scene.h"
 #include "..\renderer\SkyBox.h"
+#include "..\renderer\RenderTarget.h"
+#include "Resource.h"
 
 namespace ds {
 
@@ -47,6 +49,7 @@ namespace ds {
 		CAMERA,
 		RENDERTARGET,
 		SKYBOX,
+		MATERIAL,
 		UNKNOWN
 	};
 
@@ -59,6 +62,8 @@ namespace ds {
 		void parseJSONFile();
 
 		RID find(const char* name, ResourceType type);
+
+		BaseResource* getResource(RID rid, ResourceType type);
 
 		bool contains(RID rid, ResourceType type);
 
@@ -97,6 +102,8 @@ namespace ds {
 		MeshBuffer* getMeshBuffer(RID rid);
 
 		MeshBuffer* getMeshBuffer(const char* name);
+
+		Material* getMaterial(const char* name);
 
 		Scene* getScene(const char* name);
 

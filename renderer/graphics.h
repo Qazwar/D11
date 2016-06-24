@@ -60,7 +60,7 @@ namespace graphics {
 
 	void setShader(RID rid);
 
-	void setInputLayout(RID rid);
+	//void setInputLayout(RID rid);
 
 	void setPixelShaderResourceView(RID rid, uint32_t slot = 0);
 
