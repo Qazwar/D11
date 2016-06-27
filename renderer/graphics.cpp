@@ -401,20 +401,31 @@ namespace graphics {
 		_context->d3dContext->Unmap(buffer, 0);
 	}
 
+	void setMaterial(RID rid) {
+		ds::Material* m = ds::res::getMaterial(rid);
+		setBlendState(m->blendState);
+		setShader(m->shader);
+		if (m->texture != INVALID_RID) {
+			setPixelShaderResourceView(m->texture);
+		}
+		else {
+			// FIXME: set NULL as pixel shader resource
+		}
+	}
 	// ------------------------------------------------------
 	// set shader
 	// ------------------------------------------------------
 	void setShader(RID rid) {
 		ds::Shader* s = ds::res::getShader(rid);
-		//if (s->vertexShader != 0) {
+		if (s->vertexShader != 0) {
 			_context->d3dContext->VSSetShader(s->vertexShader, 0, 0);
-		//}
-		//if (s->pixelShader != 0) {
+		}
+		if (s->pixelShader != 0) {
 			_context->d3dContext->PSSetShader(s->pixelShader, 0, 0);
-		//}
-		//if (s->geometryShader != 0) {
+		}
+		if (s->geometryShader != 0) {
 			_context->d3dContext->GSSetShader(s->geometryShader, 0, 0);
-		//}
+		}
 		_context->d3dContext->PSSetSamplers(0, 1, &s->samplerState);
 	}
 

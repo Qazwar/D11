@@ -62,6 +62,8 @@ namespace graphics {
 
 	//void setInputLayout(RID rid);
 
+	void setMaterial(RID rid);
+
 	void setPixelShaderResourceView(RID rid, uint32_t slot = 0);
 
 	void setVertexShaderConstantBuffer(RID rid);

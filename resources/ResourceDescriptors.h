@@ -108,10 +108,7 @@ namespace ds {
 		RID indexBuffer;
 		RID constantBuffer;
 		RID vertexBuffer;
-		RID shader;
-		RID blendstate;
-		RID colormap;
-		RID inputlayout;
+		RID material;
 		RID font;
 	};
 
@@ -133,10 +130,11 @@ namespace ds {
 		RID indexBuffer;
 		RID constantBuffer;
 		RID vertexBuffer;
-		RID shader;
-		RID blendstate;
-		RID colormap;
-		RID inputlayout;
+		//RID shader;
+		//RID blendstate;
+		//RID colormap;
+		//RID inputlayout;
+		RID material;
 	};
 
 	struct MeshDescriptor {

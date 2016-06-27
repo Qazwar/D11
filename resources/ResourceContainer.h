@@ -105,6 +105,8 @@ namespace ds {
 
 		Material* getMaterial(const char* name);
 
+		Material* getMaterial(RID rid);
+
 		Scene* getScene(const char* name);
 
 		Camera* getCamera(const char* name);

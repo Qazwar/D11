@@ -252,16 +252,10 @@ namespace ds {
 		unsigned int stride = sizeof(PNTCVertex);
 		unsigned int offset = 0;
 
-		//graphics::setInputLayout(_descriptor.inputlayout);
 		graphics::setVertexBuffer(_descriptor.vertexBuffer, &stride, &offset);
 		graphics::setIndexBuffer(_descriptor.indexBuffer);
-		graphics::setBlendState(_descriptor.blendstate);
-
-		graphics::setShader(_descriptor.shader);
-		graphics::setPixelShaderResourceView(_descriptor.colormap);
-
+		graphics::setMaterial(_descriptor.material);
 		Camera* camera = graphics::getCamera();
-
 		ds::mat4 mvp = w * camera->getViewProjectionMatrix();
 		_buffer.viewProjectionMatrix = ds::matrix::mat4Transpose(mvp);
 		_buffer.worldMatrix = ds::matrix::mat4Transpose(w);
@@ -269,7 +263,6 @@ namespace ds {
 		_buffer.lightPos = _lightPos;
 		_buffer.diffuseColor = color;// Color(192, 0, 0, 255);
 		graphics::mapData(_descriptor.vertexBuffer, mesh->vertices.data(), mesh->vertices.size() * sizeof(PNTCVertex));
-
 		graphics::updateConstantBuffer(_descriptor.constantBuffer, &_buffer, sizeof(PNTCConstantBuffer));
 		graphics::setVertexShaderConstantBuffer(_descriptor.constantBuffer);
 		//graphics::setPixelShaderConstantBuffer(_descriptor.constantBuffer);
@@ -289,28 +282,24 @@ namespace ds {
 			unsigned int stride = sizeof(PNTCVertex);
 			unsigned int offset = 0;
 
-			//graphics::setInputLayout(_descriptor.inputlayout);
 			graphics::setVertexBuffer(_descriptor.vertexBuffer, &stride, &offset);
 			graphics::setIndexBuffer(_descriptor.indexBuffer);
-			
-			graphics::setBlendState(_descriptor.blendstate);
-			graphics::setShader(_descriptor.shader);
-			graphics::setPixelShaderResourceView(_descriptor.colormap);
+			graphics::setMaterial(_descriptor.material);
 
 			Camera* camera = graphics::getCamera();
-
 			ds::mat4 mvp = world * camera->getViewProjectionMatrix();
 			_buffer.viewProjectionMatrix = ds::matrix::mat4Transpose(mvp);
 			_buffer.worldMatrix = ds::matrix::mat4Transpose(world);
 			_buffer.cameraPos = camera->getPosition();
 			_buffer.lightPos = _lightPos;
 			_buffer.diffuseColor = _diffuseColor;
-			//graphics::mapData(_descriptor.vertexBuffer, _vertices.data(), _vertices.size() * sizeof(PNTCVertex));
+			
 			graphics::mapData(_descriptor.vertexBuffer, _vertices, _index * sizeof(PNTCVertex));
-
+			
 			graphics::updateConstantBuffer(_descriptor.constantBuffer, &_buffer, sizeof(PNTCConstantBuffer));
 			graphics::setVertexShaderConstantBuffer(_descriptor.constantBuffer);
 			graphics::drawIndexed(_index / 4 * 6);
+
 			++gDrawCounter->flushes;
 			gDrawCounter->vertices += _index;
 			_index = 0;			

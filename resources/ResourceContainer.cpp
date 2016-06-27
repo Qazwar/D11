@@ -1210,11 +1210,8 @@ namespace ds {
 			descriptor.constantBuffer = find(constantBufferName, ResourceType::CONSTANTBUFFER);
 			const char* vertexBufferName = reader.get_string(childIndex, "vertex_buffer");
 			descriptor.vertexBuffer = find(vertexBufferName, ResourceType::VERTEXBUFFER);
-			reader.get(childIndex, "shader", &descriptor.shader);
-			reader.get(childIndex, "blend_state", &descriptor.blendstate);
-			reader.get(childIndex, "color_map", &descriptor.colormap);
-			const char* inputLayoutName = reader.get_string(childIndex, "input_layout");
-			descriptor.inputlayout = find(inputLayoutName, ResourceType::INPUTLAYOUT);
+			const char* materialName = reader.get_string(childIndex, "material");
+			descriptor.material = find(materialName, ResourceType::MATERIAL);
 			if (reader.contains_property(childIndex, "font")) {
 				const char* fontName = reader.get_string(childIndex, "font");
 				descriptor.font = find(fontName, ResourceType::BITMAPFONT);
@@ -1262,13 +1259,8 @@ namespace ds {
 			descriptor.constantBuffer = find(constantBufferName, ResourceType::CONSTANTBUFFER);
 			const char* vertexBufferName = reader.get_string(childIndex, "vertex_buffer");
 			descriptor.vertexBuffer = find(vertexBufferName, ResourceType::VERTEXBUFFER);
-			const char* shaderName = reader.get_string(childIndex, "shader");
-			descriptor.shader = find(shaderName, ResourceType::SHADER);
-			const char* blendStateName = reader.get_string(childIndex, "blend_state");
-			descriptor.blendstate = find(blendStateName, ResourceType::BLENDSTATE);
-			reader.get(childIndex, "color_map", &descriptor.colormap);
-			const char* inputLayoutName = reader.get_string(childIndex, "input_layout");
-			descriptor.inputlayout= find(inputLayoutName, ResourceType::INPUTLAYOUT);
+			const char* materialName = reader.get_string(childIndex, "material");
+			descriptor.material = find(materialName, ResourceType::MATERIAL);
 			const char* name = reader.get_string(childIndex, "name");
 			createMeshBuffer(name, descriptor);
 		}
@@ -1385,6 +1377,7 @@ namespace ds {
 			_resCtx->parsers[string::murmur_hash("camera")] = parseCamera;
 			_resCtx->parsers[string::murmur_hash("texture_cube")] = parseTextureCube;
 			_resCtx->parsers[string::murmur_hash("skybox")] = parseSkyBox;
+			_resCtx->parsers[string::murmur_hash("material")] = parseMaterial;
 		}
 
 		// ------------------------------------------------------
@@ -1572,11 +1565,14 @@ namespace ds {
 
 		Material* getMaterial(const char* name) {
 			int idx = find(name, ResourceType::MATERIAL);
-			//IdString hash = string::murmur_hash(name);
-			//assert(_resCtx->lookup.find(hash) != _resCtx->lookup.end());
-			//const ResourceIndex& res_idx = _resCtx->lookup[hash];
-			//assert(res_idx.type == ResourceType::MATERIAL);
 			MaterialResource* res = static_cast<MaterialResource*>(_resCtx->resources[idx]);
+			return res->get();
+		}
+
+		Material* getMaterial(RID rid) {
+			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
+			assert(res_idx.type == ResourceType::MATERIAL);
+			MaterialResource* res = static_cast<MaterialResource*>(_resCtx->resources[res_idx.index]);
 			return res->get();
 		}
 

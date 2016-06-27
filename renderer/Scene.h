@@ -35,6 +35,7 @@ namespace ds {
 		int value;
 		DrawMode mode;
 		int staticIndex;
+		RID material;
 	};
 
 	typedef DataArray<Entity> EntityList;
@@ -44,9 +45,9 @@ namespace ds {
 	public:
 		Scene(const SceneDescriptor& descriptor);
 		~Scene();
-		ID add(const char* meshName, const v3& position, DrawMode mode = IMMEDIATE);
-		ID add(Mesh* mesh, const v3& position, DrawMode mode = IMMEDIATE);
-		ID addStatic(Mesh* mesh, const v3& position);
+		ID add(const char* meshName, const v3& position, RID material, DrawMode mode = IMMEDIATE);
+		ID add(Mesh* mesh, const v3& position, RID material, DrawMode mode = IMMEDIATE);
+		ID addStatic(Mesh* mesh, const v3& position, RID material);
 		void attach(ID child, ID parent);
 		Entity& get(ID id);
 		const Entity& get(ID id) const;
@@ -59,6 +60,7 @@ namespace ds {
 			return _entities.numObjects;
 		}
 	private:
+		RID _currentMaterial;
 		EntityList _entities;
 		MeshBuffer* _meshBuffer;
 		Camera* _camera;

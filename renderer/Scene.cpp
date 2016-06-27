@@ -15,15 +15,15 @@ namespace ds {
 	// ------------------------------------
 	// add entity
 	// ------------------------------------
-	ID Scene::add(const char* meshName, const v3& position, DrawMode mode) {
+	ID Scene::add(const char* meshName, const v3& position, RID material, DrawMode mode) {
 		Mesh* m = res::getMesh(meshName);
-		return add(m, position);
+		return add(m, position, material);
 	}
 	
 	// ------------------------------------
 	// add entity
 	// ------------------------------------
-	ID Scene::add(Mesh* mesh, const v3& position, DrawMode mode) {
+	ID Scene::add(Mesh* mesh, const v3& position, RID material, DrawMode mode) {
 		ID id = _entities.add();
 		Entity& e = _entities.get(id);
 		e.mesh = mesh;
@@ -37,13 +37,14 @@ namespace ds {
 		e.parent = INVALID_ID;
 		e.value = 0;
 		e.mode = mode;
+		e.material = material;
 		return id;
 	}
 
 	// ------------------------------------
 	// add entity
 	// ------------------------------------
-	ID Scene::addStatic(Mesh* mesh, const v3& position) {
+	ID Scene::addStatic(Mesh* mesh, const v3& position, RID material) {
 		ID id = _entities.add();
 		Entity& e = _entities.get(id);
 		e.mesh = mesh;
@@ -58,6 +59,7 @@ namespace ds {
 		e.value = 0;
 		e.mode = STATIC;
 		e.staticIndex = _staticMeshes.size();
+		e.material = material;
 		StaticMesh sm;
 		sm.id = e.id;
 		sm.index = _staticVertices.size();
@@ -86,6 +88,7 @@ namespace ds {
 	// ------------------------------------
 	void Scene::draw() {
 		ZoneTracker z("Scene::draw");
+		_currentMaterial = INVALID_RID;
 		graphics::setCamera(_camera);
 		if (_depthEnabled) {
 			graphics::turnOnZBuffer();
@@ -97,6 +100,10 @@ namespace ds {
 		for (EntityList::iterator it = _entities.begin(); it != _entities.end(); ++it) {
 			const Entity& e = (*it);			
 			if (e.active) {
+				if (e.material != _currentMaterial) {
+					_meshBuffer->flush();
+					_currentMaterial = e.material;
+				}
 				if (e.mode == DrawMode::IMMEDIATE) {
 					_meshBuffer->flush();
 					_meshBuffer->drawImmediate(e.mesh, e.world, e.scale, e.rotation, e.color);
