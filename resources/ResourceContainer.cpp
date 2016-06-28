@@ -1333,8 +1333,10 @@ namespace ds {
 		void parseDialog(JSONReader& reader, int childIndex) {
 			GUIDialogDescriptor descriptor;
 			reader.get(childIndex, "id", &descriptor.id);
-			reader.get(childIndex, "sprite_buffer", &descriptor.spriteBuffer);
-			reader.get(childIndex, "font", &descriptor.font);
+			const char* spriteBufferName = reader.get_string(childIndex, "sprite_buffer");
+			descriptor.spriteBuffer = find(spriteBufferName, ResourceType::SPRITEBUFFER);
+			const char* fontName = reader.get_string(childIndex, "font");
+			descriptor.font = find(fontName, ResourceType::BITMAPFONT);
 			descriptor.file = reader.get_string(childIndex, "file");
 			const char* name = reader.get_string(childIndex, "name");
 			createDialog(name, descriptor);
@@ -1453,6 +1455,14 @@ namespace ds {
 			return res_idx.id;
 		}
 
+		int find_index(const char* name, ResourceType type) {
+			IdString hash = string::murmur_hash(name);
+			assert(_resCtx->lookup.find(hash) != _resCtx->lookup.end());
+			const ResourceIndex& res_idx = _resCtx->lookup[hash];
+			assert(res_idx.type == type);
+			return res_idx.index;
+		}
+
 		ID3D11Buffer* getConstantBuffer(const char* name) {
 			IdString hash = string::murmur_hash(name);
 			if (_resCtx->lookup.find(hash) != _resCtx->lookup.end()) {
@@ -1564,7 +1574,7 @@ namespace ds {
 		}
 
 		Material* getMaterial(const char* name) {
-			int idx = find(name, ResourceType::MATERIAL);
+			int idx = find_index(name, ResourceType::MATERIAL);
 			MaterialResource* res = static_cast<MaterialResource*>(_resCtx->resources[idx]);
 			return res->get();
 		}
@@ -1630,6 +1640,12 @@ namespace ds {
 			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
 			assert(res_idx.type == ResourceType::GUIDIALOG);
 			GUIDialogResource* res = static_cast<GUIDialogResource*>(_resCtx->resources[res_idx.index]);
+			return res->get();
+		}
+
+		GUIDialog* getGUIDialog(const char* name) {
+			int idx = find_index(name, ResourceType::GUIDIALOG);
+			GUIDialogResource* res = static_cast<GUIDialogResource*>(_resCtx->resources[idx]);
 			return res->get();
 		}
 

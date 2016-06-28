@@ -71,12 +71,13 @@ private:
 class BasicMenuGameState : public GameState {
 
 public:
-	BasicMenuGameState(const char* name,RID rid) : GameState(name) {
-		_dialog = res::getGUIDialog(rid);
+	BasicMenuGameState(const char* name,const char* dialogName) : GameState(name) {
+		_dialog = res::getGUIDialog(dialogName);
 	}
 	~BasicMenuGameState() {}
 	int onButtonUp(int button, int x, int y) {
-		int ret = _dialog->onButton(button, x, graphics::getScreenHeight() - y, true);
+		//int ret = _dialog->onButton(button, x, graphics::getScreenHeight() - y, true);
+		int ret = _dialog->onButton(button, x, y, true);
 		if (ret != -1) {
 			int tmp = onGUIButton(ret);
 			if (tmp != -1) {

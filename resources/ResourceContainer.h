@@ -93,6 +93,8 @@ namespace ds {
 
 		GUIDialog* getGUIDialog(RID rid);
 
+		GUIDialog* getGUIDialog(const char* name);
+
 		SpriteBuffer* getSpriteBuffer(const char* name);
 
 		SpriteBuffer* getSpriteBuffer(RID rid);
