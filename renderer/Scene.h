@@ -59,7 +59,11 @@ namespace ds {
 		uint32_t numEntities() const {
 			return _entities.numObjects;
 		}
+		void rotate(ID id, const v3& r);
+		void activate(ID id);
+		void deactivate(ID id);
 	private:
+		void updateWorld(Entity& e);
 		RID _currentMaterial;
 		EntityList _entities;
 		MeshBuffer* _meshBuffer;

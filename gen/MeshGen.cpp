@@ -1762,11 +1762,11 @@ namespace ds {
 		// ----------------------------------------------
 		// create ring
 		// ----------------------------------------------
-		void MeshGen::create_cylinder(const v3& pos, float bottomRadius, float topRadius, float height, uint16_t segments) {
+		void MeshGen::create_cylinder(const v3& pos, float bottomRadius, float topRadius, float height, uint16_t segments, float startAngle) {
 			float angleStep = TWO_PI / static_cast<float>(segments);
 			v3 p[4];
-			float angle = 0.0f;
-			float next_angle = angleStep;
+			float angle = startAngle;
+			float next_angle = angleStep + startAngle;
 			float hh = height * 0.5f;
 			v3* topPoints = new v3[segments];
 			v3* bottomPoints = new v3[segments];

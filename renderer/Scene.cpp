@@ -73,6 +73,37 @@ namespace ds {
 		return id;
 	}
 
+	void Scene::updateWorld(Entity& e) {
+		mat4 rotY = matrix::mat4RotationY(e.rotation.y);
+		mat4 rotX = matrix::mat4RotationX(e.rotation.x);
+		mat4 rotZ = matrix::mat4RotationZ(e.rotation.z);
+		mat4 t = matrix::mat4Transform(e.position);
+		mat4 s = matrix::mat4Scale(e.scale);
+		e.world = rotZ * rotY * rotX * s * t;
+	}
+
+	void Scene::activate(ID id) {
+		if (_entities.contains(id)) {
+			Entity& e = _entities.get(id);
+			e.active = true;
+		}
+	}
+
+	void Scene::deactivate(ID id) {
+		if (_entities.contains(id)) {
+			Entity& e = _entities.get(id);
+			e.active = false;
+		}
+	}
+
+	void Scene::rotate(ID id, const v3& r) {
+		if (_entities.contains(id)) {
+			Entity& e = _entities.get(id);
+			e.rotation = r;
+			updateWorld(e);
+		}
+	}
+
 	// ------------------------------------
 	// attach
 	// ------------------------------------

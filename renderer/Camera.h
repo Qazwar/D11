@@ -65,9 +65,7 @@ namespace ds {
 		void resetYAngle();
 
 		void update(float elapsedTime);
-		const float getAngle() const {
-			return _yaw;
-		}
+
 		float getPitch() const {
 			return _pitch;
 		}
@@ -76,6 +74,9 @@ namespace ds {
 		}
 		const v3& getTarget() const {
 			return _target;
+		}
+		float getYaw() const {
+			return _yaw;
 		}
 	private:
 		void buildView();

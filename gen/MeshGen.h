@@ -207,7 +207,7 @@ namespace ds {
 		// objects
 		void create_ring(float radius, float width, uint16_t segments);
 		void create_hexagon(float radius);
-		void create_cylinder(const v3& pos, float bottomRadius, float topRadius, float height, uint16_t segments);
+		void create_cylinder(const v3& pos, float bottomRadius, float topRadius, float height, uint16_t segments,float startAngle = 0.0f);
 		void create_tube(const v3& pos, float bottomRadius, float topRadius, float height, float width, uint16_t segments);
 		uint16_t create_torus(const v3& position,float radius, float width, float depth, uint16_t segments);
 		void create_grid(const v2& size, int stepsX, int stepsY);
