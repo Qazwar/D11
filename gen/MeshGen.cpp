@@ -878,6 +878,7 @@ namespace ds {
 					}
 				}
 			}
+			mesh->buildBoundingBox();
 		}
 
 		// ----------------------------------------------
@@ -1460,6 +1461,7 @@ namespace ds {
 			_opcodes.clear();
 			_groupCounter = 0;
 			_currentGroup = -1;
+			_selectedColor = Color::WHITE;
 		}
 
 		// ----------------------------------------------
