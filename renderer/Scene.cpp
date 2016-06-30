@@ -89,6 +89,13 @@ namespace ds {
 		}
 	}
 
+	void Scene::setColor(ID id, const Color& clr) {
+		if (_entities.contains(id)) {
+			Entity& e = _entities.get(id);
+			e.color = clr;
+		}
+	}
+
 	void Scene::deactivate(ID id) {
 		if (_entities.contains(id)) {
 			Entity& e = _entities.get(id);
@@ -228,12 +235,14 @@ namespace ds {
 				}
 			}
 		}
+		/*
 		if (ret != INVALID_ID) {
 			LOG << "INTERSECTION!!!! id: " << ret << " t0: " << t0 << " t1: " << t1;
 		}
 		else {
 			LOG << "NO intersection!";
 		}
+		*/
 		return ret;
 	}
 }

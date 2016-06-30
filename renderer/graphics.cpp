@@ -420,11 +420,20 @@ namespace graphics {
 		if (s->vertexShader != 0) {
 			_context->d3dContext->VSSetShader(s->vertexShader, 0, 0);
 		}
+		else {
+			_context->d3dContext->VSSetShader(NULL, NULL, 0);
+		}
 		if (s->pixelShader != 0) {
 			_context->d3dContext->PSSetShader(s->pixelShader, 0, 0);
 		}
+		else {
+			_context->d3dContext->PSSetShader(NULL, NULL, 0);
+		}
 		if (s->geometryShader != 0) {
 			_context->d3dContext->GSSetShader(s->geometryShader, 0, 0);
+		}
+		else {
+			_context->d3dContext->GSSetShader(NULL, NULL, 0);
 		}
 		_context->d3dContext->PSSetSamplers(0, 1, &s->samplerState);
 	}

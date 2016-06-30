@@ -136,13 +136,26 @@ namespace ds {
 
 	void MeshBuffer::add(Mesh* mesh, const mat4& world, const Color& color) {
 		ZoneTracker z("MeshBuffer::addMesh4");
-		for (int i = 0; i < mesh->vertices.size(); ++i) {
-			const PNTCVertex& v = mesh->vertices[i];
-			v3 p = world * v.position;
-			//v3 n = world * v.normal;
-			// FIXME: we need to rotate normal!!!
-			v3 n = v.normal;
-			add(p, n, v.texture, v.color * color);
+		int cnt = mesh->vertices.size() / 4;
+		v3 p[4];
+		v2 t[4];
+		Color c[4];
+		for (int i = 0; i < cnt; ++i) {
+			for (int j = 0; j < 4; ++j) {
+				const PNTCVertex& v = mesh->vertices[i * 4 + j];
+				p[j] = world * v.position;
+				t[j] = v.texture;
+				c[j] = v.color;
+			}
+			v3 s = p[0];
+			v3 end1 = p[1];
+			v3 end2 = p[2];
+			v3 a = end1 - s;
+			v3 b = end2 - s;
+			v3 n = normalize(cross(a, b));
+			for (int j = 0; j < 4; ++j) {
+				add(p[j], n, t[j], c[j] * color);
+			}
 		}
 	}
 

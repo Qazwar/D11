@@ -62,6 +62,7 @@ namespace ds {
 		void rotate(ID id, const v3& r);
 		void activate(ID id);
 		void deactivate(ID id);
+		void setColor(ID id, const Color& clr);
 	private:
 		void updateWorld(Entity& e);
 		RID _currentMaterial;
