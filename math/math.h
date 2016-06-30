@@ -47,6 +47,9 @@ namespace math {
 
 	float norm(float t, float max);
 
+	void init_random(unsigned long seed);
+
+	void clear_random();
 	// -------------------------------------------------------
 	// Get random float between min and max
 	// -------------------------------------------------------

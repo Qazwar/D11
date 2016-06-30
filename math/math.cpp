@@ -291,12 +291,16 @@ namespace math {
 		return r;
 	}
 
+	static MTRand_open rand;
+
+	void init_random(unsigned long seed) {
+		rand.seed(seed);
+	}
+
 	// -------------------------------------------------------
 	// random
 	// -------------------------------------------------------
 	float random(float min, float max) {
-		MTRand_open rand;
-		//rand.seed(GetTickCount());
 		return min + (max - min)* (float)rand();
 	}
 
@@ -322,14 +326,15 @@ namespace math {
 		return v2(x, y);
 	}
 
+	
+
 	// -------------------------------------------------------
 	// random int
 	// -------------------------------------------------------
 	int random(int min, int max) {
-		MTRand_open rand;
 		float minf = static_cast<float>(min);
 		float maxf = static_cast<float>(max)+0.99f;
-		float r = minf + (maxf - minf)* (float)rand();
+		float r = random(minf,maxf);
 		return static_cast<int>(r);
 	}
 
