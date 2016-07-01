@@ -88,7 +88,9 @@ public:
 		return 0;
 	}
 	void render() {
+		graphics::turnOffZBuffer();
 		_dialog->render();
+		graphics::turnOnZBuffer();
 	}
 protected:
 	GUIDialog* _dialog;
