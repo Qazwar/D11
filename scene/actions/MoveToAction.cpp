@@ -3,29 +3,34 @@
 #include "..\..\math\GameMath.h"
 
 namespace ds {
+
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
 	MoveToAction::MoveToAction() : AbstractAction("move_to") {
-		int sizes[] = { sizeof(SID), sizeof(v2), sizeof(v2), sizeof(float), sizeof(float), sizeof(tweening::TweeningType), sizeof(int) };
+		int sizes[] = { sizeof(ID), sizeof(v3), sizeof(v3), sizeof(float), sizeof(float), sizeof(tweening::TweeningType), sizeof(int) };
 		_buffer.init(sizes, 7);
 	}
 
+	// -------------------------------------------------------
+	// 
+	// -------------------------------------------------------
 	void MoveToAction::allocate(int sz) {
 		if (_buffer.resize(sz)) {
-			_ids = (SID*)_buffer.get_ptr(0);
-			_startPositions = (v2*)_buffer.get_ptr(1);
-			_endPositions = (v2*)_buffer.get_ptr(2);
+			_ids = (ID*)_buffer.get_ptr(0);
+			_startPositions = (v3*)_buffer.get_ptr(1);
+			_endPositions = (v3*)_buffer.get_ptr(2);
 			_timers = (float*)_buffer.get_ptr(3);
 			_ttl = (float*)_buffer.get_ptr(4);
 			_tweeningTypes = (tweening::TweeningType*)_buffer.get_ptr(5);
 			_modes = (int*)_buffer.get_ptr(6);
 		}
 	}
+
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	void MoveToAction::attach(SID id, SpriteArray& array,const Vector2f& startPos, const Vector2f& endPos, float ttl, int mode, const tweening::TweeningType& tweeningType) {
+	void MoveToAction::attach(ID id, EntityArray& array,const v3& startPos, const v3& endPos, float ttl, int mode, const tweening::TweeningType& tweeningType) {
 		int idx = create(id);
 		_ids[idx] = id;
 		_startPositions[idx] = startPos;
@@ -37,25 +42,28 @@ namespace ds {
 		if ( mode > 0 ) {
 			--_modes[idx];
 		}
-		array.setPosition(id, startPos);
+		int ai = array.getIndex(id);
+		array.positions[ai] = startPos;
 	}
 
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	void MoveToAction::update(SpriteArray& array,float dt,ActionEventBuffer& buffer) {	
+	void MoveToAction::update(EntityArray& array,float dt,ActionEventBuffer& buffer) {	
 		if (_buffer.size > 0) {
 			// move
 			for (int i = 0; i < _buffer.size; ++i) {
-				array.setPosition(_ids[i], tweening::interpolate(_tweeningTypes[i], _startPositions[i], _endPositions[i], _timers[i], _ttl[i]));
+				int ai = array.getIndex(_ids[i]);
+				array.positions[ai] = tweening::interpolate(_tweeningTypes[i], _startPositions[i], _endPositions[i], _timers[i], _ttl[i]);
+				array.dirty[ai] = true;
 				_timers[i] += dt;
 				if ( _timers[i] >= _ttl[i] ) {
 					if ( _modes[i] < 0 ) {
 						_timers[i] = 0.0f;
 					}
 					else if ( _modes[i] == 0 ) {
-						array.setPosition(_ids[i], _endPositions[i]);
-						buffer.add(_ids[i], AT_MOVE_TO, array.getType(_ids[i]));
+						array.positions[ai] = tweening::interpolate(_tweeningTypes[i], _startPositions[i], _endPositions[i], _ttl[i], _ttl[i]);
+						buffer.add(_ids[i], AT_MOVE_TO, array.types[ai]);
 						removeByIndex(i);
 					}
 					else {
@@ -74,14 +82,14 @@ namespace ds {
 	void MoveToAction::debug() {
 		LOG << "------- MoveToAction -------";
 		for (int i = 0; i < _buffer.size; ++i) {
-			LOG << i << " id: " << _ids[i] << " start: " << DBG_V2(_startPositions[i]) << " end: " << DBG_V2(_endPositions[i]) << " ttl: " << _ttl[i] << " timer: " << _timers[i];
+			LOG << i << " id: " << _ids[i] << " start: " << DBG_V3(_startPositions[i]) << " end: " << DBG_V3(_endPositions[i]) << " ttl: " << _ttl[i] << " timer: " << _timers[i];
 		}		
 	}
 
-	void MoveToAction::debug(SID sid) {
+	void MoveToAction::debug(ID sid) {
 		int i = find(sid);
 		if (i != -1) {
-			LOG << "> move_to : id: " << _ids[i] << " start: " << DBG_V2(_startPositions[i]) << " end: " << DBG_V2(_endPositions[i]) << " ttl: " << _ttl[i] << " timer: " << _timers[i];
+			LOG << "> move_to : id: " << _ids[i] << " start: " << DBG_V3(_startPositions[i]) << " end: " << DBG_V3(_endPositions[i]) << " ttl: " << _ttl[i] << " timer: " << _timers[i];
 		}
 	}
 

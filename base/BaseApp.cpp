@@ -181,10 +181,15 @@ namespace ds {
 				char filename[255];
 				sprintf_s(filename, "%s%s.html", _settings.reportingDirectory, timeFormat);
 				ReportWriter rw(filename);
-				gDrawCounter->save(rw);
-				perf::save(rw);
-				res::save(rw);
-				gDefaultMemory->save(rw);				
+				if (rw.isOpen()) {
+					gDrawCounter->save(rw);
+					perf::save(rw);
+					res::save(rw);
+					gDefaultMemory->save(rw);
+				}
+				else {
+					LOGE << "Cannot write Report";
+				}
 				_createReport = false;
 			}
 		}

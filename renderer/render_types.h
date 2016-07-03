@@ -15,6 +15,12 @@ namespace ds {
 		RID texture;
 	};
 
+	enum DrawMode {
+		STATIC,
+		TRANSFORM,
+		IMMEDIATE
+	};
+
 	struct Texture {
 
 		//IdString hashName;

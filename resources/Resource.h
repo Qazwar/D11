@@ -191,17 +191,6 @@ namespace ds {
 		}
 	};
 
-	class WorldResource : public AbstractResource<World*> {
-
-	public:
-		WorldResource(World* t) : AbstractResource(t) {}
-		virtual ~WorldResource() {
-			if (_data != 0) {
-				delete _data;
-			}
-		}
-	};
-
 	class SceneResource : public AbstractResource<Scene*> {
 
 	public:

@@ -1,6 +1,7 @@
 #include "ResourceContainer.h"
 #include <D3D11.h>
 #include <D3Dcompiler.h>
+#include <map>
 #include "..\io\json.h"
 #include "ResourceDescriptors.h"
 #include "..\renderer\graphics.h"
@@ -675,26 +676,6 @@ namespace ds {
 		}
 
 		// ------------------------------------------------------
-		// create world
-		// ------------------------------------------------------
-		static RID createWorld(const char* name, const WorldDescriptor& descriptor) {
-			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
-			assert(ri.type == ResourceType::UNKNOWN);
-			World* w = new World(descriptor);
-			int idx = _resCtx->resources.size();
-			WorldResource* cbr = new WorldResource(w);
-			_resCtx->resources.push_back(cbr);
-			IdString hash = string::murmur_hash(name);
-			ri.index = idx;
-			ri.id = descriptor.id;
-			ri.type = ResourceType::WORLD;
-			ri.nameIndex = _resCtx->nameBuffer.size;
-			_resCtx->nameBuffer.append(name);
-			_resCtx->lookup[hash] = ri;
-			return ri.id;
-		}
-
-		// ------------------------------------------------------
 		// create camera
 		// ------------------------------------------------------
 		static RID createCamera(const char* name, const CameraDescriptor& descriptor) {
@@ -1304,17 +1285,6 @@ namespace ds {
 		}
 
 		// ------------------------------------------------------
-		// parse world
-		// ------------------------------------------------------
-		void parseWorld(JSONReader& reader, int childIndex) {
-			WorldDescriptor descriptor;
-			reader.get(childIndex, "id", &descriptor.id);
-			reader.get(childIndex, "sprite_buffer", &descriptor.spriteBuffer);
-			const char* name = reader.get_string(childIndex, "name");
-			createWorld(name, descriptor);
-		}
-
-		// ------------------------------------------------------
 		// parse IMGUI
 		// ------------------------------------------------------
 		void parseIMGUI(JSONReader& reader, int childIndex) {
@@ -1550,13 +1520,6 @@ namespace ds {
 			return res->get();
 		}
 
-		World* getWorld(RID rid) {
-			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
-			assert(res_idx.type == ResourceType::WORLD);
-			WorldResource* res = static_cast<WorldResource*>(_resCtx->resources[res_idx.index]);
-			return res->get();
-		}
-
 		Mesh* getMesh(RID rid) {
 			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
 			assert(res_idx.type == ResourceType::MESH);
@@ -1671,6 +1634,17 @@ namespace ds {
 			}
 		}
 
+		// -------------------------------------------------------------
+		// get name
+		// -------------------------------------------------------------
+		const char* getName(RID rid) {
+			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
+			return _resCtx->nameBuffer.data + res_idx.nameIndex;
+		}
+
+		// -------------------------------------------------------------
+		// save report
+		// -------------------------------------------------------------
 		void save(const ReportWriter& writer) {
 			writer.startBox("Resources");
 			const char* HEADERS[] = { "ID", "Index", "Type", "Name" };
@@ -1691,6 +1665,13 @@ namespace ds {
 			}
 			writer.endTable();
 			writer.endBox();
+			for (uint32_t i = 0; i < MAX_RESOURCES; ++i) {
+				ResourceIndex& index = _resCtx->resourceTable[i];
+				if (index.type == ResourceType::SCENE) {
+					SceneResource* res = static_cast<SceneResource*>(_resCtx->resources[index.index]);
+					res->get()->save(writer);
+				}
+			}
 		}
 
 	}

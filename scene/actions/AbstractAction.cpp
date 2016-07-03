@@ -11,7 +11,7 @@ namespace ds {
 		m_BoundingRect = r;
 	}
 
-	int AbstractAction::find(SID id) {
+	int AbstractAction::find(ID id) {
 		for (int i = 0; i < _buffer.size; ++i) {
 			if (_ids[i] == id) {
 				return i;
@@ -20,14 +20,14 @@ namespace ds {
 		return -1;
 	}
 
-	bool AbstractAction::contains(SID id) {
+	bool AbstractAction::contains(ID id) {
 		return find(id) != -1;
 	}
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	SID AbstractAction::swap(int i) {
-		SID current = _ids[i];
+	ID AbstractAction::swap(int i) {
+		ID current = _ids[i];
 		_buffer.remove(i);
 		return current;
 	}
@@ -35,7 +35,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// create new entry
 	// -------------------------------------------------------
-	int AbstractAction::create(SID id) {
+	int AbstractAction::create(ID id) {
 		int idx = find(id);
 		if (idx == -1) {
 			allocate(_buffer.size + 16);
@@ -51,7 +51,7 @@ namespace ds {
 		_buffer.size = 0;
 	}
 
-	void AbstractAction::removeByID(SID id) {
+	void AbstractAction::removeByID(ID id) {
 		int idx = find(id);
 		if (idx != -1) {
 			swap(idx);

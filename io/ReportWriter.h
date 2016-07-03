@@ -20,6 +20,7 @@ namespace ds {
 		void addCell(int v) const;
 		void addCell(uint32_t v) const;
 		void addCell(const v2& v) const;
+		void addCell(const v3& v) const;
 		void addCell(const Rect& v) const;
 		void addCell(bool v) const;
 		void addCell(float v) const;
@@ -27,6 +28,9 @@ namespace ds {
 		void addCell(int ident, const char* v) const;
 		void endRow() const;
 		void endTable() const;
+		bool isOpen() const {
+			return _open;
+		}
 	private:
 		FILE* _file;
 		bool _open;

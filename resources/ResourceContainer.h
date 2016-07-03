@@ -5,12 +5,11 @@
 #include "..\Common.h"
 #include "..\renderer\Bitmapfont.h"
 #include "..\renderer\sprites.h"
-#include "..\world\World.h"
 #include "..\particles\ParticleManager.h"
 #include "..\dialogs\GUIDialog.h"
 #include "..\renderer\QuadBuffer.h"
 #include "..\renderer\MeshBuffer.h"
-#include "..\renderer\Scene.h"
+#include "..\scene\Scene.h"
 #include "..\renderer\SkyBox.h"
 #include "..\renderer\RenderTarget.h"
 #include "Resource.h"
@@ -67,6 +66,8 @@ namespace ds {
 
 		bool contains(RID rid, ResourceType type);
 
+		const char* getName(RID rid);
+
 		ID3D11Buffer* getIndexBuffer(RID rid);
 
 		ID3D11BlendState* getBlendState(RID rid);
@@ -122,8 +123,6 @@ namespace ds {
 		int findInputElement(const char* name);
 
 		int findBlendState(const char* text);
-
-		World* getWorld(RID rid);
 
 		void debug();
 

@@ -2,9 +2,10 @@
 #include "..\..\renderer\render_types.h"
 #include "..\..\math\tweening.h"
 #include <map>
-#include "..\World.h"
+#include "..\Scene.h"
 #include "..\..\math\tweening.h"
 #include "AbstractAction.h"
+#include "..\EntityArray.h"
 
 namespace ds {
 
@@ -13,17 +14,18 @@ namespace ds {
 	public:
 		ScalingAction();
 		virtual ~ScalingAction();
-		void attach(SID id,const Vector2f& startScale,const Vector2f& endScale,float ttl,int mode = 0,const tweening::TweeningType& tweeningType = &tweening::easeOutQuad);
-		void update(SpriteArray& array,float dt,ActionEventBuffer& buffer);
+		void attach(ID id,const v3& startScale,const v3& endScale,float ttl,int mode = 0,const tweening::TweeningType& tweeningType = &tweening::easeOutQuad);
+		void update(EntityArray& array,float dt,ActionEventBuffer& buffer);
 		void debug();
-		void debug(SID sid) {}
+		void debug(ID sid) {}
+		void save(const ReportWriter& writer);
 		ActionType getActionType() const {
 			return AT_SCALE;
 		}
 	private:
 		void allocate(int sz);
-		v2* _startScale;
-		v2* _endScale;
+		v3* _startScale;
+		v3* _endScale;
 		float* _timers;
 		float* _ttl;
 		tweening::TweeningType* _tweeningTypes;

@@ -1,7 +1,7 @@
 #pragma once
 #include "..\..\renderer\render_types.h"
 #include "..\..\math\tweening.h"
-#include "..\World.h"
+#include "..\Scene.h"
 #include "..\..\math\tweening.h"
 #include "AbstractAction.h"
 
@@ -12,17 +12,17 @@ namespace ds {
 	public:
 		MoveToAction();
 		virtual ~MoveToAction() {}
-		void attach(SID id, SpriteArray& array,const Vector2f& startPos, const Vector2f& endPos, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::easeOutQuad);
-		void update(SpriteArray& array,float dt,ActionEventBuffer& buffer);
+		void attach(ID id, EntityArray& array,const v3& startPos, const v3& endPos, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
+		void update(EntityArray& array,float dt,ActionEventBuffer& buffer);
 		void debug();
-		void debug(SID sid);
+		void debug(ID sid);
 		ActionType getActionType() const {
 			return AT_MOVE_TO;
 		}
 	private:
 		void allocate(int sz);
-		v2* _startPositions;
-		v2* _endPositions;
+		v3* _startPositions;
+		v3* _endPositions;
 		float* _timers;
 		float* _ttl;
 		tweening::TweeningType* _tweeningTypes;
