@@ -2,6 +2,7 @@
 #include "..\resources\ResourceContainer.h"
 #include "actions\ScalingAction.h"
 #include "actions\MoveToAction.h"
+#include "actions\RotateToAction.h"
 
 namespace ds {
 
@@ -14,6 +15,7 @@ namespace ds {
 		}
 		_actions[AT_SCALE] = new ScalingAction;
 		_actions[AT_MOVE_TO] = new MoveToAction;
+		_actions[AT_ROTATE_TO] = new RotateToAction;
 
 	}
 
@@ -343,5 +345,13 @@ namespace ds {
 	void Scene::moveTo(ID id, const v3& startPos, const v3& endPos, float ttl, int mode, const tweening::TweeningType& tweeningType) {
 		MoveToAction* action = (MoveToAction*)_actions[AT_MOVE_TO];
 		action->attach(id, _data, startPos, endPos, ttl, mode, tweeningType);
+	}
+
+	// ------------------------------------
+	// rotate to
+	// ------------------------------------
+	void Scene::rotateTo(ID id, const v3& startRotation, const v3& endRotation, float ttl, int mode, const tweening::TweeningType& tweeningType) {
+		RotateToAction* action = (RotateToAction*)_actions[AT_ROTATE_TO];
+		action->attach(id, startRotation, endRotation, ttl, mode, tweeningType);
 	}
 }

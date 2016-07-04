@@ -93,4 +93,23 @@ namespace ds {
 		}
 	}
 
+	// -------------------------------------------------------
+	// save to report
+	// -------------------------------------------------------
+	void MoveToAction::save(const ReportWriter& writer) {
+		writer.addHeader("MoveToAction");
+		const char* HEADERS[] = { "ID", "Start", "End", "Timer", "TTL" };
+		writer.startTable(HEADERS, 5);
+		for (uint32_t i = 0; i < _buffer.size; ++i) {
+			writer.startRow();
+			writer.addCell(_ids[i]);
+			writer.addCell(_startPositions[i]);
+			writer.addCell(_endPositions[i]);
+			writer.addCell(_timers[i]);
+			writer.addCell(_ttl[i]);
+			writer.endRow();
+		}
+		writer.endTable();
+	}
+
 }

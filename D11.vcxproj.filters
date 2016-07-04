@@ -41,12 +41,6 @@
     <Filter Include="sprites">
       <UniqueIdentifier>{3a64bf55-3f42-459f-b3d1-4619e913d8ea}</UniqueIdentifier>
     </Filter>
-    <Filter Include="world">
-      <UniqueIdentifier>{fafeff11-b720-489d-a16a-9de5c9472b92}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="world\actions">
-      <UniqueIdentifier>{a953b0c5-158c-46c1-a1bd-00cbc2feec68}</UniqueIdentifier>
-    </Filter>
     <Filter Include="physics">
       <UniqueIdentifier>{2cdf0fcb-f0c5-4dc5-841f-0ebdebf8f29a}</UniqueIdentifier>
     </Filter>
@@ -67,6 +61,12 @@
     </Filter>
     <Filter Include="stats">
       <UniqueIdentifier>{85a0e2f2-14ac-444a-a711-c2a4dc9fccce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scene">
+      <UniqueIdentifier>{c4c42552-b2e5-4304-b02a-ef97c02a009a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scene\actions">
+      <UniqueIdentifier>{6f4c7579-491c-4b5e-b30e-3c9dda357e4b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -129,66 +129,6 @@
     </ClCompile>
     <ClCompile Include="gamestates\GameStateMachine.cpp">
       <Filter>gamestates</Filter>
-    </ClCompile>
-    <ClCompile Include="world\AdditionalData.cpp">
-      <Filter>world</Filter>
-    </ClCompile>
-    <ClCompile Include="world\BehaviorDefinitions.cpp">
-      <Filter>world</Filter>
-    </ClCompile>
-    <ClCompile Include="world\World.cpp">
-      <Filter>world</Filter>
-    </ClCompile>
-    <ClCompile Include="world\actions\AbstractAction.cpp">
-      <Filter>world\actions</Filter>
-    </ClCompile>
-    <ClCompile Include="world\actions\AlphaFadeToAction.cpp">
-      <Filter>world\actions</Filter>
-    </ClCompile>
-    <ClCompile Include="world\actions\ColorFadeToAction.cpp">
-      <Filter>world\actions</Filter>
-    </ClCompile>
-    <ClCompile Include="world\actions\ColorFlashAction.cpp">
-      <Filter>world\actions</Filter>
-    </ClCompile>
-    <ClCompile Include="world\actions\FollowCurveAction.cpp">
-      <Filter>world\actions</Filter>
-    </ClCompile>
-    <ClCompile Include="world\actions\FollowPathAction.cpp">
-      <Filter>world\actions</Filter>
-    </ClCompile>
-    <ClCompile Include="world\actions\FollowStraightPathAction.cpp">
-      <Filter>world\actions</Filter>
-    </ClCompile>
-    <ClCompile Include="world\actions\FollowTargetAction.cpp">
-      <Filter>world\actions</Filter>
-    </ClCompile>
-    <ClCompile Include="world\actions\MoveByAction.cpp">
-      <Filter>world\actions</Filter>
-    </ClCompile>
-    <ClCompile Include="world\actions\MoveToAction.cpp">
-      <Filter>world\actions</Filter>
-    </ClCompile>
-    <ClCompile Include="world\actions\MoveWithAction.cpp">
-      <Filter>world\actions</Filter>
-    </ClCompile>
-    <ClCompile Include="world\actions\RemoveAfterAction.cpp">
-      <Filter>world\actions</Filter>
-    </ClCompile>
-    <ClCompile Include="world\actions\RotateAction.cpp">
-      <Filter>world\actions</Filter>
-    </ClCompile>
-    <ClCompile Include="world\actions\RotateByAction.cpp">
-      <Filter>world\actions</Filter>
-    </ClCompile>
-    <ClCompile Include="world\actions\ScaleByPathAction.cpp">
-      <Filter>world\actions</Filter>
-    </ClCompile>
-    <ClCompile Include="world\actions\ScalingAction.cpp">
-      <Filter>world\actions</Filter>
-    </ClCompile>
-    <ClCompile Include="world\actions\WaitAction.cpp">
-      <Filter>world\actions</Filter>
     </ClCompile>
     <ClCompile Include="math\tweening.cpp">
       <Filter>math</Filter>
@@ -268,9 +208,6 @@
     <ClCompile Include="utils\StateManager.cpp">
       <Filter>utils</Filter>
     </ClCompile>
-    <ClCompile Include="renderer\Scene.cpp">
-      <Filter>renderer</Filter>
-    </ClCompile>
     <ClCompile Include="data\DynamicSettings.cpp">
       <Filter>data</Filter>
     </ClCompile>
@@ -297,6 +234,24 @@
     </ClCompile>
     <ClCompile Include="renderer\RenderTarget.cpp">
       <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\EntityArray.cpp">
+      <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\Scene.cpp">
+      <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\actions\AbstractAction.cpp">
+      <Filter>scene\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\actions\MoveToAction.cpp">
+      <Filter>scene\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\actions\ScalingAction.cpp">
+      <Filter>scene\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\actions\RotateToAction.cpp">
+      <Filter>scene\actions</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -384,66 +339,6 @@
     </ClInclude>
     <ClInclude Include="gamestates\GameStateMachine.h">
       <Filter>gamestates</Filter>
-    </ClInclude>
-    <ClInclude Include="world\AdditionalData.h">
-      <Filter>world</Filter>
-    </ClInclude>
-    <ClInclude Include="world\BehaviorDefinitions.h">
-      <Filter>world</Filter>
-    </ClInclude>
-    <ClInclude Include="world\World.h">
-      <Filter>world</Filter>
-    </ClInclude>
-    <ClInclude Include="world\actions\AbstractAction.h">
-      <Filter>world\actions</Filter>
-    </ClInclude>
-    <ClInclude Include="world\actions\AlphaFadeToAction.h">
-      <Filter>world\actions</Filter>
-    </ClInclude>
-    <ClInclude Include="world\actions\ColorFadeToAction.h">
-      <Filter>world\actions</Filter>
-    </ClInclude>
-    <ClInclude Include="world\actions\ColorFlashAction.h">
-      <Filter>world\actions</Filter>
-    </ClInclude>
-    <ClInclude Include="world\actions\FollowCurveAction.h">
-      <Filter>world\actions</Filter>
-    </ClInclude>
-    <ClInclude Include="world\actions\FollowPathAction.h">
-      <Filter>world\actions</Filter>
-    </ClInclude>
-    <ClInclude Include="world\actions\FollowStraightPathAction.h">
-      <Filter>world\actions</Filter>
-    </ClInclude>
-    <ClInclude Include="world\actions\FollowTargetAction.h">
-      <Filter>world\actions</Filter>
-    </ClInclude>
-    <ClInclude Include="world\actions\MoveByAction.h">
-      <Filter>world\actions</Filter>
-    </ClInclude>
-    <ClInclude Include="world\actions\MoveToAction.h">
-      <Filter>world\actions</Filter>
-    </ClInclude>
-    <ClInclude Include="world\actions\MoveWithAction.h">
-      <Filter>world\actions</Filter>
-    </ClInclude>
-    <ClInclude Include="world\actions\RemoveAfterAction.h">
-      <Filter>world\actions</Filter>
-    </ClInclude>
-    <ClInclude Include="world\actions\RotateAction.h">
-      <Filter>world\actions</Filter>
-    </ClInclude>
-    <ClInclude Include="world\actions\RotateByAction.h">
-      <Filter>world\actions</Filter>
-    </ClInclude>
-    <ClInclude Include="world\actions\ScaleByPathAction.h">
-      <Filter>world\actions</Filter>
-    </ClInclude>
-    <ClInclude Include="world\actions\ScalingAction.h">
-      <Filter>world\actions</Filter>
-    </ClInclude>
-    <ClInclude Include="world\actions\WaitAction.h">
-      <Filter>world\actions</Filter>
     </ClInclude>
     <ClInclude Include="math\tweening.h">
       <Filter>math</Filter>
@@ -556,9 +451,6 @@
     <ClInclude Include="utils\StateManager.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="renderer\Scene.h">
-      <Filter>renderer</Filter>
-    </ClInclude>
     <ClInclude Include="resources\Resource.h">
       <Filter>resources</Filter>
     </ClInclude>
@@ -588,6 +480,28 @@
     </ClInclude>
     <ClInclude Include="renderer\RenderTarget.h">
       <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\TileMap.h" />
+    <ClInclude Include="scene\ActionEventBuffer.h">
+      <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\EntityArray.h">
+      <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\Scene.h">
+      <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\actions\AbstractAction.h">
+      <Filter>scene\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\actions\MoveToAction.h">
+      <Filter>scene\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\actions\ScalingAction.h">
+      <Filter>scene\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\actions\RotateToAction.h">
+      <Filter>scene\actions</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

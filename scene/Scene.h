@@ -51,6 +51,7 @@ namespace ds {
 
 		void scaleTo(ID sid, const v3& startScale, const v3& endScale, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 		void moveTo(ID sid, const v3& startPos, const v3& endPos, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
+		void rotateTo(ID sid, const v3& startRotation, const v3& endRotation, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 
 		void save(const ReportWriter& writer);
 	private:

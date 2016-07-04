@@ -21,7 +21,8 @@ namespace ds {
 		AT_KILL,
 		AT_SCALE_BY_PATH,
 		AT_SCALE,
-		AT_COLOR_FLASH
+		AT_COLOR_FLASH,
+		AT_ROTATE_TO
 	};
 
 	struct ActionEvent {

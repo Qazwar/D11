@@ -1,31 +1,29 @@
 #pragma once
 #include "..\..\renderer\render_types.h"
-#include "..\..\math\tweening.h"
 #include "..\Scene.h"
-#include "..\..\math\tweening.h"
 #include "AbstractAction.h"
 
 namespace ds {
 
-	class MoveToAction : public AbstractAction {
+	class RotateToAction : public AbstractAction {
 
 	public:
-		MoveToAction();
-		virtual ~MoveToAction() {}
-		void attach(ID id, EntityArray& array,const v3& startPos, const v3& endPos, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
+		RotateToAction();
+		virtual ~RotateToAction() {}
+		void attach(ID id, const v3& startAngle, const v3& endAngle, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 		void update(EntityArray& array,float dt,ActionEventBuffer& buffer);
 		void debug();
 		void debug(ID sid);
 		void save(const ReportWriter& writer);
 		ActionType getActionType() const {
-			return AT_MOVE_TO;
+			return AT_ROTATE_TO;
 		}
 	private:
 		void allocate(int sz);
-		v3* _startPositions;
-		v3* _endPositions;
+		v3* _startAngles;
+		v3* _endAngles;
 		float* _timers;
-		float* _ttl;
+		float* _ttl;		
 		tweening::TweeningType* _tweeningTypes;
 		int* _modes;
 	};
