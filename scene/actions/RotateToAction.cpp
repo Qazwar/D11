@@ -57,6 +57,7 @@ namespace ds {
 					else if ( _modes[i] == 0 ) {
 						array.rotations[ai] = tweening::interpolate(_tweeningTypes[i], _startAngles[i], _endAngles[i], _ttl[i], _ttl[i]);
 						array.dirty[ai] = true;
+						buffer.add(_ids[i], AT_ROTATE_TO, array.types[ai]);
 						removeByIndex(i);
 					}
 					else {

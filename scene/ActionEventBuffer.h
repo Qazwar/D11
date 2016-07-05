@@ -27,9 +27,9 @@ namespace ds {
 
 	struct ActionEvent {
 
-		ID sid;
-		ActionType type;
-		int spriteType;
+		ID id;
+		ActionType action;
+		int type;
 	};
 
 	struct ActionEventBuffer {
@@ -40,11 +40,11 @@ namespace ds {
 			events.clear();
 		}
 
-		void add(ID sid, ActionType type, int spriteType) {
+		void add(ID id, ActionType action, int type) {
 			ActionEvent e;
-			e.sid = sid;
+			e.id = id;
 			e.type = type;
-			e.spriteType = spriteType;
+			e.action = action;
 			events.push_back(e);
 		}
 	};

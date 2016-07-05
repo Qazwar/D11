@@ -296,7 +296,7 @@ namespace ds {
 			for (int i = 0; i < _eventBuffer.events.size(); ++i) {
 				const ActionEvent& e = _eventBuffer.events[i];
 				if (e.type == AT_KILL) {
-					remove(e.sid);
+					remove(e.id);
 				}
 			}
 		}

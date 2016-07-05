@@ -20,8 +20,6 @@ namespace ds {
 		AABBox boundingBox;
 	};
 
-	//typedef DataArray<Entity> EntityList;
-
 	class Scene {
 
 	public:
@@ -31,8 +29,6 @@ namespace ds {
 		ID add(Mesh* mesh, const v3& position, RID material, DrawMode mode = IMMEDIATE);
 		ID addStatic(Mesh* mesh, const v3& position, RID material);
 		void attach(ID child, ID parent);
-		//Entity& get(ID id);
-		//const Entity& get(ID id) const;
 		void remove(ID id);
 		void draw();
 		int find(int type, ID* ids, int max);
@@ -49,25 +45,38 @@ namespace ds {
 		bool isActive(ID id) const;
 		void setPosition(ID id, const v3& p);
 
+		// actions
 		void scaleTo(ID sid, const v3& startScale, const v3& endScale, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 		void moveTo(ID sid, const v3& startPos, const v3& endPos, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 		void rotateTo(ID sid, const v3& startRotation, const v3& endRotation, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 
+		bool hasEvents() const {
+			return _eventBuffer.events.size() > 0;
+		}
+		uint32_t numEvents() const {
+			return _eventBuffer.events.size();
+		}
+
+		const ActionEvent& getEvent(uint32_t idx) {
+			return _eventBuffer.events[idx];
+		}
+
+
 		void save(const ReportWriter& writer);
+
 	private:
 		void updateWorld(int idx);
 
 		SceneDescriptor _descriptor;
 		RID _currentMaterial;
 		EntityArray _data;
-		//EntityList _entities;
 		MeshBuffer* _meshBuffer;
 		Camera* _camera;
-		bool _depthEnabled;
 		Array<PNTCVertex> _staticVertices;
 		Array<StaticMesh> _staticMeshes;
 		AbstractAction* _actions[MAX_ACTIONS];
 		ActionEventBuffer _eventBuffer;
+		bool _depthEnabled;
 	};
 
 }
