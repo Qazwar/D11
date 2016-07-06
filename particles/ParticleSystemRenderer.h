@@ -1,0 +1,28 @@
+#pragma once
+#include "Particle.h"
+#include "..\renderer\sprites.h"
+
+namespace ds {
+
+	class ParticleSystemRenderer {
+
+	public:
+		ParticleSystemRenderer() {}
+		virtual ~ParticleSystemRenderer() {}
+
+		virtual void render(const ParticleArray& array, const Texture& t) = 0;
+	};
+
+	class ParticleSystemRenderer2D : public ParticleSystemRenderer {
+
+	public:
+		ParticleSystemRenderer2D();
+		virtual ~ParticleSystemRenderer2D() {}
+
+		void render(const ParticleArray& array, const Texture& t);
+
+	private:
+		SpriteBuffer* _particles;
+	};
+
+}

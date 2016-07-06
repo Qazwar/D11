@@ -18,10 +18,13 @@ namespace ds {
 		ST_NONE
 	};
 
-	struct CVar {
-		int nameIndex;
-		SettingsType type;
+	// -------------------------------------------------------
+	// settings item
+	// -------------------------------------------------------
+	struct SettingsItem {
+		const char* name;
 		IdString hash;
+		SettingsType type;
 		union {
 			int* iPtr;
 			float* fPtr;
@@ -29,24 +32,44 @@ namespace ds {
 			v3* v3Ptr;
 			Color* cPtr;
 			Rect* rPtr;
+			Vector2fPath* pPtr;
 		} ptr;
-
-		CVar() : nameIndex(-1), type(ST_NONE), hash(0) {}
-		CVar(int ni, SettingsType t, IdString h) : nameIndex(ni), type(type), hash(h) {}
-
 	};
+	
+	// -------------------------------------------------------
+	// dynamic settings
+	// -------------------------------------------------------
+	struct DynamicGameSettings : public DataFile {
 
-	const CVar INVALID_CVAR = CVar(-1, ST_NONE, 0);
+		DynamicGameSettings();
+		~DynamicGameSettings();
 
-	namespace settings {
+		void add(const char* name, float* value, float defaultValue = 0.0f);
+		bool set(const char* name, float value);
 
-		void initialize();
+		//void addInt(const char* name, int* value, int defaultValue);
+		//bool setInt(const char* name, int value);
 
-		void shutdown();
+		//void addRect(const char* name, Rect* value, const Rect& defaultValue);
+		//bool setRect(const char* name, const Rect& value);
 
-		float* addFloat(const char* name, const char* description, float defaultValue = 0.0f);
+		//void addColor(const char* name, Color* value, const Color& defaultValue);
+		//bool setColor(const char* name, const Color& value);
 
-		const CVar& get(const char* name);
-	}
+		//void addPath(const char* name, Vector2fPath* value);
+		//bool setPath(const char* name, const Vector2fPath& value);
+		
+		bool saveData(JSONWriter& writer);
+		bool loadData(const JSONReader& loader);
+
+		virtual const char* getFileName() const = 0;
+
+		//int _state;
+		//int _offset;
+		//Array<SettingsItem> _items;
+		//gui::ComponentModel<SettingsItem> _model;
+
+		Array<SettingsItem> items;
+	};
 
 }
