@@ -4,6 +4,7 @@
 #include "..\utils\StringUtils.h"
 #include "..\dialogs\GUIDialog.h"
 #include "..\resources\ResourceContainer.h"
+#include "..\base\Game.h"
 
 namespace ds {
 
@@ -13,7 +14,7 @@ namespace ds {
 class GameState {
 
 public:
-	GameState(const char* name) : _name(name) , _initialized(false) {
+	GameState(const char* name, Game* g) : _name(name) , game(g) , _initialized(false) {
 		_hash = string::murmur_hash(name);
 	}
 	virtual ~GameState(void) {}
@@ -58,6 +59,8 @@ public:
 	void endInitialisation() {
 		_initialized = true;
 	}
+protected:
+	Game* game;
 private:
 	bool _initialized;
 	GameState(const GameState& other) {}
@@ -71,7 +74,7 @@ private:
 class BasicMenuGameState : public GameState {
 
 public:
-	BasicMenuGameState(const char* name,const char* dialogName) : GameState(name) {
+	BasicMenuGameState(const char* name,const char* dialogName,Game* g) : GameState(name, g) {
 		_dialog = res::getGUIDialog(dialogName);
 	}
 	~BasicMenuGameState() {}

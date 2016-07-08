@@ -5,6 +5,7 @@
 #include "..\resources\ResourceContainer.h"
 #include "..\gamestates\GameStateMachine.h"
 #include "EventStream.h"
+#include "Game.h"
 
 namespace ds {
 
@@ -62,6 +63,8 @@ namespace ds {
 		virtual bool loadContent() {
 			return true;
 		}
+
+		Game* game;
 	private:
 		void tick();
 		void renderFrame();

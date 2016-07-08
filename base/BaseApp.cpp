@@ -80,10 +80,12 @@ namespace ds {
 		LOG << "size: " << _settings.screenWidth << " x " << _settings.screenHeight;
 		_start = std::chrono::steady_clock::now();
 		_num = 0;
+		game = new Game;
 	}
 
 
 	BaseApp::~BaseApp() {
+		delete game;
 		repository::shutdown();
 		perf::shutdown();		
 		events::shutdown();
@@ -295,6 +297,7 @@ namespace ds {
 						ZoneTracker u2("UPDATE::main");
 						update(elapsed);
 					}
+					game->update(elapsed);
 					_stateMachine->update(elapsed);
 				}
 				//_accu -= _dt;
@@ -317,6 +320,10 @@ namespace ds {
 		{
 			ZoneTracker("Render::stateMachine");
 			_stateMachine->render();
+		}
+		{
+			ZoneTracker("Render::Game");
+			game->render();
 		}
 		{
 			ZoneTracker("Render::endFrame");

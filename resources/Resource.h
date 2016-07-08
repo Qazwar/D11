@@ -202,19 +202,6 @@ namespace ds {
 		}
 	};
 
-	class Camera;
-
-	class CameraResource : public AbstractResource<Camera*> {
-
-	public:
-		CameraResource(Camera* t) : AbstractResource(t) {}
-		virtual ~CameraResource() {
-			if (_data != 0) {
-				delete _data;
-			}
-		}
-	};
-
 	class RenderTargetResource : public AbstractResource<RenderTarget*> {
 
 	public:
@@ -258,6 +245,17 @@ namespace ds {
 	public:
 		SkyBoxResource(SkyBox* t) : AbstractResource(t) {}
 		virtual ~SkyBoxResource() {
+			if (_data != 0) {
+				delete _data;
+			}
+		}
+	};
+
+	class ParticleManagerResource : public AbstractResource<ParticleManager*> {
+
+	public:
+		ParticleManagerResource(ParticleManager* t) : AbstractResource(t) {}
+		virtual ~ParticleManagerResource() {
 			if (_data != 0) {
 				delete _data;
 			}

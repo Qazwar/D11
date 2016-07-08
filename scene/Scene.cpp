@@ -6,9 +6,9 @@
 
 namespace ds {
 
-	Scene::Scene(const SceneDescriptor& descriptor) : _descriptor(descriptor) {
+	Scene::Scene(const SceneDescriptor& descriptor) : _descriptor(descriptor) , _active(false) {
 		_meshBuffer = res::getMeshBuffer(descriptor.meshBuffer);
-		_camera = res::getCamera(descriptor.camera);
+		_camera = graphics::getFPSCamera();
 		_depthEnabled = descriptor.depthEnabled;
 		for (size_t i = 0; i < MAX_ACTIONS; ++i) {
 			_actions[i] = 0;

@@ -12,12 +12,12 @@ namespace ds {
 	// --------------------------------------------------------------------------
 	// constructor
 	// --------------------------------------------------------------------------
-	ParticleManager::ParticleManager(const ParticleSystemsDescriptor& descriptor) : _particles(0) {
+	ParticleManager::ParticleManager(const ParticleSystemsDescriptor& descriptor) {
 		_systems = new ParticleSystem*[MAX_PARTICLE_SYSTEMS];
 		for (int i = 0; i < 128; ++i) {
 			_systems[i] = 0;
 		}
-		_particles = res::getSpriteBuffer(descriptor.spriteBuffer);
+		_renderer[PRM_2D] = new ParticleSystemRenderer2D(descriptor.spriteBuffer);
 	}
 
 	// --------------------------------------------------------------------------
@@ -31,14 +31,15 @@ namespace ds {
 			_systems[i] = 0;
 		}
 		delete[] _systems;
+		delete _renderer[PRM_2D];
 	}
 
-	ParticleSystem* ParticleManager::create(int id, const char* name) {
-		ParticleSystem* system = new ParticleSystem(id, name, &_factory);
+	ParticleSystem* ParticleManager::create(int id, const char* name, ParticleRenderMode renderMode) {
+		ParticleSystem* system = new ParticleSystem(id, name, &_factory, renderMode);
 		return system;
 	}
 
-	ParticleSystem* ParticleManager::create(const char* name) {
+	ParticleSystem* ParticleManager::create(const char* name, ParticleRenderMode renderMode) {
 		int idx = -1;
 		for (int i = 0; i < MAX_PARTICLE_SYSTEMS; ++i) {
 			if (_systems[i] == 0 && idx == -1) {
@@ -46,7 +47,7 @@ namespace ds {
 			}
 		}
 		if (idx != -1) {
-			ParticleSystem* system = new ParticleSystem(idx, name, &_factory);
+			ParticleSystem* system = new ParticleSystem(idx, name, &_factory, renderMode);
 			_systems[idx] = system;
 			return system;
 		}
@@ -159,11 +160,12 @@ namespace ds {
 				int id = -1;
 				reader.get_int(cats[i], "id", &id);
 				bool se = false;
+				// FIXME: read render mode : 2D, 3D
 				if (reader.contains_property(cats[i], "send_events")) {
 					reader.get(cats[i], "send_events", &se);
 				}
 				if (id != -1) {
-					ParticleSystem* system = create(id, name);
+					ParticleSystem* system = create(id, name, ParticleRenderMode::PRM_2D);
 					if (se) {
 						system->activateEvents();
 					}
@@ -202,6 +204,34 @@ namespace ds {
 	// render
 	// --------------------------------------------------------------------------
 	void ParticleManager::render() {
+		//_particles->begin();
+		int batchSize = 0;
+		//_particles->begin();
+		ZoneTracker z("ParticleManager::render");
+		//SpriteVertex v;
+		for (int i = 0; i < MAX_PARTICLE_SYSTEMS; ++i) {
+			if (_systems[i] != 0) {
+				ParticleSystemRenderer* renderer = _renderer[_systems[i]->getRenderMode()];
+				//const ParticleArray& array = _systems[i]->getArray();
+				//const Texture& t = _systems[i]->getTexture();
+				//renderer->render(array, t);
+				/*
+				if (array.countAlive > 0) {
+					for (int j = 0; j < array.countAlive; ++j) {
+						_particles->draw(array.position[j].xy(), t, array.rotation[j], array.scale[j], array.color[j]);
+					}
+				}
+				*/
+			}
+		}
+		/*
+		if (_particles->size() > 0) {
+		_particles->flush();
+		}
+		*/
+		//_particles->end();
+
+		/*
 		_particles->begin();
 		int batchSize = 0;
 		_particles->begin();
@@ -213,31 +243,13 @@ namespace ds {
 				const Texture& t = _systems[i]->getTexture();
 				if (array.countAlive > 0) {
 					for (int j = 0; j < array.countAlive; ++j) {
-						_particles->draw(array.position[j].xy(), t, array.rotation[j], array.scale[j], array.color[j]);
-						/*
-						for (int k = 0; k < 4; ++k) {
-							v.x = array.position[j].x;
-							v.y = array.position[j].y;
-							v.z = array.position[j].z;
-							v.uv = t.getUV(k);
-							v.scale = array.scale[j];
-							v.dimension = t.dim;
-							v.rotationIndex.x = array.rotation[j];
-							v.rotationIndex.y = k;
-							v.color = array.color[j];
-							_particles->append(v);
-						}
-						*/
+						_particles->draw(array.position[j].xy(), t, array.rotation[j], array.scale[j], array.color[j]);						
 					}
 				}
 			}
 		}
-		/*
-		if (_particles->size() > 0) {
-			_particles->flush();
-		}
-		*/
 		_particles->end();
+		*/
 		//renderer::setCurrentShader(renderer::getDefaultShaderID());
 	}
 

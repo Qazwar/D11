@@ -16,7 +16,7 @@ namespace ds {
 	class ParticleSystemRenderer2D : public ParticleSystemRenderer {
 
 	public:
-		ParticleSystemRenderer2D();
+		ParticleSystemRenderer2D(RID bufferID);
 		virtual ~ParticleSystemRenderer2D() {}
 
 		void render(const ParticleArray& array, const Texture& t);

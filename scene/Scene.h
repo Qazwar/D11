@@ -20,6 +20,9 @@ namespace ds {
 		AABBox boundingBox;
 	};
 
+	// ----------------------------------------
+	// Basic scene
+	// ----------------------------------------
 	class Scene {
 
 	public:
@@ -63,8 +66,14 @@ namespace ds {
 
 
 		void save(const ReportWriter& writer);
-
+		const bool isActive() const {
+			return _active;
+		}
+		void setActive(bool active) {
+			_active = active;
+		}
 	private:
+		bool _active;
 		void updateWorld(int idx);
 
 		SceneDescriptor _descriptor;
@@ -79,4 +88,27 @@ namespace ds {
 		bool _depthEnabled;
 	};
 
+	// ----------------------------------------
+	// 2D scene
+	// ----------------------------------------
+	class Scene2D : public Scene {
+
+	public:
+		Scene2D(const SceneDescriptor& descriptor) : Scene(descriptor) {}
+		~Scene2D() {}
+	private:
+		OrthoCamera* _camera;
+	};
+
+	// ----------------------------------------
+	// 3D scene
+	// ----------------------------------------
+	class Scene3D : public Scene {
+
+	public:
+		Scene3D(const SceneDescriptor& descriptor) : Scene(descriptor) {}
+		~Scene3D() {}
+	private:
+		FPSCamera* _camera;
+	};
 }

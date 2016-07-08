@@ -36,6 +36,10 @@ namespace graphics {
 
 	ID3D11Device* getDevice();
 
+	ds::OrthoCamera* getOrthoCamera();
+
+	ds::FPSCamera* getFPSCamera();
+
 	void setCamera(ds::Camera* camera);
 
 	ds::Camera* getCamera();

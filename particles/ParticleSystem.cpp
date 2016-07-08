@@ -6,7 +6,7 @@
 
 namespace ds {
 
-	ParticleSystem::ParticleSystem(int id, const char* name, ParticleSystemFactory* factory) {
+	ParticleSystem::ParticleSystem(int id, const char* name, ParticleSystemFactory* factory, ParticleRenderMode renderMode) {
 		_sendEvents = false;
 		strcpy_s(m_DebugName, 32, name);
 		sprintf_s(_json_name, 64, "particles\\%s.json", name);
@@ -15,6 +15,7 @@ namespace ds {
 		_count_modules = 0;
 		_factory = factory;
 		_counter = 0;
+		_renderMode = renderMode;
 	}
 
 	ParticleSystem::~ParticleSystem() {

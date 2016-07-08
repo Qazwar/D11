@@ -609,6 +609,9 @@ namespace gui {
 			guiContext->startPosition = *startPos;
 			guiContext->position = *startPos;
 		}
+
+		graphics::setCamera(graphics::getOrthoCamera());
+		graphics::turnOffZBuffer();
 	}
 
 	// -------------------------------------------------------
@@ -1949,6 +1952,7 @@ namespace gui {
 		//ds::sprites::setTexture(current);
 		guiContext->spriteBuffer->end();
 		guiContext->position.y -= 8.0f;
+		graphics::turnOnZBuffer();
 	}
 
 	// -------------------------------------------

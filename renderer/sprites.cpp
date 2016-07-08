@@ -149,7 +149,7 @@ namespace ds {
 		ZoneTracker("SpriteBuffer::flush");
 		unsigned int stride = sizeof(SpriteVertex);
 		unsigned int offset = 0;
-
+		graphics::turnOffZBuffer();
 		graphics::setVertexBuffer(_descriptor.vertexBuffer, &stride, &offset, D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 		graphics::setMaterial(_descriptor.material);
 		for (int i = 0; i < _index; i++) {
@@ -166,6 +166,7 @@ namespace ds {
 		graphics::setVertexShaderConstantBuffer(_descriptor.constantBuffer);
 		graphics::setGeometryShaderConstantBuffer(_descriptor.constantBuffer);
 		graphics::draw(_index);
+		graphics::turnOnZBuffer();
 		_index = 0;
 	}
 

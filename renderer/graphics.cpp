@@ -40,6 +40,9 @@ namespace graphics {
 		ds::Camera* camera;
 
 		v2 viewportCenter;
+
+		ds::OrthoCamera* orthoCamera;
+		ds::FPSCamera* fpsCamera;
 	};
 
 	static GraphicContext* _context;
@@ -316,6 +319,8 @@ namespace graphics {
 		_context->viewProjectionMatrix = _context->viewMatrix * _context->projectionMatrix;
 
 		_context->camera = 0;
+		_context->orthoCamera = new ds::OrthoCamera(graphics::getScreenWidth(), graphics::getScreenHeight());
+		_context->fpsCamera = new ds::FPSCamera(graphics::getScreenWidth(), graphics::getScreenHeight());
 		return true;
 	}
 
@@ -324,6 +329,8 @@ namespace graphics {
 	// ------------------------------------------------------
 	void shutdown() {
 		if (_context != 0) {
+			delete _context->orthoCamera;
+			delete _context->fpsCamera;
 			if (_context->backBufferTarget) _context->backBufferTarget->Release();
 			if (_context->swapChain) _context->swapChain->Release();
 			if (_context->d3dContext) _context->d3dContext->Release();
@@ -339,6 +346,14 @@ namespace graphics {
 
 	void setCamera(ds::Camera* camera) {
 		_context->camera = camera;
+	}
+
+	ds::OrthoCamera* getOrthoCamera() {
+		return _context->orthoCamera;
+	}
+
+	ds::FPSCamera* getFPSCamera() {
+		return _context->fpsCamera;
 	}
 
 	ds::Camera* getCamera() {

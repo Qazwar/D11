@@ -49,6 +49,7 @@ namespace ds {
 		RENDERTARGET,
 		SKYBOX,
 		MATERIAL,
+		PARTICLEMANAGER,
 		UNKNOWN
 	};
 
@@ -111,8 +112,6 @@ namespace ds {
 		Material* getMaterial(RID rid);
 
 		Scene* getScene(const char* name);
-
-		Camera* getCamera(const char* name);
 
 		Mesh* getMesh(RID rid);
 

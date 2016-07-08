@@ -1,9 +1,10 @@
 #include "ParticleSystemRenderer.h"
+#include "..\resources\ResourceContainer.h"
 
 namespace ds {
 
-	ParticleSystemRenderer2D::ParticleSystemRenderer2D() : ParticleSystemRenderer() {
-
+	ParticleSystemRenderer2D::ParticleSystemRenderer2D(RID bufferID) : ParticleSystemRenderer() {
+		_particles = res::getSpriteBuffer(bufferID);
 	}
 	
 

@@ -1,12 +1,15 @@
 #pragma once
 #include "ParticleSystem.h"
 #include "ParticleSystemFactory.h"
-#include "..\renderer\sprites.h"
+//#include "..\renderer\sprites.h"
 #include "..\resources\ResourceDescriptors.h"
+#include "ParticleSystemRenderer.h"
 
 namespace ds {
 
 const int MAX_PARTICLES = 16386;
+
+const int MAX_RENDERER = 2;
 
 struct ParticleSystemGroup {
 	uint32_t id;
@@ -35,8 +38,8 @@ public:
 	void update(float elapsed);
 	void render();
 
-	ParticleSystem* create(int id, const char* name);
-	ParticleSystem* create(const char* name);
+	ParticleSystem* create(int id, const char* name, ParticleRenderMode renderMode);
+	ParticleSystem* create(const char* name, ParticleRenderMode renderMode);
 	void removeSystem(int id);
 	void debug();
 	//void fillModel(gui::ComponentModel<int>* model);
@@ -61,10 +64,11 @@ private:
 	int findGroup(uint32_t id);
 	ParticleSystem** _systems;
 	int m_BlendState;
-	SpriteBuffer* _particles;
+	//SpriteBuffer* _particles;
 	ParticleSystemFactory _factory;
 	Array<ParticleSystemGroup> _groups;
 	Array<ParticleEvent> _events;
+	ParticleSystemRenderer* _renderer[MAX_RENDERER];
 };
 
 }

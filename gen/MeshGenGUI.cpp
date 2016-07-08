@@ -8,7 +8,7 @@ namespace ds {
 	namespace gen {
 
 		MeshGenGUI::MeshGenGUI(const char* orthoCameraName, CommandContext* ctx) : _ctx(ctx) , _pressed(false) , _prevColor(Color::WHITE) {
-			_orthoCamera = (ds::OrthoCamera*)res::getCamera(orthoCameraName);
+			_orthoCamera = graphics::getOrthoCamera();
 			_commands.push_back(new AddCubeCommand(_ctx));
 			_commands.push_back(new ExtrudeEdgeCommand(_ctx));
 			_commands.push_back(new SetColorCommand(_ctx));

@@ -1,8 +1,6 @@
 #pragma once
-#include "ParticleSystem.h"
 #include "..\io\DataFile.h"
 #include "Particle.h"
-#include "ParticleManager.h"
 #include "..\utils\Profiler.h"
 #include "ParticleSystemFactory.h"
 #include "..\lib\collection_types.h"
@@ -23,16 +21,21 @@ namespace ds {
 		ParticleEventType type;
 	};
 
-// -------------------------------------------------------
-// Module instance
-// -------------------------------------------------------
-struct ModuleInstance {
+	enum ParticleRenderMode {
+		PRM_2D,
+		PRM_3D
+	};
 
-	ParticleModule* module;
-	ParticleModuleData* data;
+	// -------------------------------------------------------
+	// Module instance
+	// -------------------------------------------------------
+	struct ModuleInstance {
 
-	ModuleInstance() : module(0), data(0) {}
-};
+		ParticleModule* module;
+		ParticleModuleData* data;
+
+		ModuleInstance() : module(0), data(0) {}
+	};
 
 // -------------------------------------------------------
 // Particle system
@@ -40,7 +43,7 @@ struct ModuleInstance {
 class ParticleSystem : public DataFile {
 
 public:
-	ParticleSystem(int id, const char* name, ParticleSystemFactory* factory);
+	ParticleSystem(int id, const char* name, ParticleSystemFactory* factory, ParticleRenderMode renderMode);
 	~ParticleSystem();
 	void clear();
 	void update(float elapsed, Array<ParticleEvent>& events);
@@ -68,18 +71,14 @@ public:
 	const char* getDebugName() const {
 		return m_DebugName;
 	}
-	const ParticleArray& getArray() const {
-		return m_Array;
-	}
-	const Texture& getTexture() const {
-		return _texture;
-	}
+	
 	int getID() const {
 		return _id;
 	}
 	void removeModuleByName(const char* name);
 
 	bool saveData(JSONWriter& writer);
+
 	const char* getFileName() const {
 		return _json_name;
 	}
@@ -91,6 +90,9 @@ public:
 		_sendEvents = true;
 	}
 	void debug();
+	const ParticleRenderMode getRenderMode() const {
+		return _renderMode;
+	}
 private:
 	void updateSpawners(float dt);
 	void initSpawner();
@@ -111,6 +113,7 @@ private:
 	SpawnerInstances _spawnerInstances;
 	bool _sendEvents;
 	uint32_t _counter;
+	ParticleRenderMode _renderMode;
 };
 
 }

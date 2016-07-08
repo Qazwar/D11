@@ -253,6 +253,12 @@
     <ClCompile Include="scene\actions\RotateToAction.cpp">
       <Filter>scene\actions</Filter>
     </ClCompile>
+    <ClCompile Include="particles\ParticleSystemRenderer.cpp">
+      <Filter>particles</Filter>
+    </ClCompile>
+    <ClCompile Include="base\Game.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils\Log.h">
@@ -502,6 +508,12 @@
     </ClInclude>
     <ClInclude Include="scene\actions\RotateToAction.h">
       <Filter>scene\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\ParticleSystemRenderer.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="base\Game.h">
+      <Filter>base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

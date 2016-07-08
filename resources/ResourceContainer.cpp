@@ -39,12 +39,13 @@ namespace ds {
 			ID3D11Device* device;
 			uint32_t resourceIndex;
 			ResourceIndex resourceTable[MAX_RESOURCES];
-			ParticleManager* particles;
 
 			std::vector<BaseResource*> resources;
 			std::map<IdString, ResourceIndex> lookup;
 
 			std::map<IdString, ParseFunc> parsers;
+
+			
 		};
 
 		static ResourceContext* _resCtx;
@@ -128,6 +129,7 @@ namespace ds {
 			"TEXTURECUBE",
 			"SKYBOX",
 			"MATERIAL",
+			"PARTICLEMANAGER",
 			"UNKNOWN"
 		};
 
@@ -173,9 +175,6 @@ namespace ds {
 		// shutdown
 		// ------------------------------------------------------
 		void shutdown() {
-			if (_resCtx->particles != 0) {
-				delete _resCtx->particles;
-			}
 			// delete all resources
 			for (size_t i = 0; i < _resCtx->resources.size(); ++i) {
 				delete _resCtx->resources[i];
@@ -676,36 +675,6 @@ namespace ds {
 		}
 
 		// ------------------------------------------------------
-		// create camera
-		// ------------------------------------------------------
-		static RID createCamera(const char* name, const CameraDescriptor& descriptor) {
-			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
-			assert(ri.type == ResourceType::UNKNOWN);
-			CameraResource* cbr = 0;
-			if (strcmp(descriptor.type, "orthographic") == 0) {
-				OrthoCamera* camera = new OrthoCamera(graphics::getScreenWidth(), graphics::getScreenHeight());
-				cbr = new CameraResource(camera);
-			}
-			else if (strcmp(descriptor.type, "fps") == 0) {
-				FPSCamera* camera = new FPSCamera(graphics::getScreenWidth(), graphics::getScreenHeight());
-				camera->setPosition(descriptor.position, descriptor.target);
-				camera->resetPitch(0.0f);
-				camera->resetYAngle();
-				cbr = new CameraResource(camera);
-			}
-			int idx = _resCtx->resources.size();
-			_resCtx->resources.push_back(cbr);
-			IdString hash = string::murmur_hash(name);
-			ri.index = idx;
-			ri.id = descriptor.id;
-			ri.nameIndex = _resCtx->nameBuffer.size;
-			_resCtx->nameBuffer.append(name);
-			ri.type = ResourceType::CAMERA;
-			_resCtx->lookup[hash] = ri;
-			return ri.id;
-		}
-
-		// ------------------------------------------------------
 		// create scene
 		// ------------------------------------------------------
 		static RID createScene(const char* name, const SceneDescriptor& descriptor) {
@@ -749,9 +718,22 @@ namespace ds {
 		// ------------------------------------------------------
 		// create particle manager
 		// ------------------------------------------------------
-		static void createParticleManager(const ParticleSystemsDescriptor& descriptor) {
-			_resCtx->particles = new ParticleManager(descriptor);
-			_resCtx->particles->load();
+		static RID createParticleManager(const ParticleSystemsDescriptor& descriptor) {
+			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
+			assert(ri.type == ResourceType::UNKNOWN);
+			ParticleManager* pm = new ParticleManager(descriptor);
+			pm->load();
+			int idx = _resCtx->resources.size();
+			ParticleManagerResource* cbr = new ParticleManagerResource(pm);
+			_resCtx->resources.push_back(cbr);
+			IdString hash = string::murmur_hash("ParticleManager");
+			ri.index = idx;
+			ri.id = descriptor.id;
+			ri.nameIndex = _resCtx->nameBuffer.size;
+			_resCtx->nameBuffer.append("ParticleManager");
+			ri.type = ResourceType::PARTICLEMANAGER;
+			_resCtx->lookup[hash] = ri;
+			return ri.id;
 		}
 
 		// ------------------------------------------------------
@@ -1103,19 +1085,6 @@ namespace ds {
 		}
 
 		// ------------------------------------------------------
-		// parse camera
-		// ------------------------------------------------------
-		void parseCamera(JSONReader& reader, int childIndex) {
-			CameraDescriptor descriptor;
-			reader.get(childIndex, "id", &descriptor.id);
-			reader.get(childIndex, "position", &descriptor.position);
-			reader.get(childIndex, "target", &descriptor.target);
-			descriptor.type= reader.get_string(childIndex, "type");
-			const char* name = reader.get_string(childIndex, "name");
-			createCamera(name, descriptor);
-		}
-
-		// ------------------------------------------------------
 		// parse input layout
 		// ------------------------------------------------------
 		void parseInputLayout(JSONReader& reader, int childIndex) {
@@ -1147,15 +1116,17 @@ namespace ds {
 			const char* name = reader.get_string(childIndex, "name");
 			loadFont(name, descriptor);
 		}
-		/*
-		else if (reader.matches(children[i], "particles")) {
-		ParticleSystemsDescriptor descriptor;
-		reader.get(children[i], "id", &descriptor.id);
-		reader.get(children[i], "sprite_buffer", &descriptor.spriteBuffer);
-		const char* name = reader.get_string(children[i], "name");
-		createParticleManager(descriptor);
+
+		// ------------------------------------------------------
+		// parse particle manager
+		// ------------------------------------------------------
+		void parseParticleManager(JSONReader& reader, int childIndex) {			
+			ParticleSystemsDescriptor descriptor;
+			reader.get(childIndex, "id", &descriptor.id);
+			reader.get(childIndex, "sprite_buffer", &descriptor.spriteBuffer);
+			const char* name = reader.get_string(childIndex, "name");
+			createParticleManager(descriptor);
 		}
-		*/
 
 		// ------------------------------------------------------
 		// parse sampler state
@@ -1320,8 +1291,7 @@ namespace ds {
 		void initialize(ID3D11Device* device) {
 			_resCtx = new ResourceContext;
 			_resCtx->device = device;
-			_resCtx->resourceIndex = 0;
-			_resCtx->particles = 0;
+			_resCtx->resourceIndex = 0;			
 			for (uint32_t i = 0; i < MAX_RESOURCES; ++i) {
 				ResourceIndex& index = _resCtx->resourceTable[i];
 				index.id = INVALID_RID;
@@ -1346,10 +1316,10 @@ namespace ds {
 			_resCtx->parsers[string::murmur_hash("mesh_buffer")] = parseMeshBuffer;
 			_resCtx->parsers[string::murmur_hash("quad_buffer")] = parseQuadBuffer;
 			_resCtx->parsers[string::murmur_hash("scene")] = parseScene;
-			_resCtx->parsers[string::murmur_hash("camera")] = parseCamera;
 			_resCtx->parsers[string::murmur_hash("texture_cube")] = parseTextureCube;
 			_resCtx->parsers[string::murmur_hash("skybox")] = parseSkyBox;
 			_resCtx->parsers[string::murmur_hash("material")] = parseMaterial;
+			_resCtx->parsers[string::murmur_hash("particle_manager")] = parseParticleManager;
 		}
 
 		// ------------------------------------------------------
@@ -1582,16 +1552,7 @@ namespace ds {
 			SceneResource* res = static_cast<SceneResource*>(_resCtx->resources[res_idx.index]);
 			return res->get();
 		}
-
-		Camera* getCamera(const char* name) {
-			IdString hash = string::murmur_hash(name);
-			assert(_resCtx->lookup.find(hash) != _resCtx->lookup.end());
-			const ResourceIndex& res_idx = _resCtx->lookup[hash];
-			assert(res_idx.type == ResourceType::CAMERA);
-			CameraResource* res = static_cast<CameraResource*>(_resCtx->resources[res_idx.index]);
-			return res->get();
-		}
-
+		
 		QuadBuffer* getQuadBuffer(RID rid) {
 			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
 			assert(res_idx.type == ResourceType::QUADBUFFER);
@@ -1619,7 +1580,9 @@ namespace ds {
 		}
 
 		ParticleManager* getParticleManager() {
-			return _resCtx->particles;
+			int idx = find_index("ParticleManager", ResourceType::PARTICLEMANAGER);
+			ParticleManagerResource* res = static_cast<ParticleManagerResource*>(_resCtx->resources[idx]);
+			return res->get();
 		}
 
 		void debug() {
