@@ -33,7 +33,7 @@ namespace ds {
 		ID addStatic(Mesh* mesh, const v3& position, RID material);
 		void attach(ID child, ID parent);
 		void remove(ID id);
-		void draw();
+		virtual void draw();
 		int find(int type, ID* ids, int max);
 		ID intersects(const Ray& ray);
 		uint32_t numEntities() const {
@@ -72,18 +72,21 @@ namespace ds {
 		void setActive(bool active) {
 			_active = active;
 		}
+	protected:
+		EntityArray _data;
+		AbstractAction* _actions[MAX_ACTIONS];
 	private:
 		bool _active;
 		void updateWorld(int idx);
 
 		SceneDescriptor _descriptor;
 		RID _currentMaterial;
-		EntityArray _data;
+		
 		MeshBuffer* _meshBuffer;
 		Camera* _camera;
 		Array<PNTCVertex> _staticVertices;
 		Array<StaticMesh> _staticMeshes;
-		AbstractAction* _actions[MAX_ACTIONS];
+		
 		ActionEventBuffer _eventBuffer;
 		bool _depthEnabled;
 	};
@@ -96,6 +99,9 @@ namespace ds {
 	public:
 		Scene2D(const SceneDescriptor& descriptor) : Scene(descriptor) {}
 		~Scene2D() {}
+		ID add(const v2& pos, const Texture& t, RID material);
+		void draw();
+		void scaleTo(ID id, const v2& startScale, const v2& endScale, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 	private:
 		OrthoCamera* _camera;
 	};

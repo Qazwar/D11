@@ -43,6 +43,9 @@ namespace graphics {
 
 		ds::OrthoCamera* orthoCamera;
 		ds::FPSCamera* fpsCamera;
+
+		ID3D11Buffer* spriteCB;
+		ds::SpriteBuffer* sprites;
 	};
 
 	static GraphicContext* _context;
@@ -144,6 +147,69 @@ namespace graphics {
 		return true;
 	}
 
+	void createInternalSpriteBuffer() {
+		// FIXME: create SpriteBufferCB
+		D3D11_BUFFER_DESC constDesc;
+		ZeroMemory(&constDesc, sizeof(constDesc));
+		constDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		constDesc.ByteWidth = sizeof(ds::SpriteBufferCB);
+		constDesc.Usage = D3D11_USAGE_DYNAMIC;
+		constDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		HRESULT d3dResult = _context->d3dDevice->CreateBuffer(&constDesc, 0, &_context->spriteCB);
+		if (FAILED(d3dResult)) {
+			DXTRACE_MSG("Failed to create constant buffer!");
+		}
+
+		ds::SamplerStateDescriptor ssDesc;
+		ssDesc.addressU = 2;
+		ssDesc.addressV = 2;
+		ssDesc.addressW = 2;
+		RID ss_id = ds::res::createSamplerState("SpriteSampler", ssDesc);
+
+		ds::ShaderDescriptor shaderDesc;
+		shaderDesc.file = "content\\shaders\\Sprite.fx";
+		shaderDesc.vertexShader = "VS_Main";
+		shaderDesc.pixelShader = "PS_Main";
+		shaderDesc.geometryShader = "GS_Main";
+		shaderDesc.model = "4_0";
+		shaderDesc.samplerState = ss_id;
+		RID shader_id = ds::res::createShader("SpriteShader", shaderDesc);
+		
+		ds::InputLayoutDescriptor ilDesc;
+		ilDesc.num = 0;
+		ilDesc.indices[ilDesc.num++] = 0;
+		ilDesc.indices[ilDesc.num++] = 1;
+		ilDesc.indices[ilDesc.num++] = 3;
+		ilDesc.indices[ilDesc.num++] = 1;
+		ilDesc.shader = shader_id;
+		RID il_id = ds::res::createInputLayout("SpriteInputLayout", ilDesc);
+
+		ds::VertexBufferDescriptor vbDesc;
+		vbDesc.dynamic = true;
+		vbDesc.layout = il_id;
+		vbDesc.size = 8192;
+		RID vb_id = ds::res::createVertexBuffer("SpriteVertexBuffer", vbDesc);
+
+		ds::BlendStateDescriptor bsDesc;
+		bsDesc.alphaEnabled = true;
+		bsDesc.srcBlend = ds::res::findBlendState("SRC_ALPHA");
+		bsDesc.srcAlphaBlend = ds::res::findBlendState("SRC_ALPHA");
+		bsDesc.destBlend = ds::res::findBlendState("INV_SRC_ALPHA");
+		bsDesc.destAlphaBlend = ds::res::findBlendState("INV_SRC_ALPHA");
+		RID bs_id = ds::res::createBlendState("SpriteBlendState", bsDesc);
+
+		ds::MaterialDescriptor mtrlDesc;
+		mtrlDesc.shader = shader_id;
+		mtrlDesc.blendstate = bs_id;
+		mtrlDesc.texture = INVALID_RID;
+		RID mtrl_id = ds::res::createMaterial("SpriteMaterial", mtrlDesc);
+
+		ds::SpriteBufferDescriptor spDesc;
+		spDesc.size = 4096;
+		spDesc.vertexBuffer = vb_id;
+		spDesc.material = mtrl_id;
+		_context->sprites = new ds::SpriteBuffer(spDesc);
+	}
 
 	bool initialize(HINSTANCE hInstance, HWND hwnd, const ds::Settings& settings) {
 		_context = new GraphicContext;
@@ -321,6 +387,7 @@ namespace graphics {
 		_context->camera = 0;
 		_context->orthoCamera = new ds::OrthoCamera(graphics::getScreenWidth(), graphics::getScreenHeight());
 		_context->fpsCamera = new ds::FPSCamera(graphics::getScreenWidth(), graphics::getScreenHeight());
+		
 		return true;
 	}
 
@@ -329,6 +396,8 @@ namespace graphics {
 	// ------------------------------------------------------
 	void shutdown() {
 		if (_context != 0) {
+			_context->spriteCB->Release();
+			delete _context->sprites;
 			delete _context->orthoCamera;
 			delete _context->fpsCamera;
 			if (_context->backBufferTarget) _context->backBufferTarget->Release();
@@ -478,6 +547,21 @@ namespace graphics {
 		else {
 			LOG << "ERROR mapping data";
 		}
+	}
+
+	ds::SpriteBuffer* getSpriteBuffer() {
+		return _context->sprites;
+	}
+
+	void updateSpriteConstantBuffer(const ds::SpriteBufferCB& buffer) {
+		D3D11_MAPPED_SUBRESOURCE resource;
+		HRESULT hResult = _context->d3dContext->Map(_context->spriteCB, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
+		void* ptr = resource.pData;
+		// Copy the data into the vertex buffer.
+		memcpy(ptr, &buffer, sizeof(ds::SpriteBufferCB));
+		_context->d3dContext->Unmap(_context->spriteCB, 0);
+		_context->d3dContext->VSSetConstantBuffers(0, 1, &_context->spriteCB);
+		_context->d3dContext->GSSetConstantBuffers(0, 1, &_context->spriteCB);
 	}
 
 	// ------------------------------------------------------

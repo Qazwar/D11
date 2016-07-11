@@ -144,6 +144,7 @@ namespace ds {
 			res::initialize(graphics::getDevice());
 			res::parseJSONFile();
 			input::init(m_hWnd, _settings.screenWidth, _settings.screenHeight);
+			graphics::createInternalSpriteBuffer();
 			LOG << "------------------ start load content ------------------";
 			loadContent();
 			init();

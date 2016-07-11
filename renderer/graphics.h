@@ -32,6 +32,8 @@ namespace graphics {
 	
 	bool initialize(HINSTANCE hInstance, HWND hwnd, const ds::Settings& settings);
 
+	void createInternalSpriteBuffer();
+
 	ID3D11DeviceContext* getContext();
 
 	ID3D11Device* getDevice();
@@ -91,5 +93,9 @@ namespace graphics {
 	void turnOffZBuffer();
 
 	ds::Ray getCameraRay(ds::Camera* camera);
+
+	void updateSpriteConstantBuffer(const ds::SpriteBufferCB& buffer);
+
+	ds::SpriteBuffer* getSpriteBuffer();
 }
 

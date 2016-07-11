@@ -7,8 +7,8 @@
 namespace ds {
 
 	Scene::Scene(const SceneDescriptor& descriptor) : _descriptor(descriptor) , _active(false) {
-		_meshBuffer = res::getMeshBuffer(descriptor.meshBuffer);
-		_camera = graphics::getFPSCamera();
+		//_meshBuffer = res::getMeshBuffer(descriptor.meshBuffer);
+		//_camera = graphics::getFPSCamera();
 		_depthEnabled = descriptor.depthEnabled;
 		for (size_t i = 0; i < MAX_ACTIONS; ++i) {
 			_actions[i] = 0;
@@ -310,8 +310,8 @@ namespace ds {
 	// ------------------------------------
 	void Scene::save(const ReportWriter& writer) {
 		char buffer[256];
-		sprintf_s(buffer, 256, "Scene - %s", res::getName(_descriptor.id));
-		writer.startBox(buffer);
+		//sprintf_s(buffer, 256, "Scene - %s", res::getName(_descriptor.id));
+		//writer.startBox(buffer);
 		const char* HEADERS[] = { "ID", "Pos", "Scale", "Rotation" };
 		writer.startTable(HEADERS, 4);
 		for (uint32_t i = 0; i < _data.num; ++i) {
@@ -353,5 +353,40 @@ namespace ds {
 	void Scene::rotateTo(ID id, const v3& startRotation, const v3& endRotation, float ttl, int mode, const tweening::TweeningType& tweeningType) {
 		RotateToAction* action = (RotateToAction*)_actions[AT_ROTATE_TO];
 		action->attach(id, startRotation, endRotation, ttl, mode, tweeningType);
+	}
+
+
+
+	// ------------------------------------
+	// Scene2D
+	// ------------------------------------
+
+	// ------------------------------------
+	// add
+	// ------------------------------------
+	ID Scene2D::add(const v2& pos, const Texture& t, RID material) {
+		return _data.create(pos, t, v2(1, 1), 0.0f, material, Color::WHITE);
+	}
+
+	// ------------------------------------
+	// draw
+	// ------------------------------------
+	void Scene2D::draw() {
+		SpriteBuffer* sprites = graphics::getSpriteBuffer();
+		sprites->begin();
+		for (int i = 0; i < _data.num; ++i) {
+			if (_data.active[i]) {
+				sprites->draw(_data.positions[i].xy(), _data.textures[i],_data.rotations[i].x,_data.scales[i].xy());
+			}
+		}
+		sprites->end();
+	}
+
+	// ------------------------------------
+	// scale to
+	// ------------------------------------
+	void Scene2D::scaleTo(ID id, const v2& startScale, const v2& endScale, float ttl, int mode, const tweening::TweeningType& tweeningType) {
+		ScalingAction* action = (ScalingAction*)_actions[AT_SCALE];
+		action->attach(id, v3(startScale,0.0f), v3(endScale,0.0f), ttl, mode, tweeningType);
 	}
 }

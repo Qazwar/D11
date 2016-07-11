@@ -11,6 +11,7 @@ namespace ds {
 		~Game();
 		void render();
 		void update(float dt);
+		Scene2D* create2DScene(const char* name);
 		void addScene(const char* name, Scene* scene);
 		Scene* getScene(const char* name) const;
 		void activateScene(const char* name);

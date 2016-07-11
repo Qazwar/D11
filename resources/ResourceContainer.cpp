@@ -25,9 +25,9 @@ namespace ds {
 		// ------------------------------------------------------
 		struct ResourceIndex {
 			RID id;
-			uint32_t index;
 			ResourceType type;
 			uint32_t nameIndex;
+			IdString hash;
 		};
 
 		// ------------------------------------------------------
@@ -38,10 +38,11 @@ namespace ds {
 			CharBuffer nameBuffer;
 			ID3D11Device* device;
 			uint32_t resourceIndex;
-			ResourceIndex resourceTable[MAX_RESOURCES];
+			//ResourceIndex resourceTable[MAX_RESOURCES];
 
-			std::vector<BaseResource*> resources;
-			std::map<IdString, ResourceIndex> lookup;
+			Array<BaseResource*> resources;
+			Array<ResourceIndex> indices;
+			//std::map<IdString, ResourceIndex> lookup;
 
 			std::map<IdString, ParseFunc> parsers;
 
@@ -150,7 +151,7 @@ namespace ds {
 		// ------------------------------------------------------
 		// find blendstate by name
 		// ------------------------------------------------------
-		static int findBlendState(const char* text) {
+		int findBlendState(const char* text) {
 			for (int i = 0; i < 17; ++i) {
 				if (strcmp(BLEND_STATE_MAPPINGS[i].name, text) == 0) {
 					return i;
@@ -187,14 +188,17 @@ namespace ds {
 		// ------------------------------------------------------
 		// cretate internal resource entry
 		// ------------------------------------------------------
-		static RID create(ResourceIndex& ri, const char* name, uint16_t id, int index, ResourceType type) {
+		static RID create(const char* name, ResourceType type) {
 			IdString hash = string::murmur_hash(name);
-			ri.index = index;
-			ri.id = id;
+			ResourceIndex ri;
+			// this one gets called after we have already the resource
+			ri.id = _resCtx->resources.size() - 1;
 			ri.nameIndex = _resCtx->nameBuffer.size;
 			_resCtx->nameBuffer.append(name);
 			ri.type = type;
-			_resCtx->lookup[hash] = ri;
+			ri.hash = hash;
+			LOG << "adding resource: '" << name << "' at " << ri.id << " type: " << ResourceTypeNames[type];
+			_resCtx->indices.push_back(ri);
 			return ri.id;
 		}
 
@@ -202,9 +206,7 @@ namespace ds {
 		// cretate quad index buffer
 		// ------------------------------------------------------
 		static RID createQuadIndexBuffer(const char* name,const QuadIndexBufferDescriptor& descriptor) {
-			int idx = _resCtx->resources.size();
-			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
-			assert(ri.type == ResourceType::UNKNOWN);
+			
 			// FIXME: check that size % 6 == 0 !!!
 			D3D11_BUFFER_DESC bufferDesc;
 			bufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -241,25 +243,16 @@ namespace ds {
 				return -1;
 			}
 			delete[] data;
+			RID rid = create(name, ResourceType::INDEXBUFFER);
 			IndexBufferResource* cbr = new IndexBufferResource(buffer);
 			_resCtx->resources.push_back(cbr);
-			IdString hash = string::murmur_hash(name);
-			ri.index = idx;
-			ri.id = descriptor.id;
-			ri.nameIndex = _resCtx->nameBuffer.size;
-			_resCtx->nameBuffer.append(name);
-			ri.type = ResourceType::INDEXBUFFER;
-			_resCtx->lookup[hash] = ri;
-			return ri.id;
+			return rid;
 		}
 
 		// ------------------------------------------------------
 		// create index buffer
 		// ------------------------------------------------------
 		static RID createIndexBuffer(const char* name, const IndexBufferDescriptor& descriptor) {
-			int idx = _resCtx->resources.size();
-			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
-			assert(ri.type == ResourceType::UNKNOWN);
 			D3D11_BUFFER_DESC bufferDesc;
 			if (descriptor.dynamic) {
 				bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -280,23 +273,13 @@ namespace ds {
 			}
 			IndexBufferResource* cbr = new IndexBufferResource(buffer);
 			_resCtx->resources.push_back(cbr);
-			IdString hash = string::murmur_hash(name);
-			ri.index = idx;
-			ri.id = descriptor.id;
-			ri.nameIndex = _resCtx->nameBuffer.size;
-			_resCtx->nameBuffer.append(name);
-			ri.type = ResourceType::INDEXBUFFER;
-			_resCtx->lookup[hash] = ri;
-			return ri.id;
+			return create(name, ResourceType::INDEXBUFFER);
 		}
 
 		// ------------------------------------------------------
 		// create constant buffer
 		// ------------------------------------------------------
 		static RID createConstantBuffer(const char* name, const ConstantBufferDescriptor& descriptor) {
-			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
-			assert(ri.type == ResourceType::UNKNOWN);
-			int index = _resCtx->resources.size();
 			D3D11_BUFFER_DESC constDesc;
 			ZeroMemory(&constDesc, sizeof(constDesc));
 			constDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -311,24 +294,13 @@ namespace ds {
 			}
 			ConstantBufferResource* cbr = new ConstantBufferResource(buffer);
 			_resCtx->resources.push_back(cbr);
-			IdString hash = string::murmur_hash(name);
-			//_resCtx->constantBuffers.push_back(buffer);
-			ri.index = index;
-			ri.id = descriptor.id;
-			ri.nameIndex = _resCtx->nameBuffer.size;
-			_resCtx->nameBuffer.append(name);
-			ri.type = ResourceType::CONSTANTBUFFER;
-			_resCtx->lookup[hash] = ri;
-			return ri.id;
+			return create(name, ResourceType::CONSTANTBUFFER);
 		}
 
 		// ------------------------------------------------------
 		// create material
 		// ------------------------------------------------------
-		static RID createMaterial(const char* name, const MaterialDescriptor& descriptor) {
-			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
-			assert(ri.type == ResourceType::UNKNOWN);
-			int index = _resCtx->resources.size();
+		RID createMaterial(const char* name, const MaterialDescriptor& descriptor) {
 			Material* m = new Material;
 			m->ambient = descriptor.ambient;
 			m->diffuse = descriptor.diffuse;
@@ -337,94 +309,47 @@ namespace ds {
 			m->texture = descriptor.texture;
 			MaterialResource* cbr = new MaterialResource(m);
 			_resCtx->resources.push_back(cbr);
-			IdString hash = string::murmur_hash(name);
-			ri.index = index;
-			ri.id = descriptor.id;
-			ri.nameIndex = _resCtx->nameBuffer.size;
-			_resCtx->nameBuffer.append(name);
-			ri.type = ResourceType::MATERIAL;
-			_resCtx->lookup[hash] = ri;
-			return ri.id;
+			return create(name, ResourceType::MATERIAL);
 		}
 
 		// ------------------------------------------------------
 		// create render target
 		// ------------------------------------------------------
 		static RID createRenderTarget(const char* name, const RenderTargetDescriptor& descriptor) {
-			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
-			assert(ri.type == ResourceType::UNKNOWN);
-			int index = _resCtx->resources.size();
 			RenderTarget* rt= new RenderTarget(descriptor);
 			RenderTargetResource* cbr = new RenderTargetResource(rt);
 			_resCtx->resources.push_back(cbr);
-			IdString hash = string::murmur_hash(name);
-			ri.index = index;
-			ri.id = descriptor.id;
-			ri.nameIndex = _resCtx->nameBuffer.size;
-			_resCtx->nameBuffer.append(name);
-			ri.type = ResourceType::RENDERTARGET;
-			_resCtx->lookup[hash] = ri;
-			return ri.id;
+			return create(name, ResourceType::RENDERTARGET);
 		}
 
 		// ------------------------------------------------------
 		// create sprite buffer
 		// ------------------------------------------------------
 		static RID createSpriteBuffer(const char* name, const SpriteBufferDescriptor& descriptor) {
-			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
-			assert(ri.type == ResourceType::UNKNOWN);
-			int index = _resCtx->resources.size();
 			SpriteBuffer* buffer = new SpriteBuffer(descriptor);
 			SpriteBufferResource* cbr = new SpriteBufferResource(buffer);
 			_resCtx->resources.push_back(cbr);
-			IdString hash = string::murmur_hash(name);
-			ri.index = index;
-			ri.id = descriptor.id;
-			ri.nameIndex = _resCtx->nameBuffer.size;
-			_resCtx->nameBuffer.append(name);
-			ri.type = ResourceType::SPRITEBUFFER;
-			_resCtx->lookup[hash] = ri;
-			return ri.id;
+			return create(name, ResourceType::SPRITEBUFFER);
 		}
 
 		// ------------------------------------------------------
 		// create quad buffer
 		// ------------------------------------------------------
 		static RID createQuadBuffer(const char* name, const QuadBufferDescriptor& descriptor) {
-			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
-			assert(ri.type == ResourceType::UNKNOWN);
-			int index = _resCtx->resources.size();
 			QuadBuffer* buffer = new QuadBuffer(descriptor);
 			QuadBufferResource* cbr = new QuadBufferResource(buffer);
 			_resCtx->resources.push_back(cbr);
-			IdString hash = string::murmur_hash(name);
-			ri.index = index;
-			ri.id = descriptor.id;
-			ri.nameIndex = _resCtx->nameBuffer.size;
-			_resCtx->nameBuffer.append(name);
-			ri.type = ResourceType::QUADBUFFER;
-			_resCtx->lookup[hash] = ri;
-			return ri.id;
+			return create(name, ResourceType::QUADBUFFER);
 		}
 
 		// ------------------------------------------------------
 		// create mesh buffer
 		// ------------------------------------------------------
 		static RID createMeshBuffer(const char* name, const MeshBufferDescriptor& descriptor) {
-			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
-			assert(ri.type == ResourceType::UNKNOWN);
-			int index = _resCtx->resources.size();
 			MeshBuffer* buffer = new MeshBuffer(descriptor);
 			MeshBufferResource* cbr = new MeshBufferResource(buffer);
 			_resCtx->resources.push_back(cbr);
-			IdString hash = string::murmur_hash(name);
-			ri.index = index;
-			ri.id = descriptor.id;
-			ri.nameIndex = _resCtx->nameBuffer.size;
-			_resCtx->nameBuffer.append(name);
-			ri.type = ResourceType::MESHBUFFER;
-			_resCtx->lookup[hash] = ri;
-			return ri.id;
+			return create(name, ResourceType::MESHBUFFER);
 		}
 
 		
@@ -433,44 +358,21 @@ namespace ds {
 		// create skybox
 		// ------------------------------------------------------
 		static RID createSkyBox(const char* name, const SkyBoxDescriptor& descriptor) {
-			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
-			assert(ri.type == ResourceType::UNKNOWN);
-			int index = _resCtx->resources.size();
 			SkyBox* buffer = new SkyBox(descriptor);
 			SkyBoxResource* cbr = new SkyBoxResource(buffer);
 			_resCtx->resources.push_back(cbr);
-			return create(ri, name, descriptor.id, index, ResourceType::SKYBOX);
-			/*
-			IdString hash = string::murmur_hash(name);
-			ri.index = index;
-			ri.id = descriptor.id;
-			ri.nameIndex = _resCtx->nameBuffer.size;
-			_resCtx->nameBuffer.append(name);
-			ri.type = ResourceType::SKYBOX;
-			_resCtx->lookup[hash] = ri;
-			return ri.id;
-			*/
+			return create(name, ResourceType::SKYBOX);
 		}
 
 		// ------------------------------------------------------
 		// create mesh 
 		// ------------------------------------------------------
 		static RID createMesh(const char* name, const MeshDescriptor& descriptor) {
-			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
-			assert(ri.type == ResourceType::UNKNOWN);
-			int index = _resCtx->resources.size();
 			Mesh* mesh = new Mesh;
 			mesh->load(descriptor.fileName);
 			MeshResource* cbr = new MeshResource(mesh);
 			_resCtx->resources.push_back(cbr);
-			IdString hash = string::murmur_hash(name);
-			ri.index = index;
-			ri.id = descriptor.id;
-			ri.nameIndex = _resCtx->nameBuffer.size;
-			_resCtx->nameBuffer.append(name);
-			ri.type = ResourceType::MESH;
-			_resCtx->lookup[hash] = ri;
-			return ri.id;
+			return create(name, ResourceType::MESH);
 		}
 
 		
@@ -479,9 +381,6 @@ namespace ds {
 		// create sampler state
 		// ------------------------------------------------------
 		RID createSamplerState(const char* name, const SamplerStateDescriptor& descriptor) {
-			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
-			assert(ri.type == ResourceType::UNKNOWN);
-			int index = _resCtx->resources.size();
 			D3D11_SAMPLER_DESC colorMapDesc;
 			ZeroMemory(&colorMapDesc, sizeof(colorMapDesc));
 			colorMapDesc.AddressU = TEXTURE_ADDRESS_MODES[descriptor.addressU].mode;
@@ -500,23 +399,13 @@ namespace ds {
 			}
 			SamplerStateResource* cbr = new SamplerStateResource(sampler);
 			_resCtx->resources.push_back(cbr);
-			IdString hash = string::murmur_hash(name);
-			ri.index = index;
-			ri.id = descriptor.id;
-			ri.nameIndex = _resCtx->nameBuffer.size;
-			_resCtx->nameBuffer.append(name);
-			ri.type = ResourceType::SAMPLERSTATE;
-			_resCtx->lookup[hash] = ri;
-			return ri.id;
+			return create(name, ResourceType::SAMPLERSTATE);
 		}
 
 		// ------------------------------------------------------
 		// load texture
 		// ------------------------------------------------------
 		static RID loadTexture(const char* name, const TextureDescriptor& descriptor) {
-			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
-			assert(ri.type == ResourceType::UNKNOWN);
-			int idx = _resCtx->resources.size();
 			ID3D11ShaderResourceView* srv = 0;
 			char buffer[256];
 			sprintf_s(buffer, 256, "content\\textures\\%s", descriptor.name);
@@ -527,23 +416,13 @@ namespace ds {
 			}
 			ShaderResourceViewResource* cbr = new ShaderResourceViewResource(srv);
 			_resCtx->resources.push_back(cbr);
-			IdString hash = string::murmur_hash(name);			
-			ri.index = idx;
-			ri.id = descriptor.id;
-			ri.nameIndex = _resCtx->nameBuffer.size;
-			_resCtx->nameBuffer.append(name);
-			ri.type = ResourceType::TEXTURE;
-			_resCtx->lookup[hash] = ri;
-			return ri.id;
+			return create(name, ResourceType::TEXTURE);
 		}
 
 		// ------------------------------------------------------
 		// load texture cube
 		// ------------------------------------------------------
 		static RID loadTextureCube(const char* name, const TextureDescriptor& descriptor) {
-			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
-			assert(ri.type == ResourceType::UNKNOWN);
-			int idx = _resCtx->resources.size();
 			ID3D11ShaderResourceView* srv = 0;
 			char buffer[256];
 			sprintf_s(buffer, 256, "content\\textures\\%s", descriptor.name);
@@ -575,24 +454,13 @@ namespace ds {
 			}
 			ShaderResourceViewResource* cbr = new ShaderResourceViewResource(srv);
 			_resCtx->resources.push_back(cbr);
-			IdString hash = string::murmur_hash(name);
-			ri.index = idx;
-			ri.id = descriptor.id;
-			ri.nameIndex = _resCtx->nameBuffer.size;
-			_resCtx->nameBuffer.append(name);
-			ri.type = ResourceType::TEXTURE;
-			_resCtx->lookup[hash] = ri;
-			return ri.id;
+			return create(name, ResourceType::TEXTURE);
 		}
 
 		// ------------------------------------------------------
 		// load bitmap font
 		// ------------------------------------------------------
 		static RID loadFont(const char* name,const BitmapfontDescriptor& descriptor) {
-			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
-			assert(ri.type == ResourceType::UNKNOWN);
-			int idx = _resCtx->resources.size();
-
 			char buffer[256];
 			sprintf_s(buffer, 256, "content\\resources\\%s", descriptor.name);
 			float xOffset = 0.0f;
@@ -622,23 +490,13 @@ namespace ds {
 			}
 			BitmapfontResource* cbr = new BitmapfontResource(font);
 			_resCtx->resources.push_back(cbr);
-			IdString hash = string::murmur_hash(name);
-			ri.index = idx;
-			ri.id = descriptor.id;
-			ri.nameIndex = _resCtx->nameBuffer.size;
-			_resCtx->nameBuffer.append(name);
-			ri.type = ResourceType::BITMAPFONT;
-			_resCtx->lookup[hash] = ri;
-			return ri.id;
+			return create(name, ResourceType::BITMAPFONT);
 		}
 
 		// ------------------------------------------------------
 		// create blend state
 		// ------------------------------------------------------
-		static RID createBlendState(const char* name, const BlendStateDescriptor& descriptor) {
-			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
-			assert(ri.type == ResourceType::UNKNOWN);
-			int idx = _resCtx->resources.size();
+		RID createBlendState(const char* name, const BlendStateDescriptor& descriptor) {
 			D3D11_BLEND_DESC blendDesc;
 			ZeroMemory(&blendDesc, sizeof(blendDesc));
 			if (descriptor.alphaEnabled) {
@@ -664,89 +522,49 @@ namespace ds {
 			}
 			BlendStateResource* cbr = new BlendStateResource(state);
 			_resCtx->resources.push_back(cbr);
-			IdString hash = string::murmur_hash(name);			
-			ri.index = idx;
-			ri.id = descriptor.id;
-			ri.nameIndex = _resCtx->nameBuffer.size;
-			_resCtx->nameBuffer.append(name);
-			ri.type = ResourceType::BLENDSTATE;
-			_resCtx->lookup[hash] = ri;
-			return ri.id;
+			return create(name, ResourceType::BLENDSTATE);
 		}
 
 		// ------------------------------------------------------
 		// create scene
 		// ------------------------------------------------------
 		static RID createScene(const char* name, const SceneDescriptor& descriptor) {
-			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
-			assert(ri.type == ResourceType::UNKNOWN);
 			Scene* scene = new Scene(descriptor);
 			int idx = _resCtx->resources.size();
 			SceneResource* cbr = new SceneResource(scene);
 			_resCtx->resources.push_back(cbr);
-			IdString hash = string::murmur_hash(name);
-			ri.index = idx;
-			ri.id = descriptor.id;
-			ri.nameIndex = _resCtx->nameBuffer.size;
-			_resCtx->nameBuffer.append(name);
-			ri.type = ResourceType::SCENE;
-			_resCtx->lookup[hash] = ri;
-			return ri.id;
+			return create(name, ResourceType::SCENE);
 		}
 
 		// ------------------------------------------------------
 		// create dialog
 		// ------------------------------------------------------
 		static RID createDialog(const char* name, const GUIDialogDescriptor& descriptor) {
-			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
-			assert(ri.type == ResourceType::UNKNOWN);
 			GUIDialog* dialog = new GUIDialog(descriptor);
 			dialog->load();
 			int idx = _resCtx->resources.size();
 			GUIDialogResource* cbr = new GUIDialogResource(dialog);
 			_resCtx->resources.push_back(cbr);
-			IdString hash = string::murmur_hash(name);
-			ri.index = idx;
-			ri.id = descriptor.id;
-			ri.nameIndex = _resCtx->nameBuffer.size;
-			_resCtx->nameBuffer.append(name);
-			ri.type = ResourceType::GUIDIALOG;
-			_resCtx->lookup[hash] = ri;
-			return ri.id;
+			return create(name, ResourceType::GUIDIALOG);
 		}
 
 		// ------------------------------------------------------
 		// create particle manager
 		// ------------------------------------------------------
 		static RID createParticleManager(const ParticleSystemsDescriptor& descriptor) {
-			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
-			assert(ri.type == ResourceType::UNKNOWN);
 			ParticleManager* pm = new ParticleManager(descriptor);
 			pm->load();
 			int idx = _resCtx->resources.size();
 			ParticleManagerResource* cbr = new ParticleManagerResource(pm);
 			_resCtx->resources.push_back(cbr);
-			IdString hash = string::murmur_hash("ParticleManager");
-			ri.index = idx;
-			ri.id = descriptor.id;
-			ri.nameIndex = _resCtx->nameBuffer.size;
-			_resCtx->nameBuffer.append("ParticleManager");
-			ri.type = ResourceType::PARTICLEMANAGER;
-			_resCtx->lookup[hash] = ri;
-			return ri.id;
+			return create("ParticleManager", ResourceType::PARTICLEMANAGER);
 		}
 
 		// ------------------------------------------------------
 		// create vertex buffer
 		// ------------------------------------------------------
-		static RID createVertexBuffer(const char* name, const VertexBufferDescriptor& descriptor) {
-			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
-			assert(ri.type == ResourceType::UNKNOWN);
-			
-
-			const ResourceIndex& lyt_idx = _resCtx->resourceTable[descriptor.layout];
-			assert(lyt_idx.type == ResourceType::INPUTLAYOUT);
-			InputLayoutResource* res = static_cast<InputLayoutResource*>(_resCtx->resources[lyt_idx.index]);
+		RID createVertexBuffer(const char* name, const VertexBufferDescriptor& descriptor) {
+			InputLayoutResource* res = static_cast<InputLayoutResource*>(_resCtx->resources[descriptor.layout]);
 			UINT size = descriptor.size * res->size();
 
 			D3D11_BUFFER_DESC bufferDesciption;
@@ -771,24 +589,13 @@ namespace ds {
 			int idx = _resCtx->resources.size();
 			VertexBufferResource* cbr = new VertexBufferResource(buffer, size, descriptor.layout);
 			_resCtx->resources.push_back(cbr);
-			IdString hash = string::murmur_hash(name);
-			ri.index = idx;
-			ri.id = descriptor.id;
-			ri.nameIndex = _resCtx->nameBuffer.size;
-			_resCtx->nameBuffer.append(name);
-			ri.type = ResourceType::VERTEXBUFFER;
-			_resCtx->lookup[hash] = ri;
-			LOG << "VertexBuffer '" << name << "' id: " << ri.id << " size: " << size;
-			return ri.id;
+			return create(name, ResourceType::VERTEXBUFFER);
 		}
 
 		// ------------------------------------------------------
 		// create vertex buffer
 		// ------------------------------------------------------
-		static RID createInputLayout(const char* name, const InputLayoutDescriptor& descriptor) {
-			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
-			assert(ri.type == ResourceType::UNKNOWN);
-			int idx = _resCtx->resources.size();
+		RID createInputLayout(const char* name, const InputLayoutDescriptor& descriptor) {
 			D3D11_INPUT_ELEMENT_DESC* descriptors = new D3D11_INPUT_ELEMENT_DESC[descriptor.num];
 			uint32_t index = 0;
 			uint32_t counter = 0;			
@@ -807,9 +614,7 @@ namespace ds {
 				si[descriptor.indices[i]] += 1;
 			}
 			ID3D11InputLayout* layout = 0;
-			const ResourceIndex& res_idx = _resCtx->resourceTable[descriptor.shader];
-			assert(res_idx.type == ResourceType::SHADER);
-			ShaderResource* sr = static_cast<ShaderResource*>(_resCtx->resources[res_idx.index]);
+			ShaderResource* sr = static_cast<ShaderResource*>(_resCtx->resources[descriptor.shader]);
 			Shader* s = sr->get();
 			assert(s != 0);
 			HRESULT d3dResult = _resCtx->device->CreateInputLayout(descriptors, descriptor.num, s->vertexShaderBuffer->GetBufferPointer(), s->vertexShaderBuffer->GetBufferSize(), &layout);
@@ -820,14 +625,7 @@ namespace ds {
 			delete[] descriptors;
 			InputLayoutResource* ilr = new InputLayoutResource(layout,index);
 			_resCtx->resources.push_back(ilr);
-			ri.index = idx;
-			ri.id = descriptor.id;
-			ri.nameIndex = _resCtx->nameBuffer.size;
-			_resCtx->nameBuffer.append(name);
-			ri.type = ResourceType::INPUTLAYOUT;
-			IdString hash = string::murmur_hash(name);
-			_resCtx->lookup[hash] = ri;
-			return ri.id;
+			return create(name, ResourceType::INPUTLAYOUT);
 		}
 
 		static bool createVertexShader(ID3DBlob* buffer, ID3D11VertexShader** shader) {
@@ -888,11 +686,8 @@ namespace ds {
 			return true;
 		}
 
-		static RID createShader(const char* name, const ShaderDescriptor& descriptor) {
-			ResourceIndex& ri = _resCtx->resourceTable[descriptor.id];
-			assert(ri.type == ResourceType::UNKNOWN);
+		RID createShader(const char* name, const ShaderDescriptor& descriptor) {
 			Shader* s = new Shader;
-			int idx = _resCtx->resources.size();
 			s->vertexShaderBuffer = 0;
 			bool compileResult = compileShader(descriptor.file, descriptor.vertexShader, "vs_4_0", &s->vertexShaderBuffer);
 			if (!compileResult)	{
@@ -932,14 +727,7 @@ namespace ds {
 			s->samplerState = getSamplerState(descriptor.samplerState);
 			ShaderResource* cbr = new ShaderResource(s);
 			_resCtx->resources.push_back(cbr);
-			IdString hash = string::murmur_hash(name);
-			ri.index = idx;
-			ri.id = descriptor.id;
-			ri.nameIndex = _resCtx->nameBuffer.size;
-			_resCtx->nameBuffer.append(name);
-			ri.type = ResourceType::SHADER;
-			_resCtx->lookup[hash] = ri;
-			return ri.id;
+			return create(name, ResourceType::SHADER);
 		}
 
 		// ------------------------------------------------------
@@ -947,7 +735,6 @@ namespace ds {
 		// ------------------------------------------------------
 		void parseConstantBuffer(JSONReader& reader, int childIndex) {
 			ConstantBufferDescriptor descriptor;
-			reader.get(childIndex, "id", &descriptor.id);
 			reader.get(childIndex, "size", &descriptor.size);
 			const char* name = reader.get_string(childIndex, "name");
 			createConstantBuffer(name, descriptor);
@@ -958,7 +745,6 @@ namespace ds {
 		// ------------------------------------------------------
 		void parseQuadIndexBuffer(JSONReader& reader, int childIndex) {
 			QuadIndexBufferDescriptor descriptor;
-			reader.get(childIndex, "id", &descriptor.id);
 			reader.get(childIndex, "size", &descriptor.size);
 			const char* name = reader.get_string(childIndex, "name");
 			createQuadIndexBuffer(name, descriptor);
@@ -969,7 +755,6 @@ namespace ds {
 		// ------------------------------------------------------
 		void parseIndexBuffer(JSONReader& reader, int childIndex) {
 			IndexBufferDescriptor descriptor;
-			reader.get(childIndex, "id", &descriptor.id);
 			reader.get(childIndex, "size", &descriptor.size);
 			const char* name = reader.get_string(childIndex, "name");
 			createIndexBuffer(name, descriptor);
@@ -980,7 +765,6 @@ namespace ds {
 		// ------------------------------------------------------
 		void parseMaterial(JSONReader& reader, int childIndex) {
 			MaterialDescriptor descriptor;
-			reader.get(childIndex, "id", &descriptor.id);
 			const char* shaderName = reader.get_string(childIndex, "shader");
 			descriptor.shader = find(shaderName, ResourceType::SHADER);
 			const char* bsName = reader.get_string(childIndex, "blend_state");
@@ -1003,7 +787,6 @@ namespace ds {
 		// ------------------------------------------------------
 		void parseVertexBuffer(JSONReader& reader, int childIndex) {
 			VertexBufferDescriptor descriptor;
-			reader.get(childIndex, "id", &descriptor.id);
 			reader.get(childIndex, "size", &descriptor.size);
 			reader.get(childIndex, "dynamic", &descriptor.dynamic);
 			const char* layoutName = reader.get_string(childIndex, "layout");
@@ -1017,7 +800,6 @@ namespace ds {
 		// ------------------------------------------------------
 		void parseShader(JSONReader& reader, int childIndex) {
 			ShaderDescriptor descriptor;
-			reader.get(childIndex, "id", &descriptor.id);
 			descriptor.file = reader.get_string(childIndex, "file");
 			descriptor.vertexShader = reader.get_string(childIndex, "vertex_shader");
 			descriptor.pixelShader = reader.get_string(childIndex, "pixel_shader");
@@ -1034,7 +816,6 @@ namespace ds {
 		// ------------------------------------------------------
 		void parseBlendState(JSONReader& reader, int childIndex) {
 			BlendStateDescriptor descriptor;
-			reader.get(childIndex, "id", &descriptor.id);
 			const char* entry = reader.get_string(childIndex, "src_blend");
 			descriptor.srcBlend = findBlendState(entry);
 			entry = reader.get_string(childIndex, "dest_blend");
@@ -1053,7 +834,6 @@ namespace ds {
 		// ------------------------------------------------------
 		void parseTexture(JSONReader& reader, int childIndex) {
 			TextureDescriptor descriptor;
-			reader.get(childIndex, "id", &descriptor.id);
 			descriptor.name = reader.get_string(childIndex, "file");
 			const char* name = reader.get_string(childIndex, "name");
 			loadTexture(name, descriptor);
@@ -1064,7 +844,6 @@ namespace ds {
 		// ------------------------------------------------------
 		void parseTextureCube(JSONReader& reader, int childIndex) {
 			TextureDescriptor descriptor;
-			reader.get(childIndex, "id", &descriptor.id);
 			descriptor.name = reader.get_string(childIndex, "file");
 			const char* name = reader.get_string(childIndex, "name");
 			loadTextureCube(name, descriptor);
@@ -1075,7 +854,6 @@ namespace ds {
 		// ------------------------------------------------------
 		void parseScene(JSONReader& reader, int childIndex) {
 			SceneDescriptor descriptor;
-			reader.get(childIndex, "id", &descriptor.id);
 			reader.get(childIndex, "size", &descriptor.size);
 			descriptor.meshBuffer = reader.get_string(childIndex, "mesh_buffer");
 			descriptor.camera = reader.get_string(childIndex, "camera");
@@ -1090,7 +868,6 @@ namespace ds {
 		void parseInputLayout(JSONReader& reader, int childIndex) {
 			InputLayoutDescriptor descriptor;
 			descriptor.num = 0;
-			reader.get(childIndex, "id", &descriptor.id);
 			const char* attributes = reader.get_string(childIndex, "attributes");
 			char buffer[256];
 			sprintf_s(buffer, 256, "%s", attributes);
@@ -1111,7 +888,6 @@ namespace ds {
 		// ------------------------------------------------------
 		void parseFont(JSONReader& reader, int childIndex) {
 			BitmapfontDescriptor descriptor;
-			reader.get(childIndex, "id", &descriptor.id);
 			descriptor.name = reader.get_string(childIndex, "file");
 			const char* name = reader.get_string(childIndex, "name");
 			loadFont(name, descriptor);
@@ -1122,7 +898,6 @@ namespace ds {
 		// ------------------------------------------------------
 		void parseParticleManager(JSONReader& reader, int childIndex) {			
 			ParticleSystemsDescriptor descriptor;
-			reader.get(childIndex, "id", &descriptor.id);
 			reader.get(childIndex, "sprite_buffer", &descriptor.spriteBuffer);
 			const char* name = reader.get_string(childIndex, "name");
 			createParticleManager(descriptor);
@@ -1133,7 +908,6 @@ namespace ds {
 		// ------------------------------------------------------
 		void parseSamplerState(JSONReader& reader, int childIndex) {
 			SamplerStateDescriptor descriptor;
-			reader.get(childIndex, "id", &descriptor.id);
 			const char* mode = reader.get_string(childIndex, "addressU");
 			int idx = findTextureAddressMode(mode);
 			assert(idx >= 0);
@@ -1155,7 +929,6 @@ namespace ds {
 		// ------------------------------------------------------
 		void parseSpriteBuffer(JSONReader& reader, int childIndex) {
 			SpriteBufferDescriptor descriptor;
-			reader.get(childIndex, "id", &descriptor.id);
 			reader.get(childIndex, "size", &descriptor.size);
 			reader.get(childIndex, "index_buffer", &descriptor.indexBuffer);
 			const char* constantBufferName = reader.get_string(childIndex, "constant_buffer");
@@ -1180,7 +953,6 @@ namespace ds {
 		// ------------------------------------------------------
 		void parseQuadBuffer(JSONReader& reader, int childIndex) {
 			QuadBufferDescriptor descriptor;
-			reader.get(childIndex, "id", &descriptor.id);
 			reader.get(childIndex, "size", &descriptor.size);
 			reader.get(childIndex, "index_buffer", &descriptor.indexBuffer);
 			reader.get(childIndex, "constant_buffer", &descriptor.constantBuffer);
@@ -1203,7 +975,6 @@ namespace ds {
 		// ------------------------------------------------------
 		void parseMeshBuffer(JSONReader& reader, int childIndex) {
 			MeshBufferDescriptor descriptor;
-			reader.get(childIndex, "id", &descriptor.id);
 			reader.get(childIndex, "size", &descriptor.size);
 			const char* indexBufferName = reader.get_string(childIndex, "index_buffer");
 			descriptor.indexBuffer = find(indexBufferName, ResourceType::INDEXBUFFER);
@@ -1222,7 +993,6 @@ namespace ds {
 		// ------------------------------------------------------
 		void parseSkyBox(JSONReader& reader, int childIndex) {
 			SkyBoxDescriptor descriptor;
-			reader.get(childIndex, "id", &descriptor.id);
 			reader.get(childIndex, "scale", &descriptor.scale);
 			const char* indexBufferName = reader.get_string(childIndex, "index_buffer");
 			descriptor.indexBuffer = find(indexBufferName, ResourceType::INDEXBUFFER);
@@ -1246,7 +1016,6 @@ namespace ds {
 		// ------------------------------------------------------
 		void parseMesh(JSONReader& reader, int childIndex) {
 			MeshDescriptor descriptor;
-			reader.get(childIndex, "id", &descriptor.id);
 			reader.get(childIndex, "position", &descriptor.position);
 			reader.get(childIndex, "scale", &descriptor.scale);
 			reader.get(childIndex, "rotation", &descriptor.rotation);
@@ -1260,7 +1029,6 @@ namespace ds {
 		// ------------------------------------------------------
 		void parseIMGUI(JSONReader& reader, int childIndex) {
 			IMGUIDescriptor descriptor;
-			reader.get(childIndex, "id", &descriptor.id);
 			const char* spriteBufferName = reader.get_string(childIndex, "sprite_buffer");
 			descriptor.spriteBuffer = find(spriteBufferName, ResourceType::SPRITEBUFFER);
 			const char* fontName = reader.get_string(childIndex, "font");
@@ -1273,7 +1041,6 @@ namespace ds {
 		// ------------------------------------------------------
 		void parseDialog(JSONReader& reader, int childIndex) {
 			GUIDialogDescriptor descriptor;
-			reader.get(childIndex, "id", &descriptor.id);
 			const char* spriteBufferName = reader.get_string(childIndex, "sprite_buffer");
 			descriptor.spriteBuffer = find(spriteBufferName, ResourceType::SPRITEBUFFER);
 			const char* fontName = reader.get_string(childIndex, "font");
@@ -1291,14 +1058,7 @@ namespace ds {
 		void initialize(ID3D11Device* device) {
 			_resCtx = new ResourceContext;
 			_resCtx->device = device;
-			_resCtx->resourceIndex = 0;			
-			for (uint32_t i = 0; i < MAX_RESOURCES; ++i) {
-				ResourceIndex& index = _resCtx->resourceTable[i];
-				index.id = INVALID_RID;
-				index.index = 0;
-				index.nameIndex = -1;
-				index.type = ResourceType::UNKNOWN;
-			}
+			_resCtx->resourceIndex = 0;						
 			_resCtx->parsers[string::murmur_hash("constant_buffer")] = parseConstantBuffer;
 			_resCtx->parsers[string::murmur_hash("quad_index_buffer")] = parseQuadIndexBuffer;
 			_resCtx->parsers[string::murmur_hash("index_buffer")] = parseIndexBuffer;
@@ -1363,231 +1123,204 @@ namespace ds {
 		}
 
 		uint32_t getIndex(RID rid, ResourceType type) {
-			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
+			const ResourceIndex& res_idx = _resCtx->indices[rid];
 			assert(res_idx.type == type);
-			return res_idx.index;
+			return res_idx.id;
 		}
 
 		ID3D11Buffer* getIndexBuffer(RID rid) {
-			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
+			const ResourceIndex& res_idx = _resCtx->indices[rid];
 			assert(res_idx.type == ResourceType::INDEXBUFFER);
-			IndexBufferResource* res = static_cast<IndexBufferResource*>(_resCtx->resources[res_idx.index]);
+			IndexBufferResource* res = static_cast<IndexBufferResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
 
 		ID3D11BlendState* getBlendState(RID rid) {
-			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
+			const ResourceIndex& res_idx = _resCtx->indices[rid];
 			assert(res_idx.type == ResourceType::BLENDSTATE);
-			BlendStateResource* res = static_cast<BlendStateResource*>(_resCtx->resources[res_idx.index]);
+			BlendStateResource* res = static_cast<BlendStateResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
 
 		bool contains(RID rid, ResourceType type) {
-			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
+			const ResourceIndex& res_idx = _resCtx->indices[rid];
 			return res_idx.type == type;
 		}
 
 		RID find(const char* name, ResourceType type) {
 			IdString hash = string::murmur_hash(name);
-			assert(_resCtx->lookup.find(hash) != _resCtx->lookup.end());
-			const ResourceIndex& res_idx = _resCtx->lookup[hash];
+			int idx = -1;
+			for (uint32_t i = 0; i < _resCtx->indices.size(); ++i) {
+				if (_resCtx->indices[i].hash == hash) {
+					idx = i;
+				}
+			}
+			assert(idx != -1);
+			const ResourceIndex& res_idx = _resCtx->indices[idx];
 			assert(res_idx.type == type);
 			return res_idx.id;
 		}
 
-		int find_index(const char* name, ResourceType type) {
-			IdString hash = string::murmur_hash(name);
-			assert(_resCtx->lookup.find(hash) != _resCtx->lookup.end());
-			const ResourceIndex& res_idx = _resCtx->lookup[hash];
-			assert(res_idx.type == type);
-			return res_idx.index;
-		}
-
 		ID3D11Buffer* getConstantBuffer(const char* name) {
-			IdString hash = string::murmur_hash(name);
-			if (_resCtx->lookup.find(hash) != _resCtx->lookup.end()) {
-				const ResourceIndex& res_idx = _resCtx->lookup[hash];
-				assert(res_idx.type == ResourceType::CONSTANTBUFFER);
-				ConstantBufferResource* res = static_cast<ConstantBufferResource*>(_resCtx->resources[res_idx.index]);
-				return res->get();
-			}
-			return 0;
+			RID rid = find(name, ResourceType::CONSTANTBUFFER);
+			ConstantBufferResource* res = static_cast<ConstantBufferResource*>(_resCtx->resources[rid]);
+			return res->get();			
 		}
 
 		ID3D11Buffer* getConstantBuffer(RID rid) {
-			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
+			const ResourceIndex& res_idx = _resCtx->indices[rid];
 			assert(res_idx.type == ResourceType::CONSTANTBUFFER);
-			ConstantBufferResource* res = static_cast<ConstantBufferResource*>(_resCtx->resources[res_idx.index]);
+			ConstantBufferResource* res = static_cast<ConstantBufferResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
 
 		ID3D11Buffer* getVertexBuffer(RID rid) {
-			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
+			const ResourceIndex& res_idx = _resCtx->indices[rid];
 			assert(res_idx.type == ResourceType::VERTEXBUFFER);
-			VertexBufferResource* res = static_cast<VertexBufferResource*>(_resCtx->resources[res_idx.index]);
+			VertexBufferResource* res = static_cast<VertexBufferResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
 
 		ID3D11InputLayout* getInputLayout(const char* name) {
-			IdString hash = string::murmur_hash(name);
-			if (_resCtx->lookup.find(hash) != _resCtx->lookup.end()) {
-				const ResourceIndex& res_idx = _resCtx->lookup[hash];
-				assert(res_idx.type == ResourceType::INPUTLAYOUT);
-				InputLayoutResource* res = static_cast<InputLayoutResource*>(_resCtx->resources[res_idx.index]);
-				return res->get();
-			}
-			return 0;
+			RID rid = find(name,ResourceType::INPUTLAYOUT);
+			InputLayoutResource* res = static_cast<InputLayoutResource*>(_resCtx->resources[rid]);
+			return res->get();			
 		}
 
 		ID3D11InputLayout* getInputLayout(RID rid) {
-			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
+			const ResourceIndex& res_idx = _resCtx->indices[rid];
 			assert(res_idx.type == ResourceType::INPUTLAYOUT);
-			InputLayoutResource* res = static_cast<InputLayoutResource*>(_resCtx->resources[res_idx.index]);
+			InputLayoutResource* res = static_cast<InputLayoutResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
 
 		ID3D11ShaderResourceView* getShaderResourceView(RID rid) {
-			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
+			const ResourceIndex& res_idx = _resCtx->indices[rid];
 			assert(res_idx.type == ResourceType::TEXTURE);
-			ShaderResourceViewResource* res = static_cast<ShaderResourceViewResource*>(_resCtx->resources[res_idx.index]);
+			ShaderResourceViewResource* res = static_cast<ShaderResourceViewResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
 
 		ID3D11SamplerState* getSamplerState(RID rid) {
-			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
+			const ResourceIndex& res_idx = _resCtx->indices[rid];
 			assert(res_idx.type == ResourceType::SAMPLERSTATE);
-			SamplerStateResource* res = static_cast<SamplerStateResource*>(_resCtx->resources[res_idx.index]);
+			SamplerStateResource* res = static_cast<SamplerStateResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
 
 		Shader* getShader(RID rid) {
-			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
+			const ResourceIndex& res_idx = _resCtx->indices[rid];
 			assert(res_idx.type == ResourceType::SHADER);
-			ShaderResource* res = static_cast<ShaderResource*>(_resCtx->resources[res_idx.index]);
+			ShaderResource* res = static_cast<ShaderResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
 
 		Bitmapfont* getFont(RID rid) {
-			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
+			const ResourceIndex& res_idx = _resCtx->indices[rid];
 			assert(res_idx.type == ResourceType::BITMAPFONT);
-			BitmapfontResource* res = static_cast<BitmapfontResource*>(_resCtx->resources[res_idx.index]);
+			BitmapfontResource* res = static_cast<BitmapfontResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
 
 		SpriteBuffer* getSpriteBuffer(const char* name) {
-			IdString hash = string::murmur_hash(name);
-			assert(_resCtx->lookup.find(hash) != _resCtx->lookup.end());
-			const ResourceIndex& res_idx = _resCtx->lookup[hash];
-			assert(res_idx.type == ResourceType::SPRITEBUFFER);
-			SpriteBufferResource* res = static_cast<SpriteBufferResource*>(_resCtx->resources[res_idx.index]);
+			RID rid = find(name,ResourceType::SPRITEBUFFER);
+			SpriteBufferResource* res = static_cast<SpriteBufferResource*>(_resCtx->resources[rid]);
 			return res->get();			
 		}
 
 		SpriteBuffer* getSpriteBuffer(RID rid) {
-			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
+			const ResourceIndex& res_idx = _resCtx->indices[rid];
 			assert(res_idx.type == ResourceType::SPRITEBUFFER);
-			SpriteBufferResource* res = static_cast<SpriteBufferResource*>(_resCtx->resources[res_idx.index]);
+			SpriteBufferResource* res = static_cast<SpriteBufferResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
 
 		Mesh* getMesh(RID rid) {
-			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
+			const ResourceIndex& res_idx = _resCtx->indices[rid];
 			assert(res_idx.type == ResourceType::MESH);
-			MeshResource* res = static_cast<MeshResource*>(_resCtx->resources[res_idx.index]);
+			MeshResource* res = static_cast<MeshResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
 
 		Mesh* getMesh(const char* name) {
-			IdString hash = string::murmur_hash(name);
-			assert(_resCtx->lookup.find(hash) != _resCtx->lookup.end());
-			const ResourceIndex& res_idx = _resCtx->lookup[hash];
-			assert(res_idx.type == ResourceType::MESH);
-			MeshResource* res = static_cast<MeshResource*>(_resCtx->resources[res_idx.index]);
+			RID rid = find(name, ResourceType::MESH);
+			MeshResource* res = static_cast<MeshResource*>(_resCtx->resources[rid]);
 			return res->get();
 		}
 
 		Material* getMaterial(const char* name) {
-			int idx = find_index(name, ResourceType::MATERIAL);
-			MaterialResource* res = static_cast<MaterialResource*>(_resCtx->resources[idx]);
+			RID rid = find(name, ResourceType::MATERIAL);
+			MaterialResource* res = static_cast<MaterialResource*>(_resCtx->resources[rid]);
 			return res->get();
 		}
 
 		Material* getMaterial(RID rid) {
-			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
+			const ResourceIndex& res_idx = _resCtx->indices[rid];
 			assert(res_idx.type == ResourceType::MATERIAL);
-			MaterialResource* res = static_cast<MaterialResource*>(_resCtx->resources[res_idx.index]);
+			MaterialResource* res = static_cast<MaterialResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
 
 		SkyBox* getSkyBox(const char* name) {
-			IdString hash = string::murmur_hash(name);
-			assert(_resCtx->lookup.find(hash) != _resCtx->lookup.end());
-			const ResourceIndex& res_idx = _resCtx->lookup[hash];
-			assert(res_idx.type == ResourceType::SKYBOX);
-			SkyBoxResource* res = static_cast<SkyBoxResource*>(_resCtx->resources[res_idx.index]);
+			RID rid = find(name, ResourceType::SKYBOX);
+			SkyBoxResource* res = static_cast<SkyBoxResource*>(_resCtx->resources[rid]);
 			return res->get();
 		}
 
 		MeshBuffer* getMeshBuffer(RID rid) {
-			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
+			const ResourceIndex& res_idx = _resCtx->indices[rid];
 			assert(res_idx.type == ResourceType::MESHBUFFER);
-			MeshBufferResource* res = static_cast<MeshBufferResource*>(_resCtx->resources[res_idx.index]);
+			MeshBufferResource* res = static_cast<MeshBufferResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
 
 		MeshBuffer* getMeshBuffer(const char* name) {
-			IdString hash = string::murmur_hash(name);
-			assert(_resCtx->lookup.find(hash) != _resCtx->lookup.end());
-			const ResourceIndex& res_idx = _resCtx->lookup[hash];
-			assert(res_idx.type == ResourceType::MESHBUFFER);
-			MeshBufferResource* res = static_cast<MeshBufferResource*>(_resCtx->resources[res_idx.index]);
+			RID rid = find(name, ResourceType::MESHBUFFER);
+			MeshBufferResource* res = static_cast<MeshBufferResource*>(_resCtx->resources[rid]);
 			return res->get();
 		}
 
 		Scene* getScene(const char* name) {
-			IdString hash = string::murmur_hash(name);
-			assert(_resCtx->lookup.find(hash) != _resCtx->lookup.end());
-			const ResourceIndex& res_idx = _resCtx->lookup[hash];
-			assert(res_idx.type == ResourceType::SCENE);
-			SceneResource* res = static_cast<SceneResource*>(_resCtx->resources[res_idx.index]);
+			RID rid = find(name, ResourceType::SCENE);
+			SceneResource* res = static_cast<SceneResource*>(_resCtx->resources[rid]);
 			return res->get();
 		}
 		
 		QuadBuffer* getQuadBuffer(RID rid) {
-			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
+			const ResourceIndex& res_idx = _resCtx->indices[rid];
 			assert(res_idx.type == ResourceType::QUADBUFFER);
-			QuadBufferResource* res = static_cast<QuadBufferResource*>(_resCtx->resources[res_idx.index]);
+			QuadBufferResource* res = static_cast<QuadBufferResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
 
 		GUIDialog* getGUIDialog(RID rid) {
-			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
+			const ResourceIndex& res_idx = _resCtx->indices[rid];
 			assert(res_idx.type == ResourceType::GUIDIALOG);
-			GUIDialogResource* res = static_cast<GUIDialogResource*>(_resCtx->resources[res_idx.index]);
+			GUIDialogResource* res = static_cast<GUIDialogResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
 
 		GUIDialog* getGUIDialog(const char* name) {
-			int idx = find_index(name, ResourceType::GUIDIALOG);
-			GUIDialogResource* res = static_cast<GUIDialogResource*>(_resCtx->resources[idx]);
+			RID rid = find(name, ResourceType::GUIDIALOG);
+			GUIDialogResource* res = static_cast<GUIDialogResource*>(_resCtx->resources[rid]);
 			return res->get();
 		}
 
 		BaseResource* getResource(RID rid, ResourceType type) {
-			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
+			const ResourceIndex& res_idx = _resCtx->indices[rid];
 			assert(res_idx.type == type);
-			return _resCtx->resources[res_idx.index];
+			return _resCtx->resources[res_idx.id];
 		}
 
 		ParticleManager* getParticleManager() {
-			int idx = find_index("ParticleManager", ResourceType::PARTICLEMANAGER);
-			ParticleManagerResource* res = static_cast<ParticleManagerResource*>(_resCtx->resources[idx]);
+			RID rid = find("ParticleManager", ResourceType::PARTICLEMANAGER);
+			ParticleManagerResource* res = static_cast<ParticleManagerResource*>(_resCtx->resources[rid]);
 			return res->get();
 		}
 
 		void debug() {
-			for (uint32_t i = 0; i < MAX_RESOURCES; ++i) {
-				ResourceIndex& index = _resCtx->resourceTable[i];
+			for (uint32_t i = 0; i < _resCtx->indices.size(); ++i) {
+				ResourceIndex& index = _resCtx->indices[i];
 				if (index.type != ResourceType::UNKNOWN) {
 					if (index.nameIndex != -1) {
 						const char* text = _resCtx->nameBuffer.data + index.nameIndex;
@@ -1601,7 +1334,7 @@ namespace ds {
 		// get name
 		// -------------------------------------------------------------
 		const char* getName(RID rid) {
-			const ResourceIndex& res_idx = _resCtx->resourceTable[rid];
+			const ResourceIndex& res_idx = _resCtx->indices[rid];
 			return _resCtx->nameBuffer.data + res_idx.nameIndex;
 		}
 
@@ -1610,15 +1343,14 @@ namespace ds {
 		// -------------------------------------------------------------
 		void save(const ReportWriter& writer) {
 			writer.startBox("Resources");
-			const char* HEADERS[] = { "ID", "Index", "Type", "Name" };
-			writer.startTable(HEADERS, 4);
+			const char* HEADERS[] = { "ID", "Type", "Name" };
+			writer.startTable(HEADERS, 3);
 			for (uint32_t i = 0; i < MAX_RESOURCES; ++i) {
-				ResourceIndex& index = _resCtx->resourceTable[i];
+				ResourceIndex& index = _resCtx->indices[i];
 				if (index.type != ResourceType::UNKNOWN) {
 					if (index.nameIndex != -1) {
 						writer.startRow();
 						writer.addCell(index.id);
-						writer.addCell(index.index);
 						writer.addCell(ResourceTypeNames[index.type]);
 						const char* text = _resCtx->nameBuffer.data + index.nameIndex;
 						writer.addCell(text);
@@ -1629,9 +1361,9 @@ namespace ds {
 			writer.endTable();
 			writer.endBox();
 			for (uint32_t i = 0; i < MAX_RESOURCES; ++i) {
-				ResourceIndex& index = _resCtx->resourceTable[i];
+				ResourceIndex& index = _resCtx->indices[i];
 				if (index.type == ResourceType::SCENE) {
-					SceneResource* res = static_cast<SceneResource*>(_resCtx->resources[index.index]);
+					SceneResource* res = static_cast<SceneResource*>(_resCtx->resources[index.id]);
 					res->get()->save(writer);
 				}
 			}

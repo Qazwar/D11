@@ -59,6 +59,20 @@ namespace ds {
 
 		void shutdown();
 
+		int findBlendState(const char* text);
+
+		RID createShader(const char* name, const ShaderDescriptor& descriptor);
+
+		RID createInputLayout(const char* name, const InputLayoutDescriptor& descriptor);
+
+		RID createVertexBuffer(const char* name, const VertexBufferDescriptor& descriptor);
+
+		RID createBlendState(const char* name, const BlendStateDescriptor& descriptor);
+
+		RID createMaterial(const char* name, const MaterialDescriptor& descriptor);
+
+		RID createSamplerState(const char* name, const SamplerStateDescriptor& descriptor);
+
 		void parseJSONFile();
 
 		RID find(const char* name, ResourceType type);

@@ -16,11 +16,16 @@ namespace ds {
 		_sprites = new Sprite[descriptor.size];
 		_vertices = new SpriteVertex[4 * descriptor.size];
 		_screenDimension = v4(graphics::getScreenWidth(), graphics::getScreenHeight(), 1024.0f, 1024.0f);
+		_constantBuffer.setScreenSize(v2(graphics::getScreenWidth(), graphics::getScreenHeight()));
+		_constantBuffer.setTextureSize(1024.0f, 1024.0f);
 	}
 
 	SpriteBuffer::~SpriteBuffer() {
 		delete[] _sprites;
 		delete[] _vertices;
+	}
+
+	void SpriteBuffer::draw(const EntityArray & array) {
 	}
 
 	void SpriteBuffer::draw(const Sprite& sprite) {
@@ -150,7 +155,9 @@ namespace ds {
 		unsigned int stride = sizeof(SpriteVertex);
 		unsigned int offset = 0;
 		graphics::turnOffZBuffer();
+
 		graphics::setVertexBuffer(_descriptor.vertexBuffer, &stride, &offset, D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+		// FIXME: use material from scene
 		graphics::setMaterial(_descriptor.material);
 		for (int i = 0; i < _index; i++) {
 			const Sprite& sprite = _sprites[i];
@@ -162,9 +169,7 @@ namespace ds {
 			_vertices[i] = SpriteVertex(sprite.position, t, v3(sprite.scale.x,sprite.scale.y,sprite.rotation),sprite.color);
 		}
 		graphics::mapData(_descriptor.vertexBuffer, _vertices, _index * sizeof(SpriteVertex));
-		graphics::updateConstantBuffer(_descriptor.constantBuffer, &_screenDimension, 16);
-		graphics::setVertexShaderConstantBuffer(_descriptor.constantBuffer);
-		graphics::setGeometryShaderConstantBuffer(_descriptor.constantBuffer);
+		graphics::updateSpriteConstantBuffer(_constantBuffer);
 		graphics::draw(_index);
 		graphics::turnOnZBuffer();
 		_index = 0;

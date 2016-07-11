@@ -28,6 +28,15 @@ namespace ds {
 		}
 	}
 
+	Scene2D* Game::create2DScene(const char* name) {
+		SceneDescriptor desc;
+		Scene2D* scene = new Scene2D(desc);
+		IdString hash = string::murmur_hash(name);
+		_names.push_back(hash);
+		_scenes.push_back(scene);
+		return scene;
+	}
+
 	void Game::addScene(const char* name, Scene* scene) {
 		IdString hash = string::murmur_hash(name);
 		_names.push_back(hash);

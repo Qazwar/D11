@@ -8,45 +8,39 @@
 namespace ds {
 
 	struct ResourceDescriptor {
-		uint16_t id;
 		uint32_t nameIndex;
 		IdString hash;
 	};
 	
 	struct IndexBufferDescriptor {
-		uint16_t id;
 		uint32_t size;
 		bool dynamic;
 	};
 
 	struct QuadIndexBufferDescriptor {
 
-		uint16_t id;
 		uint32_t size;
 
-		QuadIndexBufferDescriptor() : id(0), size(0) {}
-		QuadIndexBufferDescriptor(uint16_t _id, uint32_t _size) : id(_id), size(_size) {}
+		QuadIndexBufferDescriptor() : size(0) {}
+		QuadIndexBufferDescriptor(uint32_t _size) : size(_size) {}
 
 	};
 
 	struct ConstantBufferDescriptor {
 
-		uint16_t id;
 		uint32_t size;
 
-		ConstantBufferDescriptor() : id(0), size(0) {}
-		ConstantBufferDescriptor(uint16_t _id, uint32_t _size) : id(_id), size(_size) {}
+		ConstantBufferDescriptor() : size(0) {}
+		ConstantBufferDescriptor(uint32_t _size) : size(_size) {}
 	};
 
 	struct VertexBufferDescriptor {
-		uint16_t id;
 		uint32_t size;
 		bool dynamic;
 		uint32_t layout;
 	};
 
 	struct ShaderDescriptor {
-		uint16_t id;
 		const char* vertexShader;
 		const char* pixelShader;
 		const char* geometryShader;
@@ -58,7 +52,6 @@ namespace ds {
 	};
 
 	struct BlendStateDescriptor {
-		uint16_t id;
 		bool alphaEnabled;
 		int srcBlend;
 		int destBlend;
@@ -67,12 +60,10 @@ namespace ds {
 	};
 
 	struct TextureDescriptor {
-		uint16_t id;
 		const char* name;
 	};
 
 	struct SamplerStateDescriptor {
-		uint16_t id;
 		uint16_t addressU;
 		uint16_t addressV;
 		uint16_t addressW;
@@ -91,19 +82,16 @@ namespace ds {
 	};
 
 	struct InputLayoutDescriptor {
-		uint16_t id;
 		uint16_t indices[16];
 		uint16_t num;
 		RID shader;
 	};
 
 	struct BitmapfontDescriptor {
-		uint16_t id;
 		const char* name;
 	};
 
 	struct SpriteBufferDescriptor {
-		uint16_t id;
 		uint32_t size;
 		RID indexBuffer;
 		RID constantBuffer;
@@ -113,7 +101,6 @@ namespace ds {
 	};
 
 	struct QuadBufferDescriptor {
-		uint16_t id;
 		uint32_t size;
 		RID indexBuffer;
 		RID constantBuffer;
@@ -125,7 +112,6 @@ namespace ds {
 	};
 
 	struct MeshBufferDescriptor {
-		uint16_t id;
 		uint32_t size;
 		RID indexBuffer;
 		RID constantBuffer;
@@ -138,47 +124,35 @@ namespace ds {
 	};
 
 	struct MeshDescriptor {
-		uint16_t id;
 		const char* fileName;
 		v3 position;
 		v3 scale;
 		v3 rotation;
 	};
 
-	struct WorldDescriptor {
-		uint16_t id;
-		uint32_t size;
-		RID spriteBuffer;
-	};
-
 	struct IMGUIDescriptor {
-		uint16_t id;
 		RID font;
 		RID spriteBuffer;
 	};
 
 	struct ParticleSystemsDescriptor {
-		uint16_t id;
 		RID spriteBuffer;
 		uint32_t maxParticles;
 	};
 
 	struct GUIDialogDescriptor {
-		uint16_t id;
 		RID spriteBuffer;
 		RID font;
 		const char* file;
 	};
 
 	struct CameraDescriptor {
-		uint16_t id;
 		const char* type;
 		v3 position;
 		v3 target;
 	};
 
 	struct SceneDescriptor {
-		uint16_t id;
 		const char* meshBuffer;
 		uint16_t size;
 		const char* camera;
@@ -186,11 +160,9 @@ namespace ds {
 	};
 
 	struct RenderTargetDescriptor {
-		uint16_t id;
 	};
 
 	struct SkyBoxDescriptor {
-		uint16_t id;
 		uint32_t size;
 		RID indexBuffer;
 		RID constantBuffer;
@@ -203,7 +175,6 @@ namespace ds {
 	};
 
 	struct MaterialDescriptor {
-		uint16_t id;
 		uint32_t size;
 		RID shader;
 		RID blendstate;

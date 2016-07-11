@@ -12,6 +12,7 @@ namespace ds {
 	Color* colors;
 	float* timers;
 	uint16_t* types;
+	Texture* textures;
 	Mesh** meshes;
 	mat4* worlds;
 	ID* parents;
@@ -23,7 +24,7 @@ namespace ds {
 	void EntityArray::allocate(uint16_t size) {
 		if (size > capacity) {
 			int sum = sizeof(EntityArrayIndex) + sizeof(ID) + sizeof(v3) + sizeof(v3) + sizeof(v3) + sizeof(Color) + sizeof(float);
-			sum += sizeof(uint16_t) + sizeof(Mesh*) + sizeof(mat4) + sizeof(ID) + sizeof(DrawMode) + sizeof(RID) + sizeof(int) + sizeof(bool) + sizeof(bool);
+			sum += sizeof(uint16_t) + sizeof(Texture) + sizeof(Mesh*) + sizeof(mat4) + sizeof(ID) + sizeof(DrawMode) + sizeof(RID) + sizeof(int) + sizeof(bool) + sizeof(bool);
 			int sz = size * sum;
 			char* b = (char*)ALLOC(sz);
 			capacity = size;
@@ -35,7 +36,8 @@ namespace ds {
 			colors = (Color*)(rotations + size);
 			timers = (float*)(colors + size);
 			types = (uint16_t*)(timers + size);
-			meshes = (Mesh**)(types + size);
+			textures = (Texture*)(types + size);
+			meshes = (Mesh**)(textures + size);
 			worlds = (mat4*)(meshes + size);
 			parents = (ID*)(worlds + size);
 			drawModes = (DrawMode*)(parents + size);
@@ -60,6 +62,8 @@ namespace ds {
 				index += num * sizeof(float);
 				memcpy(types, buffer + index, num * sizeof(uint16_t));
 				index += num * sizeof(uint16_t);
+				memcpy(meshes, buffer + index, num * sizeof(Texture*));
+				index += num * sizeof(Texture);
 				memcpy(meshes, buffer + index, num * sizeof(Mesh*));
 				index += num * sizeof(Mesh*);
 				memcpy(worlds, buffer + index, num * sizeof(mat4));
@@ -114,6 +118,39 @@ namespace ds {
 		types[in.index] = 0;
 		meshes[in.index] = m;
 		worlds[in.index] = rotZ * rotY * rotX * s * t;
+		parents[in.index] = INVALID_ID;
+		drawModes[in.index] = DrawMode::TRANSFORM;
+		materials[in.index] = material;
+		staticIndices[in.index] = -1;
+		active[in.index] = true;
+		dirty[in.index] = false;
+		return in.id;
+	}
+
+	ID EntityArray::create(const v2& pos, const Texture& t, const v2& scale, const float rotation, RID material, const Color& color) {
+		if (num + 1 > capacity) {
+			allocate(capacity * 2 + 8);
+		}
+		ID id = 0;
+		if (freeList.empty()) {
+			id = current++;
+		}
+		else {
+			id = freeList.back();
+			freeList.pop_back();
+		}
+		EntityArrayIndex &in = indices[id];
+		in.index = num++;
+		ids[in.index] = in.id;
+		positions[in.index] = v3(pos,0.0f);
+		scales[in.index] = v3(scale,0.0f);
+		rotations[in.index] = v3(0.0f,0.0f,rotation);
+		colors[in.index] = color;
+		timers[in.index] = 0.0f;
+		types[in.index] = 0;
+		textures[in.index] = t;
+		meshes[in.index] = 0;
+		worlds[in.index] = matrix::m4identity();
 		parents[in.index] = INVALID_ID;
 		drawModes[in.index] = DrawMode::TRANSFORM;
 		materials[in.index] = material;
@@ -184,6 +221,7 @@ namespace ds {
 				colors[in.index] = colors[lastIn.index];
 				timers[in.index] = timers[lastIn.index];
 				types[in.index] = types[lastIn.index];
+				textures[in.index] = textures[lastIn.index];
 				meshes[in.index] = meshes[lastIn.index];
 				worlds[in.index] = worlds[lastIn.index];
 				parents[in.index] = parents[lastIn.index];

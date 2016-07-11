@@ -24,6 +24,7 @@ namespace ds {
 		Color* colors;
 		float* timers;
 		uint16_t* types;
+		Texture* textures;
 		Mesh** meshes;
 		mat4* worlds;
 		ID* parents;
@@ -61,6 +62,8 @@ namespace ds {
 		void remove(ID id);
 
 		ID create(const v3& pos, Mesh* m, const v3& scale, const v3& rotation, RID material, const Color& color);
+
+		ID create(const v2& pos, const Texture& t, const v2& scale, const float rotation, RID material, const Color& color);
 
 		void setDrawMode(ID id, DrawMode mode);
 

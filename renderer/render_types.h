@@ -21,6 +21,23 @@ namespace ds {
 		IMMEDIATE
 	};
 
+	struct SpriteBufferCB {
+
+		v4 screenDimension;
+
+		SpriteBufferCB() : screenDimension(v4(1024, 768, 1024, 1024)) {}
+
+		void setScreenSize(const v2& scrSize) {
+			screenDimension.x = scrSize.x;
+			screenDimension.y = scrSize.y;
+		}
+
+		void setTextureSize(float w, float h) {
+			screenDimension.z = w;
+			screenDimension.w = h;
+		}
+	};
+
 	struct Texture {
 
 		//IdString hashName;
