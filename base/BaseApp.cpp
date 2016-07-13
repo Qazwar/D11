@@ -63,7 +63,7 @@ namespace ds {
 		events::init();
 		gDrawCounter = new DrawCounter;
 
-		
+		_buttonState.processed = true;
 		/*
 		JSONReader reader;
 		bool ret = reader.parse("content\\engine_settings.json");
@@ -275,10 +275,12 @@ namespace ds {
 				if (!_buttonState.processed) {
 					_buttonState.processed = true;
 					if (_buttonState.down) {
+						LOG << "button down: " << _buttonState.button;
 						_stateMachine->onButtonDown(_buttonState.button, _buttonState.x, _buttonState.y);
 						OnButtonDown(_buttonState.button, _buttonState.x, _buttonState.y);
 					}
 					else {
+						LOG << "button up: " << _buttonState.button;
 						_stateMachine->onButtonUp(_buttonState.button, _buttonState.x, _buttonState.y);
 						OnButtonUp(_buttonState.button, _buttonState.x, _buttonState.y);
 					}
@@ -382,11 +384,14 @@ namespace ds {
 	// Mouse button
 	// -------------------------------------------------------
 	void BaseApp::sendButton(int button, int x, int y, bool down) {
-		_buttonState.processed = false;
-		_buttonState.x = x;
-		_buttonState.y = graphics::getScreenHeight() - y;
-		_buttonState.button = button;
-		_buttonState.down = down;
+		LOG << "==> sendButton button: " << button << " down: " << down;
+		if (_buttonState.processed) {			
+			_buttonState.processed = false;
+			_buttonState.x = x;
+			_buttonState.y = graphics::getScreenHeight() - y;
+			_buttonState.button = button;
+			_buttonState.down = down;
+		}
 	}
 
 	void BaseApp::shutdown() {

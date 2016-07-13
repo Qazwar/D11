@@ -21,7 +21,7 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 				DrawText(hDC, strMsg, -1, &rct, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 				ReleaseDC(hwnd, hDC);
 			}
-			break;
+			return 0;
 		case WM_INPUT: {
 				char buffer[sizeof(RAWINPUT)] = {};
 				UINT size = sizeof(RAWINPUT);
@@ -44,22 +44,22 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			return 0;
 		case WM_LBUTTONDOWN:
 			app->sendButton(0, GETX(lParam), GETY(lParam), true);
-			break;
+			return 0;
 		case WM_LBUTTONUP:
 			app->sendButton(0, GETX(lParam), GETY(lParam), false);
-			break;
+			return 0;
 		case WM_RBUTTONDOWN:
 			app->sendButton(1, GETX(lParam), GETY(lParam), true);
-			break;
+			return 0;
 		case WM_RBUTTONUP:
 			app->sendButton(1, GETX(lParam), GETY(lParam), false);
-			break;
+			return 0;
 		case WM_CLOSE:
 			app->shutdown();
-			break;
+			return 0;
 		case WM_DESTROY :
 			PostQuitMessage(0);
-			break;
+			return 0;
 		}
 	return DefWindowProc(hwnd, message, wParam, lParam);
 }
