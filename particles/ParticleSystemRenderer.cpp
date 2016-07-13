@@ -4,7 +4,7 @@
 namespace ds {
 
 	ParticleSystemRenderer2D::ParticleSystemRenderer2D(RID bufferID) : ParticleSystemRenderer() {
-		_particles = res::getSpriteBuffer(bufferID);
+		_particles = graphics::getSpriteBuffer();
 	}
 	
 

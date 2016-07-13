@@ -142,9 +142,9 @@ namespace ds {
 	bool BaseApp::prepare() {
 		if (graphics::initialize(hInstance, m_hWnd, _settings)) {
 			res::initialize(graphics::getDevice());
-			res::parseJSONFile();
-			input::init(m_hWnd, _settings.screenWidth, _settings.screenHeight);
 			graphics::createInternalSpriteBuffer();
+			res::parseJSONFile();
+			input::init(m_hWnd, _settings.screenWidth, _settings.screenHeight);			
 			LOG << "------------------ start load content ------------------";
 			loadContent();
 			init();

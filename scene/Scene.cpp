@@ -389,4 +389,9 @@ namespace ds {
 		ScalingAction* action = (ScalingAction*)_actions[AT_SCALE];
 		action->attach(id, v3(startScale,0.0f), v3(endScale,0.0f), ttl, mode, tweeningType);
 	}
+
+	void Scene2D::setTexture(ID id, const Texture& t) {
+		int idx = _data.getIndex(id);
+		_data.textures[idx] = t;
+	}
 }

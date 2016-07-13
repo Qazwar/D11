@@ -8,7 +8,7 @@
 namespace ds {
 	GUIDialog::GUIDialog(const GUIDialogDescriptor& descriptor) {
 		_font = descriptor.font;
-		_sprites = res::getSpriteBuffer(descriptor.spriteBuffer);
+		_sprites = graphics::getSpriteBuffer();
 		_state = 1;
 		_offset = 0;
 		_position = v2(1050, 690);

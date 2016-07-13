@@ -141,7 +141,6 @@ namespace ds {
 	};
 
 	struct GUIDialogDescriptor {
-		RID spriteBuffer;
 		RID font;
 		const char* file;
 	};

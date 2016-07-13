@@ -9,6 +9,7 @@
 #include "..\utils\Log.h"
 #include "..\renderer\render_types.h"
 #include "..\imgui\IMGUI.h"
+#include "..\utils\Assert.h"
 //#include "..\utils\ObjLoader.h"
 //#include "..\renderer\RenderTarget.h"
 //#include "..\renderer\SkyBox.h"
@@ -910,15 +911,15 @@ namespace ds {
 			SamplerStateDescriptor descriptor;
 			const char* mode = reader.get_string(childIndex, "addressU");
 			int idx = findTextureAddressMode(mode);
-			assert(idx >= 0);
+			XASSERT(idx >= 0,"No matching address mode for addressU mode: '%s'",mode);
 			descriptor.addressU = idx;
 			mode = reader.get_string(childIndex, "addressV");
 			idx = findTextureAddressMode(mode);
-			assert(idx >= 0);
+			XASSERT(idx >= 0, "No matching address mode for addressV mode: '%s'", mode);
 			descriptor.addressV = idx;
 			mode = reader.get_string(childIndex, "addressW");
 			idx = findTextureAddressMode(mode);
-			assert(idx >= 0);
+			XASSERT(idx >= 0, "No matching address mode for addressW mode: '%s'", mode);
 			descriptor.addressW = idx;
 			const char* name = reader.get_string(childIndex, "name");
 			createSamplerState(name, descriptor);
@@ -1041,8 +1042,6 @@ namespace ds {
 		// ------------------------------------------------------
 		void parseDialog(JSONReader& reader, int childIndex) {
 			GUIDialogDescriptor descriptor;
-			const char* spriteBufferName = reader.get_string(childIndex, "sprite_buffer");
-			descriptor.spriteBuffer = find(spriteBufferName, ResourceType::SPRITEBUFFER);
 			const char* fontName = reader.get_string(childIndex, "font");
 			descriptor.font = find(fontName, ResourceType::BITMAPFONT);
 			descriptor.file = reader.get_string(childIndex, "file");
@@ -1092,7 +1091,7 @@ namespace ds {
 			sprintf_s(buffer, 256, "content\\%s", fileName);
 			LOG << "Loading resource file: " << fileName;
 			bool ret = reader.parse(buffer);
-			assert(ret);
+			XASSERT(ret, "Failed parsing json file");
 			int children[256];
 			int num = reader.get_categories(children, 256);
 			for (int i = 0; i < num; ++i) {
@@ -1124,20 +1123,20 @@ namespace ds {
 
 		uint32_t getIndex(RID rid, ResourceType type) {
 			const ResourceIndex& res_idx = _resCtx->indices[rid];
-			assert(res_idx.type == type);
+			XASSERT(res_idx.type == type, "Different resource types - expected %s but found %s", ResourceTypeNames[res_idx.type], ResourceTypeNames[type]);
 			return res_idx.id;
 		}
 
 		ID3D11Buffer* getIndexBuffer(RID rid) {
 			const ResourceIndex& res_idx = _resCtx->indices[rid];
-			assert(res_idx.type == ResourceType::INDEXBUFFER);
+			XASSERT(res_idx.type == ResourceType::INDEXBUFFER, "Different resource types - expected INDEXBUFFER but found %s", ResourceTypeNames[res_idx.type]);
 			IndexBufferResource* res = static_cast<IndexBufferResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
 
 		ID3D11BlendState* getBlendState(RID rid) {
 			const ResourceIndex& res_idx = _resCtx->indices[rid];
-			assert(res_idx.type == ResourceType::BLENDSTATE);
+			XASSERT(res_idx.type == ResourceType::BLENDSTATE, "Different resource types - expected BLENDSTATE but found %s", ResourceTypeNames[res_idx.type]);
 			BlendStateResource* res = static_cast<BlendStateResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
@@ -1155,9 +1154,9 @@ namespace ds {
 					idx = i;
 				}
 			}
-			assert(idx != -1);
+			XASSERT(idx != -1, "No matching resource found for: %s", name);
 			const ResourceIndex& res_idx = _resCtx->indices[idx];
-			assert(res_idx.type == type);
+			XASSERT(res_idx.type == type, "Different resource types - expected %s but found %s", ResourceTypeNames[res_idx.type],ResourceTypeNames[type]);
 			return res_idx.id;
 		}
 
@@ -1169,14 +1168,14 @@ namespace ds {
 
 		ID3D11Buffer* getConstantBuffer(RID rid) {
 			const ResourceIndex& res_idx = _resCtx->indices[rid];
-			assert(res_idx.type == ResourceType::CONSTANTBUFFER);
+			XASSERT(res_idx.type == ResourceType::CONSTANTBUFFER, "Different resource types - expected CONSTANTBUFFER but found %s", ResourceTypeNames[res_idx.type]);
 			ConstantBufferResource* res = static_cast<ConstantBufferResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
 
 		ID3D11Buffer* getVertexBuffer(RID rid) {
 			const ResourceIndex& res_idx = _resCtx->indices[rid];
-			assert(res_idx.type == ResourceType::VERTEXBUFFER);
+			XASSERT(res_idx.type == ResourceType::VERTEXBUFFER, "Different resource types - expected VERTEXBUFFER but found %s", ResourceTypeNames[res_idx.type]);
 			VertexBufferResource* res = static_cast<VertexBufferResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
@@ -1189,35 +1188,35 @@ namespace ds {
 
 		ID3D11InputLayout* getInputLayout(RID rid) {
 			const ResourceIndex& res_idx = _resCtx->indices[rid];
-			assert(res_idx.type == ResourceType::INPUTLAYOUT);
+			XASSERT(res_idx.type == ResourceType::INPUTLAYOUT, "Different resource types - expected INPUTLAYOUT but found %s", ResourceTypeNames[res_idx.type]);
 			InputLayoutResource* res = static_cast<InputLayoutResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
 
 		ID3D11ShaderResourceView* getShaderResourceView(RID rid) {
 			const ResourceIndex& res_idx = _resCtx->indices[rid];
-			assert(res_idx.type == ResourceType::TEXTURE);
+			XASSERT(res_idx.type == ResourceType::TEXTURE, "Different resource types - expected TEXTURE but found %s", ResourceTypeNames[res_idx.type]);
 			ShaderResourceViewResource* res = static_cast<ShaderResourceViewResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
 
 		ID3D11SamplerState* getSamplerState(RID rid) {
 			const ResourceIndex& res_idx = _resCtx->indices[rid];
-			assert(res_idx.type == ResourceType::SAMPLERSTATE);
+			XASSERT(res_idx.type == ResourceType::SAMPLERSTATE, "Different resource types - expected SAMPLERSTATE but found %s", ResourceTypeNames[res_idx.type]);
 			SamplerStateResource* res = static_cast<SamplerStateResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
 
 		Shader* getShader(RID rid) {
 			const ResourceIndex& res_idx = _resCtx->indices[rid];
-			assert(res_idx.type == ResourceType::SHADER);
+			XASSERT(res_idx.type == ResourceType::SHADER, "Different resource types - expected SHADER but found %s", ResourceTypeNames[res_idx.type]);
 			ShaderResource* res = static_cast<ShaderResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
 
 		Bitmapfont* getFont(RID rid) {
 			const ResourceIndex& res_idx = _resCtx->indices[rid];
-			assert(res_idx.type == ResourceType::BITMAPFONT);
+			XASSERT(res_idx.type == ResourceType::BITMAPFONT, "Different resource types - expected BITMAPFONT but found %s", ResourceTypeNames[res_idx.type]);
 			BitmapfontResource* res = static_cast<BitmapfontResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
@@ -1230,14 +1229,14 @@ namespace ds {
 
 		SpriteBuffer* getSpriteBuffer(RID rid) {
 			const ResourceIndex& res_idx = _resCtx->indices[rid];
-			assert(res_idx.type == ResourceType::SPRITEBUFFER);
+			XASSERT(res_idx.type == ResourceType::SPRITEBUFFER, "Different resource types - expected SPRITEBUFFER but found %s", ResourceTypeNames[res_idx.type]);
 			SpriteBufferResource* res = static_cast<SpriteBufferResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
 
 		Mesh* getMesh(RID rid) {
 			const ResourceIndex& res_idx = _resCtx->indices[rid];
-			assert(res_idx.type == ResourceType::MESH);
+			XASSERT(res_idx.type == ResourceType::MESH, "Different resource types - expected MESH but found %s", ResourceTypeNames[res_idx.type]);
 			MeshResource* res = static_cast<MeshResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
@@ -1256,7 +1255,7 @@ namespace ds {
 
 		Material* getMaterial(RID rid) {
 			const ResourceIndex& res_idx = _resCtx->indices[rid];
-			assert(res_idx.type == ResourceType::MATERIAL);
+			XASSERT(res_idx.type == ResourceType::MATERIAL, "Different resource types - expected MATERIAL but found %s", ResourceTypeNames[res_idx.type]);
 			MaterialResource* res = static_cast<MaterialResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
@@ -1269,7 +1268,7 @@ namespace ds {
 
 		MeshBuffer* getMeshBuffer(RID rid) {
 			const ResourceIndex& res_idx = _resCtx->indices[rid];
-			assert(res_idx.type == ResourceType::MESHBUFFER);
+			XASSERT(res_idx.type == ResourceType::MESHBUFFER, "Different resource types - expected MESHBUFFER but found %s", ResourceTypeNames[res_idx.type]);
 			MeshBufferResource* res = static_cast<MeshBufferResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
@@ -1288,14 +1287,14 @@ namespace ds {
 		
 		QuadBuffer* getQuadBuffer(RID rid) {
 			const ResourceIndex& res_idx = _resCtx->indices[rid];
-			assert(res_idx.type == ResourceType::QUADBUFFER);
+			XASSERT(res_idx.type == ResourceType::QUADBUFFER, "Different resource types - expected QUADBUFFER but found %s", ResourceTypeNames[res_idx.type]);
 			QuadBufferResource* res = static_cast<QuadBufferResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
 
 		GUIDialog* getGUIDialog(RID rid) {
 			const ResourceIndex& res_idx = _resCtx->indices[rid];
-			assert(res_idx.type == ResourceType::GUIDIALOG);
+			XASSERT(res_idx.type == ResourceType::GUIDIALOG, "Different resource types - expected GUIDIALOG but found %s", ResourceTypeNames[res_idx.type]);
 			GUIDialogResource* res = static_cast<GUIDialogResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
@@ -1308,7 +1307,7 @@ namespace ds {
 
 		BaseResource* getResource(RID rid, ResourceType type) {
 			const ResourceIndex& res_idx = _resCtx->indices[rid];
-			assert(res_idx.type == type);
+			XASSERT(res_idx.type == type, "Different resource types - expected %s but found %s", ResourceTypeNames[type],ResourceTypeNames[res_idx.type]);
 			return _resCtx->resources[res_idx.id];
 		}
 
