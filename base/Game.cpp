@@ -7,7 +7,7 @@ namespace ds {
 
 
 	Game::~Game() {
-
+		_scenes.destroy_all();
 	}
 
 	void Game::render() {
@@ -73,6 +73,13 @@ namespace ds {
 			}
 		}
 		return -1;
+	}
+
+	void Game::save(const ReportWriter& writer) {
+		for (uint32_t i = 0; i < _scenes.size(); ++i) {
+			Scene* s = _scenes[i];
+			s->save(writer);
+		}
 	}
 
 }

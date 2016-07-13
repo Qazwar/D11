@@ -26,8 +26,7 @@ namespace ds {
 			int sum = sizeof(EntityArrayIndex) + sizeof(ID) + sizeof(v3) + sizeof(v3) + sizeof(v3) + sizeof(Color) + sizeof(float);
 			sum += sizeof(uint16_t) + sizeof(Texture) + sizeof(Mesh*) + sizeof(mat4) + sizeof(ID) + sizeof(DrawMode) + sizeof(RID) + sizeof(int) + sizeof(bool) + sizeof(bool);
 			int sz = size * sum;
-			char* b = (char*)ALLOC(sz);
-			capacity = size;
+			char* b = (char*)ALLOC(sz);			
 			indices = (EntityArrayIndex*)b;
 			ids = (ID*)(indices + size);
 			positions = (v3*)(ids + size);
@@ -47,45 +46,46 @@ namespace ds {
 			dirty = (bool*)(active + size);
 			if (buffer != 0) {
 				memcpy(indices, buffer, num * sizeof(EntityArrayIndex));
-				int index = num * sizeof(EntityArrayIndex);
+				int index = capacity * sizeof(EntityArrayIndex);
 				memcpy(ids, buffer + index, num * sizeof(ID));
-				index += num * sizeof(ID);
+				index += capacity * sizeof(ID);
 				memcpy(positions, buffer + index, num * sizeof(v3));
-				index += num * sizeof(v3);
+				index += capacity * sizeof(v3);
 				memcpy(scales, buffer + index, num * sizeof(v3));
-				index += num * sizeof(v3);
+				index += capacity * sizeof(v3);
 				memcpy(rotations, buffer + index, num * sizeof(v3));
-				index += num * sizeof(v3);
+				index += capacity * sizeof(v3);
 				memcpy(colors, buffer + index, num * sizeof(Color));
-				index += num * sizeof(Color);
+				index += capacity * sizeof(Color);
 				memcpy(timers, buffer + index, num * sizeof(float));
-				index += num * sizeof(float);
+				index += capacity * sizeof(float);
 				memcpy(types, buffer + index, num * sizeof(uint16_t));
-				index += num * sizeof(uint16_t);
-				memcpy(meshes, buffer + index, num * sizeof(Texture*));
-				index += num * sizeof(Texture);
+				index += capacity * sizeof(uint16_t);
+				memcpy(textures, buffer + index, num * sizeof(Texture));
+				index += capacity * sizeof(Texture);
 				memcpy(meshes, buffer + index, num * sizeof(Mesh*));
-				index += num * sizeof(Mesh*);
+				index += capacity * sizeof(Mesh*);
 				memcpy(worlds, buffer + index, num * sizeof(mat4));
-				index += num * sizeof(mat4);
+				index += capacity * sizeof(mat4);
 				memcpy(parents, buffer + index, num * sizeof(ID));
-				index += num * sizeof(ID);
+				index += capacity * sizeof(ID);
 				memcpy(drawModes, buffer + index, num * sizeof(DrawMode));
-				index += num * sizeof(DrawMode);
+				index += capacity * sizeof(DrawMode);
 				memcpy(materials, buffer + index, num * sizeof(RID));
-				index += num * sizeof(RID);
+				index += capacity * sizeof(RID);
 				memcpy(staticIndices, buffer + index, num * sizeof(int));
-				index += num * sizeof(int);
+				index += capacity * sizeof(int);
 				memcpy(active, buffer + index, num * sizeof(bool));
-				index += num * sizeof(bool);
+				index += capacity * sizeof(bool);
 				memcpy(dirty, buffer + index, num * sizeof(bool));
-				index += num * sizeof(bool);
-				for (int i = num; i < capacity; ++i) {
+				index += capacity * sizeof(bool);
+				for (int i = num; i < size; ++i) {
 					indices[i].id = i;
 					indices[i].index = UINT16_MAX;
 				}
 				DEALLOC(buffer);
 			}
+			capacity = size;
 			buffer = b;
 		}
 	}

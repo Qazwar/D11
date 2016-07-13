@@ -16,6 +16,8 @@ namespace ds {
 		Scene* getScene(const char* name) const;
 		void activateScene(const char* name);
 		void deactivateScene(const char* name);
+
+		void save(const ReportWriter& writer);
 	private:
 		int findSceneIndex(const char* name) const;
 		Array<IdString> _names;

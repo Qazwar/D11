@@ -1344,7 +1344,7 @@ namespace ds {
 			writer.startBox("Resources");
 			const char* HEADERS[] = { "ID", "Type", "Name" };
 			writer.startTable(HEADERS, 3);
-			for (uint32_t i = 0; i < MAX_RESOURCES; ++i) {
+			for (uint32_t i = 0; i < _resCtx->resources.size(); ++i) {
 				ResourceIndex& index = _resCtx->indices[i];
 				if (index.type != ResourceType::UNKNOWN) {
 					if (index.nameIndex != -1) {
@@ -1358,14 +1358,7 @@ namespace ds {
 				}
 			}
 			writer.endTable();
-			writer.endBox();
-			for (uint32_t i = 0; i < MAX_RESOURCES; ++i) {
-				ResourceIndex& index = _resCtx->indices[i];
-				if (index.type == ResourceType::SCENE) {
-					SceneResource* res = static_cast<SceneResource*>(_resCtx->resources[index.id]);
-					res->get()->save(writer);
-				}
-			}
+			writer.endBox();			
 		}
 
 	}

@@ -376,7 +376,7 @@ namespace ds {
 		sprites->begin();
 		for (int i = 0; i < _data.num; ++i) {
 			if (_data.active[i]) {
-				sprites->draw(_data.positions[i].xy(), _data.textures[i],_data.rotations[i].x,_data.scales[i].xy());
+				sprites->draw(_data.positions[i].xy(), _data.textures[i],_data.rotations[i].z,_data.scales[i].xy());
 			}
 		}
 		sprites->end();
@@ -388,6 +388,11 @@ namespace ds {
 	void Scene2D::scaleTo(ID id, const v2& startScale, const v2& endScale, float ttl, int mode, const tweening::TweeningType& tweeningType) {
 		ScalingAction* action = (ScalingAction*)_actions[AT_SCALE];
 		action->attach(id, v3(startScale,0.0f), v3(endScale,0.0f), ttl, mode, tweeningType);
+	}
+
+	void Scene2D::scale(ID id, const v2& scale) {
+		int idx = _data.getIndex(id);
+		_data.scales[idx] = v3(scale, 0.0f);
 	}
 
 	void Scene2D::setTexture(ID id, const Texture& t) {

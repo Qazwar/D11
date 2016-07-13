@@ -101,6 +101,7 @@ namespace ds {
 		~Scene2D() {}
 		ID add(const v2& pos, const Texture& t, RID material);
 		void draw();
+		void scale(ID id, const v2& scale);
 		void scaleTo(ID id, const v2& startScale, const v2& endScale, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 		void setTexture(ID id, const Texture& t);
 	private:

@@ -159,7 +159,7 @@ namespace ds {
 		graphics::setVertexBuffer(_descriptor.vertexBuffer, &stride, &offset, D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 		// FIXME: use material from scene
 		graphics::setMaterial(_descriptor.material);
-		for (int i = 0; i < _index; i++) {
+		for (int i = 0; i < _index; ++i) {
 			const Sprite& sprite = _sprites[i];
 			v4 t;
 			t.x = sprite.texture.rect.left;

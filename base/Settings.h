@@ -11,7 +11,7 @@ namespace ds {
 		bool fullScreen;
 		bool synched;
 		int mode;
-		char reportingDirectory[64];
+		const char* reportingDirectory;
 
 		Settings() {
 			screenWidth = 1024;
@@ -20,6 +20,7 @@ namespace ds {
 			fullScreen = false;
 			synched = true;
 			mode = 1;
+			reportingDirectory = "reports";
 		}
 	};
 

@@ -54,7 +54,7 @@ namespace ds {
 		void activate(const char* name);
 		void deactivate(const char* name);
 		void connectGameStates(const char* firstStateName, int outcome, const char* secondStateName);
-
+		virtual void prepare(Settings* settings) = 0;
 		virtual const char* getTitle() = 0;
 		virtual void init() {}
 		virtual void OnChar(uint8_t ascii) {}
@@ -65,10 +65,11 @@ namespace ds {
 		}
 
 		Game* game;
+		
 	private:
 		void tick();
 		void renderFrame();
-
+		Settings _settings;
 		HINSTANCE hInstance;
 		HWND m_hWnd;
 		float _dt;
@@ -76,7 +77,7 @@ namespace ds {
 		bool _loading;
 		bool _running;
 		bool _alive;
-		Settings _settings;
+		
 		GameStateMachine* _stateMachine;
 		KeyStates _keyStates;
 		ButtonState _buttonState;

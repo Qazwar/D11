@@ -62,6 +62,9 @@ namespace ds {
 		_stateMachine = new GameStateMachine;
 		events::init();
 		gDrawCounter = new DrawCounter;
+
+		
+		/*
 		JSONReader reader;
 		bool ret = reader.parse("content\\engine_settings.json");
 		assert(ret);
@@ -78,6 +81,7 @@ namespace ds {
 			sprintf_s(_settings.reportingDirectory, "");
 		}
 		LOG << "size: " << _settings.screenWidth << " x " << _settings.screenHeight;
+		*/
 		_start = std::chrono::steady_clock::now();
 		_num = 0;
 		game = new Game;
@@ -140,6 +144,7 @@ namespace ds {
 
 
 	bool BaseApp::prepare() {
+		prepare(&_settings);
 		if (graphics::initialize(hInstance, m_hWnd, _settings)) {
 			res::initialize(graphics::getDevice());
 			graphics::createInternalSpriteBuffer();
@@ -180,12 +185,13 @@ namespace ds {
 				tm *now_tm = localtime(&now);
 				strftime(timeFormat, 255, "%Y%m%d_%H%M%S", now_tm);
 				char filename[255];
-				sprintf_s(filename, "%s%s.html", _settings.reportingDirectory, timeFormat);
+				sprintf_s(filename, "%s\\%s.html", _settings.reportingDirectory, timeFormat);
 				ReportWriter rw(filename);
 				if (rw.isOpen()) {
 					gDrawCounter->save(rw);
 					perf::save(rw);
 					res::save(rw);
+					game->save(rw);
 					gDefaultMemory->save(rw);
 				}
 				else {
@@ -317,14 +323,14 @@ namespace ds {
 		{
 			ZoneTracker("Render::render");
 			render();
+		}		
+		{
+			ZoneTracker("Render::Game");
+			game->render();
 		}
 		{
 			ZoneTracker("Render::stateMachine");
 			_stateMachine->render();
-		}
-		{
-			ZoneTracker("Render::Game");
-			game->render();
 		}
 		{
 			ZoneTracker("Render::endFrame");
