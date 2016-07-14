@@ -1305,6 +1305,14 @@ namespace ds {
 			return res->get();
 		}
 
+		void reloadDialog(const char* name) {
+			LOG << "reloading: " << name;
+			RID rid = find(name, ResourceType::GUIDIALOG);
+			GUIDialogResource* res = static_cast<GUIDialogResource*>(_resCtx->resources[rid]);
+			GUIDialog* dlg = res->get();
+			dlg->load();
+		}
+
 		GUIDialog* getGUIDialog(RID rid) {
 			const ResourceIndex& res_idx = _resCtx->indices[rid];
 			XASSERT(res_idx.type == ResourceType::GUIDIALOG, "Different resource types - expected GUIDIALOG but found %s", ResourceTypeNames[res_idx.type]);

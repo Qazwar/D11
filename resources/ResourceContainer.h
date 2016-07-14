@@ -75,6 +75,8 @@ namespace ds {
 
 		RID createSamplerState(const char* name, const SamplerStateDescriptor& descriptor);
 
+		void reloadDialog(const char* name);
+
 		void parseJSONFile();
 
 		RID find(const char* name, ResourceType type);

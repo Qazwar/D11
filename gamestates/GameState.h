@@ -74,12 +74,11 @@ private:
 class BasicMenuGameState : public GameState {
 
 public:
-	BasicMenuGameState(const char* name,const char* dialogName,Game* g) : GameState(name, g) {
+	BasicMenuGameState(const char* name, const char* dialogName, Game* g) : GameState(name, g), _dialogName(dialogName) {
 		_dialog = res::getGUIDialog(dialogName);
 	}
 	~BasicMenuGameState() {}
 	int onButtonUp(int button, int x, int y) {
-		//int ret = _dialog->onButton(button, x, graphics::getScreenHeight() - y, true);
 		int ret = _dialog->onButton(button, x, y, true);
 		if (ret != -1) {
 			int tmp = onGUIButton(ret);
@@ -94,6 +93,14 @@ public:
 		graphics::turnOffZBuffer();
 		_dialog->render();
 		graphics::turnOnZBuffer();
+	}
+	int onChar(int ascii) {
+#ifdef DEBUG
+		if (ascii == 'r') {
+			res::reloadDialog(_dialogName);
+		}
+#endif
+		return 0;
 	}
 protected:
 	GUIDialog* _dialog;
