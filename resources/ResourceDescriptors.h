@@ -85,6 +85,8 @@ namespace ds {
 		uint16_t indices[16];
 		uint16_t num;
 		RID shader;
+		const BYTE* byteCode;
+		uint32_t byteCodeSize;
 	};
 
 	struct BitmapfontDescriptor {

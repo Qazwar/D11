@@ -613,15 +613,20 @@ namespace ds {
 				desc.InstanceDataStepRate = 0;
 				index += d.size;
 				si[descriptor.indices[i]] += 1;
-			}
+			}			
 			ID3D11InputLayout* layout = 0;
-			ShaderResource* sr = static_cast<ShaderResource*>(_resCtx->resources[descriptor.shader]);
-			Shader* s = sr->get();
-			assert(s != 0);
-			HRESULT d3dResult = _resCtx->device->CreateInputLayout(descriptors, descriptor.num, s->vertexShaderBuffer->GetBufferPointer(), s->vertexShaderBuffer->GetBufferSize(), &layout);
-			if (d3dResult < 0) {
-				LOGE << "Cannot create input layout '" << name << "'";
-				return INVALID_RID;
+			if (descriptor.shader == INVALID_RID) {
+				_resCtx->device->CreateInputLayout(descriptors, descriptor.num, descriptor.byteCode, descriptor.byteCodeSize, &layout);
+			}
+			else {
+				ShaderResource* sr = static_cast<ShaderResource*>(_resCtx->resources[descriptor.shader]);
+				Shader* s = sr->get();
+				assert(s != 0);
+				HRESULT d3dResult = _resCtx->device->CreateInputLayout(descriptors, descriptor.num, s->vertexShaderBuffer->GetBufferPointer(), s->vertexShaderBuffer->GetBufferSize(), &layout);
+				if (d3dResult < 0) {
+					LOGE << "Cannot create input layout '" << name << "'";
+					return INVALID_RID;
+				}
 			}
 			delete[] descriptors;
 			InputLayoutResource* ilr = new InputLayoutResource(layout,index);
@@ -685,6 +690,14 @@ namespace ds {
 				errorBuffer->Release();
 			}
 			return true;
+		}
+
+		RID createEmptyShader(const char* name) {
+			Shader* s = new Shader;
+			s->vertexShaderBuffer = 0;
+			ShaderResource* cbr = new ShaderResource(s);
+			_resCtx->resources.push_back(cbr);
+			return create(name, ResourceType::SHADER);
 		}
 
 		RID createShader(const char* name, const ShaderDescriptor& descriptor) {

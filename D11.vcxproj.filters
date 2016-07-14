@@ -68,6 +68,9 @@
     <Filter Include="scene\actions">
       <UniqueIdentifier>{6f4c7579-491c-4b5e-b30e-3c9dda357e4b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{999ea310-6151-4234-b00d-0dbae0d8c822}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="utils\Log.cpp">
@@ -526,5 +529,22 @@
     <None Include="content\resources\xscale.json">
       <Filter>content\resources</Filter>
     </None>
+    <None Include="shaders\Sprite_GS_Main.inc">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\Sprite_PS_Main.inc">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\Sprite_VS_Main.inc">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\compile_shaders.cmd">
+      <Filter>shaders</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="shaders\Sprite.fx">
+      <Filter>shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

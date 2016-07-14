@@ -239,6 +239,15 @@
     <None Include="content\engine_settings.json" />
     <None Include="content\resources.json" />
     <None Include="content\resources\xscale.json" />
+    <None Include="shaders\compile_shaders.cmd" />
+    <None Include="shaders\Sprite_GS_Main.inc" />
+    <None Include="shaders\Sprite_PS_Main.inc" />
+    <None Include="shaders\Sprite_VS_Main.inc" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="shaders\Sprite.fx">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

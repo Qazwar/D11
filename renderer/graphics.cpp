@@ -8,6 +8,9 @@
 #include "sprites.h"
 #include "..\base\InputSystem.h"
 #include "..\resources\Resource.h"
+#include "..\shaders\Sprite_VS_Main.inc"
+#include "..\shaders\Sprite_PS_Main.inc"
+#include "..\shaders\Sprite_GS_Main.inc"
 
 namespace graphics {
 
@@ -166,6 +169,14 @@ namespace graphics {
 		ssDesc.addressW = 2;
 		RID ss_id = ds::res::createSamplerState("SpriteSampler", ssDesc);
 
+		RID shader_id = ds::res::createEmptyShader("SpriteShader");
+		ds::Shader* s = ds::res::getShader(shader_id);
+
+		_context->d3dDevice->CreateVertexShader(Sprite_VS_Main, sizeof(Sprite_VS_Main), 0, &s->vertexShader);
+		_context->d3dDevice->CreatePixelShader(Sprite_PS_Main, sizeof(Sprite_PS_Main), 0, &s->pixelShader);
+		_context->d3dDevice->CreateGeometryShader(Sprite_GS_Main, sizeof(Sprite_GS_Main), 0, &s->geometryShader);
+		s->samplerState = ds::res::getSamplerState(ss_id);
+		/*
 		ds::ShaderDescriptor shaderDesc;
 		shaderDesc.file = "content\\shaders\\Sprite.fx";
 		shaderDesc.vertexShader = "VS_Main";
@@ -174,14 +185,19 @@ namespace graphics {
 		shaderDesc.model = "4_0";
 		shaderDesc.samplerState = ss_id;
 		RID shader_id = ds::res::createShader("SpriteShader", shaderDesc);
-		
+		*/
+
 		ds::InputLayoutDescriptor ilDesc;
 		ilDesc.num = 0;
 		ilDesc.indices[ilDesc.num++] = 0;
 		ilDesc.indices[ilDesc.num++] = 1;
 		ilDesc.indices[ilDesc.num++] = 3;
 		ilDesc.indices[ilDesc.num++] = 1;
-		ilDesc.shader = shader_id;
+		//ilDesc.shader = shader_id;
+		ilDesc.shader = INVALID_RID;
+		ilDesc.byteCode = Sprite_VS_Main;
+		ilDesc.byteCodeSize = sizeof(Sprite_VS_Main);
+
 		RID il_id = ds::res::createInputLayout("SpriteInputLayout", ilDesc);
 
 		ds::VertexBufferDescriptor vbDesc;

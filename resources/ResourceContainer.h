@@ -63,6 +63,8 @@ namespace ds {
 
 		RID createShader(const char* name, const ShaderDescriptor& descriptor);
 
+		RID createEmptyShader(const char* name);
+
 		RID createInputLayout(const char* name, const InputLayoutDescriptor& descriptor);
 
 		RID createVertexBuffer(const char* name, const VertexBufferDescriptor& descriptor);
