@@ -176,16 +176,6 @@ namespace graphics {
 		_context->d3dDevice->CreatePixelShader(Sprite_PS_Main, sizeof(Sprite_PS_Main), 0, &s->pixelShader);
 		_context->d3dDevice->CreateGeometryShader(Sprite_GS_Main, sizeof(Sprite_GS_Main), 0, &s->geometryShader);
 		s->samplerState = ds::res::getSamplerState(ss_id);
-		/*
-		ds::ShaderDescriptor shaderDesc;
-		shaderDesc.file = "content\\shaders\\Sprite.fx";
-		shaderDesc.vertexShader = "VS_Main";
-		shaderDesc.pixelShader = "PS_Main";
-		shaderDesc.geometryShader = "GS_Main";
-		shaderDesc.model = "4_0";
-		shaderDesc.samplerState = ss_id;
-		RID shader_id = ds::res::createShader("SpriteShader", shaderDesc);
-		*/
 
 		ds::InputLayoutDescriptor ilDesc;
 		ilDesc.num = 0;
@@ -193,7 +183,6 @@ namespace graphics {
 		ilDesc.indices[ilDesc.num++] = 1;
 		ilDesc.indices[ilDesc.num++] = 3;
 		ilDesc.indices[ilDesc.num++] = 1;
-		//ilDesc.shader = shader_id;
 		ilDesc.shader = INVALID_RID;
 		ilDesc.byteCode = Sprite_VS_Main;
 		ilDesc.byteCodeSize = sizeof(Sprite_VS_Main);
