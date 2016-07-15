@@ -7,6 +7,7 @@
 #include "..\resources\ResourceContainer.h"
 #include "..\utils\Log.h"
 #include "..\utils\Profiler.h"
+#include "..\stats\DrawCounter.h"
 
 namespace ds {
 
@@ -172,6 +173,7 @@ namespace ds {
 		graphics::updateSpriteConstantBuffer(_constantBuffer);
 		graphics::draw(_index);
 		graphics::turnOnZBuffer();
+		gDrawCounter->sprites += _index;
 		_index = 0;
 	}
 

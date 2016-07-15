@@ -99,6 +99,7 @@ namespace ds {
 
 		ID id;
 		ParticleSystem* system;
+		ID instanceID;
 	};
 
 	class Scene2D : public Scene {
@@ -110,6 +111,7 @@ namespace ds {
 		
 		ID addParticleSystem(ID systemID);
 		ID startParticleSystem(ID id, const v2& pos);
+		void stopParticleSystem(ID id);
 
 		void draw();
 		void scale(ID id, const v2& scale);

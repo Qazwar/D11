@@ -48,7 +48,7 @@ public:
 	void clear();
 	void update(float elapsed, Array<ParticleEvent>& events);
 	ID start(const v2& startPosition);
-	void stop(ID id) {}
+	void stop(ID id);
 	void addModule(ParticleModule* module, ParticleModuleData* data) {
 		if (_count_modules < 32) {
 			ModuleInstance& instance = _module_instances[_count_modules];

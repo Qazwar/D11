@@ -298,23 +298,23 @@ namespace ds {
 		perf::tickFPS(elapsed);
 		{
 			ZoneTracker u1("UPDATE");
-			//while (_accu >= _dt) {
+			while (_accu >= _dt) {
 				if (_running) {
 					{
 						ZoneTracker u2("UPDATE::main");
-						update(elapsed);
+						update(_accu);
 					}
-					game->update(elapsed);
-					_stateMachine->update(elapsed);
+					game->update(_accu);
+					_stateMachine->update(_accu);
 					// updating particles
 					ParticleManager* pm = res::getParticleManager();
 					if (pm != 0) {
-						pm->update(elapsed);
+						pm->update(_accu);
 					}
 				}
-				//_accu -= _dt;
+				_accu -= _dt;
 				_updated = true;
-			//}
+			}
 		}
 		
 	}

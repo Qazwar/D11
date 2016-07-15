@@ -26,6 +26,18 @@ namespace ds {
 	// -------------------------------------------------
 	ID ParticleSystem::start(const v2& startPosition) {
 		if (_spawnerInstances.numObjects < MAX_SPAWNERS) {
+			// no ID since it will burst immediately and does not live at all
+			if (_spawner.loop == 0 && _spawner.duration == 0.0f) {
+				ParticleSpawnerInstance instance;
+				instance.pos = startPosition;
+				uint32_t start = 0;
+				uint32_t end = 0;
+				{
+					ZoneTracker z("PS:start");
+					emittParticles(instance, 0.0f, &start, &end);
+				}
+				return INVALID_ID;
+			}
 			ID id = _spawnerInstances.add();
 			ParticleSpawnerInstance& instance = _spawnerInstances.get(id);;
 			instance.timer = 0.0f;
@@ -38,14 +50,20 @@ namespace ds {
 			uint32_t start = 0;
 			uint32_t end = 0;
 			{
-				ZoneTracker z("PS:emitterGenerate");
+				ZoneTracker z("PS:start");
 				emittParticles(instance, 0.0f, &start, &end);
-			}
+			}			
 			return id;
 		}
 		else {
 			LOG << "No more instances available";
 			return INVALID_ID;
+		}
+	}
+
+	void ParticleSystem::stop(ID id) {
+		if (_spawnerInstances.contains(id)) {
+			_spawnerInstances.remove(id);
 		}
 	}
 
@@ -101,6 +119,7 @@ namespace ds {
 	// generate
 	// -------------------------------------------------------
 	void ParticleSystem::emittParticles(ParticleSpawnerInstance& instance, float dt, uint32_t* start, uint32_t* end) {
+		// FIXME: loop = -1 means it will run endlessly
 		if (_spawner.duration > 0.0f) {
 			instance.accumulated += _spawner.frequency;
 			if (instance.accumulated >= 1.0f) {
@@ -115,6 +134,14 @@ namespace ds {
 				instance.loopTimer = 0.0f;
 				emittParticles(instance, _spawner.rate, start, end, dt);
 				--instance.loop;
+			}
+		}
+		else if (instance.loop == -1) {
+			instance.accumulated += _spawner.frequency;
+			if (instance.accumulated >= 1.0f) {
+				int count = (int)instance.accumulated;
+				instance.accumulated -= count;
+				emittParticles(instance, count, start, end, dt);
 			}
 		}
 		else {
@@ -354,6 +381,9 @@ namespace ds {
 		_spawner.frequency = 0.0f;
 		if (_spawner.duration > 0.0f) {
 			_spawner.frequency = static_cast<float>(_spawner.rate) / (60.0f * _spawner.duration);
+		}
+		else if (_spawner.loop != 0) {
+			_spawner.frequency = static_cast<float>(_spawner.rate) / 60.0f;
 		}
 		LOG << "--> frequency: " << _spawner.frequency;
 	}

@@ -420,10 +420,17 @@ namespace ds {
 		return id;
 	}
 
-	ID Scene2D::startParticleSystem(ID id, const v2& pos) {
+	void Scene2D::stopParticleSystem(ID id) {
 		if (_particleSystems.contains(id)) {
 			const ParticleSystemMapping& mapping = _particleSystems.get(id);
-			mapping.system->start(pos);
+			mapping.system->stop(mapping.instanceID);
+		}
+	}
+
+	ID Scene2D::startParticleSystem(ID id, const v2& pos) {
+		if (_particleSystems.contains(id)) {
+			ParticleSystemMapping& mapping = _particleSystems.get(id);
+			mapping.instanceID = mapping.system->start(pos);
 		}
 		return INVALID_ID;
 	}
