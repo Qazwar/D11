@@ -39,14 +39,10 @@ namespace ds {
 			CharBuffer nameBuffer;
 			ID3D11Device* device;
 			uint32_t resourceIndex;
-			//ResourceIndex resourceTable[MAX_RESOURCES];
-
 			Array<BaseResource*> resources;
 			Array<ResourceIndex> indices;
-			//std::map<IdString, ResourceIndex> lookup;
-
 			std::map<IdString, ParseFunc> parsers;
-
+			ParticleManager* particles;
 			
 		};
 
@@ -553,10 +549,10 @@ namespace ds {
 		// create particle manager
 		// ------------------------------------------------------
 		static RID createParticleManager(const ParticleSystemsDescriptor& descriptor) {
-			ParticleManager* pm = new ParticleManager(descriptor);
-			pm->load();
+			_resCtx->particles = new ParticleManager(descriptor);
+			_resCtx->particles->load();
 			int idx = _resCtx->resources.size();
-			ParticleManagerResource* cbr = new ParticleManagerResource(pm);
+			ParticleManagerResource* cbr = new ParticleManagerResource(_resCtx->particles);
 			_resCtx->resources.push_back(cbr);
 			return create("ParticleManager", ResourceType::PARTICLEMANAGER);
 		}
@@ -1070,7 +1066,8 @@ namespace ds {
 		void initialize(ID3D11Device* device) {
 			_resCtx = new ResourceContext;
 			_resCtx->device = device;
-			_resCtx->resourceIndex = 0;						
+			_resCtx->resourceIndex = 0;				
+			_resCtx->particles = 0;
 			_resCtx->parsers[string::murmur_hash("constant_buffer")] = parseConstantBuffer;
 			_resCtx->parsers[string::murmur_hash("quad_index_buffer")] = parseQuadIndexBuffer;
 			_resCtx->parsers[string::murmur_hash("index_buffer")] = parseIndexBuffer;
@@ -1333,9 +1330,7 @@ namespace ds {
 		}
 
 		ParticleManager* getParticleManager() {
-			RID rid = find("ParticleManager", ResourceType::PARTICLEMANAGER);
-			ParticleManagerResource* res = static_cast<ParticleManagerResource*>(_resCtx->resources[rid]);
-			return res->get();
+			return _resCtx->particles;
 		}
 
 		void debug() {

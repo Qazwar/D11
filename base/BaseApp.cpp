@@ -275,12 +275,10 @@ namespace ds {
 				if (!_buttonState.processed) {
 					_buttonState.processed = true;
 					if (_buttonState.down) {
-						LOG << "button down: " << _buttonState.button;
 						_stateMachine->onButtonDown(_buttonState.button, _buttonState.x, _buttonState.y);
 						OnButtonDown(_buttonState.button, _buttonState.x, _buttonState.y);
 					}
 					else {
-						LOG << "button up: " << _buttonState.button;
 						_stateMachine->onButtonUp(_buttonState.button, _buttonState.x, _buttonState.y);
 						OnButtonUp(_buttonState.button, _buttonState.x, _buttonState.y);
 					}
@@ -308,6 +306,11 @@ namespace ds {
 					}
 					game->update(elapsed);
 					_stateMachine->update(elapsed);
+					// updating particles
+					ParticleManager* pm = res::getParticleManager();
+					if (pm != 0) {
+						pm->update(elapsed);
+					}
 				}
 				//_accu -= _dt;
 				_updated = true;
@@ -384,7 +387,6 @@ namespace ds {
 	// Mouse button
 	// -------------------------------------------------------
 	void BaseApp::sendButton(int button, int x, int y, bool down) {
-		LOG << "==> sendButton button: " << button << " down: " << down;
 		if (_buttonState.processed) {			
 			_buttonState.processed = false;
 			_buttonState.x = x;

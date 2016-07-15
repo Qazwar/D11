@@ -379,6 +379,19 @@ namespace ds {
 				sprites->draw(_data.positions[i].xy(), _data.textures[i],_data.rotations[i].z,_data.scales[i].xy());
 			}
 		}
+
+		for (uint32_t i = 0; i < _particleSystems.numObjects; ++i) {
+			const ParticleArray& array = _particleSystems.objects[i].system->getArray();
+			const Texture& t = _particleSystems.objects[i].system->getTexture();
+			//renderer->render(array, t);
+			if (array.countAlive > 0) {
+				for (int j = 0; j < array.countAlive; ++j) {
+					sprites->draw(array.position[j].xy(), t, array.rotation[j], array.scale[j], array.color[j]);
+				}
+			}
+		}
+
+
 		sprites->end();
 	}
 
@@ -398,5 +411,20 @@ namespace ds {
 	void Scene2D::setTexture(ID id, const Texture& t) {
 		int idx = _data.getIndex(id);
 		_data.textures[idx] = t;
+	}
+
+	ID Scene2D::addParticleSystem(ID systemID) {
+		ID id = _particleSystems.add();
+		ParticleSystemMapping& mapping = _particleSystems.get(id);
+		mapping.system = res::getParticleManager()->getParticleSystem(systemID);
+		return id;
+	}
+
+	ID Scene2D::startParticleSystem(ID id, const v2& pos) {
+		if (_particleSystems.contains(id)) {
+			const ParticleSystemMapping& mapping = _particleSystems.get(id);
+			mapping.system->start(pos);
+		}
+		return INVALID_ID;
 	}
 }

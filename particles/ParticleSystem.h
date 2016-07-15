@@ -93,6 +93,12 @@ public:
 	const ParticleRenderMode getRenderMode() const {
 		return _renderMode;
 	}
+	const ParticleArray& getArray() const {
+		return m_Array;
+	}
+	const Texture& getTexture() const {
+		return _texture;
+	}
 private:
 	void updateSpawners(float dt);
 	void initSpawner();

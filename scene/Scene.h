@@ -8,6 +8,7 @@
 #include "ActionEventBuffer.h"
 #include "..\math\tweening.h"
 #include "actions\AbstractAction.h"
+#include "..\particles\ParticleSystem.h"
 
 namespace ds {
 
@@ -94,17 +95,29 @@ namespace ds {
 	// ----------------------------------------
 	// 2D scene
 	// ----------------------------------------
+	struct ParticleSystemMapping {
+
+		ID id;
+		ParticleSystem* system;
+	};
+
 	class Scene2D : public Scene {
 
 	public:
 		Scene2D(const SceneDescriptor& descriptor) : Scene(descriptor) {}
 		~Scene2D() {}
 		ID add(const v2& pos, const Texture& t, RID material);
+		
+		ID addParticleSystem(ID systemID);
+		ID startParticleSystem(ID id, const v2& pos);
+
 		void draw();
 		void scale(ID id, const v2& scale);
 		void scaleTo(ID id, const v2& startScale, const v2& endScale, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 		void setTexture(ID id, const Texture& t);
+
 	private:
+		DataArray<ParticleSystemMapping> _particleSystems;
 		OrthoCamera* _camera;
 	};
 
