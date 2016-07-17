@@ -180,6 +180,11 @@ namespace ds {
 			}
 		}
 
+		void formatTime(const GameTimer& timer, char* str) {
+			formatInt(timer.getMinutes(), str, 2);
+			str[2] = ':';
+			formatInt(timer.getSeconds(), str, 2, 3);
+		}
 		// -------------------------------------------------------
 		// Formats time in minutes and seconds to string
 		// -------------------------------------------------------
@@ -190,29 +195,7 @@ namespace ds {
 			formatInt(minutes, minStr, 2);
 			str = minStr + ":" + secStr;
 		}
-
-		void formatInt(int value, char* buffer, int maxBuffer, int length) {
-			int idx = 0;
-			if (value < 0) {
-				buffer[0] = '-';
-				++idx;
-				value = -value;
-			}
-			int tmp = value;
-			int div = 1;
-			for (int i = 0; i < length; ++i) {
-				if (i > 0) {
-					div *= 10;
-				}
-			}
-			for (int i = 0; i < length; ++i) {
-				int r = tmp / div;
-				buffer[idx++] = ('0' + r);
-				tmp = tmp - r * div;
-				div /= 10;
-			}
-			buffer[idx] = '\0';
-		}
+		
 		// -------------------------------------------------------
 		// Formats an int to a string using fixed length
 		// -------------------------------------------------------
@@ -241,7 +224,7 @@ namespace ds {
 		// -------------------------------------------------------
 		// Formats an int to a string using fixed length
 		// -------------------------------------------------------
-		void formatInt(int value, char* str, int length) {
+		void formatInt(int value, char* str, int length, int offset) {
 			//str = "";
 			int index = 0;
 			if (value < 0) {
@@ -258,11 +241,11 @@ namespace ds {
 			}
 			for (int i = 0; i < length; ++i) {
 				int r = tmp / div;
-				str[index++] = ('0' + r);
+				str[offset + index++] = ('0' + r);
 				tmp = tmp - r * div;
 				div /= 10;
 			}
-			str[index++] = '\0';
+			str[offset + index++] = '\0';
 		}
 
 		// -------------------------------------------------------

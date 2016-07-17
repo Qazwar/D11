@@ -1,0 +1,41 @@
+image { 
+    id : 10 
+    pos : 140,650 
+    color : 255,255,255,255 
+    centered : true 
+    scale : 1,1
+    rect : 540,0,910,105    
+}
+button { 
+    id : 1 
+    pos : 400,500 
+    color : 255,255,255,255 
+    centered : true 
+    scale : 1,1
+    rect : 368,0,302,52 
+    text : "Easy"    
+}
+timer { 
+    id : 6
+    pos : 140,720
+    color : 148,171,185,255
+    centered : true
+    scale : 1,1
+}
+numbers { 
+    id : 7
+    pos : 880,720
+    color : 148,171,185,255
+    centered : false
+    scale : 1,1
+    value : 1234
+    length : 4
+}
+text { 
+    id : 12
+    pos : 520,450
+    color : 255,255,255,255
+    centered : true
+    scale : 1,1
+    text : "0 / 32"
+}

@@ -27,11 +27,13 @@ public:
 						++m_Hours;
 					}
 				}
+				_dirty = true;
 			}
 		}
 	}
 	void start() {
 		m_Active = true;
+		_dirty = true;
 	}
 	void stop() {
 		m_Active = false;
@@ -57,11 +59,17 @@ public:
 		m_Minutes = minutes;
 		m_Hours = hours;
 		m_Timer = 0.0f;
+		_dirty = true;
 	}
 	void reset() {
 		set(0,0,0,0);
+		_dirty = true;
+	}
+	bool isDirty() const {
+		return _dirty;
 	}
 private:
+	bool _dirty;
 	float m_Timer;
 	bool m_Forward;
 	bool m_Active;

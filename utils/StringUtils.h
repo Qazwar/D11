@@ -5,6 +5,7 @@
 #include "..\utils\Color.h"
 #include "..\math\math.h"
 #include "..\lib\collection_types.h"
+#include "GameTimer.h"
 
 namespace ds {
 
@@ -44,12 +45,10 @@ namespace string {
 	void formatPercentage(float percentage, char* ret);
 
 	void trim(std::string& str,const std::string& ws);
-
-	void formatInt(int value, char* buffer, int maxBuffer, int length);
-
+	
 	void formatInt(int value,std::string& str,int length);
 
-	void formatInt(int value, char* str, int length);
+	void formatInt(int value, char* str, int length, int offset = 0);
 
 	void formatInt(int value,std::string& str);
 
@@ -58,6 +57,8 @@ namespace string {
 	int extract_used_characters(const char* text, char* array, int max);
 
 	void formatTime(int minutes,int seconds,std::string& str);
+
+	void formatTime(const GameTimer& timer, char* str);
 
 	void file_name(const char* file, char* name);
 
