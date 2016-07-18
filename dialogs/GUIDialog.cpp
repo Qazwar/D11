@@ -14,9 +14,7 @@ namespace ds {
 		for (int i = 0; i < MAX_GUID; ++i) {
 			_ids[i].id = -1;
 			_ids[i].index = -1;
-			_transitions[i].id = -1;
 		}
-		_transitionCounter = 0;
 		strcpy(_name, descriptor.file);
 		sprintf_s(_jsonName, 128, "dialogs\\%s.json", _name);
 	}
@@ -32,7 +30,6 @@ namespace ds {
 		for (int i = 0; i < MAX_GUID; ++i) {
 			_ids[i].id = -1;
 			_ids[i].index = -1;
-			_transitions[i].id = -1;
 		}
 	}
 
@@ -74,6 +71,7 @@ namespace ds {
 		item.scale = scale;
 		item.type = GIT_NUMBERS;
 		item.index = _vertices.size();
+		item.id = id;
 		item.tmp = length;
 		char text[16];
 		string::formatInt(value, text, length);
@@ -125,6 +123,7 @@ namespace ds {
 		item.rotation = 0.0f;
 		item.scale = scale;
 		item.type = GIT_IMAGE;
+		item.id = id;
 		item.index = _vertices.size();
 		DialogVertex v;
 		v.offset = v2(0, 0);
@@ -194,6 +193,7 @@ namespace ds {
 		item.color = color;
 		item.rotation = 0.0f;
 		item.scale = scale;
+		item.id = id;
 		item.type = GIT_TIMER;
 		item.index = _vertices.size();
 		const char* text = "00:00";		
@@ -224,6 +224,7 @@ namespace ds {
 		item.rotation = 0.0f;
 		item.scale = v2(1, 1);
 		item.type = GIT_TEXT;
+		item.id = id;
 		item.index = _vertices.size();
 
 		v2 size = font::calculateSize(_font, text, 2);
@@ -291,7 +292,7 @@ namespace ds {
 		int idx = getIndexByID(id);
 		const GUID& gid = _ids[idx];
 		const DialogItem& item = _items[gid.index];
-		XASSERT(item.type == GIT_TEXT, "The GUI item %d is not a text item", id);
+		//XASSERT(item.type == GIT_TEXT, "The GUI item %d is not a text item", id);
 		// FIXME: workaround currently
 		int len = strlen(text);
 		XASSERT(len < item.tmp, "Sorry but text is longer than the original version");
@@ -348,6 +349,7 @@ namespace ds {
 		item.rotation = 0.0f;
 		item.scale = v2(1, 1);
 		item.type = GIT_BUTTON;
+		item.id = id;
 		item.index = _vertices.size();
 		float w = textureRect.width();
 		float h = textureRect.height();
@@ -375,12 +377,6 @@ namespace ds {
 	// -------------------------------------------------------
 	void GUIDialog::activate() {
 		m_SelectedInput = -1;			
-		if (_transitionCounter > 0) {
-			_transitionMode = true;
-			for (int i = 0; i < MAX_GUID; ++i) {
-				_transitions[i].timer = 0.0f;
-			}
-		}
 	}
 
 	// -------------------------------------------------------
@@ -398,25 +394,6 @@ namespace ds {
 		v2 p = item.pos;
 		if (item.centered) {
 			p.x = graphics::getScreenWidth() * 0.5f;
-		}
-		if (_transitionMode) {
-			if (_transitions[index].id != -1) {
-				float norm = _transitions[index].timer / _transitions[index].ttl;				
-				// float from left to position
-				if (_transitions[index].typeBits == 1) {
-					return lerp(v2(-200, item.pos.y), p, norm);
-				}	
-				// floar right to position
-				if (_transitions[index].typeBits == 2) {
-					return lerp(v2(1200, item.pos.y), p, norm);
-				}
-				if (_transitions[index].typeBits == 3) {
-					return lerp(v2(p.x, 900.0f), p, norm);
-				}
-				if (_transitions[index].typeBits == 4) {
-					return lerp(v2(p.x, -200.0f), p, norm);
-				}
-			}
 		}
 		return p;
 	}
@@ -489,22 +466,22 @@ namespace ds {
 	// tick
 	// -------------------------------------------------------
 	void GUIDialog::tick(float dt) {
-		if (_transitionMode) {
-			int cnt = 0;
-			for (int i = 0; i < MAX_GUID; ++i) {
-				if (_transitions[i].id != -1) {
-					if (_transitions[i].timer < _transitions[i].ttl) {
-						_transitions[i].timer += dt;
+		for (int i = 0; i < MAX_GUID; ++i) {
+			if (_transitions[i].active) {		
+				DialogItem& item = _items[i];
+				if (_transitions[i].timer < _transitions[i].ttl) {					
+					_transitions[i].timer += dt;				
+					if (_transitions[i].timer > _transitions[i].ttl) {
+						_transitions[i].timer = _transitions[i].ttl;
 					}
-					else {
-						++cnt;
-					}
+					item.pos = tweening::interpolate(_transitions[i].tweening, _transitions[i].start, _transitions[i].end, _transitions[i].timer, _transitions[i].ttl);
+				}
+				else {
+					_transitions[i].active = false;
 				}
 			}
-			if (cnt == _transitionCounter) {
-				_transitionMode = false;
-			}
 		}
+
 		for (size_t i = 0; i < _timers.size(); ++i) {
 			_timers[i].tick(dt);
 		}
@@ -515,20 +492,9 @@ namespace ds {
 				const GameTimer& timer = _timers[item.tmp];
 				if (timer.isDirty()) {
 					string::formatTime(timer, buffer);
-					updateText(item.index, buffer);					
+					updateTextVertices(item.index, buffer);					
 				}
 			}
-		}
-	}
-
-	void GUIDialog::setTransition(int id, int type, float ttl) {
-		int idx = getIndexByID(id);
-		if (idx != -1) {
-			_transitions[idx].id = id;
-			_transitions[idx].timer = 0.0f;
-			_transitions[idx].ttl = ttl;
-			_transitions[idx].typeBits = type;
-			++_transitionCounter;
 		}
 	}
 
@@ -727,5 +693,19 @@ namespace ds {
 		reader.get(category, "centered", &item->centered);
 		reader.get(category, "scale", &item->scale);
 		return id;
+	}
+
+	void GUIDialog::startTransition(int id, const v2& start, float ttl) {
+		int idx = getIndexByID(id);
+		if (idx != -1) {
+			GUITransition& gt = _transitions[idx];
+			gt.timer = 0.0f;
+			gt.start = start;
+			gt.ttl = ttl;
+			DialogItem& item = _items[idx];
+			gt.end = item.pos;
+			item.pos = start;
+			gt.active = true;
+		}
 	}
 }

@@ -156,6 +156,7 @@ namespace ds {
 			LOG << "------------------ end load content ------------------";
 			res::debug();
 			_loading = false;
+			_start = std::chrono::steady_clock::now();
 			return true;
 		}
 		_loading = false;

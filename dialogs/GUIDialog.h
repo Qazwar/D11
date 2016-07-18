@@ -12,7 +12,6 @@
 
 namespace ds {
 
-typedef uint32_t DialogID;
 const int MAX_GUID = 64;
 
 // -------------------------------------------------------
@@ -39,6 +38,9 @@ struct GUID {
 	GUID(int _id, int _index, int _entryIndex) : id(_id), index(_index) {}
 };
 
+// -------------------------------------------------------
+// Dialog item
+// -------------------------------------------------------
 struct DialogItem {
 
 	ID id;
@@ -55,6 +57,9 @@ struct DialogItem {
 	int tmp;
 };
 
+// -------------------------------------------------------
+// Dialog vertex
+// -------------------------------------------------------
 struct DialogVertex {
 
 	v2 offset;
@@ -67,10 +72,15 @@ struct DialogVertex {
 // GUI transitions
 // -------------------------------------------------------
 struct GUITransition {
-	int id;
-	int typeBits;
+
+	bool active;
 	float timer;
 	float ttl;
+	v2 start;
+	v2 end;
+	tweening::TweeningType tweening;
+
+	GUITransition() : active(false), timer(0.0f), ttl(0.0f), start(0, 0), end(0, 0), tweening(tweening::easeInCubic) {}
 };
 
 // -------------------------------------------------------
@@ -114,17 +124,12 @@ public:
 		return m_HashName;
 	}
 	void updateMousePos(const Vector2f& mousePos);
-	const DialogID& getDialogID() const {
-		return m_ID;
-	}
 	void clear();
 
 	void tick(float dt);
 
 	GUID addNumber(int id,const v2& position,int value, int length, const v2& scale = v2(1, 1),const Color& color = Color::WHITE,bool centered = false);
 	void setNumber(int id, int value);
-
-	void setTransition(int id, int type, float ttl);
 
 	bool saveData(JSONWriter& writer);
 	bool loadData(const JSONReader& reader);
@@ -134,11 +139,13 @@ public:
 	const char* getName() const {
 		return _name;
 	}
+
+	void startTransition(int id, const v2& start, float ttl);
+
 private:
 	void updateTextVertices(int offset, const char* text);
 	int addTextVertices(const char* text, int sx, int sy);
 	GUIDialog(const GUIDialog& other) {}
-	//void saveItem(BinaryWriter& writer, int id, const GUIItem& item);
 	int loadItem(int category, const JSONReader& reader, DialogItem* item);
 	int findFreeID();
 	bool containsItem(int id);
@@ -148,12 +155,12 @@ private:
 	bool remove(int id);
 	v2 getPosition(int index);
 
-	DialogID m_ID;
 	IdString m_HashName;
 	RID _font;
 	Bitmapfont* _bitmapFont;
 
 	SpriteBuffer* _sprites;
+
 	Rect m_ButtonItem;
 	Rect m_ButtonItemSelected;
 	int m_SelectedInput;
@@ -164,8 +171,6 @@ private:
 	GUID _ids[MAX_GUID];
 	int _idIndex;
 	GUITransition _transitions[MAX_GUID];	
-	int _transitionCounter;
-	bool _transitionMode;
 
 	Array<DialogVertex> _vertices;
 	Array<DialogItem> _items;
