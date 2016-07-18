@@ -230,13 +230,16 @@ namespace ds {
 		int sx = -size.x * 0.5f;
 		int sy = -size.y * 0.5f;
 		int len = addTextVertices(text, sx, sy);
-
+		item.tmp = len;
 		item.num = len;
 		_items.push_back(item);
 
 		return gid;
 	}
 
+	// -------------------------------------------------------
+	// reset specific timer
+	// -------------------------------------------------------
 	void GUIDialog::resetTimer(int id) {
 		int idx = getIndexByID(id);
 		const GUID& gid = _ids[idx];
@@ -245,6 +248,9 @@ namespace ds {
 		_timers[item.tmp].reset();
 	}
 
+	// -------------------------------------------------------
+	// start specific timer
+	// -------------------------------------------------------
 	void GUIDialog::startTimer(int id) {
 		int idx = getIndexByID(id);
 		const GUID& gid = _ids[idx];
@@ -253,6 +259,9 @@ namespace ds {
 		_timers[item.tmp].start();
 	}
 
+	// -------------------------------------------------------
+	// get specific timer
+	// -------------------------------------------------------
 	GameTimer* GUIDialog::getTimer(int id) {
 		int idx = getIndexByID(id);
 		const GUID& gid = _ids[idx];
@@ -260,22 +269,19 @@ namespace ds {
 		XASSERT(item.type == GIT_TIMER, "The GUI item %d is not a timer", id);
 		return &_timers[item.tmp];
 	}
+
 	// -------------------------------------------------------
 	// Update text
 	// -------------------------------------------------------
 	void GUIDialog::updateText(int id,int x,int y,const char* text,const Color& color, const v2& scale,bool centered) {
 		int idx = getIndexByID(id);
 		const GUID& gid = _ids[idx];
-		/*
-		GUIItem& item = m_Items[gid.entryIndex];
+		const DialogItem& item = _items[gid.index];
 		XASSERT(item.type == GIT_TEXT, "The GUI item %d is not a text item", id);
-		GUIText& txt = _texts[gid.index];
-		item.centered = centered;
-		item.color = color;
-		item.scale = scale;
-		item.pos = v2(x,y);
-		strcpy(txt.text, text);
-		*/
+		// FIXME: workaround currently
+		int len = strlen(text);
+		XASSERT(len < item.tmp, "Sorry but text is longer than the original version");
+		updateTextVertices(item.index, text);
 	}
 
 	// -------------------------------------------------------
@@ -284,10 +290,12 @@ namespace ds {
 	void GUIDialog::updateText(int id,const char* text) {	
 		int idx = getIndexByID(id);
 		const GUID& gid = _ids[idx];
-		//GUIItem& item = m_Items[gid.entryIndex];
-		//XASSERT(item.type == GIT_TEXT, "The GUI item %d is not a text item", id);
-		//GUIText& txt = _texts[gid.index];
-		//strcpy(txt.text, text);
+		const DialogItem& item = _items[gid.index];
+		XASSERT(item.type == GIT_TEXT, "The GUI item %d is not a text item", id);
+		// FIXME: workaround currently
+		int len = strlen(text);
+		XASSERT(len < item.tmp, "Sorry but text is longer than the original version");
+		updateTextVertices(item.index, text);
 	}
 
 	// -------------------------------------------------------
@@ -412,6 +420,7 @@ namespace ds {
 		}
 		return p;
 	}
+
 	// -------------------------------------------------------
 	// Render both nodes
 	// -------------------------------------------------------
@@ -437,6 +446,9 @@ namespace ds {
 	void GUIDialog::updateMousePos(const Vector2f& mousePos) {
 	}
 
+	// -------------------------------------------------------
+	// update text vertices
+	// -------------------------------------------------------
 	void GUIDialog::updateTextVertices(int offset, const char* text) {
 		int sx = 0;
 		int len = strlen(text);
@@ -452,6 +464,9 @@ namespace ds {
 		}
 	}
 
+	// -------------------------------------------------------
+	// add text vertices
+	// -------------------------------------------------------
 	int GUIDialog::addTextVertices(const char* text,int sx, int sy) {
 		int len = strlen(text);
 		int padding = 2;
@@ -469,6 +484,7 @@ namespace ds {
 		}
 		return len;
 	}
+
 	// -------------------------------------------------------
 	// tick
 	// -------------------------------------------------------
@@ -646,6 +662,9 @@ namespace ds {
 		return true;
 	}
 
+	// -------------------------------------------------------
+	// load data
+	// -------------------------------------------------------
 	bool GUIDialog::loadData(const JSONReader& reader) {
 		clear();
 		int cats[256];
@@ -697,6 +716,9 @@ namespace ds {
 		return true;
 	}
 
+	// -------------------------------------------------------
+	// basic load item shared by all items
+	// -------------------------------------------------------
 	int GUIDialog::loadItem(int category, const JSONReader& reader, DialogItem* item) {
 		int id = 0;
 		reader.get_int(category,"id", &id);
