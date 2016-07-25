@@ -105,7 +105,7 @@ namespace ds {
 	class Scene2D : public Scene {
 
 	public:
-		Scene2D(const SceneDescriptor& descriptor) : Scene(descriptor) {}
+		Scene2D(const SceneDescriptor& descriptor) : Scene(descriptor) , _renderTarget(INVALID_RID) {}
 		~Scene2D() {}
 		ID add(const v2& pos, const Texture& t, RID material);
 		
@@ -117,10 +117,11 @@ namespace ds {
 		void scale(ID id, const v2& scale);
 		void scaleTo(ID id, const v2& startScale, const v2& endScale, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 		void setTexture(ID id, const Texture& t);
-
+		void useRenderTarget(const char* name);
 	private:
 		DataArray<ParticleSystemMapping> _particleSystems;
 		OrthoCamera* _camera;
+		RID _renderTarget;
 	};
 
 	// ----------------------------------------

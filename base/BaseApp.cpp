@@ -399,6 +399,7 @@ namespace ds {
 
 	void BaseApp::shutdown() {
 		_alive = false;
+		onShutdown();
 		//DestroyWindow(m_hWnd);
 	}
 

@@ -442,6 +442,10 @@ namespace graphics {
 		return _context->d3dDevice;
 	}
 
+	ID3D11DepthStencilView* getDepthStencilView() {
+		return _context->depthStencilView;
+	}
+
 	// ------------------------------------------------------
 	// get view projection matrix
 	// ------------------------------------------------------
@@ -567,6 +571,11 @@ namespace graphics {
 		_context->d3dContext->Unmap(_context->spriteCB, 0);
 		_context->d3dContext->VSSetConstantBuffers(0, 1, &_context->spriteCB);
 		_context->d3dContext->GSSetConstantBuffers(0, 1, &_context->spriteCB);
+	}
+
+	void setRenderTarget(RID rtID) {
+		ds::RenderTarget* rt = ds::res::getRenderTarget(rtID);
+		rt->begin(_context->d3dContext);
 	}
 
 	// ------------------------------------------------------

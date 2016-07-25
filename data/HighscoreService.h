@@ -1,68 +1,77 @@
 #pragma once
+#include "..\lib\collection_types.h"
+#include "..\io\BinaryFile.h"
 
 namespace ds {
 
-	struct BaseScore {
-
-		BaseScore() {}
-		virtual int compare(const BaseScore& other) = 0;
-
-	};
-
-	template<class T, int SIZE = 10>
+	template<class H,int SIZE = 10>
 	class HighscoreService {
 
 	public:
 		HighscoreService() : _count(0) {
-			_scores = new T[SIZE];
+			_scores = new H[SIZE];
 		}
+
 		~HighscoreService() {
 			delete[] _scores;
 		}
-		int add(const T& score) {
+
+		int add(const H& score) {
 			int idx = -1;
+			if (_count == 0) {
+				_scores[_count++] = score;
+				return 0;
+			}
 			for (int i = 0; i < _count; ++i) {
 				if (idx == -1) {
 					int state = score.compare(_scores[i]);
-					if (state >= 0) {
+					if (state == -1) {
 						idx = i;
 					}
 				}
 			}
-			if (idx != -1) {
-				// FIXME: move the rest on further down
+			if (idx != -1) {				
+				for (int j = _count - 1; j >= idx; --j) {
+					_scores[j + 1] = _scores[j];
+				}
 				_scores[idx] = score;
 				++_count;
 			}
 			return idx;
 		}
-		bool load() {
-			FILE* f = fopen("score.dat", "rb");
-			if (f) {
-				int count = 0;
-				fread(&count, sizeof(int), 1, f);
-				for (int i = 0; i < count; ++i) {
-					fread(&_scores[i], sizeof(T), 1, f);
+
+		bool load(const char* name) {
+			BinaryFile f;
+			if (f.open(name, FileMode::READ)) {
+				f.read(&_count);
+				if (_count > SIZE) {
+					_count = SIZE;
 				}
-				_count = count;
-				fclose(f);
-				return true;
-			}
-			return false;
-		}
-		bool save() {
-			FILE* f = fopen("score.dat", "wb");
-			if (f) {
-				fwrite(&_count, sizeof(int), 1, f);
 				for (int i = 0; i < _count; ++i) {
-					fwrite(&_scores[i], sizeof(T), 1, f);
-				}
-				fclose(f);
+					f.read(&_scores[i], sizeof(H));
+				}			
 				return true;
 			}
 			return false;
 		}
-		int get(T* list, int max) {
+		
+		bool save(const char* name) {
+			BinaryFile f;
+			if (f.open(name, FileMode::WRITE)) {
+				f.write(_count);
+				for (int i = 0; i < _count; ++i) {
+					f.write(&_scores[i], sizeof(H));
+				}			
+				return true;
+			}
+			return false;
+		}
+
+		const H& get(int index) const {
+			return _scores[index];
+		}
+
+		int get(H* list, int max) {
 			int cnt = max;
 			if (cnt > _count) {
 				cnt = _count;
@@ -72,9 +81,13 @@ namespace ds {
 			}
 			return cnt;
 		}
+
+		int size() const {
+			return _count;
+		}
 	private:
 		int _count;
-		T* _scores;
+		H* _scores;
 	};
 
 }

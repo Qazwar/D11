@@ -143,7 +143,7 @@ public:
 	void startTransition(int id, const v2& start, float ttl);
 
 private:
-	void updateTextVertices(int offset, const char* text);
+	void updateTextVertices(int offset, const char* text, int sx = 0, int sy = 0);
 	int addTextVertices(const char* text, int sx, int sy);
 	GUIDialog(const GUIDialog& other) {}
 	int loadItem(int category, const JSONReader& reader, DialogItem* item);

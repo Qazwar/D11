@@ -161,6 +161,9 @@ namespace ds {
 	};
 
 	struct RenderTargetDescriptor {
+		uint16_t width;
+		uint16_t height;
+		Color clearColor;
 	};
 
 	struct SkyBoxDescriptor {

@@ -281,7 +281,7 @@ namespace ds {
 		XASSERT(item.type == GIT_TEXT, "The GUI item %d is not a text item", id);
 		// FIXME: workaround currently
 		int len = strlen(text);
-		XASSERT(len < item.tmp, "Sorry but text is longer than the original version");
+		XASSERT(len <= item.tmp, "Sorry but text is longer than the original version");
 		updateTextVertices(item.index, text);
 	}
 
@@ -295,8 +295,11 @@ namespace ds {
 		//XASSERT(item.type == GIT_TEXT, "The GUI item %d is not a text item", id);
 		// FIXME: workaround currently
 		int len = strlen(text);
-		XASSERT(len < item.tmp, "Sorry but text is longer than the original version");
-		updateTextVertices(item.index, text);
+		XASSERT(len <= item.tmp, "Sorry but text is longer than the original version");
+		v2 size = font::calculateSize(_font, text, 2);
+		int sx = -size.x * 0.5f;
+		int sy = -size.y * 0.5f;
+		updateTextVertices(item.index, text, sx, sy);
 	}
 
 	// -------------------------------------------------------
@@ -316,7 +319,7 @@ namespace ds {
 				br.top += p.y;
 				br.bottom += p.y;
 				if (x >= br.left && x <= br.right && y <= br.top && y >= br.bottom) {
-					return i;
+					return item.id;
 				}
 			}
 		}
@@ -426,8 +429,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// update text vertices
 	// -------------------------------------------------------
-	void GUIDialog::updateTextVertices(int offset, const char* text) {
-		int sx = 0;
+	void GUIDialog::updateTextVertices(int offset, const char* text,int sx, int sy) {
 		int len = strlen(text);
 		v2 size = font::calculateSize(_font, text, 2);
 		for (int cnt = 0; cnt < len; ++cnt) {
@@ -436,7 +438,7 @@ namespace ds {
 			float dimX = t.dim.x;// *item.scale.x;
 			float dimY = t.dim.y;// *item.scale.y;
 			_vertices[offset + cnt].texture = t;
-			_vertices[offset + cnt].offset = v2(sx + dimX * 0.5f, dimY * 0.5f);
+			_vertices[offset + cnt].offset = v2(sx + dimX * 0.5f, sy + dimY * 0.5f);
 			sx += dimX + 2;
 		}
 	}

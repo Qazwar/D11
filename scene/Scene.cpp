@@ -368,10 +368,17 @@ namespace ds {
 		return _data.create(pos, t, v2(1, 1), 0.0f, material, Color::WHITE);
 	}
 
+	void Scene2D::useRenderTarget(const char* name) {
+		_renderTarget = res::find(name, ResourceType::RENDERTARGET);
+	}
+
 	// ------------------------------------
 	// draw
 	// ------------------------------------
 	void Scene2D::draw() {
+		if (_renderTarget != INVALID_RID) {
+			graphics::setRenderTarget(_renderTarget);
+		}
 		SpriteBuffer* sprites = graphics::getSpriteBuffer();
 		sprites->begin();
 		for (int i = 0; i < _data.num; ++i) {

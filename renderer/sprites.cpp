@@ -177,4 +177,23 @@ namespace ds {
 		_index = 0;
 	}
 
+	void SpriteBuffer::drawScreenQuad(RID material) {
+		ZoneTracker("SpriteBuffer::drawScreenQuad");
+		// if something is still pending
+		flush();
+		// draw quad
+		unsigned int stride = sizeof(SpriteVertex);
+		unsigned int offset = 0;
+		graphics::turnOffZBuffer();
+		SpriteVertex sp(v2(512, 384), v4(0.0f, 0.0f, 1024.0f, 768.0f), v3(1.0f, 1.0f, 0.0f), Color::WHITE);
+		graphics::setVertexBuffer(_descriptor.vertexBuffer, &stride, &offset, D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+		// FIXME: use material from scene
+		graphics::setMaterial(material);
+		graphics::mapData(_descriptor.vertexBuffer, &sp, sizeof(SpriteVertex));
+		graphics::updateSpriteConstantBuffer(_constantBuffer);
+		graphics::draw(1);
+		graphics::turnOnZBuffer();
+		gDrawCounter->sprites += _index;
+	}
+
 }

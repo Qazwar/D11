@@ -38,6 +38,8 @@ namespace graphics {
 
 	ID3D11Device* getDevice();
 
+	ID3D11DepthStencilView* getDepthStencilView();
+
 	ds::OrthoCamera* getOrthoCamera();
 
 	ds::FPSCamera* getFPSCamera();
@@ -97,5 +99,7 @@ namespace graphics {
 	void updateSpriteConstantBuffer(const ds::SpriteBufferCB& buffer);
 
 	ds::SpriteBuffer* getSpriteBuffer();
+
+	void setRenderTarget(RID rtID);
 }
 

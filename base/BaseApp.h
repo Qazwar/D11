@@ -39,6 +39,7 @@ namespace ds {
 		virtual bool initialize() = 0;
 		virtual void render() = 0;
 		virtual void update(float dt) = 0;		
+		virtual void onShutdown() {}
 		void buildFrame();
 		bool isLoading() const {
 			return _loading;

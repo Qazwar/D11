@@ -131,6 +131,8 @@ namespace ds {
 
 		Scene* getScene(const char* name);
 
+		RenderTarget* getRenderTarget(RID rid);
+
 		Mesh* getMesh(RID rid);
 
 		Mesh* getMesh(const char* name);

@@ -124,7 +124,7 @@ namespace ds {
 			"MESH",
 			"SCENE",
 			"CAMERA",
-			"TEXTURECUBE",
+			"RENDERTARGET",
 			"SKYBOX",
 			"MATERIAL",
 			"PARTICLEMANAGER",
@@ -313,8 +313,9 @@ namespace ds {
 		// create render target
 		// ------------------------------------------------------
 		static RID createRenderTarget(const char* name, const RenderTargetDescriptor& descriptor) {
-			RenderTarget* rt= new RenderTarget(descriptor);
-			RenderTargetResource* cbr = new RenderTargetResource(rt);
+			RenderTarget* rt = new RenderTarget(descriptor);
+			rt->init(graphics::getDevice(), descriptor.height, descriptor.height);
+			RenderTargetResource* cbr = new RenderTargetResource(rt);			
 			_resCtx->resources.push_back(cbr);
 			return create(name, ResourceType::RENDERTARGET);
 		}
@@ -1022,6 +1023,18 @@ namespace ds {
 		}
 
 		// ------------------------------------------------------
+		// parse rendertarget
+		// ------------------------------------------------------
+		void parseRenderTarget(JSONReader& reader, int childIndex) {
+			RenderTargetDescriptor descriptor;
+			reader.get(childIndex, "width", &descriptor.width);
+			reader.get(childIndex, "height", &descriptor.height);
+			reader.get(childIndex, "clear_color", &descriptor.clearColor);
+			const char* name = reader.get_string(childIndex, "name");
+			createRenderTarget(name, descriptor);
+		}
+
+		// ------------------------------------------------------
 		// parse Mesh
 		// ------------------------------------------------------
 		void parseMesh(JSONReader& reader, int childIndex) {
@@ -1089,6 +1102,7 @@ namespace ds {
 			_resCtx->parsers[string::murmur_hash("skybox")] = parseSkyBox;
 			_resCtx->parsers[string::murmur_hash("material")] = parseMaterial;
 			_resCtx->parsers[string::murmur_hash("particle_manager")] = parseParticleManager;
+			_resCtx->parsers[string::murmur_hash("render_target")] = parseRenderTarget;
 		}
 
 		// ------------------------------------------------------
@@ -1254,6 +1268,13 @@ namespace ds {
 		Mesh* getMesh(const char* name) {
 			RID rid = find(name, ResourceType::MESH);
 			MeshResource* res = static_cast<MeshResource*>(_resCtx->resources[rid]);
+			return res->get();
+		}
+
+		RenderTarget* getRenderTarget(RID rid) {
+			const ResourceIndex& res_idx = _resCtx->indices[rid];
+			XASSERT(res_idx.type == ResourceType::RENDERTARGET, "Different resource types - expected RENDERTARGET but found %s", ResourceTypeNames[res_idx.type]);
+			RenderTargetResource* res = static_cast<RenderTargetResource*>(_resCtx->resources[rid]);
 			return res->get();
 		}
 

@@ -23,6 +23,8 @@ namespace ds {
 		void drawTiledXY(const v2& position, const v2& size, const Texture& texture, float cornersize, const Color& color = Color::WHITE);
 		void begin();
 		void end();
+
+		void drawScreenQuad(RID material);
 	private:
 		void flush();
 		int _index;
