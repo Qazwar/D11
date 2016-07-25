@@ -277,12 +277,16 @@ namespace ds {
 	void GUIDialog::updateText(int id,int x,int y,const char* text,const Color& color, const v2& scale,bool centered) {
 		int idx = getIndexByID(id);
 		const GUID& gid = _ids[idx];
-		const DialogItem& item = _items[gid.index];
+		DialogItem& item = _items[gid.index];
 		XASSERT(item.type == GIT_TEXT, "The GUI item %d is not a text item", id);
 		// FIXME: workaround currently
 		int len = strlen(text);
 		XASSERT(len <= item.tmp, "Sorry but text is longer than the original version");
-		updateTextVertices(item.index, text);
+		v2 size = font::calculateSize(_font, text, 2);
+		int sx = x -size.x * 0.5f;
+		int sy = y -size.y * 0.5f;
+		item.num = len;
+		updateTextVertices(item.index, text, sx, sy);
 	}
 
 	// -------------------------------------------------------
@@ -291,7 +295,7 @@ namespace ds {
 	void GUIDialog::updateText(int id,const char* text) {	
 		int idx = getIndexByID(id);
 		const GUID& gid = _ids[idx];
-		const DialogItem& item = _items[gid.index];
+		DialogItem& item = _items[gid.index];
 		//XASSERT(item.type == GIT_TEXT, "The GUI item %d is not a text item", id);
 		// FIXME: workaround currently
 		int len = strlen(text);
@@ -299,6 +303,7 @@ namespace ds {
 		v2 size = font::calculateSize(_font, text, 2);
 		int sx = -size.x * 0.5f;
 		int sy = -size.y * 0.5f;
+		item.num = len;
 		updateTextVertices(item.index, text, sx, sy);
 	}
 

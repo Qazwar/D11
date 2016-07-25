@@ -37,6 +37,9 @@ namespace ds {
 				_scores[idx] = score;
 				++_count;
 			}
+			else if (_count < SIZE) {
+				_scores[_count++] = score;
+			}
 			return idx;
 		}
 
