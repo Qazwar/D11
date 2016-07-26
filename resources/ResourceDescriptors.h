@@ -185,6 +185,9 @@ namespace ds {
 		RID texture;
 		Color diffuse;
 		Color ambient;
+		RID renderTarget;
+
+		MaterialDescriptor() : size(0), shader(INVALID_RID), blendstate(INVALID_RID), texture(INVALID_RID), diffuse(255, 255, 255), ambient(255, 255, 255), renderTarget(INVALID_RID) {}
 	};
 
 }

@@ -383,7 +383,7 @@ namespace ds {
 		sprites->begin();
 		for (int i = 0; i < _data.num; ++i) {
 			if (_data.active[i]) {
-				sprites->draw(_data.positions[i].xy(), _data.textures[i],_data.rotations[i].z,_data.scales[i].xy());
+				sprites->draw(_data.positions[i].xy(), _data.textures[i],_data.rotations[i].z,_data.scales[i].xy(),_data.colors[i], _data.materials[i]);
 			}
 		}
 
@@ -400,6 +400,9 @@ namespace ds {
 
 
 		sprites->end();
+		if (_renderTarget != INVALID_RID) {
+			graphics::restoreBackbuffer();
+		}
 	}
 
 	// ------------------------------------

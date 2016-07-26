@@ -58,7 +58,7 @@ namespace graphics {
 
 	const ds::mat4& getViewProjectionMaxtrix();
 
-	void beginRendering(const ds::Color& color);
+	void beginRendering();
 
 	void setIndexBuffer(RID rid);
 
@@ -101,5 +101,7 @@ namespace graphics {
 	ds::SpriteBuffer* getSpriteBuffer();
 
 	void setRenderTarget(RID rtID);
+
+	void restoreBackbuffer();
 }
 

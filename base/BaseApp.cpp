@@ -325,7 +325,7 @@ namespace ds {
 	// -------------------------------------------------------
 	void BaseApp::renderFrame() {
 		ZoneTracker("Render");
-		graphics::beginRendering(_settings.clearColor);
+		graphics::beginRendering();
 		{
 			ZoneTracker("Render::render");
 			render();

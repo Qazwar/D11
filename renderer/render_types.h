@@ -13,6 +13,7 @@ namespace ds {
 		RID blendState;
 		RID shader;
 		RID texture;
+		RID renderTarget;
 	};
 
 	enum DrawMode {

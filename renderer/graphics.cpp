@@ -32,6 +32,8 @@ namespace graphics {
 		ID3D11DepthStencilState* depthDisabledStencilState;
 		ID3D11DepthStencilState* depthEnabledStencilState;
 
+		ds::Color clearColor;
+
 		ds::mat4 viewMatrix;
 		ds::mat4 worldMatrix;
 		ds::mat4 projectionMatrix;
@@ -207,6 +209,7 @@ namespace graphics {
 		mtrlDesc.shader = shader_id;
 		mtrlDesc.blendstate = bs_id;
 		mtrlDesc.texture = INVALID_RID;
+		mtrlDesc.renderTarget = INVALID_RID;
 		RID mtrl_id = ds::res::createMaterial("SpriteMaterial", mtrlDesc);
 
 		ds::SpriteBufferDescriptor spDesc;
@@ -222,6 +225,7 @@ namespace graphics {
 		_context->hwnd = hwnd;
 		_context->screenWidth = settings.screenWidth;
 		_context->screenHeight = settings.screenHeight;
+		_context->clearColor = settings.clearColor;
 		RECT dimensions;
 		GetClientRect(hwnd, &dimensions);
 
@@ -460,8 +464,8 @@ namespace graphics {
 	// ------------------------------------------------------
 	// begin rendering
 	// ------------------------------------------------------
-	void beginRendering(const ds::Color& color) {
-		_context->d3dContext->ClearRenderTargetView(_context->backBufferTarget, color);
+	void beginRendering() {
+		_context->d3dContext->ClearRenderTargetView(_context->backBufferTarget, _context->clearColor);
 		_context->d3dContext->ClearDepthStencilView(_context->depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0.0);
 	}
 
@@ -503,6 +507,11 @@ namespace graphics {
 		}
 		else {
 			// FIXME: set NULL as pixel shader resource
+		}
+		if (m->renderTarget != INVALID_RID) {
+			ds::RenderTarget* rt = ds::res::getRenderTarget(m->renderTarget);
+			ID3D11ShaderResourceView* srv = rt->getShaderResourceView();
+			_context->d3dContext->PSSetShaderResources(0, 1, &srv);
 		}
 	}
 	// ------------------------------------------------------
@@ -668,6 +677,12 @@ namespace graphics {
 	// ------------------------------------------------------
 	void endRendering() {
 		_context->swapChain->Present(0, 0);
+	}
+
+	void restoreBackbuffer() {
+		_context->d3dContext->OMSetRenderTargets(1, &_context->backBufferTarget, _context->depthStencilView);
+		_context->d3dContext->ClearRenderTargetView(_context->backBufferTarget, _context->clearColor);
+		_context->d3dContext->ClearDepthStencilView(_context->depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0.0);
 	}
 
 }

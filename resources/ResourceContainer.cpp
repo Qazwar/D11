@@ -304,6 +304,7 @@ namespace ds {
 			m->blendState = descriptor.blendstate;
 			m->shader = descriptor.shader;
 			m->texture = descriptor.texture;
+			m->renderTarget = descriptor.renderTarget;
 			MaterialResource* cbr = new MaterialResource(m);
 			_resCtx->resources.push_back(cbr);
 			return create(name, ResourceType::MATERIAL);
@@ -314,7 +315,8 @@ namespace ds {
 		// ------------------------------------------------------
 		static RID createRenderTarget(const char* name, const RenderTargetDescriptor& descriptor) {
 			RenderTarget* rt = new RenderTarget(descriptor);
-			rt->init(graphics::getDevice(), descriptor.height, descriptor.height);
+			bool ret = rt->init(graphics::getDevice(), descriptor.width, descriptor.height);
+			XASSERT(ret, "Could not create rendertarget: %s", name);
 			RenderTargetResource* cbr = new RenderTargetResource(rt);			
 			_resCtx->resources.push_back(cbr);
 			return create(name, ResourceType::RENDERTARGET);
@@ -789,6 +791,13 @@ namespace ds {
 			}
 			else {
 				descriptor.texture = INVALID_RID;
+			}
+			if (reader.contains_property(childIndex, "render_target")) {
+				const char* texName = reader.get_string(childIndex, "render_target");
+				descriptor.renderTarget = find(texName, ResourceType::RENDERTARGET);
+			}
+			else {
+				descriptor.renderTarget = INVALID_RID;
 			}
 			createMaterial(name, descriptor);
 		}

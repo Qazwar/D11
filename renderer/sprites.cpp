@@ -33,8 +33,12 @@ namespace ds {
 		draw(sprite.position, sprite.texture, sprite.rotation, sprite.scale, sprite.color);
 	}
 
-	void SpriteBuffer::draw(const v2& position, const ds::Texture& texture, float rotation, const v2& scale, const Color& color) {
+	void SpriteBuffer::draw(const v2& position, const ds::Texture& texture, float rotation, const v2& scale, const Color& color, RID material) {
 		if (_started) {
+			if (material != INVALID_RID && material != _currentMtrl) {
+				flush();
+				_currentMtrl = material;
+			}
 			if (_index >= _maxSprites) {
 				flush();
 			}
@@ -144,6 +148,7 @@ namespace ds {
 	void SpriteBuffer::begin() {
 		_index = 0;
 		_started = true;
+		_currentMtrl = _descriptor.material;
 	}
 
 	void SpriteBuffer::end() {
@@ -159,7 +164,8 @@ namespace ds {
 
 		graphics::setVertexBuffer(_descriptor.vertexBuffer, &stride, &offset, D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 		// FIXME: use material from scene
-		graphics::setMaterial(_descriptor.material);
+		//graphics::setMaterial(_descriptor.material);
+		graphics::setMaterial(_currentMtrl);
 		for (int i = 0; i < _index; ++i) {
 			const Sprite& sprite = _sprites[i];
 			v4 t;
