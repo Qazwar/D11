@@ -34,6 +34,8 @@ namespace graphics {
 
 	void createInternalSpriteBuffer();
 
+	void createPostProcessResources();
+
 	ID3D11DeviceContext* getContext();
 
 	ID3D11Device* getDevice();

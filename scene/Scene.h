@@ -9,6 +9,7 @@
 #include "..\math\tweening.h"
 #include "actions\AbstractAction.h"
 #include "..\particles\ParticleSystem.h"
+#include "..\postprocess\PostProcess.h"
 
 namespace ds {
 
@@ -105,7 +106,7 @@ namespace ds {
 	class Scene2D : public Scene {
 
 	public:
-		Scene2D(const SceneDescriptor& descriptor) : Scene(descriptor) , _renderTarget(INVALID_RID) {}
+		Scene2D(const SceneDescriptor& descriptor) : Scene(descriptor), _renderTarget(INVALID_RID), _rtActive(false) {}
 		~Scene2D() {}
 		ID add(const v2& pos, const Texture& t, RID material);
 		
@@ -113,15 +114,21 @@ namespace ds {
 		ID startParticleSystem(ID id, const v2& pos);
 		void stopParticleSystem(ID id);
 
+		void addPostProcess(PostProcess* pp);
+
 		void draw();
 		void scale(ID id, const v2& scale);
 		void scaleTo(ID id, const v2& startScale, const v2& endScale, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 		void setTexture(ID id, const Texture& t);
 		void useRenderTarget(const char* name);
+		void activateRenderTarget();
+		void deactivateRenderTarget();
 	private:
+		Array<PostProcess*> _postProcesses;
 		DataArray<ParticleSystemMapping> _particleSystems;
 		OrthoCamera* _camera;
 		RID _renderTarget;
+		bool _rtActive;
 	};
 
 	// ----------------------------------------

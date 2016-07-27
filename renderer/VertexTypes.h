@@ -14,6 +14,15 @@ namespace ds {
 		QuadVertex(const v2& p, const v2& t, const Color& c) : position(p, 1.0f), texture(t), color(c) {}
 	};
 
+	struct PTCVertex {
+		v3 position;
+		v2 texture;
+		Color color;
+
+		PTCVertex() : position(0, 0, 0) , texture(0,0), color(Color::WHITE) {}
+		PTCVertex(const v3& p, const v2& t, const Color& c) : position(p), texture(t), color(c) {}
+	};
+
 	struct PNTCVertex {
 		v3 position;
 		v3 normal;

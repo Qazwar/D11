@@ -152,6 +152,36 @@ namespace graphics {
 		return true;
 	}
 
+	void createPostProcessResources() {
+
+		// Position Texture Color layout
+		ds::InputLayoutDescriptor ilDesc;
+		ilDesc.num = 0;
+		ilDesc.indices[ilDesc.num++] = 0;
+		ilDesc.indices[ilDesc.num++] = 2;
+		ilDesc.indices[ilDesc.num++] = 1;
+		ilDesc.shader = INVALID_RID;
+		ilDesc.byteCode = Sprite_VS_Main;
+		ilDesc.byteCodeSize = sizeof(Sprite_VS_Main);
+
+		RID il_id = ds::res::createInputLayout("PTCLayout", ilDesc);
+
+		ds::BlendStateDescriptor bsDesc;
+		bsDesc.alphaEnabled = true;
+		bsDesc.srcBlend = ds::res::findBlendState("SRC_ALPHA");
+		bsDesc.srcAlphaBlend = ds::res::findBlendState("SRC_ALPHA");
+		bsDesc.destBlend = ds::res::findBlendState("INV_SRC_ALPHA");
+		bsDesc.destAlphaBlend = ds::res::findBlendState("INV_SRC_ALPHA");
+		RID bs_id = ds::res::createBlendState("DefaultBlendState", bsDesc);
+
+		ds::VertexBufferDescriptor vbDesc;
+		vbDesc.dynamic = true;
+		vbDesc.layout = il_id;
+		vbDesc.size = 6;
+		RID vb_id = ds::res::createVertexBuffer("PostProcessVertexBuffer", vbDesc);
+
+	}
+
 	void createInternalSpriteBuffer() {
 		// FIXME: create SpriteBufferCB
 		D3D11_BUFFER_DESC constDesc;

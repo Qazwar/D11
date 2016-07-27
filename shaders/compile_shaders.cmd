@@ -11,9 +11,13 @@ set error=0
 
 set FX_PATH=C:\devtools\DirectX\Utilities\bin\x86
 
-call :CompileShader%1 Sprite vs VS_Main
-call :CompileShader%1 Sprite ps PS_Main
-call :CompileShader%1 Sprite gs GS_Main
+call :CompileShader%1 Sprite Sprite vs VS_Main
+call :CompileShader%1 Sprite Sprite ps PS_Main
+call :CompileShader%1 Sprite Sprite gs GS_Main
+
+rem GrayFade effect
+call :CompileShader%1 postprocess\GrayFade GrayFade vs VS_Main
+call :CompileShader%1 postprocess\GrayFade GrayFade ps PS_Main
 
 echo.
 
@@ -27,7 +31,7 @@ endlocal
 exit /b
 
 :CompileShader
-set fxc=%FX_PATH%\fxc /nologo %1.fx /T%2_5_0 /Zi /Zpc /Qstrip_reflect /Qstrip_debug /E%3 /Fh%1_%3.inc /Vn%1_%3
+set fxc=%FX_PATH%\fxc /nologo %1.fx /T%3_5_0 /Zi /Zpc /Qstrip_reflect /Qstrip_debug /E%4 /Fh%1_%4.inc /Vn%2_%4
 echo.
 echo %fxc%
 %fxc% || set error=1

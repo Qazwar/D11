@@ -75,6 +75,8 @@ namespace ds {
 
 		RID createSamplerState(const char* name, const SamplerStateDescriptor& descriptor);
 
+		RID createConstantBuffer(const char* name, const ConstantBufferDescriptor& descriptor);
+
 		void reloadDialog(const char* name);
 
 		void parseJSONFile();

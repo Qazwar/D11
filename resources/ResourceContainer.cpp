@@ -276,7 +276,7 @@ namespace ds {
 		// ------------------------------------------------------
 		// create constant buffer
 		// ------------------------------------------------------
-		static RID createConstantBuffer(const char* name, const ConstantBufferDescriptor& descriptor) {
+		RID createConstantBuffer(const char* name, const ConstantBufferDescriptor& descriptor) {
 			D3D11_BUFFER_DESC constDesc;
 			ZeroMemory(&constDesc, sizeof(constDesc));
 			constDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;

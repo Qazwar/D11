@@ -372,11 +372,23 @@ namespace ds {
 		_renderTarget = res::find(name, ResourceType::RENDERTARGET);
 	}
 
+	void Scene2D::addPostProcess(PostProcess* pp) {
+		_postProcesses.push_back(pp);
+	}
+
+
+	void Scene2D::activateRenderTarget() {
+		_rtActive = true;
+	}
+
+	void Scene2D::deactivateRenderTarget() {
+		_rtActive = false;
+	}
 	// ------------------------------------
 	// draw
 	// ------------------------------------
 	void Scene2D::draw() {
-		if (_renderTarget != INVALID_RID) {
+		if (_renderTarget != INVALID_RID && _rtActive) {
 			graphics::setRenderTarget(_renderTarget);
 		}
 		SpriteBuffer* sprites = graphics::getSpriteBuffer();
@@ -400,8 +412,12 @@ namespace ds {
 
 
 		sprites->end();
-		if (_renderTarget != INVALID_RID) {
+		if (_renderTarget != INVALID_RID && _rtActive) {
 			graphics::restoreBackbuffer();
+		}
+
+		for (uint32_t i = 0; i < _postProcesses.size(); ++i) {
+			_postProcesses[i]->render();
 		}
 	}
 
