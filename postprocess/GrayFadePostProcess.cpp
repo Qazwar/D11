@@ -7,7 +7,7 @@
 
 namespace ds {
 
-	GrayFadePostProcess::GrayFadePostProcess(const GrayFadePostProcessDescriptor& descriptor) : PostProcess() , _descriptor(descriptor) , _timer(0.8f) {
+	GrayFadePostProcess::GrayFadePostProcess(const GrayFadePostProcessDescriptor& descriptor) : PostProcess() , _descriptor(descriptor) , _timer(0.1f) {
 		//_vertexBuffer = ds::res::find("PostProcessVertexBuffer",ResourceType::VERTEXBUFFER);
 		_vertices[0] = PTCVertex(v3(-1, -1, 0), v2(0, 1), Color::WHITE);
 		_vertices[1] = PTCVertex(v3(-1,  1, 0), v2(0, 0), Color::WHITE);
@@ -17,7 +17,7 @@ namespace ds {
 		_vertices[5] = PTCVertex(v3(-1, -1, 0), v2(0, 1), Color::WHITE);
 
 		ds::ConstantBufferDescriptor cbDesc;
-		cbDesc.size = 4;
+		cbDesc.size = 16;
 		_cbID = ds::res::createConstantBuffer("GrayFadeCB", cbDesc);
 
 		RID ss_id = ds::res::find("SpriteSampler", ResourceType::SAMPLERSTATE);
