@@ -427,9 +427,10 @@ namespace ds {
 			_postProcesses[i]->tick(dt);
 		}
 	}
-	// ------------------------------------
+
+	// -------------------------------------------------------------------------
 	// scale to
-	// ------------------------------------
+	// -------------------------------------------------------------------------
 	void Scene2D::scaleTo(ID id, const v2& startScale, const v2& endScale, float ttl, int mode, const tweening::TweeningType& tweeningType) {
 		ScalingAction* action = (ScalingAction*)_actions[AT_SCALE];
 		action->attach(id, v3(startScale,0.0f), v3(endScale,0.0f), ttl, mode, tweeningType);

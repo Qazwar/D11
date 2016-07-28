@@ -35,9 +35,14 @@ namespace ds {
 	};
 
 	struct VertexBufferDescriptor {
+
 		uint32_t size;
 		bool dynamic;
-		uint32_t layout;
+		RID layout;
+		void* data;
+		int dataSize;
+
+		VertexBufferDescriptor() : size(0), dynamic(false), layout(INVALID_RID), data(0), dataSize(0) {}
 	};
 
 	struct ShaderDescriptor {

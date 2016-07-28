@@ -581,10 +581,23 @@ namespace ds {
 			bufferDesciption.ByteWidth = size;
 
 			ID3D11Buffer* buffer = 0;
-			HRESULT d3dResult = _resCtx->device->CreateBuffer(&bufferDesciption, 0, &buffer);
-			if (FAILED(d3dResult))	{
-				DXTRACE_MSG("Failed to create buffer!");
-				return -1;
+			if (descriptor.dataSize == 0) {
+				HRESULT d3dResult = _resCtx->device->CreateBuffer(&bufferDesciption, 0, &buffer);
+				if (FAILED(d3dResult))	{
+					DXTRACE_MSG("Failed to create buffer!");
+					return -1;
+				}
+			}
+			else {
+				D3D11_SUBRESOURCE_DATA resource;
+				resource.pSysMem = descriptor.data;
+				resource.SysMemPitch = 0;
+				resource.SysMemSlicePitch = 0;
+				HRESULT d3dResult = _resCtx->device->CreateBuffer(&bufferDesciption, &resource, &buffer);
+				if (FAILED(d3dResult))	{
+					DXTRACE_MSG("Failed to create buffer!");
+					return -1;
+				}
 			}
 			int idx = _resCtx->resources.size();
 			VertexBufferResource* cbr = new VertexBufferResource(buffer, size, descriptor.layout);

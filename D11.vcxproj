@@ -118,6 +118,8 @@
     <ClCompile Include="particles\ParticleSystemRenderer.cpp" />
     <ClCompile Include="physics\ColliderArray.cpp" />
     <ClCompile Include="physics\PhysicalWorld.cpp" />
+    <ClCompile Include="postprocess\GrayFadePostProcess.cpp" />
+    <ClCompile Include="postprocess\SimplePostProcess.cpp" />
     <ClCompile Include="renderer\Bitmapfont.cpp" />
     <ClCompile Include="renderer\Camera.cpp" />
     <ClCompile Include="renderer\graphics.cpp" />
@@ -156,6 +158,7 @@
     <ClInclude Include="base\Settings.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="data\DynamicSettings.h" />
+    <ClInclude Include="data\HighscoreService.h" />
     <ClInclude Include="dialogs\GUIDialog.h" />
     <ClInclude Include="gamestates\GameState.h" />
     <ClInclude Include="gamestates\GameStateMachine.h" />
@@ -198,6 +201,9 @@
     <ClInclude Include="physics\ColliderArray.h" />
     <ClInclude Include="physics\PhysicalWorld.h" />
     <ClInclude Include="physics\physic_types.h" />
+    <ClInclude Include="postprocess\GrayFadePostProcess.h" />
+    <ClInclude Include="postprocess\PostProcess.h" />
+    <ClInclude Include="postprocess\SimplePostProcess.h" />
     <ClInclude Include="renderer\Bitmapfont.h" />
     <ClInclude Include="renderer\Camera.h" />
     <ClInclude Include="renderer\graphics.h" />
@@ -240,11 +246,27 @@
     <None Include="content\resources.json" />
     <None Include="content\resources\xscale.json" />
     <None Include="shaders\compile_shaders.cmd" />
+    <None Include="shaders\postprocess\BasicPostProcess_PS_Main.inc" />
+    <None Include="shaders\postprocess\BasicPostProcess_VS_Main.inc" />
+    <None Include="shaders\postprocess\GrayFade_PS_Main.inc" />
+    <None Include="shaders\postprocess\GrayFade_VS_Main.inc" />
+    <None Include="shaders\postprocess\PostProcessCommon.inc" />
     <None Include="shaders\Sprite_GS_Main.inc" />
     <None Include="shaders\Sprite_PS_Main.inc" />
     <None Include="shaders\Sprite_VS_Main.inc" />
+    <None Include="TODO.md" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\ScreenQuad.fx">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </None>
+    <FxCompile Include="shaders\postprocess\BasicPostProcess.fx">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="shaders\postprocess\GrayFade.fx">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="shaders\Sprite.fx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </FxCompile>

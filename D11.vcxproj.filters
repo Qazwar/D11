@@ -71,6 +71,12 @@
     <Filter Include="shaders">
       <UniqueIdentifier>{999ea310-6151-4234-b00d-0dbae0d8c822}</UniqueIdentifier>
     </Filter>
+    <Filter Include="postprocess">
+      <UniqueIdentifier>{d10b1f57-8179-4ec7-9c79-95ff643ee75b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders\postprocess">
+      <UniqueIdentifier>{5583694e-52aa-4d57-b9f7-d0bd7e9a1e39}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="utils\Log.cpp">
@@ -261,6 +267,12 @@
     </ClCompile>
     <ClCompile Include="base\Game.cpp">
       <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="postprocess\GrayFadePostProcess.cpp">
+      <Filter>postprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="postprocess\SimplePostProcess.cpp">
+      <Filter>postprocess</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -518,6 +530,18 @@
     <ClInclude Include="base\Game.h">
       <Filter>base</Filter>
     </ClInclude>
+    <ClInclude Include="data\HighscoreService.h">
+      <Filter>data</Filter>
+    </ClInclude>
+    <ClInclude Include="postprocess\PostProcess.h">
+      <Filter>postprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="postprocess\GrayFadePostProcess.h">
+      <Filter>postprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="postprocess\SimplePostProcess.h">
+      <Filter>postprocess</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="content\engine_settings.json">
@@ -541,10 +565,35 @@
     <None Include="shaders\compile_shaders.cmd">
       <Filter>shaders</Filter>
     </None>
+    <None Include="TODO.md" />
+    <None Include="shaders\ScreenQuad.fx">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\postprocess\GrayFade_PS_Main.inc">
+      <Filter>shaders\postprocess</Filter>
+    </None>
+    <None Include="shaders\postprocess\GrayFade_VS_Main.inc">
+      <Filter>shaders\postprocess</Filter>
+    </None>
+    <None Include="shaders\postprocess\BasicPostProcess_PS_Main.inc">
+      <Filter>shaders\postprocess</Filter>
+    </None>
+    <None Include="shaders\postprocess\BasicPostProcess_VS_Main.inc">
+      <Filter>shaders\postprocess</Filter>
+    </None>
+    <None Include="shaders\postprocess\PostProcessCommon.inc">
+      <Filter>shaders\postprocess</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\Sprite.fx">
       <Filter>shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\postprocess\GrayFade.fx">
+      <Filter>shaders\postprocess</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\postprocess\BasicPostProcess.fx">
+      <Filter>shaders\postprocess</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

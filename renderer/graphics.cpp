@@ -11,6 +11,7 @@
 #include "..\shaders\Sprite_VS_Main.inc"
 #include "..\shaders\Sprite_PS_Main.inc"
 #include "..\shaders\Sprite_GS_Main.inc"
+#include "..\shaders\postprocess\BasicPostProcess_VS_Main.inc"
 
 namespace graphics {
 
@@ -161,9 +162,8 @@ namespace graphics {
 		ilDesc.indices[ilDesc.num++] = 2;
 		ilDesc.indices[ilDesc.num++] = 1;
 		ilDesc.shader = INVALID_RID;
-		ilDesc.byteCode = Sprite_VS_Main;
-		ilDesc.byteCodeSize = sizeof(Sprite_VS_Main);
-
+		ilDesc.byteCode = BasicPostProcess_VS_Main;
+		ilDesc.byteCodeSize = sizeof(BasicPostProcess_VS_Main);
 		RID il_id = ds::res::createInputLayout("PTCLayout", ilDesc);
 
 		ds::BlendStateDescriptor bsDesc;
@@ -174,10 +174,20 @@ namespace graphics {
 		bsDesc.destAlphaBlend = ds::res::findBlendState("INV_SRC_ALPHA");
 		RID bs_id = ds::res::createBlendState("DefaultBlendState", bsDesc);
 
+		ds::PTCVertex vertices[6];
+		vertices[0] = ds::PTCVertex(v3(-1, -1, 0), v2(0, 1), ds::Color::WHITE);
+		vertices[1] = ds::PTCVertex(v3(-1, 1, 0), v2(0, 0), ds::Color::WHITE);
+		vertices[2] = ds::PTCVertex(v3(1, 1, 0), v2(1, 0), ds::Color::WHITE);
+		vertices[3] = ds::PTCVertex(v3(1, 1, 0), v2(1, 0), ds::Color::WHITE);
+		vertices[4] = ds::PTCVertex(v3(1, -1, 0), v2(1, 1), ds::Color::WHITE);
+		vertices[5] = ds::PTCVertex(v3(-1, -1, 0), v2(0, 1), ds::Color::WHITE);
+
 		ds::VertexBufferDescriptor vbDesc;
-		vbDesc.dynamic = true;
+		vbDesc.dynamic = false;
 		vbDesc.layout = il_id;
-		vbDesc.size = 6;
+		vbDesc.size = 6 * sizeof(ds::PTCVertex);
+		vbDesc.data = vertices;
+		vbDesc.dataSize = 6 * sizeof(ds::PTCVertex);
 		RID vb_id = ds::res::createVertexBuffer("PostProcessVertexBuffer", vbDesc);
 
 	}
