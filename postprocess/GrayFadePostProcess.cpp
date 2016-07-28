@@ -7,7 +7,8 @@
 
 namespace ds {
 
-	GrayFadePostProcess::GrayFadePostProcess(const GrayFadePostProcessDescriptor& descriptor) : PostProcess() , _descriptor(descriptor) , _timer(0.1f) {
+	GrayFadePostProcess::GrayFadePostProcess(const GrayFadePostProcessDescriptor& descriptor) : PostProcess() , _descriptor(descriptor) , _timer(0.0f) {
+		assert(_descriptor.ttl > 0.0f);
 		//_vertexBuffer = ds::res::find("PostProcessVertexBuffer",ResourceType::VERTEXBUFFER);
 		_vertices[0] = PTCVertex(v3(-1, -1, 0), v2(0, 1), Color::WHITE);
 		_vertices[1] = PTCVertex(v3(-1,  1, 0), v2(0, 0), Color::WHITE);
@@ -65,8 +66,9 @@ namespace ds {
 		graphics::setVertexBuffer(_vertexBuffer, &stride, &offset, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		graphics::setMaterial(_material);
 		graphics::mapData(_vertexBuffer, _vertices, 6 * sizeof(PTCVertex));
-		graphics::updateConstantBuffer(_cbID, &_timer, sizeof(float));
-		graphics::setVertexShaderConstantBuffer(_cbID);
+		_cbData.x = math::clamp(_timer / _descriptor.ttl,0.0f,1.0f);
+		graphics::updateConstantBuffer(_cbID, &_cbData, sizeof(v4));
+		graphics::setPixelShaderConstantBuffer(_cbID);
 		graphics::draw(6);
 		graphics::turnOnZBuffer();
 	}

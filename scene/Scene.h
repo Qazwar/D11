@@ -41,7 +41,7 @@ namespace ds {
 		uint32_t numEntities() const {
 			return _data.num;
 		}
-		void tick(float dt);
+		virtual void tick(float dt);
 		void rotate(ID id, const v3& r);
 		void activate(ID id);
 		void deactivate(ID id);
@@ -115,7 +115,7 @@ namespace ds {
 		void stopParticleSystem(ID id);
 
 		void addPostProcess(PostProcess* pp);
-
+		virtual void tick(float dt);
 		void draw();
 		void scale(ID id, const v2& scale);
 		void scaleTo(ID id, const v2& startScale, const v2& endScale, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);

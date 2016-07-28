@@ -16,8 +16,12 @@ namespace ds {
 		virtual ~GrayFadePostProcess();
 		void render();
 		void tick(float dt);
+		void onActivate() {
+			_timer = 0.0f;
+		}
 	private:
 		float _timer;
+		v4 _cbData;
 		RID _vertexBuffer;
 		RID _material;
 		RID _cbID;

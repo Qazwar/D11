@@ -421,6 +421,12 @@ namespace ds {
 		}
 	}
 
+	void Scene2D::tick(float dt) {
+		Scene::tick(dt);
+		for (uint32_t i = 0; i < _postProcesses.size(); ++i) {
+			_postProcesses[i]->tick(dt);
+		}
+	}
 	// ------------------------------------
 	// scale to
 	// ------------------------------------
