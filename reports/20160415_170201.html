@@ -1,0 +1,262 @@
+<!doctype html>
+<html>
+<head>
+<link rel = 'stylesheet' href = 'report.css'></head><body>
+<div class = 'panel'>
+<div class = 'panel-heading'><h1>Perf - Profiling</h1></div>
+<table id = 'box-table-a'><thead>  <tr>    <th scope='col'>Percent</th>
+    <th scope='col'>Accu</th>
+    <th scope='col'>Name</th>
+  </tr></thead><tbody>
+  <tr>
+    <td>100.00</td>
+    <td>0.511042</td>
+    <td>ROOT</td>
+  </tr>
+  <tr>
+    <td> 0.18</td>
+    <td>0.000905567</td>
+    <td>&nbsp;&nbsp;INPUT</td>
+  </tr>
+  <tr>
+    <td> 0.35</td>
+    <td>0.00181113</td>
+    <td>&nbsp;&nbsp;UPDATE</td>
+  </tr>
+  <tr>
+    <td> 0.12</td>
+    <td>0.000603711</td>
+    <td>&nbsp;&nbsp;&nbsp;&nbsp;GameStateMachine:update</td>
+  </tr>
+  <tr>
+    <td> 0.12</td>
+    <td>0.000603711</td>
+    <td>&nbsp;&nbsp;Render</td>
+  </tr>
+  <tr>
+    <td> 0.12</td>
+    <td>0.000603711</td>
+    <td>&nbsp;&nbsp;GameStateMachine:render</td>
+  </tr>
+  <tr>
+    <td> 0.12</td>
+    <td>0.000603711</td>
+    <td>&nbsp;&nbsp;SpriteBuffer::flush</td>
+  </tr>
+</tbody>
+</table>
+</div>
+<div class = 'panel'>
+<div class = 'panel-heading'><h1>Perf - Top calls</h1></div>
+<table id = 'box-table-a'><thead>  <tr>    <th scope='col'>Calls</th>
+    <th scope='col'>Total</th>
+    <th scope='col'>Name</th>
+  </tr></thead><tbody>
+  <tr>
+    <td>1</td>
+    <td>0.511042</td>
+    <td>ROOT</td>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>0.00181113</td>
+    <td>UPDATE</td>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>0.000905567</td>
+    <td>INPUT</td>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>0.000603711</td>
+    <td>GameStateMachine:update</td>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>0.000603711</td>
+    <td>Render</td>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>0.000603711</td>
+    <td>GameStateMachine:render</td>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>0.000603711</td>
+    <td>SpriteBuffer::flush</td>
+  </tr>
+</tbody>
+</table>
+</div>
+<div class = 'panel'>
+<div class = 'panel-heading'><h1>Memory Dump</h1></div>
+<table id = 'box-table-a'><thead>  <tr>    <th scope='col'>Type</th>
+    <th scope='col'>Value</th>
+  </tr></thead><tbody>
+  <tr>
+    <td>Total headers</td>
+    <td>18</td>
+  </tr>
+  <tr>
+    <td>Used headers</td>
+    <td>3</td>
+  </tr>
+  <tr>
+    <td>Capacity</td>
+    <td>67.108.864</td>
+  </tr>
+  <tr>
+    <td>Allocated</td>
+    <td>4.480</td>
+  </tr>
+  <tr>
+    <td>Used %</td>
+    <td>0.00667572</td>
+  </tr>
+</tbody>
+</table>
+<table id = 'box-table-a'><thead>  <tr>    <th scope='col'>Index</th>
+    <th scope='col'>Size</th>
+    <th scope='col'>Original Size</th>
+    <th scope='col'>Block Index</th>
+    <th scope='col'>In use</th>
+  </tr></thead><tbody>
+  <tr>
+    <td>0</td>
+    <td>2176</td>
+    <td>2176</td>
+    <td>0</td>
+    <td>true</td>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>128</td>
+    <td>128</td>
+    <td>2176</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td>384</td>
+    <td>384</td>
+    <td>2304</td>
+    <td>true</td>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td>896</td>
+    <td>896</td>
+    <td>2688</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>1920</td>
+    <td>1920</td>
+    <td>3584</td>
+    <td>true</td>
+  </tr>
+  <tr>
+    <td>5</td>
+    <td>128</td>
+    <td>128</td>
+    <td>5504</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>6</td>
+    <td>8</td>
+    <td>8</td>
+    <td>5632</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>7</td>
+    <td>24</td>
+    <td>24</td>
+    <td>5640</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>8</td>
+    <td>56</td>
+    <td>56</td>
+    <td>5664</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>9</td>
+    <td>640</td>
+    <td>640</td>
+    <td>5720</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>10</td>
+    <td>248</td>
+    <td>248</td>
+    <td>6360</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>11</td>
+    <td>3968</td>
+    <td>3968</td>
+    <td>6608</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>12</td>
+    <td>640</td>
+    <td>640</td>
+    <td>10576</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>13</td>
+    <td>2688</td>
+    <td>2688</td>
+    <td>11216</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>14</td>
+    <td>1920</td>
+    <td>1920</td>
+    <td>13904</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>15</td>
+    <td>8064</td>
+    <td>8064</td>
+    <td>15824</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>16</td>
+    <td>16256</td>
+    <td>16256</td>
+    <td>23888</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>17</td>
+    <td>2688</td>
+    <td>2688</td>
+    <td>40144</td>
+    <td>false</td>
+  </tr>
+</tbody>
+</table>
+<table id = 'box-table-a'><thead>  <tr>    <th scope='col'>Stack</th>
+    <th scope='col'>Size</th>
+    <th scope='col'>Reuse</th>
+    <th scope='col'>Open</th>
+  </tr></thead><tbody>
+</tbody>
+</table>
+</div>
+</body></html>
