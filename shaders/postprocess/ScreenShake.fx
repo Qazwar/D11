@@ -31,6 +31,7 @@ PS_Input VS_Main(VS_Input vertex) {
 
 float4 PS_Main( PS_Input frag ) : SV_TARGET {
 	float2 uv = frag.tex0;
-	uv.x += cos((time / period) * 2 * 3.14159) * shakeAmount;
+	uv.x += cos((time / period) * 2 * 3.14159 * frequency) * shakeAmount;
+	uv.y += cos((time / period) * 2 * 3.14159 * frequency) * shakeAmount;
 	return colorMap_.Sample(colorSampler_, uv) * frag.color;
 }

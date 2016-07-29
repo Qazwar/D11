@@ -5,8 +5,13 @@
 
 namespace ds {
 
-	struct ScreenShakePostProcessDescriptor {
+	struct ScreenShakePostProcessDescriptor : public PostProcessDescriptor {
+
 		float ttl;
+		float shakeAmount;
+		float frequency;
+
+		ScreenShakePostProcessDescriptor() : PostProcessDescriptor(), ttl(1.0f) , shakeAmount(2.0f) , frequency(1.0f) {}
 	};
 
 	class ScreenShakePostProcess : public PostProcess {
@@ -29,11 +34,9 @@ namespace ds {
 		void onActivate() {
 			_constantBuffer.timer = 0.0f;
 		}
+		void updateConstantBuffer();
 	private:
-		RID _vertexBuffer;
-		RID _material;
 		RID _cbID;
-		PTCVertex _vertices[6];
 		ScreenShakePostProcessDescriptor _descriptor;
 		ScreenShakeConstantBuffer _constantBuffer;
 	};

@@ -1,14 +1,23 @@
 #pragma once
+#include "..\Common.h"
 
 namespace ds {
+
+	struct PostProcessDescriptor {
+
+		RID source;
+		RID target;
+
+		PostProcessDescriptor() : source(INVALID_RID), target(INVALID_RID) {}
+	};
 
 	class PostProcess {
 
 	public:
-		PostProcess() : _active(false) {}
+		PostProcess(const PostProcessDescriptor& descriptor);
 		virtual ~PostProcess() {}
 		virtual void init() {}
-		virtual void render() = 0;
+		void render();
 		virtual void tick(float dt) = 0;
 		virtual void onActivate() {}
 		virtual void onDeactivate() {}
@@ -20,7 +29,13 @@ namespace ds {
 			_active = false;
 			onDeactivate();
 		}
+		virtual void updateConstantBuffer() = 0;
 	protected:
+		PostProcess(const PostProcess& other) {}
 		bool _active;
+		RID _source;
+		RID _target;
+		RID _vertexBuffer;
+		RID _material;
 	};
 }

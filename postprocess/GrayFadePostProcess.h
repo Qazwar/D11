@@ -5,8 +5,11 @@
 
 namespace ds {
 
-	struct GrayFadePostProcessDescriptor {
+	struct GrayFadePostProcessDescriptor : public PostProcessDescriptor {
+
 		float ttl;
+
+		GrayFadePostProcessDescriptor() : PostProcessDescriptor() , ttl(1.0f) {}
 	};
 
 	class GrayFadePostProcess : public PostProcess {
@@ -19,13 +22,11 @@ namespace ds {
 		void onActivate() {
 			_timer = 0.0f;
 		}
+		void updateConstantBuffer();
 	private:
 		float _timer;
 		v4 _cbData;
-		RID _vertexBuffer;
-		RID _material;
 		RID _cbID;
-		PTCVertex _vertices[6];
 		GrayFadePostProcessDescriptor _descriptor;
 	};
 

@@ -7,10 +7,8 @@
 
 namespace ds {
 
-	ScreenShakePostProcess::ScreenShakePostProcess(const ScreenShakePostProcessDescriptor& descriptor) : PostProcess() , _descriptor(descriptor) {
+	ScreenShakePostProcess::ScreenShakePostProcess(const ScreenShakePostProcessDescriptor& descriptor) : PostProcess(descriptor), _descriptor(descriptor) {
 		assert(_descriptor.ttl > 0.0f);
-
-		_vertexBuffer = ds::res::find("PostProcessVertexBuffer",ResourceType::VERTEXBUFFER);
 
 		ds::ConstantBufferDescriptor cbDesc;
 		cbDesc.size = 16;
@@ -27,7 +25,7 @@ namespace ds {
 		mtrlDesc.shader = shader_id;
 		mtrlDesc.blendstate = ds::res::find("DefaultBlendState",ResourceType::BLENDSTATE);
 		mtrlDesc.texture = INVALID_RID;
-		mtrlDesc.renderTarget = ds::res::find("RT1", ResourceType::RENDERTARGET);
+		mtrlDesc.renderTarget = _source;
 		_material = ds::res::createMaterial("ScreenShakeMaterial", mtrlDesc);
 
 	}
@@ -35,27 +33,22 @@ namespace ds {
 	ScreenShakePostProcess::~ScreenShakePostProcess() {
 	}
 
-	void ScreenShakePostProcess::render() {
-		ZoneTracker("ScreenShakePostProcess::render");
-		unsigned int stride = sizeof(PTCVertex);
-		unsigned int offset = 0;
-		graphics::turnOffZBuffer();
-		graphics::setVertexBuffer(_vertexBuffer, &stride, &offset, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		graphics::setMaterial(_material);
-
-		//_cbData.x = _timer;// math::clamp(_timer / _descriptor.ttl, 0.0f, 1.0f);
-		_constantBuffer.period = 0.25f;
-		_constantBuffer.shakeAmount = 6.0f / 1024.0f;
-		_constantBuffer.frequency = 5.0f;
+	void ScreenShakePostProcess::updateConstantBuffer() {
+		_constantBuffer.period = 1.0f / _descriptor.ttl;
+		float n = _constantBuffer.timer / _descriptor.ttl;
+		_constantBuffer.shakeAmount = _descriptor.shakeAmount / 1024.0f * cos(n * HALF_PI);
+		_constantBuffer.frequency = _descriptor.frequency;
 		graphics::updateConstantBuffer(_cbID, &_constantBuffer, sizeof(ScreenShakeConstantBuffer));
 		graphics::setPixelShaderConstantBuffer(_cbID);
-		graphics::draw(6);
-		graphics::turnOnZBuffer();
 	}
 
 	void ScreenShakePostProcess::tick(float dt) {
 		if (_active) {
 			_constantBuffer.timer += dt;
+			float n = _constantBuffer.timer / _descriptor.ttl;
+			if (n > 1.0f) {
+				_active = false;
+			}
 
 		}
 	}
