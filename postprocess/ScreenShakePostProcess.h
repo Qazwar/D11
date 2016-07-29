@@ -11,22 +11,31 @@ namespace ds {
 
 	class ScreenShakePostProcess : public PostProcess {
 
+		struct ScreenShakeConstantBuffer {
+			float timer;
+			float period;
+			float shakeAmount;
+			float frequency;
+
+			ScreenShakeConstantBuffer() : timer(0.0f), period(1.0f), shakeAmount(0.0f), frequency(0.0f) {}
+
+		};
+
 	public:
 		ScreenShakePostProcess(const ScreenShakePostProcessDescriptor& descriptor);
 		virtual ~ScreenShakePostProcess();
 		void render();
 		void tick(float dt);
 		void onActivate() {
-			_timer = 0.0f;
+			_constantBuffer.timer = 0.0f;
 		}
 	private:
-		float _timer;
-		v4 _cbData;
 		RID _vertexBuffer;
 		RID _material;
 		RID _cbID;
 		PTCVertex _vertices[6];
 		ScreenShakePostProcessDescriptor _descriptor;
+		ScreenShakeConstantBuffer _constantBuffer;
 	};
 
 }

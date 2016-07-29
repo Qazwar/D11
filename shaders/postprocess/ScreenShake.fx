@@ -2,7 +2,7 @@ cbuffer cbChangesPerFrame : register(b0) {
 	float time;
 	float period;
 	float shakeAmount;
-	float data;
+	float frequency;
 };
 
 Texture2D colorMap_ : register( t0 );
