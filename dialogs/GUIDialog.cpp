@@ -4,10 +4,12 @@
 #include "..\utils\font.h"
 #include "..\utils\Assert.h"
 #include "..\resources\ResourceContainer.h"
+#include "..\base\InputSystem.h"
 
 namespace ds {
 	GUIDialog::GUIDialog(const GUIDialogDescriptor& descriptor) {
 		_font = descriptor.font;
+		_hoverCallback = 0;
 		_bitmapFont = res::getFont(_font);
 		_sprites = graphics::getSpriteBuffer();
 		_idIndex = 0;
@@ -73,6 +75,7 @@ namespace ds {
 		item.index = _vertices.size();
 		item.id = id;
 		item.tmp = length;
+		item.visible = true;
 		char text[16];
 		string::formatInt(value, text, length);
 		v2 size = font::calculateSize(_font, text, 2);
@@ -124,6 +127,7 @@ namespace ds {
 		item.scale = scale;
 		item.type = GIT_IMAGE;
 		item.id = id;
+		item.visible = true;
 		item.index = _vertices.size();
 		DialogVertex v;
 		v.offset = v2(0, 0);
@@ -195,6 +199,7 @@ namespace ds {
 		item.scale = scale;
 		item.id = id;
 		item.type = GIT_TIMER;
+		item.visible = true;
 		item.index = _vertices.size();
 		const char* text = "00:00";		
 		item.num = addTextVertices(text, 0, 0);
@@ -225,6 +230,7 @@ namespace ds {
 		item.scale = v2(1, 1);
 		item.type = GIT_TEXT;
 		item.id = id;
+		item.visible = true;
 		item.index = _vertices.size();
 
 		v2 size = font::calculateSize(_font, text, 2);
@@ -307,6 +313,13 @@ namespace ds {
 		updateTextVertices(item.index, text, sx, sy);
 	}
 
+	void GUIDialog::setVisible(ID id, bool visible) {
+		int idx = getIndexByID(id);
+		const GUID& gid = _ids[idx];
+		DialogItem& item = _items[gid.index];
+		item.visible = visible;
+	}
+
 	// -------------------------------------------------------
 	// On button
 	// -------------------------------------------------------
@@ -358,6 +371,7 @@ namespace ds {
 		item.scale = v2(1, 1);
 		item.type = GIT_BUTTON;
 		item.id = id;
+		item.visible = true;
 		item.index = _vertices.size();
 		float w = textureRect.width();
 		float h = textureRect.height();
@@ -385,6 +399,7 @@ namespace ds {
 	// -------------------------------------------------------
 	void GUIDialog::activate() {
 		m_SelectedInput = -1;			
+		_current = INVALID_ID;
 	}
 
 	// -------------------------------------------------------
@@ -414,11 +429,13 @@ namespace ds {
 
 		for (uint32_t i = 0; i < _items.size(); ++i) {
 			const DialogItem& item = _items[i];
-			int start = item.index;
-			int end = start + item.num;
-			for (int j = start; j < end; ++j) {
-				const DialogVertex& v = _vertices[j];
-				_sprites->draw(item.pos + v.offset, v.texture, item.rotation, item.scale, item.color);
+			if (item.visible) {
+				int start = item.index;
+				int end = start + item.num;
+				for (int j = start; j < end; ++j) {
+					const DialogVertex& v = _vertices[j];
+					_sprites->draw(item.pos + v.offset, v.texture, item.rotation, item.scale, item.color);
+				}
 			}
 		}
 		
@@ -473,6 +490,7 @@ namespace ds {
 	// tick
 	// -------------------------------------------------------
 	void GUIDialog::tick(float dt) {
+		// handle transitions
 		for (int i = 0; i < MAX_GUID; ++i) {
 			if (_transitions[i].active) {		
 				DialogItem& item = _items[i];
@@ -488,10 +506,11 @@ namespace ds {
 				}
 			}
 		}
-
+		// tick timers
 		for (size_t i = 0; i < _timers.size(); ++i) {
 			_timers[i].tick(dt);
 		}
+		// update timers if necessary
 		char buffer[10];
 		for (uint32_t i = 0; i < _items.size(); ++i) {
 			const DialogItem& item = _items[i];
@@ -501,6 +520,42 @@ namespace ds {
 					string::formatTime(timer, buffer);
 					updateTextVertices(item.index, buffer);					
 				}
+			}
+		}
+		// handle hovering
+		v2 mp = ds::input::getMousePosition();
+		ID temp = INVALID_ID;
+		for (uint32_t i = 0; i < _items.size(); ++i) {
+			const DialogItem& item = _items[i];
+			if (item.type == GIT_BUTTON || item.type == GIT_IMAGE_BUTTON) {
+				Rect br = item.boundingRect;
+				v2 p = item.pos;
+				if (item.centered) {
+					p.x = graphics::getScreenWidth() * 0.5f;
+				}
+				br.left += p.x;
+				br.right += p.x;
+				br.top += p.y;
+				br.bottom += p.y;
+				if (mp.x >= br.left && mp.x <= br.right && mp.y <= br.top && mp.y >= br.bottom) {
+					temp = item.id;
+				}
+			}
+		}
+		if (temp != INVALID_ID) {
+			if (temp != _current) {				
+				_current = temp;
+				if (_hoverCallback) {
+					_hoverCallback->entering(_current);
+				}
+			}
+		}
+		else {
+			if (_current != INVALID_ID) {				
+				if (_hoverCallback) {
+					_hoverCallback->leaving(_current);
+				}
+				_current = INVALID_ID;
 			}
 		}
 	}

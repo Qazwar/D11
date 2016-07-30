@@ -3,11 +3,15 @@
 
 namespace ds {
 
+// --------------------------------------------
+// Game timer
+// --------------------------------------------
 class GameTimer {
 
 public:
 	GameTimer() : m_Millis(0) , m_Seconds(0) , m_Minutes(0) , m_Hours(0) , m_Forward(true) , m_Active(true) , m_Timer(0.0f) {}
 	~GameTimer() {}
+
 	void tick(float elapsed) {
 		if ( m_Active ) {
 			m_Timer += elapsed;

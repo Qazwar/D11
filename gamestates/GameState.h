@@ -71,7 +71,7 @@ private:
 // --------------------------------------------
 // Basic menu game state
 // --------------------------------------------
-class BasicMenuGameState : public GameState {
+class BasicMenuGameState : public GameState , public GUIHoverCallback {
 
 public:
 	BasicMenuGameState(const char* name, const char* dialogName, Game* g) : GameState(name, g), _dialogName(dialogName) {
@@ -102,6 +102,8 @@ public:
 #endif
 		return 0;
 	}
+	virtual void entering(ID id) {}
+	virtual void leaving(ID id) {}
 protected:
 	GUIDialog* _dialog;
 	const char* _dialogName;

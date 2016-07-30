@@ -55,6 +55,7 @@ struct DialogItem {
 	uint32_t num;
 	bool active;
 	int tmp;
+	bool visible;
 };
 
 // -------------------------------------------------------
@@ -81,6 +82,16 @@ struct GUITransition {
 	tweening::TweeningType tweening;
 
 	GUITransition() : active(false), timer(0.0f), ttl(0.0f), start(0, 0), end(0, 0), tweening(tweening::easeInCubic) {}
+};
+
+// -------------------------------------------------------
+// GUI hover callback
+// -------------------------------------------------------
+class GUIHoverCallback {
+
+public:
+	virtual void entering(ID id) = 0;
+	virtual void leaving(ID id) = 0;
 };
 
 // -------------------------------------------------------
@@ -141,7 +152,10 @@ public:
 	}
 
 	void startTransition(int id, const v2& start, float ttl);
-
+	void registerCallback(GUIHoverCallback* hoverCallback) {
+		_hoverCallback = hoverCallback;
+	}
+	void setVisible(ID id, bool visible);
 private:
 	void updateTextVertices(int offset, const char* text, int sx = 0, int sy = 0);
 	int addTextVertices(const char* text, int sx, int sy);
@@ -175,6 +189,8 @@ private:
 	Array<DialogVertex> _vertices;
 	Array<DialogItem> _items;
 	Timers _timers;
+	ID _current;
+	GUIHoverCallback* _hoverCallback;
 };
 
 }
