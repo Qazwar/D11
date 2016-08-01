@@ -101,7 +101,9 @@ std::ostringstream& Log::error() {
 
 Log::~Log() {
     os << std::endl;
-	OutputDebugStringA(os.str().c_str());
+	//OutputDebugStringA(os.str().c_str());
+	
+	printf("%s", os.str().c_str());
 	//handler().write(os.str());
 }
 
