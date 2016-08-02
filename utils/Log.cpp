@@ -10,6 +10,49 @@
 #include <stdio.h>
 #pragma warning(disable: 4996)
 
+struct LogContext {
+
+	HANDLE console;
+	FILE* file;
+
+};
+
+static LogContext* _logContext;
+
+void init_logger(int width, int height) {
+	_logContext = new LogContext;
+	CONSOLE_SCREEN_BUFFER_INFO coninfo;
+	AllocConsole();
+	AttachConsole(GetCurrentProcessId());
+	_logContext->console = GetStdHandle(STD_OUTPUT_HANDLE);
+	GetConsoleScreenBufferInfo(_logContext->console, &coninfo);
+	coninfo.dwSize.Y = height;
+	coninfo.dwSize.X = width;
+	SetConsoleScreenBufferSize(_logContext->console, coninfo.dwSize);
+
+	SMALL_RECT srctWindow;
+	srctWindow = coninfo.srWindow;
+	srctWindow.Top = 0;
+	srctWindow.Left = 0;
+	srctWindow.Right = width - 1;
+	srctWindow.Bottom = height - 1;
+	SetConsoleWindowInfo(_logContext->console, TRUE, &srctWindow);
+	SetConsoleTextAttribute(_logContext->console, FOREGROUND_RED);
+	const char* text = "Hello world\n";
+	unsigned long res;
+	WriteConsole(_logContext->console,text,strlen(text),&res,0);
+	SetConsoleTextAttribute(_logContext->console, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+	_logContext->file = fopen("log.txt", "w");
+	
+	
+}
+
+void shutdown_logger() {
+	FreeConsole();
+	fclose(_logContext->file);
+	delete _logContext;
+}
+
 void file_name(const char* file, char* name) {
 	char n[256];
 	char e[16];
@@ -34,7 +77,9 @@ void FileOutputHandler::write(const char* message) {
 	}
 }
 
-Log::Log() {}
+Log::Log() {
+	_errorFlag = false;
+}
 
 Log::Log(const Log& orig) {}
 
@@ -51,6 +96,7 @@ void Log::log_file_line(const char *file, const unsigned long line, bool isError
 	os << " ";
 	if (isError) {
 		os << " -- ERROR -- ";
+		_errorFlag = true;
 	}
 	file_name(file, buffer);
 	os << " [";
@@ -67,12 +113,14 @@ std::ostringstream& Log::get(const char *file, const unsigned long line) {
 
 std::ostringstream& Log::error(const char *file, const unsigned long line) {
 	log_file_line(file, line, true);
+	_errorFlag = true;
 	return os;
 }
 
 std::ostringstream& Log::error(const char *file, const unsigned long line,const char* message) {
 	log_file_line(file, line,true);
 	os << message;
+	_errorFlag = true;
 	return os;
 }
 
@@ -82,6 +130,7 @@ std::ostringstream& Log::error(const char *file, const unsigned long line, char*
 	memset(buffer, 0, sizeof(buffer));
 	int written = vsnprintf_s(buffer, sizeof(buffer), _TRUNCATE, format, args);
 	os << buffer;
+	_errorFlag = true;
 	return os;
 }
 
@@ -90,20 +139,29 @@ std::ostringstream& Log::error(const char *file, const unsigned long line, char*
 	va_start(args, format);
 	error(file, line, format, args);
 	va_end(args);
+	_errorFlag = true;
 	return os;
 }
 
 std::ostringstream& Log::error() {
 	os << NowTime();
 	os << " [ERROR] : ";
+	_errorFlag = true;
 	return os;
 }
 
 Log::~Log() {
     os << std::endl;
 	//OutputDebugStringA(os.str().c_str());
-	
-	printf("%s", os.str().c_str());
+	unsigned long res;
+	if (_errorFlag) {
+		SetConsoleTextAttribute(_logContext->console, FOREGROUND_RED);
+	}
+	else {
+		SetConsoleTextAttribute(_logContext->console, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+	}
+	WriteConsole(_logContext->console, os.str().c_str(), strlen(os.str().c_str()), &res, 0);
+	fprintf(_logContext->file,"%s", os.str().c_str());
 	//handler().write(os.str());
 }
 

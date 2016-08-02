@@ -106,22 +106,7 @@ int WINAPI WinMain(HINSTANCE hThisInst, HINSTANCE hLastInst, LPSTR lpszCmdLine, 
 
 	RegisterRawInputDevices(Rid, 2, sizeof(RAWINPUTDEVICE));
 
-	CONSOLE_SCREEN_BUFFER_INFO coninfo;
-	AllocConsole();
-
-	HANDLE handle_out = GetStdHandle(STD_OUTPUT_HANDLE);
-
-	coninfo.dwSize.Y = 400;
-	coninfo.dwSize.X = 150;
-	SetConsoleScreenBufferSize(handle_out,coninfo.dwSize);
-
-	int hCrt = _open_osfhandle((long)handle_out, _O_TEXT);
-	FILE* hf_out = _fdopen(hCrt, "w");
-	setvbuf(hf_out, NULL, _IONBF, 1);
-	*stdout = *hf_out;
-	SetConsoleTextAttribute(handle_out, FOREGROUND_RED);
-	printf("Hello world\n");
-	SetConsoleTextAttribute(handle_out, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+	
 
 	app->setInstance(hThisInst);
 	app->createWindow();
@@ -136,7 +121,6 @@ int WINAPI WinMain(HINSTANCE hThisInst, HINSTANCE hLastInst, LPSTR lpszCmdLine, 
 		}
 		app->buildFrame();
 	}
-	delete app;	
-	FreeConsole();
+	delete app;		
 	return 0;
 }

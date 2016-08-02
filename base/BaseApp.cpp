@@ -54,6 +54,7 @@ namespace ds {
 		_createReport = false;
 		_updated = false;
 		_running = true;
+		init_logger(200,600);
 		math::init_random(GetTickCount());
 		gDefaultMemory = new DefaultAllocator(64 * 1024 * 1024);
 		gStringBuffer = new GlobalStringBuffer();
@@ -99,8 +100,9 @@ namespace ds {
 		delete _stateMachine;
 		delete gStringBuffer;		
 		graphics::shutdown();
-		//gDefaultMemory->printOpenAllocations();
-		delete gDefaultMemory;
+		//gDefaultMemory->printOpenAllocations();		
+		delete gDefaultMemory;		
+		shutdown_logger();
 	}
 
 	// -------------------------------------------------------

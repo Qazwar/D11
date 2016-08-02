@@ -11,6 +11,11 @@
 #include <sstream>
 #include <stdio.h>
 
+
+void init_logger(int width,int height);
+
+void shutdown_logger();
+
 class LogOutputHandler {
 
 public:
@@ -52,6 +57,7 @@ private:
 	void NowTime(char* ret, int max);
     Log(const Log&);
     Log& operator =(const Log&);	
+	bool _errorFlag;
 };
 
 #ifndef FILELOG_MAX_LEVEL
