@@ -6,6 +6,7 @@
 #include "..\gamestates\GameStateMachine.h"
 #include "EventStream.h"
 #include "Game.h"
+#include "system_info.h"
 
 namespace ds {
 
@@ -87,6 +88,8 @@ namespace ds {
 		std::chrono::steady_clock::time_point _start, _now;
 		float _ar[256];
 		int _num;
+
+		SystemInfo _systemInfo;
 	};
 
 }

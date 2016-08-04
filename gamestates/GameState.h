@@ -64,6 +64,7 @@ protected:
 private:
 	bool _initialized;
 	GameState(const GameState& other) {}
+	void operator=(const GameState& other) {}
 	const char* _name;
 	IdString _hash;
 };

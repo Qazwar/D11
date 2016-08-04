@@ -54,35 +54,9 @@ namespace ds {
 		_createReport = false;
 		_updated = false;
 		_running = true;
-		init_logger(200,600);
-		math::init_random(GetTickCount());
-		gDefaultMemory = new DefaultAllocator(64 * 1024 * 1024);
-		gStringBuffer = new GlobalStringBuffer();
-		perf::init();
-		repository::initialize(repository::RM_DEBUG);
-		_stateMachine = new GameStateMachine;
-		events::init();
+		math::init_random(GetTickCount());		
 		gDrawCounter = new DrawCounter;
-
 		_buttonState.processed = true;
-		/*
-		JSONReader reader;
-		bool ret = reader.parse("content\\engine_settings.json");
-		assert(ret);
-		int c = reader.find_category("basic_settings");
-		assert(c != -1);
-		reader.get_int(c, "screen_width", &_settings.screenWidth);
-		reader.get_int(c, "screen_height", &_settings.screenHeight);
-		reader.get_color(c, "clear_color", &_settings.clearColor);
-		if (reader.contains_property(c, "reporting_directory")) {
-			const char* dir = reader.get_string(c, "reporting_directory");
-			sprintf_s(_settings.reportingDirectory, 64, "%s\\", dir);
-		}
-		else {
-			sprintf_s(_settings.reportingDirectory, "");
-		}
-		LOG << "size: " << _settings.screenWidth << " x " << _settings.screenHeight;
-		*/
 		_start = std::chrono::steady_clock::now();
 		_num = 0;
 		game = new Game;
@@ -146,7 +120,32 @@ namespace ds {
 
 
 	bool BaseApp::prepare() {
+		// let the actual app define the settings
 		prepare(&_settings);
+		// prepare the initial systems
+		init_logger(_settings.logTypes, 200, 600);
+
+		createWindow();
+		// get system information
+		sysinfo::getProcessor(&_systemInfo);
+		sysinfo::getGFX(&_systemInfo);
+		sysinfo::getRAMInformation(&_systemInfo);
+		// FIXME: make sure that we have the amount of memory available
+		gDefaultMemory = new DefaultAllocator(_settings.initialMemorySize * 1024 * 1024);
+		gStringBuffer = new GlobalStringBuffer();
+		perf::init();
+		repository::initialize(_settings.repositoryMode);
+		_stateMachine = new GameStateMachine;
+		events::init();
+		
+		LOG << "---------- System information ----------";
+		LOG << "Processor : " << _systemInfo.processor;
+		LOG << "Speed     : " << _systemInfo.mhz;
+		LOG << "GPU Model : " << _systemInfo.gpuModel;
+		LOG << "Total RAM : " << _systemInfo.total_memory_MB;
+		LOG << "Free  RAM : " << _systemInfo.free_memory_MB;
+
+		// now set up the graphic subsystem
 		if (graphics::initialize(hInstance, m_hWnd, _settings)) {
 			res::initialize(graphics::getDevice());
 			graphics::createInternalSpriteBuffer();

@@ -1,7 +1,14 @@
 #pragma once
 #include "..\utils\Color.h"
+#include "..\io\FileRepository.h"
 
 namespace ds {
+
+	enum LogTypes {
+		LT_NONE,
+		LT_CONSOLE,
+		LT_FILE
+	};
 
 	struct Settings {
 
@@ -12,6 +19,9 @@ namespace ds {
 		bool synched;
 		int mode;
 		const char* reportingDirectory;
+		int initialMemorySize;
+		repository::RepositoryMode repositoryMode;
+		int logTypes;
 
 		Settings() {
 			screenWidth = 1024;
@@ -20,7 +30,10 @@ namespace ds {
 			fullScreen = false;
 			synched = true;
 			mode = 1;
+			initialMemorySize = 64;
+			repositoryMode = repository::RM_DEBUG;
 			reportingDirectory = "reports";
+			logTypes = 0;
 		}
 	};
 

@@ -8,48 +8,69 @@
 #include "Log.h"
 #include <windows.h>
 #include <stdio.h>
+#include "..\base\Settings.h"
+
 #pragma warning(disable: 4996)
 
 struct LogContext {
-
+	bool useConsole;
+	bool useFile;
 	HANDLE console;
 	FILE* file;
+	int logTypes;
 
 };
 
 static LogContext* _logContext;
 
-void init_logger(int width, int height) {
+void init_logger(int logTypes, int width, int height) {
 	_logContext = new LogContext;
-	CONSOLE_SCREEN_BUFFER_INFO coninfo;
-	AllocConsole();
-	AttachConsole(GetCurrentProcessId());
-	_logContext->console = GetStdHandle(STD_OUTPUT_HANDLE);
-	GetConsoleScreenBufferInfo(_logContext->console, &coninfo);
-	coninfo.dwSize.Y = height;
-	coninfo.dwSize.X = width;
-	SetConsoleScreenBufferSize(_logContext->console, coninfo.dwSize);
+	_logContext->logTypes = logTypes;
+	if ((logTypes & ds::LogTypes::LT_CONSOLE) == ds::LogTypes::LT_CONSOLE) {
+		_logContext->useConsole = true;
+		CONSOLE_SCREEN_BUFFER_INFO coninfo;
+		AllocConsole();
+		AttachConsole(GetCurrentProcessId());
+		_logContext->console = GetStdHandle(STD_OUTPUT_HANDLE);
+		GetConsoleScreenBufferInfo(_logContext->console, &coninfo);
+		coninfo.dwSize.Y = height;
+		coninfo.dwSize.X = width;
+		SetConsoleScreenBufferSize(_logContext->console, coninfo.dwSize);
 
-	SMALL_RECT srctWindow;
-	srctWindow = coninfo.srWindow;
-	srctWindow.Top = 0;
-	srctWindow.Left = 0;
-	srctWindow.Right = width - 1;
-	srctWindow.Bottom = height - 1;
-	SetConsoleWindowInfo(_logContext->console, TRUE, &srctWindow);
-	SetConsoleTextAttribute(_logContext->console, FOREGROUND_RED);
-	const char* text = "Hello world\n";
-	unsigned long res;
-	WriteConsole(_logContext->console,text,strlen(text),&res,0);
-	SetConsoleTextAttribute(_logContext->console, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
-	_logContext->file = fopen("log.txt", "w");
+		SMALL_RECT srctWindow;
+		srctWindow = coninfo.srWindow;
+		srctWindow.Top = 0;
+		srctWindow.Left = 0;
+		srctWindow.Right = width - 1;
+		srctWindow.Bottom = height - 1;
+		SetConsoleWindowInfo(_logContext->console, TRUE, &srctWindow);
+		SetConsoleTextAttribute(_logContext->console, FOREGROUND_RED);
+		const char* text = "Hello world\n";
+		unsigned long res;
+		WriteConsole(_logContext->console, text, strlen(text), &res, 0);
+		SetConsoleTextAttribute(_logContext->console, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+	}
+	else {
+		_logContext->useConsole = false;
+	}
+	if ((logTypes & ds::LogTypes::LT_FILE) == ds::LogTypes::LT_FILE) {
+		_logContext->file = fopen("log.txt", "w");
+		_logContext->useFile = true;
+	}
+	else {
+		_logContext->useFile = false;
+	}
 	
 	
 }
 
 void shutdown_logger() {
-	FreeConsole();
-	fclose(_logContext->file);
+	if (_logContext->useConsole) {
+		FreeConsole();
+	}
+	if (_logContext->useFile) {
+		fclose(_logContext->file);
+	}
 	delete _logContext;
 }
 
@@ -154,14 +175,18 @@ Log::~Log() {
     os << std::endl;
 	//OutputDebugStringA(os.str().c_str());
 	unsigned long res;
-	if (_errorFlag) {
-		SetConsoleTextAttribute(_logContext->console, FOREGROUND_RED);
+	if (_logContext->useConsole) {
+		if (_errorFlag) {
+			SetConsoleTextAttribute(_logContext->console, FOREGROUND_RED);
+		}
+		else {
+			SetConsoleTextAttribute(_logContext->console, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+		}
+		WriteConsole(_logContext->console, os.str().c_str(), strlen(os.str().c_str()), &res, 0);
 	}
-	else {
-		SetConsoleTextAttribute(_logContext->console, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+	if (_logContext->useFile) {
+		fprintf(_logContext->file, "%s", os.str().c_str());
 	}
-	WriteConsole(_logContext->console, os.str().c_str(), strlen(os.str().c_str()), &res, 0);
-	fprintf(_logContext->file,"%s", os.str().c_str());
 	//handler().write(os.str());
 }
 

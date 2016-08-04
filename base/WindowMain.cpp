@@ -106,14 +106,10 @@ int WINAPI WinMain(HINSTANCE hThisInst, HINSTANCE hLastInst, LPSTR lpszCmdLine, 
 
 	RegisterRawInputDevices(Rid, 2, sizeof(RAWINPUTDEVICE));
 
-	
-
 	app->setInstance(hThisInst);
-	app->createWindow();
 	app->prepare();
 	app->initialize();
 	MSG msg = { 0 };
-	//while (msg.message != WM_QUIT) {
 	while (app->isRunning()) { 
 		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);

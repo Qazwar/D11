@@ -90,6 +90,7 @@ namespace ds {
 	void GUIDialog::setNumber(int id, int value) {
 		int idx = getIndexByID(id);
 		XASSERT(idx != -1, "No matching GUI item for id: %d", id);
+		XASSERT(idx < MAX_GUID, "Not a valid index - id: %d", id);
 		const GUID& gid = _ids[idx];		
 		const DialogItem& item = _items[gid.index];
 		char text[16];
@@ -149,6 +150,7 @@ namespace ds {
 	// -------------------------------------------------------
 	void GUIDialog::updateImage(int id, int x, int y, const Rect& textureRect, bool centered) {
 		int idx = getIndexByID(id);
+		XASSERT(idx < MAX_GUID, "Not a valid index - id: %d", id);
 		const GUID& gid = _ids[idx];
 		XASSERT(gid.id != -1, "No matching GUI item for %d", id);
 		const DialogItem& item = _items[gid.index];
@@ -249,6 +251,7 @@ namespace ds {
 	// -------------------------------------------------------
 	void GUIDialog::resetTimer(int id) {
 		int idx = getIndexByID(id);
+		XASSERT(idx < MAX_GUID, "Not a valid index - id: %d", id);
 		const GUID& gid = _ids[idx];
 		const DialogItem& item = _items[gid.index];
 		XASSERT(item.type == GIT_TIMER,"The GUI item %d is not a timer",id);
@@ -260,6 +263,7 @@ namespace ds {
 	// -------------------------------------------------------
 	void GUIDialog::startTimer(int id) {
 		int idx = getIndexByID(id);
+		XASSERT(idx < MAX_GUID, "Not a valid index - id: %d", id);
 		const GUID& gid = _ids[idx];
 		const DialogItem& item = _items[gid.index];
 		XASSERT(item.type == GIT_TIMER, "The GUI item %d is not a timer", id);
@@ -271,6 +275,7 @@ namespace ds {
 	// -------------------------------------------------------
 	GameTimer* GUIDialog::getTimer(int id) {
 		int idx = getIndexByID(id);
+		XASSERT(idx < MAX_GUID, "Not a valid index - id: %d", id);
 		const GUID& gid = _ids[idx];
 		const DialogItem& item = _items[gid.index];
 		XASSERT(item.type == GIT_TIMER, "The GUI item %d is not a timer", id);
@@ -282,6 +287,7 @@ namespace ds {
 	// -------------------------------------------------------
 	void GUIDialog::updateText(int id,int x,int y,const char* text,const Color& color, const v2& scale,bool centered) {
 		int idx = getIndexByID(id);
+		XASSERT(idx < MAX_GUID, "Not a valid index - id: %d", id);
 		const GUID& gid = _ids[idx];
 		DialogItem& item = _items[gid.index];
 		XASSERT(item.type == GIT_TEXT, "The GUI item %d is not a text item", id);
@@ -300,6 +306,7 @@ namespace ds {
 	// -------------------------------------------------------
 	void GUIDialog::updateText(int id,const char* text) {	
 		int idx = getIndexByID(id);
+		XASSERT(idx < MAX_GUID, "Not a valid index - id: %d", id);
 		const GUID& gid = _ids[idx];
 		DialogItem& item = _items[gid.index];
 		//XASSERT(item.type == GIT_TEXT, "The GUI item %d is not a text item", id);
@@ -315,6 +322,7 @@ namespace ds {
 
 	void GUIDialog::setVisible(ID id, bool visible) {
 		int idx = getIndexByID(id);
+		XASSERT(idx < MAX_GUID, "Not a valid index - id: %d", id);
 		const GUID& gid = _ids[idx];
 		DialogItem& item = _items[gid.index];
 		item.visible = visible;
@@ -503,6 +511,22 @@ namespace ds {
 				}
 				else {
 					_transitions[i].active = false;
+				}
+			}
+		}
+		// handle color fades
+		for (int i = 0; i < MAX_GUID; ++i) {
+			if (_colorFades[i].active) {
+				DialogItem& item = _items[i];
+				if (_colorFades[i].timer < _colorFades[i].ttl) {
+					_colorFades[i].timer += dt;
+					if (_colorFades[i].timer > _colorFades[i].ttl) {
+						_colorFades[i].timer = _colorFades[i].ttl;
+					}
+					item.color = tweening::interpolate(_colorFades[i].tweening, _colorFades[i].start, _colorFades[i].end, _colorFades[i].timer, _colorFades[i].ttl);
+				}
+				else {
+					_colorFades[i].active = false;
 				}
 			}
 		}
@@ -755,6 +779,21 @@ namespace ds {
 		reader.get(category, "centered", &item->centered);
 		reader.get(category, "scale", &item->scale);
 		return id;
+	}
+
+	void GUIDialog::fadeColor(int id, const Color& start, const Color& end, float ttl) {
+		int idx = getIndexByID(id);
+		if (idx != -1) {
+			GUIColorFade& gt = _colorFades[idx];
+			gt.timer = 0.0f;
+			gt.start = start;
+			gt.ttl = ttl;
+			DialogItem& item = _items[idx];
+			gt.start = start;
+			gt.end = end;
+			item.color = start;
+			gt.active = true;
+		}
 	}
 
 	void GUIDialog::startTransition(int id, const v2& start, float ttl) {

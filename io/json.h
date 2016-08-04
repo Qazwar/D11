@@ -12,9 +12,9 @@ namespace ds {
 
 		enum TokenType { EMPTY, NUMBER, NAME, DELIMITER, SEPARATOR, OPEN_BRACES, CLOSE_BRACES, STRING, ASSIGN, SEMICOLON,OPEN_BRACKET,CLOSE_BRACKET,SLASH,NEWLINE };
 
-		Token() {}
-		Token(TokenType type) : type(type) {}
-		Token(TokenType type, float v) : type(type), value(v) {}
+		Token() :type(EMPTY) , value(0.0f) , index(0) , size(0) {}
+		Token(TokenType type) : type(type) , value(0.0f) , index(0), size(0) {}
+		Token(TokenType type, float v) : type(type), value(v) , index(0), size(0) {}
 		Token(TokenType type, int i, int s) : type(type), index(i), size(s) {}
 
 		TokenType type;

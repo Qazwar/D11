@@ -29,7 +29,7 @@ namespace ds {
 
 	public:
 		Scene(const SceneDescriptor& descriptor);
-		~Scene();
+		virtual ~Scene();
 		ID add(const char* meshName, const v3& position, RID material, DrawMode mode = IMMEDIATE);
 		ID add(Mesh* mesh, const v3& position, RID material, DrawMode mode = IMMEDIATE);
 		ID addStatic(Mesh* mesh, const v3& position, RID material);

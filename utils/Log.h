@@ -12,7 +12,7 @@
 #include <stdio.h>
 
 
-void init_logger(int width,int height);
+void init_logger(int logTypes,int width, int height);
 
 void shutdown_logger();
 

@@ -85,6 +85,21 @@ struct GUITransition {
 };
 
 // -------------------------------------------------------
+// GUI Color fade
+// -------------------------------------------------------
+struct GUIColorFade {
+
+	bool active;
+	float timer;
+	float ttl;
+	Color start;
+	Color end;
+	tweening::TweeningType tweening;
+
+	GUIColorFade() : active(false), timer(0.0f), ttl(0.0f), start(Color::WHITE), end(Color::WHITE), tweening(tweening::easeInCubic) {}
+};
+
+// -------------------------------------------------------
 // GUI hover callback
 // -------------------------------------------------------
 class GUIHoverCallback {
@@ -152,6 +167,9 @@ public:
 	}
 
 	void startTransition(int id, const v2& start, float ttl);
+	void fadeColor(int id, const Color& start, const Color& end, float ttl);
+
+
 	void registerCallback(GUIHoverCallback* hoverCallback) {
 		_hoverCallback = hoverCallback;
 	}
@@ -160,6 +178,7 @@ private:
 	void updateTextVertices(int offset, const char* text, int sx = 0, int sy = 0);
 	int addTextVertices(const char* text, int sx, int sy);
 	GUIDialog(const GUIDialog& other) {}
+	void operator=(const GUIDialog& other) {}
 	int loadItem(int category, const JSONReader& reader, DialogItem* item);
 	int findFreeID();
 	bool containsItem(int id);
@@ -185,6 +204,7 @@ private:
 	GUID _ids[MAX_GUID];
 	int _idIndex;
 	GUITransition _transitions[MAX_GUID];	
+	GUIColorFade _colorFades[MAX_GUID];
 
 	Array<DialogVertex> _vertices;
 	Array<DialogItem> _items;

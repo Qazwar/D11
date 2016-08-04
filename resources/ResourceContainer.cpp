@@ -161,7 +161,7 @@ namespace ds {
 		// find inputelement by name
 		// ------------------------------------------------------
 		static int findInputElement(const char* name) {
-			for (int i = 0; i < 7; ++i) {
+			for (int i = 0; i < 4; ++i) {
 				if (strcmp(INPUT_ELEMENT_DESCRIPTIONS[i].semantic, name) == 0) {
 					return i;
 				}
@@ -647,6 +647,7 @@ namespace ds {
 		}
 
 		static bool createVertexShader(ID3DBlob* buffer, ID3D11VertexShader** shader) {
+			XASSERT(buffer != 0, "The buffer must not be NULL");
 			HRESULT d3dResult = _resCtx->device->CreateVertexShader(buffer->GetBufferPointer(), buffer->GetBufferSize(), 0, shader);
 			if (d3dResult < 0) {
 				if (buffer) {
@@ -658,6 +659,7 @@ namespace ds {
 		}
 
 		static bool createGeometryShader(ID3DBlob* buffer, ID3D11GeometryShader** shader) {
+			XASSERT(buffer != 0, "The buffer must not be NULL");
 			HRESULT d3dResult = _resCtx->device->CreateGeometryShader(buffer->GetBufferPointer(), buffer->GetBufferSize(), 0, shader);
 			if (d3dResult < 0) {
 				if (buffer) {
@@ -669,6 +671,7 @@ namespace ds {
 		}
 
 		static bool createPixelShader(ID3DBlob* buffer, ID3D11PixelShader** shader) {
+			XASSERT(buffer != 0, "The buffer must not be NULL");
 			HRESULT d3dResult = _resCtx->device->CreatePixelShader(buffer->GetBufferPointer(), buffer->GetBufferSize(), 0, shader);
 			if (d3dResult < 0) {
 				if (buffer) {
