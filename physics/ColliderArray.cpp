@@ -14,8 +14,8 @@ namespace ds {
 		// Given three colinear points p, q, r, the function checks if
 		// point q lies on line segment 'pr'
 		bool onSegment(const v2& p, const v2& q, const v2& r) {
-			if (q.x <= std::max(p.x, r.x) && q.x >= std::min(p.x, r.x) &&
-				q.y <= std::max(p.y, r.y) && q.y >= std::min(p.y, r.y))
+			if (q.x <= (std::max)(p.x, r.x) && q.x >= (std::min)(p.x, r.x) &&
+				q.y <= (std::max)(p.y, r.y) && q.y >= (std::min)(p.y, r.y))
 				return true;
 
 			return false;
@@ -200,9 +200,9 @@ namespace ds {
 				}
 			}
 			//possible first time of overlap
-			*u0 = std::max(u_0.x, std::max(u_0.y, u_0.z));
+			*u0 = (std::max)(u_0.x, (std::max)(u_0.y, u_0.z));
 			//possible last time of overlap
-			*u1 = std::min(u_1.x, std::min(u_1.y, u_1.z));
+			*u1 = (std::min)(u_1.x, (std::min)(u_1.y, u_1.z));
 			//they could have only collided if
 			//the first time of overlap occurred
 			//before the last time of overlap

@@ -34,7 +34,7 @@ namespace ds {
 		SpriteVertex* _vertices;
 		int _maxSprites;
 		bool _started;
-		v4 _screenDimension;
+		//v4 _screenDimension;
 		SpriteBufferCB _constantBuffer;
 	};
 

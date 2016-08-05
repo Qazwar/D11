@@ -16,7 +16,7 @@ namespace ds {
 		_maxSprites = descriptor.size;
 		_sprites = new Sprite[descriptor.size];
 		_vertices = new SpriteVertex[4 * descriptor.size];
-		_screenDimension = v4(graphics::getScreenWidth(), graphics::getScreenHeight(), 1024.0f, 1024.0f);
+		//_screenDimension = v4(graphics::getScreenWidth(), graphics::getScreenHeight(), 1024.0f, 1024.0f);
 		_constantBuffer.setScreenSize(v2(graphics::getScreenWidth(), graphics::getScreenHeight()));
 		_constantBuffer.setTextureSize(1024.0f, 1024.0f);
 	}
@@ -176,6 +176,7 @@ namespace ds {
 			_vertices[i] = SpriteVertex(sprite.position, t, v3(sprite.scale.x,sprite.scale.y,sprite.rotation),sprite.color);
 		}
 		graphics::mapData(_descriptor.vertexBuffer, _vertices, _index * sizeof(SpriteVertex));
+		_constantBuffer.wvp = ds::matrix::mat4Transpose(graphics::getOrthoCamera()->getViewProjectionMatrix());
 		graphics::updateSpriteConstantBuffer(_constantBuffer);
 		graphics::draw(_index);
 		graphics::turnOnZBuffer();
@@ -196,6 +197,7 @@ namespace ds {
 		// FIXME: use material from scene
 		graphics::setMaterial(material);
 		graphics::mapData(_descriptor.vertexBuffer, &sp, sizeof(SpriteVertex));
+		_constantBuffer.wvp = ds::matrix::mat4Transpose(graphics::getOrthoCamera()->getViewProjectionMatrix());
 		graphics::updateSpriteConstantBuffer(_constantBuffer);
 		graphics::draw(1);
 		graphics::turnOnZBuffer();

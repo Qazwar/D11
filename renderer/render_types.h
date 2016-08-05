@@ -4,6 +4,7 @@
 #include "..\math\math_types.h"
 #include "..\utils\Color.h"
 #include "..\Common.h"
+#include "..\math\matrix.h"
 
 namespace ds {
 	
@@ -25,6 +26,7 @@ namespace ds {
 	struct SpriteBufferCB {
 
 		v4 screenDimension;
+		mat4 wvp;
 
 		SpriteBufferCB() : screenDimension(v4(1024, 768, 1024, 1024)) {}
 

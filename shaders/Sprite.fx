@@ -1,5 +1,6 @@
 cbuffer cbChangesPerFrame : register( b0 ) {
     float4 screenDimension;
+	matrix wvp;
 };
 
 
@@ -40,34 +41,37 @@ GSPS_INPUT VS_Main( VS_Input vertex ) {
 [maxvertexcount(4)]
 void GS_Main(point GSPS_INPUT gin[1], inout TriangleStream<PS_Input> triStream)
 {    
-    float VP_ARRAY[8] = { -1.0f, 1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f };
+    //float VP_ARRAY[8] = { -1.0f, 1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f };
+	float VP_ARRAY[8] = { -0.5f, 0.5f, 0.5f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f };
     float2 t[4];
     float4 ret = gin[0].Tex;
     float left = ret.x / screenDimension.z;
     float top = ret.y / screenDimension.w;
-    float right = left + ret.z / screenDimension.z;
-    float bottom = top + ret.w / screenDimension.w;
+	float width = ret.z / screenDimension.z;
+	float height = ret.w / screenDimension.w;
+    float right = left + width;
+    float bottom = top + height;
     t[0] = float2(left,top);
     t[1] = float2(right,top);
     t[2] = float2(left,bottom);
     t[3] = float2(right,bottom);
 
-    float dx = ret.z / screenDimension.x;
-    float dy = ret.w / screenDimension.y;
-    float4 pos = gin[0].Pos;
-    pos.x = pos.x / screenDimension.x * 2.0 - 1.0;
-    pos.y = pos.y / screenDimension.y * 2.0 - 1.0;
+    
+	float4 pos = gin[0].Pos;
+	pos -= float4(screenDimension.x / 2.0, screenDimension.y / 2.0, 0.0, 1.0);
     PS_Input gout;
     triStream.RestartStrip();
+	float rot = gin[0].Size.z;
+	
     [unroll]
     for(int i = 0; i < 4; ++i) {
-        float px = VP_ARRAY[i * 2] * dx;
-        float py = VP_ARRAY[i * 2 + 1] * dy;
-        float sx = px * gin[0].Size.x;
-        float sy = py * gin[0].Size.y;
-        float xt = cos(gin[0].Size.z) * sx - sin(gin[0].Size.z) * sy;
-        float yt = sin(gin[0].Size.z) * sx + cos(gin[0].Size.z) * sy;
-        gout.pos = float4(xt + pos.x, yt + pos.y, 0.5f, 1.0f); 
+		float px = VP_ARRAY[i * 2] * ret.z;
+		float py = VP_ARRAY[i * 2 + 1] * ret.w;  
+		float sx = px * gin[0].Size.x;
+		float sy = py * gin[0].Size.y;
+        float xt = cos(rot) * sx - sin(rot) * sy;
+        float yt = sin(rot) * sx + cos(rot) * sy;
+        gout.pos = mul(float4(xt + pos.x, yt + pos.y, 0.0f, 1.0f),wvp); 
         gout.tex0 = t[i];
         gout.color = gin[0].Color;
         triStream.Append(gout);

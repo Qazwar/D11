@@ -346,7 +346,7 @@ namespace math {
 	v3 min_val(const v3& r, const v3& l) {
 		v3 p;
 		for (int i = 0; i < 3; ++i) {
-			p.data[i] = std::min(r.data[i], l.data[i]);
+			p.data[i] = (std::min)(r.data[i], l.data[i]);
 		}
 		return p;
 	}
@@ -354,7 +354,7 @@ namespace math {
 	v3 max_val(const v3& r, const v3& l) {
 		v3 p;
 		for (int i = 0; i < 3; ++i) {
-			p.data[i] = std::max(r.data[i], l.data[i]);
+			p.data[i] = (std::max)(r.data[i], l.data[i]);
 		}
 		return p;
 	}
