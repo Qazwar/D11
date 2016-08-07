@@ -176,7 +176,8 @@ namespace ds {
 			_vertices[i] = SpriteVertex(sprite.position, t, v3(sprite.scale.x,sprite.scale.y,sprite.rotation),sprite.color);
 		}
 		graphics::mapData(_descriptor.vertexBuffer, _vertices, _index * sizeof(SpriteVertex));
-		_constantBuffer.wvp = ds::matrix::mat4Transpose(graphics::getOrthoCamera()->getViewProjectionMatrix());
+		mat4 w = matrix::m4identity();
+		_constantBuffer.wvp = ds::matrix::mat4Transpose(w * graphics::getOrthoCamera()->getViewProjectionMatrix());
 		graphics::updateSpriteConstantBuffer(_constantBuffer);
 		graphics::draw(_index);
 		graphics::turnOnZBuffer();

@@ -2,6 +2,7 @@
 #include "..\Common.h"
 #include "..\utils\Log.h"
 #include "..\base\InputSystem.h"
+#include <d3dx9math.h>
 
 namespace ds {
 
@@ -40,7 +41,9 @@ namespace ds {
 
 	OrthoCamera::OrthoCamera(float screenWidth, float screenHeight) : Camera() {
 		_viewMatrix = matrix::m4identity();
-		_projectionMatrix = ds::matrix::mat4OrthoLH(screenWidth, screenHeight, 0.1f, 100.0f);
+		_projectionMatrix = ds::matrix::mat4OrthoLH(screenWidth, screenHeight, 0.1f, 1.0f);
+		//D3DXMATRIX m_orthoMatrix;
+		//D3DXMatrixOrthoLH(&m_orthoMatrix, (float)screenWidth, (float)screenHeight, 0.1f, 100.0f);
 		_viewProjectionMatrix = _viewMatrix * _projectionMatrix;
 	}
 

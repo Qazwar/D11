@@ -52,6 +52,7 @@ namespace graphics {
 
 		ID3D11Buffer* spriteCB;
 		ds::SpriteBuffer* sprites;
+		bool depthEnabled;
 	};
 
 	static GraphicContext* _context;
@@ -194,6 +195,8 @@ namespace graphics {
 
 	void createInternalSpriteBuffer() {
 		// FIXME: create SpriteBufferCB
+		int d = sizeof(ds::SpriteBufferCB) % 16;
+		assert(d == 0);
 		D3D11_BUFFER_DESC constDesc;
 		ZeroMemory(&constDesc, sizeof(constDesc));
 		constDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -266,6 +269,7 @@ namespace graphics {
 		_context->screenWidth = settings.screenWidth;
 		_context->screenHeight = settings.screenHeight;
 		_context->clearColor = settings.clearColor;
+		_context->depthEnabled = true;
 		RECT dimensions;
 		GetClientRect(hwnd, &dimensions);
 
@@ -507,6 +511,7 @@ namespace graphics {
 	void beginRendering() {
 		_context->d3dContext->ClearRenderTargetView(_context->backBufferTarget, _context->clearColor);
 		_context->d3dContext->ClearDepthStencilView(_context->depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0.0);
+		turnOnZBuffer();		
 	}
 
 	// ------------------------------------------------------
@@ -681,11 +686,17 @@ namespace graphics {
 	}
 
 	void turnOnZBuffer() {
-		_context->d3dContext->OMSetDepthStencilState(_context->depthEnabledStencilState, 1);
+		if (!_context->depthEnabled) {
+			_context->depthEnabled = true;
+			_context->d3dContext->OMSetDepthStencilState(_context->depthEnabledStencilState, 1);
+		}
 	}
 
 	void turnOffZBuffer() {
-		_context->d3dContext->OMSetDepthStencilState(_context->depthDisabledStencilState, 1);
+		if (_context->depthEnabled) {
+			_context->depthEnabled = false;
+			_context->d3dContext->OMSetDepthStencilState(_context->depthDisabledStencilState, 1);
+		}
 	}
 
 	ds::Ray getCameraRay(ds::Camera* camera) {
