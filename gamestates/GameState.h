@@ -79,7 +79,7 @@ public:
 		_dialog = res::getGUIDialog(dialogName);
 	}
 	~BasicMenuGameState() {}
-	int onButtonUp(int button, int x, int y) {
+	virtual int onButtonUp(int button, int x, int y) {
 		int ret = _dialog->onButton(button, x, y, true);
 		if (ret != -1) {
 			int tmp = onGUIButton(ret);
@@ -90,12 +90,12 @@ public:
 		}
 		return 0;
 	}
-	void render() {
+	virtual void render() {
 		graphics::turnOffZBuffer();
 		_dialog->render();
 		graphics::turnOnZBuffer();
 	}
-	int onChar(int ascii) {
+	virtual int onChar(int ascii) {
 #ifdef DEBUG
 		if (ascii == 'r') {
 			res::reloadDialog(_dialogName);

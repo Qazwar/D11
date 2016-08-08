@@ -164,20 +164,32 @@ namespace ds {
 	// -------------------------------------------------------
 	GUID GUIDialog::addImageButton(int id,int x,int y,const Rect& textureRect,bool centered) {
 		GUID& gid = _ids[_idIndex++];
-		/*
 		XASSERT(gid.id == -1, "The id %d is already in use", id);
 		gid.id = id;
-		// add entry
-		Vector2f p = v2(x, y);
-		gid.entryIndex = createItem(p, GIT_IMAGE_BUTTON, 1.0f, centered);
-		GUIImageButton image;
-		image.texture = math::buildTexture(textureRect);
+		gid.index = _items.size();
+		v2 p = v2(x, y);
+		if (centered) {
+			p.x = graphics::getScreenWidth() * 0.5f;
+		}
+		DialogItem item;
+		item.pos = p;
+		item.centered = centered;
+		item.color = Color::WHITE;
+		item.rotation = 0.0f;
+		item.scale = v2(1, 1);
+		item.type = GIT_IMAGE_BUTTON;
+		item.id = id;
+		item.visible = true;
+		item.index = _vertices.size();
 		float w = textureRect.width();
 		float h = textureRect.height();
-		image.boundingRect = Rect(h * 0.5f, w * -0.5f, w, -h);
-		gid.index = _imageButtons.size();
-		_imageButtons.push_back(image);
-		*/
+		item.boundingRect = Rect(h * 0.5f, w * -0.5f, w, -h);
+		DialogVertex v;
+		v.offset = v2(0, 0);
+		v.texture = math::buildTexture(textureRect);
+		_vertices.push_back(v);
+		item.num = 1;
+		_items.push_back(item);
 		return gid;
 	}
 
@@ -728,6 +740,13 @@ namespace ds {
 				Rect r;
 				reader.get(cats[i], "rect", &r);
 				GUID gid = addImage(id, item.pos.x, item.pos.y, r, item.scale, item.centered);
+			}			
+			else if (reader.matches(cats[i], "image_button")) {
+				DialogItem item;
+				int id = loadItem(cats[i], reader, &item);
+				Rect r;
+				reader.get(cats[i], "rect", &r);
+				GUID gid = addImageButton(id, item.pos.x, item.pos.y, r, item.centered);
 			}
 			else if (reader.matches(cats[i], "button")) {
 				DialogItem item;
@@ -736,13 +755,6 @@ namespace ds {
 				reader.get(cats[i], "rect", &r);
 				const char* label = reader.get_string(cats[i], "text");
 				GUID gid = addButton(id, item.pos.x, item.pos.y, label, r, item.color, item.scale, item.centered);
-			}
-			else if (reader.matches(cats[i], "image_button")) {
-				DialogItem item;
-				int id = loadItem(cats[i], reader, &item);
-				Rect r;
-				reader.get(cats[i], "rect", &r);
-				GUID gid = addImageButton(id, item.pos.x, item.pos.y, r, item.centered);
 			}
 			else if (reader.matches(cats[i], "text")) {
 				DialogItem item;
