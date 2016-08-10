@@ -1038,4 +1038,302 @@ void JSONWriter::writeIdent() {
 	}
 }
 
+FlatJSONReader::FlatJSONReader() : _text(0) {
+	int data_sizes[] = { sizeof(unsigned int), sizeof(int), sizeof(int), sizeof(int) };
+	_data_buffer.init(data_sizes, 4);
+}
+// -------------------------------------------
+// add category
+// -------------------------------------------
+int FlatJSONReader::add_category(const char* name) {
+	int idx = _name_buffer.size;
+	int l = strlen(name);
+	if (_name_buffer.size + l > _name_buffer.capacity) {
+		_name_buffer.resize(_name_buffer.capacity + 256);
+	}
+	_name_buffer.append(name, l);
+	return idx;
+}
+
+void FlatJSONReader::buildName(const Stack<CategoryEntry>& stack, char* buffer) {
+	std::string tmp;
+	char b[128];
+	for (int i = stack.size() - 1; i >= 0; --i) {
+		const CategoryEntry& c = stack.at(i);
+		strncpy(b, _name_buffer.data + c.text_index, c.text_length);
+		b[c.text_length] = '\0';
+		tmp.append(b);
+		tmp.append(".");
+	}
+	strcpy(buffer, tmp.c_str());
+}
+
+// -------------------------------------------
+// allocate data buffer
+// -------------------------------------------
+void FlatJSONReader::alloc(int elements) {
+	if (_data_buffer.resize(elements)) {
+		_data_keys = (unsigned int*)_data_buffer.get_ptr(0);
+		_data_indices = (int*)_data_buffer.get_ptr(1);
+		_data_sizes = (int*)_data_buffer.get_ptr(2);
+	}
+}
+
+// -------------------------------------------
+// create property
+// -------------------------------------------
+int FlatJSONReader::create_property(const char* name) {
+	if (_data_buffer.size + 1 > _data_buffer.capacity) {
+		alloc(_data_buffer.size * 2 + 8);
+	}
+	_data_keys[_data_buffer.size] = string::murmur_hash(name);
+	_data_indices[_data_buffer.size] = _values.num;
+	_data_sizes[_data_buffer.size] = 0;
+	++_data_buffer.size;
+	LOG << "property: " << name;
+	return _data_buffer.size - 1;
+}
+
+// -------------------------------------------
+// add value to property
+// -------------------------------------------
+void FlatJSONReader::add(int pIndex, float value) {
+	float* v = (float*)_values.alloc(sizeof(float));
+	*v = value;
+	++_data_sizes[pIndex];
+}
+
+// -------------------------------------------
+// add string to property
+// -------------------------------------------
+void FlatJSONReader::add(int pIndex, const char* c, int len) {
+	int sz = ((len + 4) / 4) * 4;
+	char* v = (char*)_values.alloc(sz * sizeof(char));
+	for (int i = 0; i < len; ++i) {
+		*v = c[i];
+		++v;
+	}
+	*v = '\0';
+	_data_sizes[pIndex] = sz / 4;
+}
+
+// -------------------------------------------
+// add char to property
+// -------------------------------------------
+void FlatJSONReader::add(int pIndex, char c) {
+	char* v = (char*)_values.alloc(sizeof(char));
+	*v = c;
+	++_data_sizes[pIndex];
+}
+
+// -------------------------------------------
+// get index
+// -------------------------------------------
+int FlatJSONReader::get_index(const char* name) const {
+	unsigned int key = string::murmur_hash(name);
+	for (int i = 0; i < _data_buffer.size; ++i) {
+		if (_data_keys[i] == key) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+// -------------------------------------------
+// get float value
+// -------------------------------------------
+float FlatJSONReader::get(int index) const {
+	char* p = _values.data + index * sizeof(float);
+	float* v = (float*)(p);
+	return *v;
+}
+// -------------------------------------------
+// get float
+// -------------------------------------------
+bool FlatJSONReader::get_float(const char* name, float* ret) const {
+	int idx = get_index(name);
+	if (idx != -1) {
+		*ret = get(_data_indices[idx]);
+		return true;
+	}
+	return false;
+}
+
+// -------------------------------------------
+// get float
+// -------------------------------------------
+bool FlatJSONReader::get(const char* name, float* ret) const {
+	int idx = get_index(name);
+	if (idx != -1) {
+		*ret = get(_data_indices[idx]);
+		return true;
+	}
+	return false;
+}
+
+// -------------------------------------------
+// get v2 path
+// -------------------------------------------
+bool FlatJSONReader::get(const char* name, Vector2fPath* path) const {
+	int idx = get_index(name);
+	if (idx != -1) {
+		int entries = _data_sizes[idx];
+		int steps = entries / 3;
+		if ((entries % 3) == 0) {
+			int current = 0;
+			for (int i = 0; i < steps; ++i) {
+				float step = get(_data_indices[idx] + current);
+				++current;
+				v2 c;
+				c.x = get(_data_indices[idx] + current);
+				++current;
+				c.y = get(_data_indices[idx] + current);
+				++current;
+				path->add(step, c);
+			}
+		}
+		else {
+			return false;
+		}
+	}
+	return true;
+}
+// -------------------------------------------
+// get int
+// -------------------------------------------
+bool FlatJSONReader::get(const char* name, int* ret) const {
+	int idx = get_index(name);
+	if (idx != -1) {
+		*ret = static_cast<int>(get(_data_indices[idx]));
+		return true;
+	}
+	return false;
+}
+
+bool FlatJSONReader::get(const char* name, Color* ret) const {
+	int idx = get_index(name);
+	if (idx != -1) {
+		ret->r = get(_data_indices[idx]) / 255.0f;
+		ret->g = get(_data_indices[idx] + 1) / 255.0f;
+		ret->b = get(_data_indices[idx] + 2) / 255.0f;
+		ret->a = get(_data_indices[idx] + 3) / 255.0f;
+		return true;
+	}
+	return false;
+}
+
+// -------------------------------------------
+// get rect
+// -------------------------------------------
+bool FlatJSONReader::get(const char* name, Rect* ret) const {
+	int idx = get_index(name);
+	if (idx != -1) {
+		ret->top = get(_data_indices[idx]);
+		ret->left = get(_data_indices[idx] + 1);
+		ret->right = ret->left + get(_data_indices[idx] + 2);
+		ret->bottom = ret->top + get(_data_indices[idx] + 3);
+		return true;
+	}
+	return false;
+}
+
+// -------------------------------------------
+// contains
+// -------------------------------------------
+bool FlatJSONReader::contains(const char* name) const {
+	return get_index(name) != -1;
+}
+// -------------------------------------------
+// parse
+// -------------------------------------------
+bool FlatJSONReader::parse(const char* fileName) {
+	int fileSize = -1;
+	_text = repository::load(fileName, &fileSize);
+	if (fileSize == -1) {
+		return false;
+	}
+	Tokenizer tokenizer;
+	tokenizer.parse(_text);
+	char name[128];
+	char fullName[256];
+	int n = 0;
+	int category_index = 0;
+	int cat = -1;
+	Stack<CategoryEntry> cat_stack;
+	char cat_name[256];
+	while (n < tokenizer.size()) {
+		Token& t = tokenizer.get(n);
+		if (t.type == Token::NAME) {
+			if (tokenizer.get(n + 1).type == Token::OPEN_BRACES) {
+				++n;
+				strncpy(name, _text + t.index, t.size);
+				name[t.size] = '\0';
+				CategoryEntry cat;
+				cat.text_index = add_category(name);
+				cat.text_length = strlen(name);
+				cat_stack.push(cat);
+				buildName(cat_stack, cat_name);
+				//LOG << "cat_name: " << cat_name;
+				++n;
+			}
+			else if (tokenizer.get(n + 1).type == Token::SEPARATOR) {
+				++n;
+				strncpy(name, _text + t.index, t.size);
+				name[t.size] = '\0';
+				sprintf(fullName, "%s%s", cat_name, name);
+				LOG << "fullname: " << fullName;
+				int p = create_property(fullName);
+				++n;
+				Token& v = tokenizer.get(n);
+				if (v.type == Token::STRING) {
+					int start = v.index;
+					int end = v.index + v.size;
+					add(p, _text + start, v.size);
+					++n;
+				}
+				else if (v.type == Token::NAME) {
+					strncpy(name, _text + v.index, v.size);
+					name[v.size] = '\0';
+					if (strcmp(name, "true") == 0) {
+						add(p, 1.0f);
+					}
+					else {
+						add(p, 0.0f);
+					}
+					++n;
+				}
+				else {
+					bool parsing = true;
+					while (parsing) {
+						if (v.type == Token::NUMBER) {
+							add(p, v.value);
+							if (tokenizer.get(n + 1).type != Token::DELIMITER) {
+								parsing = false;
+							}
+						}
+						++n;
+						v = tokenizer.get(n);
+
+					}
+				}
+			}
+		}
+
+		else if (t.type == Token::CLOSE_BRACES) {
+			if (!cat_stack.empty()) {
+				cat_stack.pop();
+			}
+			buildName(cat_stack, cat_name);
+			//LOG << "cat_name: " << cat_name;
+			++n;
+		}
+		else {
+			++n;
+		}
+		t = tokenizer.get(n);
+	}
+	return true;
+}
+
+
 }

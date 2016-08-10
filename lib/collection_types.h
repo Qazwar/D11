@@ -511,11 +511,11 @@ namespace ds {
 			return _items[_size - index - 1];
 		}
 
-		uint32_t size() {
+		uint32_t size() const {
 			return _size;
 		}
 
-		bool empty() {
+		bool empty() const {
 			return _size == 0;
 		}
 

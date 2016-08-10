@@ -39,7 +39,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// dynamic settings
 	// -------------------------------------------------------
-	struct DynamicGameSettings : public DataFile {
+	struct DynamicGameSettings {
 
 		DynamicGameSettings();
 		~DynamicGameSettings();
@@ -59,8 +59,7 @@ namespace ds {
 		//void addPath(const char* name, Vector2fPath* value);
 		//bool setPath(const char* name, const Vector2fPath& value);
 		
-		bool saveData(JSONWriter& writer);
-		bool loadData(const JSONReader& loader);
+		bool load();
 
 		virtual const char* getFileName() const = 0;
 

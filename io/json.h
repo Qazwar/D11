@@ -152,4 +152,45 @@ namespace ds {
 		int _items;
 	};
 
+	class FlatJSONReader {
+
+		struct CategoryEntry {
+			int text_index;
+			int text_length;
+		};
+
+	public:
+		FlatJSONReader();
+		~FlatJSONReader() {
+			if (_text) {
+				delete _text;
+			}
+		}
+		bool parse(const char* fileName);
+		bool get_float(const char* name, float* ret) const;
+		bool get(const char* name, float* ret) const;
+		bool get(const char* name, int* ret) const;
+		bool get(const char* name, Rect* ret) const;
+		bool get(const char* name, Color* ret) const;
+		bool get(const char* name, Vector2fPath* ret) const;
+		bool contains(const char* name) const;
+	private:
+		void add(int pIndex, float value);
+		void add(int pIndex, const char* c, int len);
+		void add(int pIndex, char c);
+		int add_category(const char* name);
+		void buildName(const Stack<CategoryEntry>& stack, char* buffer);
+		int create_property(const char* name);
+		void alloc(int elements);
+		float get(int index) const;
+		int get_index(const char* name) const;
+		char* _text;
+		CharBuffer _name_buffer;
+		BlockArray _data_buffer;
+		unsigned int* _data_keys;
+		int* _data_indices;
+		int* _data_sizes;
+		CharBuffer _values;
+	};
+
 }
