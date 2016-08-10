@@ -68,7 +68,7 @@ namespace ds {
 		DialogItem item;
 		item.pos = p;
 		item.centered = centered;
-		item.color = Color::WHITE;
+		item.color = color;
 		item.rotation = 0.0f;
 		item.scale = scale;
 		item.type = GIT_NUMBERS;
@@ -241,7 +241,7 @@ namespace ds {
 		item.centered = centered;
 		item.color = color;
 		item.rotation = 0.0f;
-		item.scale = v2(1, 1);
+		item.scale = scale;
 		item.type = GIT_TEXT;
 		item.id = id;
 		item.visible = true;
