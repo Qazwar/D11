@@ -15,6 +15,8 @@ namespace ds {
 		ST_INT,
 		ST_V2_PATH,
 		ST_COLOR,
+		ST_VEC2,
+		ST_VEC3,
 		ST_NONE
 	};
 
@@ -47,8 +49,10 @@ namespace ds {
 		void add(const char* name, float* value, float defaultValue = 0.0f);
 		bool set(const char* name, float value);
 
-		//void addInt(const char* name, int* value, int defaultValue);
-		//bool setInt(const char* name, int value);
+		void add(const char* name, int* value, int defaultValue);
+		bool set(const char* name, int value);
+
+		void add(const char* name, v2* value, const v2& defaultValue);
 
 		//void addRect(const char* name, Rect* value, const Rect& defaultValue);
 		//bool setRect(const char* name, const Rect& value);

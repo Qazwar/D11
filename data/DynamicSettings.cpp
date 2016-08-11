@@ -24,6 +24,26 @@ namespace ds {
 		items.push_back(item);
 	}
 
+	void DynamicGameSettings::add(const char* name, int* value, int defaultValue) {
+		*value = defaultValue;
+		SettingsItem item;
+		item.name = name;
+		item.hash = string::murmur_hash(name);
+		item.type = ST_INT;
+		item.ptr.iPtr = value;
+		items.push_back(item);
+	}
+
+	void DynamicGameSettings::add(const char* name, v2* value, const v2& defaultValue) {
+		*value = defaultValue;
+		SettingsItem item;
+		item.name = name;
+		item.hash = string::murmur_hash(name);
+		item.type = ST_VEC2;
+		item.ptr.v2Ptr = value;
+		items.push_back(item);
+	}
+
 	// -----------------------------------------------
 	// load JSON
 	// -----------------------------------------------
@@ -53,6 +73,9 @@ namespace ds {
 					}
 					else if (item.type == ST_V2_PATH) {
 						loader.get(item.name, item.ptr.pPtr);
+					}
+					else if (item.type == ST_VEC2) {
+						loader.get(item.name, item.ptr.v2Ptr);
 					}
 					else if (item.type == ST_COLOR) {
 						loader.get(item.name, item.ptr.cPtr);

@@ -1222,6 +1222,16 @@ bool FlatJSONReader::get(const char* name, Color* ret) const {
 	return false;
 }
 
+bool FlatJSONReader::get(const char* name, v2* ret) const {
+	int idx = get_index(name);
+	if (idx != -1) {
+		ret->x = get(_data_indices[idx]);
+		ret->y = get(_data_indices[idx] + 1);
+		return true;
+	}
+	return false;
+}
+
 // -------------------------------------------
 // get rect
 // -------------------------------------------
