@@ -3,6 +3,28 @@
 
 namespace ds {
 
+	// ------------------------------------------------------
+	// HSL
+	// 0 < h < 360
+	// 0 < s < 100
+	// 0 < l < 100
+	// ------------------------------------------------------
+	struct HSL {
+
+		union {
+			float values[3];
+			struct {
+				float h;
+				float s;
+				float l;
+			};
+		};
+
+		HSL() : h(0.0f), s(0.0f), l(0.0f) {}
+		HSL(float hue, float saturation, float luminance) : h(hue), s(saturation), l(luminance) {}
+
+	};
+
 	struct Color {
 
 		union {
@@ -77,9 +99,13 @@ namespace ds {
 
 	namespace color {
 
+		Color convert(const HSL& hsl);
+
 		Color lerp(const Color& lhs, const Color& rhs, float t);
 
 		Color hsvToColor(float h, float s, float v);
+
+		void generateGoldenRatioRainbow(int count, float s, float l, Color* colors, int num);
 
 	}
 }
