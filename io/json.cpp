@@ -1090,7 +1090,6 @@ int FlatJSONReader::create_property(const char* name) {
 	_data_indices[_data_buffer.size] = _values.num;
 	_data_sizes[_data_buffer.size] = 0;
 	++_data_buffer.size;
-	LOG << "property: " << name;
 	return _data_buffer.size - 1;
 }
 
@@ -1283,7 +1282,6 @@ bool FlatJSONReader::parse(const char* fileName) {
 				cat.text_length = strlen(name);
 				cat_stack.push(cat);
 				buildName(cat_stack, cat_name);
-				//LOG << "cat_name: " << cat_name;
 				++n;
 			}
 			else if (tokenizer.get(n + 1).type == Token::SEPARATOR) {
@@ -1291,7 +1289,6 @@ bool FlatJSONReader::parse(const char* fileName) {
 				strncpy(name, _text + t.index, t.size);
 				name[t.size] = '\0';
 				sprintf(fullName, "%s%s", cat_name, name);
-				LOG << "fullname: " << fullName;
 				int p = create_property(fullName);
 				++n;
 				Token& v = tokenizer.get(n);
@@ -1328,13 +1325,11 @@ bool FlatJSONReader::parse(const char* fileName) {
 				}
 			}
 		}
-
 		else if (t.type == Token::CLOSE_BRACES) {
 			if (!cat_stack.empty()) {
 				cat_stack.pop();
 			}
 			buildName(cat_stack, cat_name);
-			//LOG << "cat_name: " << cat_name;
 			++n;
 		}
 		else {

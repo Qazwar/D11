@@ -25,6 +25,28 @@ namespace ds {
 
 	};
 
+	// ------------------------------------------------------
+	// HSV
+	// 0 < h < 360
+	// 0 < s < 100
+	// 0 < v < 100
+	// ------------------------------------------------------
+	struct HSV {
+
+		union {
+			float values[3];
+			struct {
+				float h;
+				float s;
+				float v;
+			};
+		};
+
+		HSV() : h(0.0f), s(0.0f), v(0.0f) {}
+		HSV(float hue, float saturation, float value) : h(hue), s(saturation), v(value) {}
+
+	};
+
 	struct Color {
 
 		union {
@@ -99,7 +121,7 @@ namespace ds {
 
 	namespace color {
 
-		Color convert(const HSL& hsl);
+		Color hsl2rgb(const HSL& hsl);
 
 		Color lerp(const Color& lhs, const Color& rhs, float t);
 

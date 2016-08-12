@@ -35,7 +35,7 @@ namespace ds {
 				return temp1;
 		}
 
-		Color convert(const HSL& hsl) {
+		Color hsl2rgb(const HSL& hsl) {
 			float r = 0.0f, g = 0.0f, b = 0.0f;
 			float l = hsl.l / 100.0f;
 			float s = hsl.s / 100.0f;
@@ -67,7 +67,7 @@ namespace ds {
 			float currentHue = math::random(0.0f, 1.0f);
 			for (int i = 0; i < num; i++) {
 				ds::HSL hslColor = ds::HSL(currentHue * 360.0f, s, l);
-				colors[i] = convert(hslColor);
+				colors[i] = hsl2rgb(hslColor);
 				currentHue += goldenRatioConjugate;
 				if (currentHue > 1.0f) {
 					currentHue -= 1.0f;

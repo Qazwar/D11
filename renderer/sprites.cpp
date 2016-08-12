@@ -33,6 +33,10 @@ namespace ds {
 		draw(sprite.position, sprite.texture, sprite.rotation, sprite.scale, sprite.color);
 	}
 
+	void SpriteBuffer::draw(const p2i& position, const ds::Texture& texture, float rotation, const v2& scale, const Color& color, RID material) {
+		draw(v2(position.x, position.y), texture, rotation, scale, color, material);
+	}
+
 	void SpriteBuffer::draw(const v2& position, const ds::Texture& texture, float rotation, const v2& scale, const Color& color, RID material) {
 		if (_started) {
 			if (material != INVALID_RID && material != _currentMtrl) {
