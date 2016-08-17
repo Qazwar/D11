@@ -7,6 +7,7 @@
 #include "EventStream.h"
 #include "Game.h"
 #include "system_info.h"
+#include <thread>
 
 namespace ds {
 
@@ -79,7 +80,7 @@ namespace ds {
 		bool _loading;
 		bool _running;
 		bool _alive;
-		
+		bool _reload;
 		GameStateMachine* _stateMachine;
 		KeyStates _keyStates;
 		ButtonState _buttonState;
@@ -88,7 +89,7 @@ namespace ds {
 		std::chrono::steady_clock::time_point _start, _now;
 		float _ar[256];
 		int _num;
-
+		std::thread _thread;
 		SystemInfo _systemInfo;
 	};
 

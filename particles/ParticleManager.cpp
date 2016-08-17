@@ -65,7 +65,7 @@ namespace ds {
 	}
 
 	int ParticleManager::findGroup(uint32_t id) {
-		for (int i = 0; i < _groups.size(); ++i) {
+		for (uint32_t i = 0; i < _groups.size(); ++i) {
 			if (_groups[i].id == id) {
 				return i;
 			}
@@ -80,7 +80,7 @@ namespace ds {
 		int idx = findGroup(id);
 		if (idx != -1) {
 			const ParticleSystemGroup& group = _groups[idx];
-			for (int i = 0; i < group.systems.size(); ++i) {
+			for (uint32_t i = 0; i < group.systems.size(); ++i) {
 				ParticleSystem* system = _systems[group.systems[i]];
 				assert(system != 0);
 				system->start(pos);
@@ -120,7 +120,7 @@ namespace ds {
 		}
 		if (!_groups.empty()) {
 			writer.startCategory("groups");
-			for (int i = 0; i < _groups.size(); ++i) {
+			for (uint32_t i = 0; i < _groups.size(); ++i) {
 				const ParticleSystemGroup& group = _groups[i];
 				writer.startCategory(group.name);
 				writer.write("id", group.id);

@@ -59,7 +59,10 @@ namespace file {
 			// Retrieve the file times for the file.
 			GetFileTime(hFile, NULL, NULL, &time);
 			CloseHandle(hFile);    
-		}            
+		} 
+		else {
+			LOGE << "Cannot get filetime for '" << fileName << "'";
+		}
 	}
 
 	void listDirectory(const char* dir,std::vector<std::string>& files) {

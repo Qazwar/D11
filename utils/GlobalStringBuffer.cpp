@@ -18,7 +18,7 @@ namespace ds {
 
 	int GlobalStringBuffer::find(const char* str) const {
 		IdString hash = string::murmur_hash(str);
-		for (int i = 0; i < _entries.size(); ++i) {
+		for (uint32_t i = 0; i < _entries.size(); ++i) {
 			if (_entries[i].hash == hash && !_entries[i].used) {
 				return i;
 			}

@@ -202,6 +202,17 @@ namespace ds {
 		}
 	};
 
+	class SpriteSheetResource : public AbstractResource<SpriteSheet*> {
+
+	public:
+		SpriteSheetResource(SpriteSheet* t) : AbstractResource(t) {}
+		virtual ~SpriteSheetResource() {
+			if (_data != 0) {
+				delete _data;
+			}
+		}
+	};
+
 	class RenderTargetResource : public AbstractResource<RenderTarget*> {
 
 	public:

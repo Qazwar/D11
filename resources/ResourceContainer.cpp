@@ -10,9 +10,6 @@
 #include "..\renderer\render_types.h"
 #include "..\imgui\IMGUI.h"
 #include "..\utils\Assert.h"
-//#include "..\utils\ObjLoader.h"
-//#include "..\renderer\RenderTarget.h"
-//#include "..\renderer\SkyBox.h"
 #include "Resource.h"
 
 namespace ds {
@@ -128,6 +125,7 @@ namespace ds {
 			"SKYBOX",
 			"MATERIAL",
 			"PARTICLEMANAGER",
+			"SPRITESHEET",
 			"UNKNOWN"
 		};
 
@@ -457,6 +455,17 @@ namespace ds {
 			return create(name, ResourceType::TEXTURE);
 		}
 
+
+		static RID loadSpriteSheet(const char* name) {
+			char buffer[256];
+			sprintf_s(buffer, 256, "content\\%s.json", name);
+			SpriteSheet* sheet = new SpriteSheet(buffer);
+			sheet->load();
+			SpriteSheetResource* cbr = new SpriteSheetResource(sheet);
+			_resCtx->resources.push_back(cbr);
+			return create(name, ResourceType::SPRITESHEET);
+		}
+
 		// ------------------------------------------------------
 		// load bitmap font
 		// ------------------------------------------------------
@@ -540,7 +549,9 @@ namespace ds {
 		// create dialog
 		// ------------------------------------------------------
 		static RID createDialog(const char* name, const GUIDialogDescriptor& descriptor) {
-			GUIDialog* dialog = new GUIDialog(descriptor);
+			char fileName[256];
+			sprintf_s(fileName, 256, "content\\dialogs\\%s.json", descriptor.file);
+			GUIDialog* dialog = new GUIDialog(descriptor,fileName);
 			dialog->load();
 			int idx = _resCtx->resources.size();
 			GUIDialogResource* cbr = new GUIDialogResource(dialog);
@@ -930,6 +941,14 @@ namespace ds {
 		}
 
 		// ------------------------------------------------------
+		// parse spritesheet
+		// ------------------------------------------------------
+		void parseSpriteSheet(JSONReader& reader, int childIndex) {
+			const char* name = reader.get_string(childIndex, "name");
+			loadSpriteSheet(name);
+		}
+
+		// ------------------------------------------------------
 		// parse particle manager
 		// ------------------------------------------------------
 		void parseParticleManager(JSONReader& reader, int childIndex) {			
@@ -1128,6 +1147,7 @@ namespace ds {
 			_resCtx->parsers[string::murmur_hash("material")] = parseMaterial;
 			_resCtx->parsers[string::murmur_hash("particle_manager")] = parseParticleManager;
 			_resCtx->parsers[string::murmur_hash("render_target")] = parseRenderTarget;
+			_resCtx->parsers[string::murmur_hash("spritesheet")] = parseSpriteSheet;
 		}
 
 		// ------------------------------------------------------
@@ -1360,6 +1380,12 @@ namespace ds {
 			const ResourceIndex& res_idx = _resCtx->indices[rid];
 			XASSERT(res_idx.type == ResourceType::GUIDIALOG, "Different resource types - expected GUIDIALOG but found %s", ResourceTypeNames[res_idx.type]);
 			GUIDialogResource* res = static_cast<GUIDialogResource*>(_resCtx->resources[res_idx.id]);
+			return res->get();
+		}
+
+		SpriteSheet* getSpriteSheet(const char* name) {
+			RID rid = find(name, ResourceType::SPRITESHEET);
+			SpriteSheetResource* res = static_cast<SpriteSheetResource*>(_resCtx->resources[rid]);
 			return res->get();
 		}
 

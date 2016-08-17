@@ -245,7 +245,7 @@ void DefaultAllocator::save(const ReportWriter& writer) {
 	const char* INFO_HEADERS[] = { "Stack", "Size", "Reuse","Open" };
 	writer.startTable(INFO_HEADERS, 4);
 	char line[2048];
-	for (int i = 0; i < _infos.size(); ++i) {
+	for (uint32_t i = 0; i < _infos.size(); ++i) {
 		const AllocInfo& h = _infos[i];
 		writer.startRow();		
 		//_tracer->getCalleess(h.index, line, 2048);
@@ -261,7 +261,7 @@ void DefaultAllocator::save(const ReportWriter& writer) {
 }
 
 void DefaultAllocator::printOpenAllocations() {
-	for (int i = 0; i < _infos.size(); ++i) {
+	for (uint32_t i = 0; i < _infos.size(); ++i) {
 		const AllocInfo& h = _infos[i];
 		if (h.open) {
 			LOG << "Size: " << h.size;

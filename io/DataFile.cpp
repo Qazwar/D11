@@ -3,6 +3,7 @@
 #include "..\utils\Profiler.h"
 #include "..\utils\Log.h"
 #include "json.h"
+#include "FileRepository.h"
 
 namespace ds {
 
@@ -35,29 +36,48 @@ namespace ds {
 		StopWatch s;
 		s.start();
 		sprintf_s(buffer, 64, "content\\%s", getFileName());
-		// FIXME: assert that file name contains .
 		LOG << "Reading simplified json file: " << buffer;
 		JSONReader reader;
-		if (BINARY) {
-			sprintf_s(buffer, 64, "assets\\%u", string::murmur_hash(getFileName()));
-			if (reader.load_binary(buffer)) {
-				ret = loadData(reader);
-			}
+		if (reader.parse(buffer)) {
+			ret = loadData(reader);
 		}
 		else {
-			if (reader.parse(buffer)) {
-				ret = loadData(reader);
-			}
-			if (ret) {
-				sprintf_s(buffer, 64, "assets\\%u", string::murmur_hash(getFileName()));
-				LOG << "saving binary file: " << buffer;
-				reader.save_binary(buffer);
-			}
-		}
-		if (!ret) {
 			LOG << "Error: Cannot parse file: " << buffer;
 			ret = false;
 		}		
+		s.end();
+		LOG << "----> elapsed: " << s.elapsed();
+		return ret;
+	}
+
+	// -----------------------------------------------
+	// load JSON
+	// -----------------------------------------------
+	bool AssetFile::load() {
+		bool ret = false;
+		// check length
+		StopWatch s;
+		s.start();
+		LOG << "Reading simplified json file: " << _name;
+		JSONReader reader;
+		if (reader.parse(_name)) {
+			if (_loaded) {
+				LOG << "-> Reloading";
+				ret = reloadData(reader);
+			}
+			else {
+				LOG << "-> Loading";
+				ret = loadData(reader);
+				if (ret) {
+					_loaded = true;
+				}
+			}
+			repository::add(this);
+		}
+		else {
+			LOG << "Error: Cannot parse file: " << _name;
+			ret = false;
+		}
 		s.end();
 		LOG << "----> elapsed: " << s.elapsed();
 		return ret;

@@ -91,7 +91,7 @@ namespace ds {
 		sm.id = id;
 		sm.index = _staticVertices.size();
 		sm.size = mesh->vertices.size();
-		for (int i = 0; i < mesh->vertices.size(); ++i) {
+		for (uint32_t i = 0; i < mesh->vertices.size(); ++i) {
 			PNTCVertex v = mesh->vertices[i];
 			v.position = world * v.position;
 			_staticVertices.push_back(v);
@@ -293,7 +293,7 @@ namespace ds {
 		}
 		{
 			ZoneTracker z2("World:tick:kill");
-			for (int i = 0; i < _eventBuffer.events.size(); ++i) {
+			for (uint32_t i = 0; i < _eventBuffer.events.size(); ++i) {
 				const ActionEvent& e = _eventBuffer.events[i];
 				if (e.type == AT_KILL) {
 					remove(e.id);
@@ -404,7 +404,7 @@ namespace ds {
 			const Texture& t = _particleSystems.objects[i].system->getTexture();
 			//renderer->render(array, t);
 			if (array.countAlive > 0) {
-				for (int j = 0; j < array.countAlive; ++j) {
+				for (uint32_t j = 0; j < array.countAlive; ++j) {
 					sprites->draw(array.position[j].xy(), t, array.rotation[j], array.scale[j], array.color[j]);
 				}
 			}

@@ -31,7 +31,7 @@ namespace ds {
 
 	void ParticleTimeModule::debug(const ParticleModuleData* data, void* buffer, uint32_t count) {
 		float* timers = static_cast<float*>(buffer);
-		for (int i = 0; i < count; ++i) {
+		for (uint32_t i = 0; i < count; ++i) {
 			LOG << "timer: (" << i << ") : " << timers[i];
 		}
 	}
@@ -107,7 +107,7 @@ namespace ds {
 
 	void SizeModule::debug(const ParticleModuleData* data, void* buffer, uint32_t count) {
 		v2* scales = static_cast<v2*>(buffer);
-		for (int i = 0; i < count; ++i) {
+		for (uint32_t i = 0; i < count; ++i) {
 			LOG << "scale: (" << i << ") : " << DBG_V2(scales[i]);
 		}
 	}
@@ -261,7 +261,7 @@ namespace ds {
 
 	void AccelerationModule::debug(const ParticleModuleData* data, void* buffer, uint32_t count) {
 		v2* accelerations = static_cast<v2*>(buffer);
-		for (int i = 0; i < count; ++i) {
+		for (uint32_t i = 0; i < count; ++i) {
 			LOG << "acceleration: (" << i << ") : " << DBG_V2(accelerations[i * 2]) << " velocity: " << DBG_V2(accelerations[i * 2 + 1]);
 		}
 	}
@@ -310,7 +310,7 @@ namespace ds {
 
 	void VelocityModule::debug(const ParticleModuleData* data, void* buffer, uint32_t count) {
 		v2* velocities = static_cast<v2*>(buffer);
-		for (int i = 0; i < count; ++i) {
+		for (uint32_t i = 0; i < count; ++i) {
 			LOG << "velocity: (" << i << ") : " << DBG_V2(velocities[i]);
 		}
 	}

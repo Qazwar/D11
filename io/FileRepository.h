@@ -3,6 +3,7 @@
 namespace ds {
 
 	class DataFile;
+	class AssetFile;
 
 	namespace repository {
 
@@ -24,6 +25,8 @@ namespace ds {
 		char* load(const char* fileName, int* size, FileType type = FT_TEXT);
 
 		void load(DataFile* file, FileType type = FT_TEXT);
+
+		void add(AssetFile* file);
 
 		void reload();
 

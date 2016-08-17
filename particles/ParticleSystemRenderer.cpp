@@ -13,7 +13,7 @@ namespace ds {
 		int batchSize = 0;
 		_particles->begin();
 		if (array.countAlive > 0) {
-			for (int j = 0; j < array.countAlive; ++j) {
+			for (uint32_t j = 0; j < array.countAlive; ++j) {
 				_particles->draw(array.position[j].xy(), t, array.rotation[j], array.scale[j], array.color[j]);
 			}
 		}

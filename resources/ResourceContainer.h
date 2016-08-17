@@ -12,6 +12,7 @@
 #include "..\scene\Scene.h"
 #include "..\renderer\SkyBox.h"
 #include "..\renderer\RenderTarget.h"
+#include "..\renderer\SpriteSheet.h"
 #include "Resource.h"
 
 namespace ds {
@@ -50,6 +51,7 @@ namespace ds {
 		SKYBOX,
 		MATERIAL,
 		PARTICLEMANAGER,
+		SPRITESHEET,
 		UNKNOWN
 	};
 
@@ -116,6 +118,8 @@ namespace ds {
 		GUIDialog* getGUIDialog(RID rid);
 
 		GUIDialog* getGUIDialog(const char* name);
+
+		SpriteSheet* getSpriteSheet(const char* name);
 
 		SpriteBuffer* getSpriteBuffer(const char* name);
 

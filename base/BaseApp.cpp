@@ -10,6 +10,7 @@
 #include <strsafe.h>
 #include "..\data\DynamicSettings.h"
 #include "..\stats\DrawCounter.h"
+#include <thread>
 
 void ErrorExit(LPTSTR lpszFunction)
 {
@@ -46,6 +47,17 @@ void ErrorExit(LPTSTR lpszFunction)
 
 namespace ds {
 
+	// ----------------------------------------------------
+	// Thread function to call repository::reload
+	// ----------------------------------------------------
+	void repoReloading(int waitSeconds) {
+		long long wait = waitSeconds * 1000;
+		while (1) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(wait));
+			repository::reload();
+		}
+	}
+
 	BaseApp::BaseApp() {
 		_alive = true;
 		_dt = 1.0f / 60.0f;
@@ -59,7 +71,9 @@ namespace ds {
 		_buttonState.processed = true;
 		_start = std::chrono::steady_clock::now();
 		_num = 0;
+		_reload = false;
 		game = new Game;
+		
 	}
 
 
@@ -159,14 +173,23 @@ namespace ds {
 			res::debug();
 			_loading = false;
 			_start = std::chrono::steady_clock::now();
+
+			// FIXME: will handle repository reloading - can we do it like this?
+			_thread = std::thread(repoReloading,2);
+			_thread.detach();
+
 			return true;
-		}
+		}		
 		_loading = false;
 		return false;
 	}
 
 	void BaseApp::buildFrame() {
 		if (_alive) {
+			if (_reload) {
+				_reload = false;
+				repository::reload();
+			}
 			gDrawCounter->reset();
 			perf::reset();
 			events::reset();
@@ -217,11 +240,11 @@ namespace ds {
 //#ifdef DEBUG
 		if (virtualKey == VK_F1) {
 			_createReport = true;
+		}		
+		else if (virtualKey == VK_F2) {
+			_reload = true;
 		}
 		/*
-		else if (virtualKey == VK_F2) {
-		m_DebugInfo.showDrawCounter = !m_DebugInfo.showDrawCounter;
-		}
 		else if (virtualKey == VK_F3) {
 		m_DebugInfo.showProfiler = !m_DebugInfo.showProfiler;
 		m_DebugInfo.profilerTicks = 0;

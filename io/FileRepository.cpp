@@ -15,9 +15,7 @@ namespace ds {
 		// FileInfo
 		// -----------------------------------------------------------
 		struct FileInfo {
-			//char name[256];
-			int nameIndex;
-			DataFile* dataFile;
+			AssetFile* dataFile;
 			FILETIME filetime;
 		};
 
@@ -25,7 +23,7 @@ namespace ds {
 		// RepositoryEntry
 		// -----------------------------------------------------------
 		struct RepositoryEntry {
-			char name[256];
+			int name_index;
 			IdString hash;
 			int index;
 			int size;
@@ -36,9 +34,11 @@ namespace ds {
 		// FileRepo
 		// -----------------------------------------------------------
 		struct FileRepo {
+
 			RepositoryMode mode;
 			Array<RepositoryEntry> entries;
 			Array<FileInfo> infos;
+			CharBuffer name_buffer;
 		};
 
 		static FileRepo* _repository = 0;
@@ -50,7 +50,7 @@ namespace ds {
 			_repository = new FileRepo;
 			_repository->mode = mode;
 			if (mode == RM_RELEASE) {
-				FILE* f = fopen("e.pak", "rb");
+				FILE* f = fopen("data\\e.pak", "rb");
 				if (f) {
 					int sz = 0;
 					fread(&sz, sizeof(int), 1, f);
@@ -91,25 +91,43 @@ namespace ds {
 			if (file->load()) {
 				sprintf_s(buffer, 256, "content\\%s", file->getFileName());
 				FileInfo info;
-				info.dataFile = file;
-				info.nameIndex = gStringBuffer->add(buffer);
 				file::getFileTime(buffer, info.filetime);
 				_repository->infos.push_back(info);
 			}
+		}
+
+		void add(AssetFile* file) {
+			int size = 0;
+			FileInfo info;
+			info.dataFile = file;
+			file::getFileTime(file->getName(), info.filetime);
+			_repository->infos.push_back(info);
 		}
 
 		// -----------------------------------------------------------
 		// reload
 		// -----------------------------------------------------------
 		void reload() {
-			for (int i = 0; i < _repository->infos.size(); ++i) {
+			int reloaded = 0;
+			for (uint32_t i = 0; i < _repository->infos.size(); ++i) {
 				FileInfo& info = _repository->infos[i];
-				const char* name = gStringBuffer->get(info.nameIndex);
+				const char* name = info.dataFile->getName();
 				if (file::compareFileTime(name, info.filetime)) {
-					LOG << "Reloading file: " << name;
-					info.dataFile->load();
-					file::getFileTime(name, info.filetime);
+					HANDLE hData = CreateFile(name, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+					if (hData != INVALID_HANDLE_VALUE) {
+						CloseHandle(hData);
+						LOG << "Reloading file: " << name;
+						info.dataFile->load();
+						file::getFileTime(name, info.filetime);
+						++reloaded;						
+					}
+					else {
+						LOGE << "Cannot read file: '" << name << "'";
+					}
 				}
+			}
+			if (reloaded > 0) {
+				LOG << "Number of reloaded files: " << reloaded;
 			}
 		}
 
@@ -135,7 +153,7 @@ namespace ds {
 					if (!already_loaded(fileName)) {
 						RepositoryEntry entry;
 						entry.hash = string::murmur_hash(fileName);
-						sprintf_s(entry.name, 256, "%s", fileName);
+						entry.name_index = _repository->name_buffer.append(fileName);
 						entry.size = sz;
 						entry.index = -1;
 						if (type == FT_TEXT) {
@@ -163,7 +181,7 @@ namespace ds {
 					}
 				}
 				if (selected != 0) {
-					FILE* fp = fopen("c.pak","rb");
+					FILE* fp = fopen("data\\c.pak","rb");
 					if (fp) {
 						LOG << "reading at " << selected->index << " size: " << selected->size;
 						fseek(fp, selected->index, SEEK_SET);
@@ -222,7 +240,7 @@ namespace ds {
 			/*
 			if (_repository->mode == RM_DEBUG) {
 				LOG << "entries: " << _repository->entries.size();
-				FILE* fp = fopen("c.pak", "wb");
+				FILE* fp = fopen("data\\c.pak", "wb");
 				int index = 0;
 				for (size_t i = 0; i < _repository->entries.size(); ++i) {
 					RepositoryEntry& entry = _repository->entries[i];										
@@ -267,7 +285,7 @@ namespace ds {
 				}
 				fclose(fp);
 				// save directory
-				FILE* f = fopen("e.pak", "wb");
+				FILE* f = fopen("data\\e.pak", "wb");
 				if (f) {
 					int sz = _repository->entries.size();
 					fwrite(&sz, sizeof(int), 1, f);
@@ -291,11 +309,11 @@ namespace ds {
 		// -----------------------------------------------------------
 		void list() {
 			Array<RepositoryEntry> entries;
-			FILE* f = fopen("e.pak", "rb");
+			FILE* f = fopen("data\\e.pak", "rb");
 			if (f) {
 				int sz = 0;
 				fread(&sz, sizeof(int), 1, f);
-				for (size_t i = 0; i < sz; ++i) {
+				for (int i = 0; i < sz; ++i) {
 					RepositoryEntry entry;
 					fread(&entry.hash, sizeof(IdString), 1, f);
 					fread(&entry.size, sizeof(int), 1, f);
@@ -306,8 +324,9 @@ namespace ds {
 			}
 			for (size_t i = 0; i < entries.size(); ++i) {
 				const RepositoryEntry& entry = entries[i];
-				LOG << entry.name << " size: " << entry.size << " index: " << entry.index;
-				FILE* fp = fopen("c.pak", "rb");
+				const char* name = _repository->name_buffer.data + entry.name_index;
+				LOG << name << " size: " << entry.size << " index: " << entry.index;
+				FILE* fp = fopen("data\\c.pak", "rb");
 				if (fp) {
 					fseek(fp, entry.index, SEEK_SET);
 					char* buffer = new char[entry.size + 1];

@@ -109,7 +109,7 @@ namespace perf {
 		char buffer[256];
 		char p[10];
 		std::string line;
-		for (int i = 0; i < zoneTrackerCtx->events.size(); ++i) {
+		for (uint32_t i = 0; i < zoneTrackerCtx->events.size(); ++i) {
 			const ZoneTrackerEvent& event = zoneTrackerCtx->events[i];
 			int ident = event.ident * 2;
 			float per = event.duration / norm * 100.0f;
@@ -140,7 +140,7 @@ namespace perf {
 	}
 
 	int findHash(IdString hash) {
-		for (int i = 0; i < zoneTrackerCtx->events.size(); ++i) {
+		for (uint32_t i = 0; i < zoneTrackerCtx->events.size(); ++i) {
 			if (zoneTrackerCtx->events[i].hash == hash) {
 				return i;
 			}
@@ -212,7 +212,7 @@ namespace perf {
 		writer.startTable(HEADERS, 3);
 		char p[10];
 		float norm = zoneTrackerCtx->events[0].duration;
-		for (int i = 0; i < zoneTrackerCtx->events.size(); ++i) {
+		for (uint32_t i = 0; i < zoneTrackerCtx->events.size(); ++i) {
 			writer.startRow();
 			const ZoneTrackerEvent& event = zoneTrackerCtx->events[i];
 			int ident = event.ident * 2;
@@ -228,7 +228,7 @@ namespace perf {
 		writer.endBox();
 
 		std::vector<CallAggregator> calls;
-		for (int i = 0; i < zoneTrackerCtx->events.size(); ++i) {
+		for (uint32_t i = 0; i < zoneTrackerCtx->events.size(); ++i) {
 			const ZoneTrackerEvent& event = zoneTrackerCtx->events[i];
 			int idx = -1;
 			for (size_t j = 0; j < calls.size(); ++j) {
@@ -255,7 +255,7 @@ namespace perf {
 		writer.startBox("Perf - Top calls");
 		const char* TC_HEADERS[] = { "Calls", "Total", "Name" };
 		writer.startTable(TC_HEADERS, 3);
-		for (int i = 0; i < calls.size(); ++i) {
+		for (uint32_t i = 0; i < calls.size(); ++i) {
 			const CallAggregator& ac = calls[i];
 			writer.startRow();
 			writer.addCell(ac.calls);

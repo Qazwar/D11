@@ -112,12 +112,12 @@ public:
 // -------------------------------------------------------
 // GUI Dialog
 // -------------------------------------------------------
-class GUIDialog : public DataFile {
+class GUIDialog : public AssetFile {
 
 	typedef Array<GameTimer> Timers;
 
 public:
-	GUIDialog(const GUIDialogDescriptor& descriptor);
+	GUIDialog(const GUIDialogDescriptor& descriptor,const char* fileName);
 	~GUIDialog(void);
 	void render();
 	void setButtonHover(const Rect& regularItem,const Rect& highlightItem);
@@ -159,12 +159,7 @@ public:
 
 	bool saveData(JSONWriter& writer);
 	bool loadData(const JSONReader& reader);
-	const char* getFileName() const {
-		return _jsonName;
-	}
-	const char* getName() const {
-		return _name;
-	}
+	bool reloadData(const JSONReader& reader);
 
 	void startTransition(int id, const v2& start, float ttl);
 	void fadeColor(int id, const Color& start, const Color& end, float ttl);
@@ -177,7 +172,7 @@ public:
 private:
 	void updateTextVertices(int offset, const char* text, int sx = 0, int sy = 0);
 	int addTextVertices(const char* text, int sx, int sy);
-	GUIDialog(const GUIDialog& other) {}
+	//GUIDialog(const GUIDialog& other) {}
 	void operator=(const GUIDialog& other) {}
 	int loadItem(int category, const JSONReader& reader, DialogItem* item);
 	int findFreeID();
@@ -197,9 +192,6 @@ private:
 	Rect m_ButtonItem;
 	Rect m_ButtonItemSelected;
 	int m_SelectedInput;
-
-	char _name[32];
-	char _jsonName[128];
 
 	GUID _ids[MAX_GUID];
 	int _idIndex;

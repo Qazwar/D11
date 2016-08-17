@@ -38,7 +38,7 @@ namespace ds {
 	// find transition
 	// -------------------------------------------------------
 	int StateManager::findTransition(int from, int outcome) {
-		for (int i = 0; i < _transitions.size(); ++i) {
+		for (uint32_t i = 0; i < _transitions.size(); ++i) {
 			const StateTransition& t = _transitions[i];
 			if (t.from == from && t.outcome == outcome) {
 				return i;

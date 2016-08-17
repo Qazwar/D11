@@ -196,11 +196,11 @@ namespace ds {
 		}
 
 		updateSpawners(elapsed);
-		for (int i = 0; i < _spawnerInstances.numObjects; ++i) {
+		for (uint32_t i = 0; i < _spawnerInstances.numObjects; ++i) {
 			ParticleSpawnerInstance& instance = _spawnerInstances.objects[i];
 			emittParticles(instance, elapsed, &start, &end);
 			if (_sendEvents) {
-				for (int i = start; i < end; ++i) {
+				for (uint32_t i = start; i < end; ++i) {
 					ParticleEvent event;
 					event.instance = instance.id;
 					event.type = ParticleEvent::PARTICLE_EMITTED;

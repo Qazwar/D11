@@ -137,6 +137,10 @@ namespace ds {
 		v3 rotation;
 	};
 
+	struct SpriteSheetDescriptor {
+		const char* name;
+	};
+
 	struct IMGUIDescriptor {
 		RID font;
 		RID spriteBuffer;
@@ -150,6 +154,7 @@ namespace ds {
 	struct GUIDialogDescriptor {
 		RID font;
 		const char* file;
+		const char* fileName;
 	};
 
 	struct CameraDescriptor {

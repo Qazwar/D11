@@ -7,7 +7,7 @@
 #include "..\base\InputSystem.h"
 
 namespace ds {
-	GUIDialog::GUIDialog(const GUIDialogDescriptor& descriptor) {
+	GUIDialog::GUIDialog(const GUIDialogDescriptor& descriptor,const char* fileName) : AssetFile(fileName) {
 		_font = descriptor.font;
 		_hoverCallback = 0;
 		_bitmapFont = res::getFont(_font);
@@ -17,8 +17,6 @@ namespace ds {
 			_ids[i].id = -1;
 			_ids[i].index = -1;
 		}
-		strcpy(_name, descriptor.file);
-		sprintf_s(_jsonName, 128, "dialogs\\%s.json", _name);
 	}
 
 	// -------------------------------------------------------
@@ -724,6 +722,13 @@ namespace ds {
 		}
 		*/
 		return true;
+	}
+
+	// -------------------------------------------------------
+	// reload data
+	// -------------------------------------------------------
+	bool GUIDialog::reloadData(const JSONReader& reader) {
+		return loadData(reader);
 	}
 
 	// -------------------------------------------------------

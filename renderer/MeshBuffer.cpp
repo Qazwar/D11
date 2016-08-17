@@ -57,7 +57,7 @@ namespace ds {
 		BinaryFile bf;
 		if (bf.open(buffer, FileMode::WRITE)) {
 			bf.write(vertices.size());
-			for (int i = 0; i < vertices.size(); ++i) {
+			for (uint32_t i = 0; i < vertices.size(); ++i) {
 				const PNTCVertex& v = vertices[i];
 				bf.write(v.position);
 				bf.write(v.normal);
@@ -169,7 +169,7 @@ namespace ds {
 		mat4 rotZ = matrix::mat4RotationZ(rotation.z);
 		mat4 s = matrix::mat4Scale(scale);
 		mat4 w = rotZ * rotY * rotX * s * world;
-		for (int i = 0; i < mesh->vertices.size(); ++i) {
+		for (uint32_t i = 0; i < mesh->vertices.size(); ++i) {
 			const PNTCVertex& v = mesh->vertices[i];
 			v3 p = w * v.position;
 			//v3 n = world * v.normal;
@@ -184,7 +184,7 @@ namespace ds {
 	// ------------------------------------------------------
 	void MeshBuffer::add(Mesh* mesh) {
 		ZoneTracker z("MeshBuffer::addMesh");
-		for (int i = 0; i < mesh->vertices.size(); ++i) {
+		for (uint32_t i = 0; i < mesh->vertices.size(); ++i) {
 			add(mesh->vertices[i]);
 		}
 	}
@@ -215,7 +215,7 @@ namespace ds {
 		mat4 t = matrix::mat4Transform(position);
 		mat4 s = matrix::mat4Scale(scale);
 		mat4 world = rotZ * rotY * rotX * s * t;
-		for (int i = 0; i < mesh->vertices.size(); ++i) {
+		for (uint32_t i = 0; i < mesh->vertices.size(); ++i) {
 			const PNTCVertex& v = mesh->vertices[i];
 			v3 p = world * v.position;
 			//v3 n = world * v.normal;

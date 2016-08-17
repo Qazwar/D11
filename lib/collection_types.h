@@ -85,29 +85,33 @@ namespace ds {
 			}
 		}
 
-		void append(const char* s, int len) {
+		int append(const char* s, int len) {
 			if (size + len + 1 > capacity) {
 				resize(capacity + len + 1 + 8);
 			}
 			const char* t = s;
+			int ret = size;
 			for (int i = 0; i < len; ++i) {
 				data[size++] = *t;
 				++t;
 			}
 			data[size++] = '\0';
+			return ret;
 		}
 
-		void append(const char* s) {
+		int append(const char* s) {
 			int len = strlen(s);
 			if (size + len + 1 > capacity) {
 				resize(capacity + len + 1 + 8);
 			}
 			const char* t = s;
+			int ret = size;
 			for (int i = 0; i < len; ++i) {
 				data[size++] = *t;
 				++t;
 			}
 			data[size++] = '\0';
+			return ret;
 		}
 	};
 

@@ -179,7 +179,7 @@ namespace ds {
 	}
 
 	bool PhysicalWorld::containsCollision(const Collision& c) {
-		for (int i = 0; i < _collisions.size(); ++i) {
+		for (uint32_t i = 0; i < _collisions.size(); ++i) {
 			const Collision& other = _collisions[i];
 			if (other.firstSID == c.firstSID && other.secondSID == c.secondSID) {
 				return true;
