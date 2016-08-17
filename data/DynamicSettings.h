@@ -41,9 +41,9 @@ namespace ds {
 	// -------------------------------------------------------
 	// dynamic settings
 	// -------------------------------------------------------
-	struct DynamicGameSettings {
+	struct DynamicGameSettings : public FlatAssetFile {
 
-		DynamicGameSettings();
+		DynamicGameSettings(const char* fileName);
 		~DynamicGameSettings();
 
 		void add(const char* name, float* value, float defaultValue = 0.0f);
@@ -63,9 +63,8 @@ namespace ds {
 		//void addPath(const char* name, Vector2fPath* value);
 		//bool setPath(const char* name, const Vector2fPath& value);
 		
-		bool load();
-
-		virtual const char* getFileName() const = 0;
+		bool reloadData(const FlatJSONReader& loader);
+		bool loadData(const FlatJSONReader& loader);
 
 		//int _state;
 		//int _offset;

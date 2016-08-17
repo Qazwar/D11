@@ -25,13 +25,30 @@ namespace ds {
 		virtual ~AssetFile() {}
 		virtual bool loadData(const JSONReader& loader) = 0;
 		virtual bool reloadData(const JSONReader& loader) = 0;
-		bool load();
+		virtual bool load();
 		const char* getName() const {
 			return _name;
 		}
-	private:
+	protected:
 		bool _loaded;
 		char _name[64];
+	};
+
+	class FlatAssetFile : public AssetFile {
+
+	public:
+		FlatAssetFile(const char* name) : AssetFile(name) {
+		}
+		virtual ~FlatAssetFile() {}
+		bool loadData(const JSONReader& loader) {
+			return true;
+		}
+		bool reloadData(const JSONReader& loader) {
+			return true;
+		}
+		virtual bool loadData(const FlatJSONReader& loader) = 0;
+		virtual bool reloadData(const FlatJSONReader& loader) = 0;
+		bool load();
 	};
 
 }
