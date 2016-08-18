@@ -40,10 +40,10 @@ namespace ds {
 // -------------------------------------------------------
 // Particle system
 // -------------------------------------------------------
-class ParticleSystem : public DataFile {
+class ParticleSystem : public JSONAssetFile {
 
 public:
-	ParticleSystem(int id, const char* name, ParticleSystemFactory* factory, ParticleRenderMode renderMode);
+	ParticleSystem(int id, const char* name, const char* fileName, ParticleSystemFactory* factory, ParticleRenderMode renderMode);
 	~ParticleSystem();
 	void clear();
 	void update(float elapsed, Array<ParticleEvent>& events);
@@ -79,10 +79,10 @@ public:
 
 	bool saveData(JSONWriter& writer);
 
-	const char* getFileName() const {
-		return _json_name;
-	}
 	virtual bool loadData(const JSONReader& loader);
+	virtual bool reloadData(const JSONReader& loader) {
+		return loadData(loader);
+	}
 	bool isAlive() const {
 		return _spawnerInstances.numObjects > 0 || m_Array.countAlive > 0;
 	}

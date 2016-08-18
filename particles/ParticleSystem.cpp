@@ -6,7 +6,7 @@
 
 namespace ds {
 
-	ParticleSystem::ParticleSystem(int id, const char* name, ParticleSystemFactory* factory, ParticleRenderMode renderMode) {
+	ParticleSystem::ParticleSystem(int id, const char* name, const char* fileName, ParticleSystemFactory* factory, ParticleRenderMode renderMode) : JSONAssetFile(fileName) {
 		_sendEvents = false;
 		strcpy_s(m_DebugName, 32, name);
 		sprintf_s(_json_name, 64, "particles\\%s.json", name);

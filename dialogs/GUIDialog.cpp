@@ -7,7 +7,7 @@
 #include "..\base\InputSystem.h"
 
 namespace ds {
-	GUIDialog::GUIDialog(const GUIDialogDescriptor& descriptor,const char* fileName) : AssetFile(fileName) {
+	GUIDialog::GUIDialog(const GUIDialogDescriptor& descriptor,const char* fileName) : JSONAssetFile(fileName) {
 		_font = descriptor.font;
 		_hoverCallback = 0;
 		_bitmapFont = res::getFont(_font);

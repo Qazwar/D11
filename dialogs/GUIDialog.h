@@ -112,7 +112,7 @@ public:
 // -------------------------------------------------------
 // GUI Dialog
 // -------------------------------------------------------
-class GUIDialog : public AssetFile {
+class GUIDialog : public JSONAssetFile {
 
 	typedef Array<GameTimer> Timers;
 

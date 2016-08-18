@@ -15,7 +15,7 @@ namespace ds {
 		// FileInfo
 		// -----------------------------------------------------------
 		struct FileInfo {
-			AssetFile* dataFile;
+			DataFile* dataFile;
 			FILETIME filetime;
 		};
 
@@ -96,11 +96,11 @@ namespace ds {
 			}
 		}
 
-		void add(AssetFile* file) {
+		void add(DataFile* file) {
 			int size = 0;
 			FileInfo info;
 			info.dataFile = file;
-			file::getFileTime(file->getName(), info.filetime);
+			file::getFileTime(file->getFileName(), info.filetime);
 			_repository->infos.push_back(info);
 		}
 
@@ -111,7 +111,7 @@ namespace ds {
 			int reloaded = 0;
 			for (uint32_t i = 0; i < _repository->infos.size(); ++i) {
 				FileInfo& info = _repository->infos[i];
-				const char* name = info.dataFile->getName();
+				const char* name = info.dataFile->getFileName();
 				if (file::compareFileTime(name, info.filetime)) {
 					HANDLE hData = CreateFile(name, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 					if (hData != INVALID_HANDLE_VALUE) {

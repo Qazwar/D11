@@ -7,7 +7,7 @@ namespace ds {
 
 	const Texture EMPTY_TEXTURE = Texture(0, 0, 1024, 1024);
 
-	class SpriteSheet : public AssetFile {
+	class SpriteSheet : public JSONAssetFile {
 
 		struct SheetEntry {
 			IdString hash;

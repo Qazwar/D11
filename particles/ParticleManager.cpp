@@ -12,7 +12,7 @@ namespace ds {
 	// --------------------------------------------------------------------------
 	// constructor
 	// --------------------------------------------------------------------------
-	ParticleManager::ParticleManager(const ParticleSystemsDescriptor& descriptor) {
+	ParticleManager::ParticleManager(const ParticleSystemsDescriptor& descriptor) : JSONAssetFile("content\\particles\\particlesystems.json") {
 		_systems = new ParticleSystem*[MAX_PARTICLE_SYSTEMS];
 		for (int i = 0; i < 128; ++i) {
 			_systems[i] = 0;
@@ -35,7 +35,9 @@ namespace ds {
 	}
 
 	ParticleSystem* ParticleManager::create(int id, const char* name, ParticleRenderMode renderMode) {
-		ParticleSystem* system = new ParticleSystem(id, name, &_factory, renderMode);
+		char buffer[128];
+		sprintf_s(buffer, 128, "content\\particles\\%s.json", name);
+		ParticleSystem* system = new ParticleSystem(id, name, buffer, &_factory, renderMode);
 		return system;
 	}
 
@@ -47,7 +49,9 @@ namespace ds {
 			}
 		}
 		if (idx != -1) {
-			ParticleSystem* system = new ParticleSystem(idx, name, &_factory, renderMode);
+			char buffer[128];
+			sprintf_s(buffer, 128, "content\\particles\\%s.json", name);
+			ParticleSystem* system = new ParticleSystem(idx, name, buffer, &_factory, renderMode);
 			_systems[idx] = system;
 			return system;
 		}

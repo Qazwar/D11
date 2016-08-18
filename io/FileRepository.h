@@ -26,7 +26,7 @@ namespace ds {
 
 		void load(DataFile* file, FileType type = FT_TEXT);
 
-		void add(AssetFile* file);
+		void add(DataFile* file);
 
 		void reload();
 

@@ -5,7 +5,7 @@
 
 namespace ds {
 
-	SpriteSheet::SpriteSheet(const char* fileName) : AssetFile(fileName) {
+	SpriteSheet::SpriteSheet(const char* fileName) : JSONAssetFile(fileName) {
 	}
 
 	SpriteSheet::~SpriteSheet() {

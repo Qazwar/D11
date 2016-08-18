@@ -6,7 +6,7 @@ namespace ds {
 
 	
 
-	DynamicGameSettings::DynamicGameSettings(const char* fileName) : FlatAssetFile(fileName) {
+	DynamicGameSettings::DynamicGameSettings(const char* fileName) : FlatJSONAssetFile(fileName) {
 
 	}
 

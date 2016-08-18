@@ -19,7 +19,7 @@ struct ParticleSystemGroup {
 
 struct ParticleEvent;
 	
-class ParticleManager : public DataFile {
+class ParticleManager : public JSONAssetFile {
 
 public:
 	ParticleManager(const ParticleSystemsDescriptor& descriptor);
@@ -51,6 +51,9 @@ public:
 		return _factory;
 	}
 	virtual bool loadData(const JSONReader& loader);
+	bool reloadData(const JSONReader& loader) {
+		return loadData(loader);
+	}
 	bool hasEvents() const {
 		return _events.size() > 0;
 	}

@@ -41,7 +41,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// dynamic settings
 	// -------------------------------------------------------
-	struct DynamicGameSettings : public FlatAssetFile {
+	struct DynamicGameSettings : public FlatJSONAssetFile {
 
 		DynamicGameSettings(const char* fileName);
 		~DynamicGameSettings();
