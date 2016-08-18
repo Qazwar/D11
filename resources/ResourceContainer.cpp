@@ -479,11 +479,13 @@ namespace ds {
 			JSONReader reader;
 			bool ret = reader.parse(buffer);
 			assert(ret);
+			int flipped = 0;
 			int info = reader.find_category("settings");
 			if (info != -1) {
 				reader.get_float(info, "x_offset", &xOffset);
 				reader.get_float(info, "y_offset", &yOffset);
 				reader.get_float(info, "texture_size", &textureSize);
+				reader.get_int(info, "axis_flipped", &flipped);
 			}
 			int num = reader.find_category("characters");
 			char tmp[16];
@@ -493,6 +495,15 @@ namespace ds {
 					sprintf_s(tmp, 16, "C%d", i);
 					if (reader.contains_property(num, tmp)) {
 						reader.get(num, tmp, &rect);
+						if (flipped == 1) {
+							float w = rect.width();
+							float h = rect.height();
+							float tm = rect.top;
+							rect.top = rect.left;
+							rect.left = tm;
+							rect.right = rect.left + w;
+							rect.bottom = rect.top + h;
+						}
 						font->add(i, rect, xOffset, yOffset, textureSize);
 					}
 				}

@@ -12,7 +12,6 @@
 		LOGE << buf; \
 		LOG << "---------------------------------------------------------------";\
 		MessageBoxA(NULL, buf, NULL, NULL); \
-		assert(cond); \
-		} \
+	} \
 } while (false)
 #endif

@@ -15,6 +15,7 @@ namespace ds {
 		// FileInfo
 		// -----------------------------------------------------------
 		struct FileInfo {
+			IdString hash;
 			DataFile* dataFile;
 			FILETIME filetime;
 		};
@@ -96,12 +97,29 @@ namespace ds {
 			}
 		}
 
+		// -----------------------------------------------------------
+		// already in the watch list
+		// -----------------------------------------------------------
+		bool already_watching(const char* fileName) {
+			IdString hash = string::murmur_hash(fileName);
+			for (size_t i = 0; i < _repository->infos.size(); ++i) {
+				const FileInfo& entry = _repository->infos[i];
+				if (entry.hash == hash) {
+					return true;
+				}
+			}
+			return false;
+		}
+
 		void add(DataFile* file) {
-			int size = 0;
-			FileInfo info;
-			info.dataFile = file;
-			file::getFileTime(file->getFileName(), info.filetime);
-			_repository->infos.push_back(info);
+			if (!already_watching(file->getFileName())) {
+				int size = 0;
+				FileInfo info;
+				info.dataFile = file;
+				info.hash = string::murmur_hash(file->getFileName());
+				file::getFileTime(file->getFileName(), info.filetime);
+				_repository->infos.push_back(info);
+			}
 		}
 
 		// -----------------------------------------------------------
