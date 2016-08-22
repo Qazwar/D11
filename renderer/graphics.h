@@ -32,6 +32,8 @@ namespace graphics {
 	
 	bool initialize(HINSTANCE hInstance, HWND hwnd, const ds::Settings& settings);
 
+	HWND getWindowsHandle();
+
 	void createInternalSpriteBuffer();
 
 	void createPostProcessResources();

@@ -23,7 +23,7 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 				DrawText(hDC, strMsg, -1, &rct, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 				ReleaseDC(hwnd, hDC);
 			}
-			return 0;
+			return DefWindowProc(hwnd, message, wParam, lParam);
 		case WM_INPUT: {
 				char buffer[sizeof(RAWINPUT)] = {};
 				UINT size = sizeof(RAWINPUT);

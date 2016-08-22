@@ -9,6 +9,8 @@
 #include <windows.h>
 #include <stdio.h>
 #include "..\base\Settings.h"
+#include "..\base\EventStream.h"
+#include "..\renderer\graphics.h"
 
 #pragma warning(disable: 4996)
 
@@ -26,7 +28,7 @@ void MyAssert(char* expr_str, bool expr, char* file, int line, char* msg) {
 		LOG << "---------------------------------------------------------------";
 		LOGE << msg;
 		LOG << "---------------------------------------------------------------";
-		MessageBoxA(NULL, msg, "ERROR", NULL);
+		MessageBoxA(GetDesktopWindow(), msg, "ERROR", NULL);
 		abort();
 	}
 }
@@ -41,7 +43,7 @@ void MyAssert_fmt(char* expr_str, bool expr, char* file, int line, char* format,
 		LOG << "---------------------------------------------------------------";
 		LOGE << buffer;
 		LOG << "---------------------------------------------------------------";
-		MessageBoxA(NULL, buffer, "ERROR", NULL);
+		MessageBoxA(GetDesktopWindow(), buffer, "ERROR", NULL);
 		va_end(args);
 		abort();
 	}
@@ -101,7 +103,6 @@ void shutdown_logger() {
 }
 
 void file_name(const char* file, char* name) {
-	char n[256];
 	char e[16];
 	_splitpath(file,0,0,name,e);
 }

@@ -486,6 +486,10 @@ namespace graphics {
 		return _context->d3dContext;
 	}
 
+	HWND getWindowsHandle() {
+		return _context->hwnd;
+	}
+
 	ID3D11Device* getDevice() {
 		return _context->d3dDevice;
 	}
