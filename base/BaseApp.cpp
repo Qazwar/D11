@@ -66,7 +66,7 @@ namespace ds {
 		_createReport = false;
 		_updated = false;
 		_running = true;
-		math::init_random(GetTickCount());		
+		
 		gDrawCounter = new DrawCounter;
 		_buttonState.processed = true;
 		_start = std::chrono::steady_clock::now();
@@ -151,6 +151,7 @@ namespace ds {
 		repository::initialize(_settings.repositoryMode);
 		_stateMachine = new GameStateMachine;
 		events::init();
+		math::init_random(GetTickCount());
 		
 		LOG << "---------- System information ----------";
 		LOG << "Processor : " << _systemInfo.processor;

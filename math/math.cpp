@@ -1,6 +1,6 @@
 #include "math.h"
 #include <algorithm>
-#include "..\utils\mtrand.h"
+#include <random>
 
 namespace math {
 
@@ -291,17 +291,21 @@ namespace math {
 		return r;
 	}
 
-	static MTRand_open rand;
+	static std::mt19937 mt;
 
 	void init_random(unsigned long seed) {
-		rand.seed(seed);
+		std::random_device r;
+		std::seed_seq new_seed{ r(), r(), r(), r(), r(), r(), r(), r() };
+		mt.seed(new_seed);
 	}
 
 	// -------------------------------------------------------
 	// random
 	// -------------------------------------------------------
 	float random(float min, float max) {
-		return min + (max - min)* (float)rand();
+		std::uniform_real_distribution<float> dist(min, max);
+		return dist(mt);
+		//return min + (max - min)* (float)mt_rand();
 	}
 
 	float randomRange(float value, float variance) {

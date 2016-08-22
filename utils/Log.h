@@ -11,6 +11,8 @@
 #include <sstream>
 #include <stdio.h>
 
+void MyAssert(char* expr_str, bool expr, char* file, int line, char* msg);
+void MyAssert_fmt(char* expr_str, bool expr, char* file, int line, char* fomat, ...);
 
 void init_logger(int logTypes,int width, int height);
 

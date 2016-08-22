@@ -5,6 +5,7 @@
 #include "..\dialogs\GUIDialog.h"
 #include "..\resources\ResourceContainer.h"
 #include "..\base\Game.h"
+#include "..\base\EventStream.h"
 
 namespace ds {
 
@@ -82,6 +83,10 @@ public:
 	virtual int onButtonUp(int button, int x, int y) {
 		int ret = _dialog->onButton(button, x, y, true);
 		if (ret != -1) {
+			if (ret == 666) {
+				events::send(InternalEvents::ENGINE_SHUTDOWN);
+				return 0;
+			}
 			int tmp = onGUIButton(ret);
 			if (tmp != -1) {
 				return tmp;

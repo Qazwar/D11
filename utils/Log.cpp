@@ -21,6 +21,32 @@ struct LogContext {
 
 };
 
+void MyAssert(char* expr_str, bool expr, char* file, int line, char* msg) {
+	if (!expr) {
+		LOG << "---------------------------------------------------------------";
+		LOGE << msg;
+		LOG << "---------------------------------------------------------------";
+		MessageBoxA(NULL, msg, "ERROR", NULL);
+		abort();
+	}
+}
+
+void MyAssert_fmt(char* expr_str, bool expr, char* file, int line, char* format, ...) {
+	if (!expr) {
+		va_list args;
+		va_start(args, format);
+		char buffer[1024];
+		memset(buffer, 0, sizeof(buffer));
+		int written = vsnprintf_s(buffer, sizeof(buffer), _TRUNCATE, format, args);
+		LOG << "---------------------------------------------------------------";
+		LOGE << buffer;
+		LOG << "---------------------------------------------------------------";
+		MessageBoxA(NULL, buffer, "ERROR", NULL);
+		va_end(args);
+		abort();
+	}
+}
+
 static LogContext* _logContext;
 
 void init_logger(int logTypes, int width, int height) {

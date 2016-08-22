@@ -4,14 +4,7 @@
 #include "Log.h"
 
 #ifndef XASSERT
-#define XASSERT(cond, s, ...) do { \
-	if (!(cond)) { \
-		char buf[2048]; \
-		sprintf_s(buf,2048,s, ##__VA_ARGS__); \
-		LOG << "---------------------------------------------------------------";\
-		LOGE << buf; \
-		LOG << "---------------------------------------------------------------";\
-		MessageBoxA(NULL, buf, NULL, NULL); \
-	} \
-} while (false)
+//#define XASSERT(Expr, s) do { MyAssert(#Expr, Expr,__FILE__,__LINE__,s); } while(false);
+#define XASSERT(Expr, s, ...) do { MyAssert_fmt(#Expr, Expr,__FILE__,__LINE__,s,__VA_ARGS__); } while(false);
 #endif
+

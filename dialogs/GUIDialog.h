@@ -123,7 +123,7 @@ public:
 	void setButtonHover(const Rect& regularItem,const Rect& highlightItem);
 	
 
-	GUID addImage(int id,int x,int y,const Rect& textureRect,const v2& scale = v2(1,1),bool centered = true);	
+	GUID addImage(int id,int x,int y,const Rect& textureRect,const v2& scale = v2(1,1),bool centered = true, const Color& color = Color::WHITE);	
 	void updateImage(int id, int x, int y, const Rect& textureRect, bool centered = true);
 
 	GUID addImageButton(int id,int x,int y,const Rect& textureRect,bool centered = true);

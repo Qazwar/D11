@@ -113,7 +113,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// Add static image
 	// -------------------------------------------------------
-	GUID GUIDialog::addImage(int id, int x, int y, const Rect& textureRect, const v2& scale, bool centered) {
+	GUID GUIDialog::addImage(int id, int x, int y, const Rect& textureRect, const v2& scale, bool centered, const Color& color) {
 		v2 p = v2(x,y);
 		if (centered) {
 			p.x = graphics::getScreenWidth() * 0.5f;
@@ -121,7 +121,7 @@ namespace ds {
 		DialogItem item;
 		item.pos = p;
 		item.centered = centered;
-		item.color = Color::WHITE;
+		item.color = color;
 		item.rotation = 0.0f;
 		item.scale = scale;
 		item.type = GIT_IMAGE;
@@ -744,7 +744,7 @@ namespace ds {
 				int id = loadItem(cats[i], reader, &item);
 				Rect r;
 				reader.get(cats[i], "rect", &r);
-				GUID gid = addImage(id, item.pos.x, item.pos.y, r, item.scale, item.centered);
+				GUID gid = addImage(id, item.pos.x, item.pos.y, r, item.scale, item.centered, item.color);
 			}			
 			else if (reader.matches(cats[i], "image_button")) {
 				DialogItem item;
