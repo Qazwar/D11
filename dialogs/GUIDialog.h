@@ -135,6 +135,7 @@ public:
 	GUID addText(int id,int x,int y,const char* text,const Color& color = Color(1.0f,1.0f,1.0f,1.0f), const v2& scale = v2(1, 1),bool centered = true);
 	void updateText(int id,int x,int y,const char* text,const Color& color = Color(1.0f,1.0f,1.0f,1.0f), const v2& scale = v2(1, 1),bool centered = true);
 	void updateText(int id,const char* text);
+	void updateTextFormatted(int id, const char* format,...);
 	
 
 	GUID addTimer(int id,int x, int y, const v2& scale = v2(1, 1), const Color& color = Color::WHITE, bool centered = true);

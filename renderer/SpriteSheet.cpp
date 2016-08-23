@@ -33,6 +33,7 @@ namespace ds {
 				return i;
 			}
 		}
+		XASSERT(1 == 2, "No matching spritesheet found for '%s'", name);
 		return -1;
 	}
 

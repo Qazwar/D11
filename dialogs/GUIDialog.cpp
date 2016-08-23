@@ -312,6 +312,18 @@ namespace ds {
 	}
 
 	// -------------------------------------------------------
+	// Update formatted text
+	// -------------------------------------------------------
+	void GUIDialog::updateTextFormatted(int id, const char* format, ...) {
+		va_list args;
+		va_start(args, format);
+		char buffer[1024];
+		memset(buffer, 0, sizeof(buffer));
+		int written = vsnprintf_s(buffer, sizeof(buffer), _TRUNCATE, format, args);
+		updateText(id, buffer);
+	}
+
+	// -------------------------------------------------------
 	// Update text
 	// -------------------------------------------------------
 	void GUIDialog::updateText(int id,const char* text) {	
