@@ -509,6 +509,9 @@ namespace graphics {
 		return _context->viewportCenter;
 	}
 
+	void setClearColor(const ds::Color& clr) {
+		_context->clearColor = clr;
+	}
 	// ------------------------------------------------------
 	// begin rendering
 	// ------------------------------------------------------

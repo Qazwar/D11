@@ -72,6 +72,8 @@ namespace graphics {
 
 	void setShader(RID rid);
 
+	void setClearColor(const ds::Color& clr);
+
 	//void setInputLayout(RID rid);
 
 	void setMaterial(RID rid);
