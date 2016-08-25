@@ -161,32 +161,34 @@ namespace ds {
 	}
 
 	void SpriteBuffer::flush() {
-		ZoneTracker("SpriteBuffer::flush");
-		unsigned int stride = sizeof(SpriteVertex);
-		unsigned int offset = 0;
-		graphics::turnOffZBuffer();
+		if (_index > 0) {
+			ZoneTracker("SpriteBuffer::flush");
+			unsigned int stride = sizeof(SpriteVertex);
+			unsigned int offset = 0;
+			graphics::turnOffZBuffer();
 
-		graphics::setVertexBuffer(_descriptor.vertexBuffer, &stride, &offset, D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-		// FIXME: use material from scene
-		//graphics::setMaterial(_descriptor.material);
-		graphics::setMaterial(_currentMtrl);
-		for (int i = 0; i < _index; ++i) {
-			const Sprite& sprite = _sprites[i];
-			v4 t;
-			t.x = sprite.texture.rect.left;
-			t.y = sprite.texture.rect.top;
-			t.z = sprite.texture.rect.width();
-			t.w = sprite.texture.rect.height();
-			_vertices[i] = SpriteVertex(sprite.position, t, v3(sprite.scale.x,sprite.scale.y,sprite.rotation),sprite.color);
+			graphics::setVertexBuffer(_descriptor.vertexBuffer, &stride, &offset, D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+			// FIXME: use material from scene
+			//graphics::setMaterial(_descriptor.material);
+			graphics::setMaterial(_currentMtrl);
+			for (int i = 0; i < _index; ++i) {
+				const Sprite& sprite = _sprites[i];
+				v4 t;
+				t.x = sprite.texture.rect.left;
+				t.y = sprite.texture.rect.top;
+				t.z = sprite.texture.rect.width();
+				t.w = sprite.texture.rect.height();
+				_vertices[i] = SpriteVertex(sprite.position, t, v3(sprite.scale.x, sprite.scale.y, sprite.rotation), sprite.color);
+			}
+			graphics::mapData(_descriptor.vertexBuffer, _vertices, _index * sizeof(SpriteVertex));
+			mat4 w = matrix::m4identity();
+			_constantBuffer.wvp = ds::matrix::mat4Transpose(w * graphics::getOrthoCamera()->getViewProjectionMatrix());
+			graphics::updateSpriteConstantBuffer(_constantBuffer);
+			graphics::draw(_index);
+			graphics::turnOnZBuffer();
+			gDrawCounter->sprites += _index;
+			_index = 0;
 		}
-		graphics::mapData(_descriptor.vertexBuffer, _vertices, _index * sizeof(SpriteVertex));
-		mat4 w = matrix::m4identity();
-		_constantBuffer.wvp = ds::matrix::mat4Transpose(w * graphics::getOrthoCamera()->getViewProjectionMatrix());
-		graphics::updateSpriteConstantBuffer(_constantBuffer);
-		graphics::draw(_index);
-		graphics::turnOnZBuffer();
-		gDrawCounter->sprites += _index;
-		_index = 0;
 	}
 
 	void SpriteBuffer::drawScreenQuad(RID material) {

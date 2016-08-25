@@ -95,6 +95,12 @@ public:
 		}
 		return 0;
 	}
+	virtual void activate() {
+		_dialog->activate();
+	}
+	virtual void deactivate() {
+		_dialog->deactivate();
+	}
 	virtual void render() {
 		graphics::turnOffZBuffer();
 		_dialog->render();

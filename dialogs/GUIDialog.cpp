@@ -13,6 +13,7 @@ namespace ds {
 		_bitmapFont = res::getFont(_font);
 		_sprites = graphics::getSpriteBuffer();
 		_idIndex = 0;
+		_active = false;
 		for (int i = 0; i < MAX_GUID; ++i) {
 			_ids[i].id = -1;
 			_ids[i].index = -1;
@@ -430,12 +431,14 @@ namespace ds {
 	void GUIDialog::activate() {
 		m_SelectedInput = -1;			
 		_current = INVALID_ID;
+		_active = true;
 	}
 
 	// -------------------------------------------------------
 	// Deactivate
 	// -------------------------------------------------------
 	void GUIDialog::deactivate() {
+		_active = false;
 	}
 
 	// -------------------------------------------------------
@@ -455,21 +458,19 @@ namespace ds {
 	// Render both nodes
 	// -------------------------------------------------------
 	void GUIDialog::render() {
-		_sprites->begin();
-
-		for (uint32_t i = 0; i < _items.size(); ++i) {
-			const DialogItem& item = _items[i];
-			if (item.visible) {
-				int start = item.index;
-				int end = start + item.num;
-				for (int j = start; j < end; ++j) {
-					const DialogVertex& v = _vertices[j];
-					_sprites->draw(item.pos + v.offset, v.texture, item.rotation, item.scale, item.color);
+		if (_active) {
+			for (uint32_t i = 0; i < _items.size(); ++i) {
+				const DialogItem& item = _items[i];
+				if (item.visible) {
+					int start = item.index;
+					int end = start + item.num;
+					for (int j = start; j < end; ++j) {
+						const DialogVertex& v = _vertices[j];
+						_sprites->draw(item.pos + v.offset, v.texture, item.rotation, item.scale, item.color);
+					}
 				}
 			}
 		}
-		
-		_sprites->end();
 	}
 
 	// -------------------------------------------------------
@@ -520,88 +521,90 @@ namespace ds {
 	// tick
 	// -------------------------------------------------------
 	void GUIDialog::tick(float dt) {
-		// handle transitions
-		for (int i = 0; i < MAX_GUID; ++i) {
-			if (_transitions[i].active) {		
-				DialogItem& item = _items[i];
-				if (_transitions[i].timer < _transitions[i].ttl) {					
-					_transitions[i].timer += dt;				
-					if (_transitions[i].timer > _transitions[i].ttl) {
-						_transitions[i].timer = _transitions[i].ttl;
+		if (_active) {
+			// handle transitions
+			for (int i = 0; i < MAX_GUID; ++i) {
+				if (_transitions[i].active) {
+					DialogItem& item = _items[i];
+					if (_transitions[i].timer < _transitions[i].ttl) {
+						_transitions[i].timer += dt;
+						if (_transitions[i].timer > _transitions[i].ttl) {
+							_transitions[i].timer = _transitions[i].ttl;
+						}
+						item.pos = tweening::interpolate(_transitions[i].tweening, _transitions[i].start, _transitions[i].end, _transitions[i].timer, _transitions[i].ttl);
 					}
-					item.pos = tweening::interpolate(_transitions[i].tweening, _transitions[i].start, _transitions[i].end, _transitions[i].timer, _transitions[i].ttl);
-				}
-				else {
-					_transitions[i].active = false;
-				}
-			}
-		}
-		// handle color fades
-		for (int i = 0; i < MAX_GUID; ++i) {
-			if (_colorFades[i].active) {
-				DialogItem& item = _items[i];
-				if (_colorFades[i].timer < _colorFades[i].ttl) {
-					_colorFades[i].timer += dt;
-					if (_colorFades[i].timer > _colorFades[i].ttl) {
-						_colorFades[i].timer = _colorFades[i].ttl;
+					else {
+						_transitions[i].active = false;
 					}
-					item.color = tweening::interpolate(_colorFades[i].tweening, _colorFades[i].start, _colorFades[i].end, _colorFades[i].timer, _colorFades[i].ttl);
-				}
-				else {
-					_colorFades[i].active = false;
 				}
 			}
-		}
-		// tick timers
-		for (size_t i = 0; i < _timers.size(); ++i) {
-			_timers[i].tick(dt);
-		}
-		// update timers if necessary
-		char buffer[10];
-		for (uint32_t i = 0; i < _items.size(); ++i) {
-			const DialogItem& item = _items[i];
-			if (item.type == GIT_TIMER) {
-				const GameTimer& timer = _timers[item.tmp];
-				if (timer.isDirty()) {
-					string::formatTime(timer, buffer);
-					updateTextVertices(item.index, buffer);					
+			// handle color fades
+			for (int i = 0; i < MAX_GUID; ++i) {
+				if (_colorFades[i].active) {
+					DialogItem& item = _items[i];
+					if (_colorFades[i].timer < _colorFades[i].ttl) {
+						_colorFades[i].timer += dt;
+						if (_colorFades[i].timer > _colorFades[i].ttl) {
+							_colorFades[i].timer = _colorFades[i].ttl;
+						}
+						item.color = tweening::interpolate(_colorFades[i].tweening, _colorFades[i].start, _colorFades[i].end, _colorFades[i].timer, _colorFades[i].ttl);
+					}
+					else {
+						_colorFades[i].active = false;
+					}
 				}
 			}
-		}
-		// handle hovering
-		v2 mp = ds::input::getMousePosition();
-		ID temp = INVALID_ID;
-		for (uint32_t i = 0; i < _items.size(); ++i) {
-			const DialogItem& item = _items[i];
-			if (item.type == GIT_BUTTON || item.type == GIT_IMAGE_BUTTON) {
-				Rect br = item.boundingRect;
-				v2 p = item.pos;
-				if (item.centered) {
-					p.x = graphics::getScreenWidth() * 0.5f;
-				}
-				br.left += p.x;
-				br.right += p.x;
-				br.top += p.y;
-				br.bottom += p.y;
-				if (mp.x >= br.left && mp.x <= br.right && mp.y <= br.top && mp.y >= br.bottom) {
-					temp = item.id;
+			// tick timers
+			for (size_t i = 0; i < _timers.size(); ++i) {
+				_timers[i].tick(dt);
+			}
+			// update timers if necessary
+			char buffer[10];
+			for (uint32_t i = 0; i < _items.size(); ++i) {
+				const DialogItem& item = _items[i];
+				if (item.type == GIT_TIMER) {
+					const GameTimer& timer = _timers[item.tmp];
+					if (timer.isDirty()) {
+						string::formatTime(timer, buffer);
+						updateTextVertices(item.index, buffer);
+					}
 				}
 			}
-		}
-		if (temp != INVALID_ID) {
-			if (temp != _current) {				
-				_current = temp;
-				if (_hoverCallback) {
-					_hoverCallback->entering(_current);
+			// handle hovering
+			v2 mp = ds::input::getMousePosition();
+			ID temp = INVALID_ID;
+			for (uint32_t i = 0; i < _items.size(); ++i) {
+				const DialogItem& item = _items[i];
+				if (item.type == GIT_BUTTON || item.type == GIT_IMAGE_BUTTON) {
+					Rect br = item.boundingRect;
+					v2 p = item.pos;
+					if (item.centered) {
+						p.x = graphics::getScreenWidth() * 0.5f;
+					}
+					br.left += p.x;
+					br.right += p.x;
+					br.top += p.y;
+					br.bottom += p.y;
+					if (mp.x >= br.left && mp.x <= br.right && mp.y <= br.top && mp.y >= br.bottom) {
+						temp = item.id;
+					}
 				}
 			}
-		}
-		else {
-			if (_current != INVALID_ID) {				
-				if (_hoverCallback) {
-					_hoverCallback->leaving(_current);
+			if (temp != INVALID_ID) {
+				if (temp != _current) {
+					_current = temp;
+					if (_hoverCallback) {
+						_hoverCallback->entering(_current);
+					}
 				}
-				_current = INVALID_ID;
+			}
+			else {
+				if (_current != INVALID_ID) {
+					if (_hoverCallback) {
+						_hoverCallback->leaving(_current);
+					}
+					_current = INVALID_ID;
+				}
 			}
 		}
 	}

@@ -170,6 +170,9 @@ public:
 		_hoverCallback = hoverCallback;
 	}
 	void setVisible(ID id, bool visible);
+	bool isActive() const {
+		return _active;
+	}
 private:
 	void updateTextVertices(int offset, const char* text, int sx = 0, int sy = 0);
 	int addTextVertices(const char* text, int sx, int sy);
@@ -199,6 +202,7 @@ private:
 	GUITransition _transitions[MAX_GUID];	
 	GUIColorFade _colorFades[MAX_GUID];
 
+	bool _active;
 	Array<DialogVertex> _vertices;
 	Array<DialogItem> _items;
 	Timers _timers;

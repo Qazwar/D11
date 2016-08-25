@@ -519,6 +519,7 @@ namespace graphics {
 		_context->d3dContext->ClearRenderTargetView(_context->backBufferTarget, _context->clearColor);
 		_context->d3dContext->ClearDepthStencilView(_context->depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0.0);
 		turnOnZBuffer();		
+		_context->sprites->begin();
 	}
 
 	// ------------------------------------------------------
@@ -734,6 +735,7 @@ namespace graphics {
 	// end rendering
 	// ------------------------------------------------------
 	void endRendering() {
+		_context->sprites->end();
 		_context->swapChain->Present(0, 0);
 	}
 
