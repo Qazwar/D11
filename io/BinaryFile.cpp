@@ -37,31 +37,37 @@ namespace ds {
 	}
 
 
-	void BinaryFile::write(int i) {
+	void BinaryFile::write(int i) const {
 		XASSERT(_file != 0,"Binary file is not open");
 		XASSERT(_mode == FileMode::WRITE,"The file mode is not WRITE");
 		fwrite(&i, sizeof(int), 1, _file);
 	}
 
-	void BinaryFile::write(uint16_t i) {
+	void BinaryFile::write(char c) const {
+		XASSERT(_file != 0, "Binary file is not open");
+		XASSERT(_mode == FileMode::WRITE, "The file mode is not WRITE");
+		fwrite(&c, sizeof(char), 1, _file);
+	}
+
+	void BinaryFile::write(uint16_t i) const {
 		XASSERT(_file != 0, "Binary file is not open");
 		XASSERT(_mode == FileMode::WRITE, "The file mode is not WRITE");
 		fwrite(&i, sizeof(uint16_t), 1, _file);
 	}
 
-	void BinaryFile::write(uint32_t i) {
+	void BinaryFile::write(uint32_t i) const {
 		XASSERT(_file != 0, "Binary file is not open");
 		XASSERT(_mode == FileMode::WRITE, "The file mode is not WRITE");
 		fwrite(&i, sizeof(uint32_t), 1, _file);
 	}
 
-	void BinaryFile::write(float f) {
+	void BinaryFile::write(float f) const {
 		XASSERT(_file != 0, "Binary file is not open");
 		XASSERT(_mode == FileMode::WRITE, "The file mode is not WRITE");
 		fwrite(&f, sizeof(float), 1, _file);
 	}
 
-	void BinaryFile::write(const v3& v) {
+	void BinaryFile::write(const v3& v) const {
 		XASSERT(_file != 0, "Binary file is not open");
 		XASSERT(_mode == FileMode::WRITE, "The file mode is not WRITE");
 		for (int i = 0; i < 3; ++i) {
@@ -69,7 +75,7 @@ namespace ds {
 		}
 	}
 
-	void BinaryFile::write(const v2& v) {
+	void BinaryFile::write(const v2& v) const {
 		XASSERT(_file != 0, "Binary file is not open");
 		XASSERT(_mode == FileMode::WRITE, "The file mode is not WRITE");
 		for (int i = 0; i < 2; ++i) {
@@ -77,7 +83,7 @@ namespace ds {
 		}
 	}
 
-	void BinaryFile::write(const Color& v) {
+	void BinaryFile::write(const Color& v) const {
 		XASSERT(_file != 0, "Binary file is not open");
 		XASSERT(_mode == FileMode::WRITE, "The file mode is not WRITE");
 		fwrite(&v.r, sizeof(float), 1, _file);
@@ -86,25 +92,31 @@ namespace ds {
 		fwrite(&v.a, sizeof(float), 1, _file);
 	}
 
-	void BinaryFile::write(void* data,int size) {
+	void BinaryFile::write(void* data, int size) const {
 		XASSERT(_file != 0, "Binary file is not open");
 		XASSERT(_mode == FileMode::WRITE, "The file mode is not WRITE");
 		fwrite(data, size, 1, _file);
 	}
 
-	void BinaryFile::read(int* v) {
+	void BinaryFile::read(int* v) const {
 		XASSERT(_file != 0, "Binary file is not open");
 		XASSERT(_mode == FileMode::READ, "The file mode is not READ");
 		fread(v, sizeof(int), 1, _file);
 	}
 
-	void BinaryFile::read(uint32_t* v) {
+	void BinaryFile::read(char* v) const {
+		XASSERT(_file != 0, "Binary file is not open");
+		XASSERT(_mode == FileMode::READ, "The file mode is not READ");
+		fread(v, sizeof(char), 1, _file);
+	}
+
+	void BinaryFile::read(uint32_t* v) const {
 		XASSERT(_file != 0, "Binary file is not open");
 		XASSERT(_mode == FileMode::READ, "The file mode is not READ");
 		fread(v, sizeof(uint32_t), 1, _file);
 	}
 
-	void BinaryFile::read(void* data, int size) {
+	void BinaryFile::read(void* data, int size) const {
 		XASSERT(_file != 0, "Binary file is not open");
 		XASSERT(_mode == FileMode::READ, "The file mode is not READ");
 		fread(data, size, 1, _file);

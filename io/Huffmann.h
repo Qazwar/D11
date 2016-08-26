@@ -7,6 +7,8 @@ namespace ds {
 
 		void first(const char* text);
 
+		void decompress(const char* file);
+
 	}
 
 }
