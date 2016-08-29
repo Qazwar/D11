@@ -18,7 +18,7 @@ namespace ds {
 		*value = defaultValue;
 		SettingsItem item;
 		item.name = name;
-		item.hash = string::murmur_hash(name);
+		item.hash = StaticHash(name);
 		item.type = ST_FLOAT;
 		item.ptr.fPtr = value;
 		items.push_back(item);
@@ -28,7 +28,7 @@ namespace ds {
 		*value = defaultValue;
 		SettingsItem item;
 		item.name = name;
-		item.hash = string::murmur_hash(name);
+		item.hash = StaticHash(name);
 		item.type = ST_INT;
 		item.ptr.iPtr = value;
 		items.push_back(item);
@@ -38,7 +38,7 @@ namespace ds {
 		*value = defaultValue;
 		SettingsItem item;
 		item.name = name;
-		item.hash = string::murmur_hash(name);
+		item.hash = StaticHash(name);
 		item.type = ST_VEC2;
 		item.ptr.v2Ptr = value;
 		items.push_back(item);

@@ -5,7 +5,7 @@
 #include "..\..\math\tweening.h"
 #include "..\..\lib\BlockArray.h"
 #include "..\..\io\ReportWriter.h"
-#include "..\..\utils\StringUtils.h"
+#include "..\..\utils\StaticHash.h"
 
 namespace ds {
 	/*
@@ -19,7 +19,7 @@ namespace ds {
 
 		public:
 			AbstractAction(const char* name) : _name(name) {
-				_hash = string::murmur_hash(name);
+				_hash = SID(name);
 			}
 			virtual ~AbstractAction() {}
 			virtual void update(EntityArray& array,float dt,ActionEventBuffer& buffer) = 0;
@@ -37,7 +37,7 @@ namespace ds {
 			const char* getName() const {
 				return _name;
 			}
-			IdString getHash() const {
+			const StaticHash& getHash() const {
 				return _hash;
 			}
 		protected:
@@ -49,7 +49,7 @@ namespace ds {
 			ID* _ids;
 		private:
 			const char* _name;
-			IdString _hash;
+			StaticHash _hash;
 		};
 
 	

@@ -13,7 +13,7 @@ namespace ds {
 
 	void SpriteSheet::add(const char* name, const Rect& r) {
 		SheetEntry entry;
-		entry.hash = string::murmur_hash(name);
+		entry.hash = SID(name);
 		entry.texture = Texture(r);
 		_entries.push_back(entry);
 	}
@@ -26,14 +26,32 @@ namespace ds {
 		return EMPTY_TEXTURE;
 	}
 
+	const Texture& SpriteSheet::get(const StaticHash& sid) const {
+		int idx = findIndex(sid);
+		if (idx != -1) {
+			return _entries[idx].texture;
+		}
+		return EMPTY_TEXTURE;
+	}
+
 	int SpriteSheet::findIndex(const char* name) const {
-		IdString hash = string::murmur_hash(name);
+		StaticHash hash = SID(name);
 		for (uint32_t i = 0; i < _entries.size(); ++i) {
 			if (_entries[i].hash == hash) {
 				return i;
 			}
 		}
 		XASSERT(1 == 2, "No matching spritesheet found for '%s'", name);
+		return -1;
+	}
+
+	int SpriteSheet::findIndex(const StaticHash& sid) const {
+		for (uint32_t i = 0; i < _entries.size(); ++i) {
+			if (_entries[i].hash == sid) {
+				return i;
+			}
+		}
+		XASSERT(1 == 2, "No matching spritesheet found for '%d'", sid);
 		return -1;
 	}
 

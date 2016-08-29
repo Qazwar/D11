@@ -17,7 +17,7 @@ namespace ds {
 	}
 
 	int GlobalStringBuffer::find(const char* str) const {
-		IdString hash = string::murmur_hash(str);
+		StaticHash hash(str);
 		for (uint32_t i = 0; i < _entries.size(); ++i) {
 			if (_entries[i].hash == hash && !_entries[i].used) {
 				return i;
@@ -36,7 +36,7 @@ namespace ds {
 			}
 			_buffer.append(str, l);
 			GSBEntry entry;
-			entry.hash = string::murmur_hash(str);
+			entry.hash = StaticHash(str);
 			entry.index = index;
 			entry.size = l;
 			entry.used = true;

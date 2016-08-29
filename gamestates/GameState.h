@@ -15,8 +15,7 @@ namespace ds {
 class GameState {
 
 public:
-	GameState(const char* name, Game* g) : _name(name) , game(g) , _initialized(false) {
-		_hash = string::murmur_hash(name);
+	GameState(const char* name, Game* g) : _name(name) , game(g) , _initialized(false) , _hash(name) {
 	}
 	virtual ~GameState(void) {}
 	virtual void init() {}
@@ -48,7 +47,7 @@ public:
 	//virtual int processEvents(const EventStream& events) {
 		//return 0;
 	//}
-	IdString getHash() const {
+	const StaticHash& getHash() const {
 		return _hash;
 	}
 	const char* getName() const {
@@ -67,7 +66,7 @@ private:
 	GameState(const GameState& other) {}
 	void operator=(const GameState& other) {}
 	const char* _name;
-	IdString _hash;
+	StaticHash _hash;
 };
 
 // --------------------------------------------

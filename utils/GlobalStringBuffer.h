@@ -1,13 +1,14 @@
 #pragma once
 #include "..\lib\collection_types.h"
 #include "..\Common.h"
+#include "..\utils\StaticHash.h"
 
 namespace ds {
 
 	class GlobalStringBuffer {
 
 		struct GSBEntry {
-			IdString hash;
+			StaticHash hash;
 			int index;
 			int size;
 			bool used;

@@ -5,6 +5,7 @@
 #include "..\io\json.h"
 #include <map>
 #include "..\renderer\VertexTypes.h"
+#include "..\utils\StaticHash.h"
 
 namespace ds {
 	
@@ -28,7 +29,7 @@ namespace ds {
 			int index;
 		};
 
-		typedef std::map<IdString, Material> Materials;
+		typedef std::map<StaticHash, Material> Materials;
 		typedef Array<Vector3f> VectorCache;
 		typedef Array<VertexDefinition> Faces;
 		typedef Array<Vector2f> UVCache;
@@ -112,7 +113,7 @@ namespace ds {
 					iss >> name >> name;
 					LOG << "new mtl: " << name;
 					Material mtl;
-					IdString hash = string::murmur_hash(name.c_str());
+					StaticHash hash(name.c_str());
 					m_Materials[hash] = mtl;
 					m = &m_Materials[hash];
 				}
@@ -182,7 +183,7 @@ namespace ds {
 							t = tokenizer.get(n);
 							strncpy(name, buffer + t.index, t.size);
 							name[t.size] = '\0';
-							IdString hash = string::murmur_hash(name);
+							StaticHash hash(name);
 							m = &m_Materials[hash];
 							LOG << "using material: " << name;
 						}

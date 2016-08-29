@@ -11,6 +11,7 @@
 #include "..\imgui\IMGUI.h"
 #include "..\utils\Assert.h"
 #include "Resource.h"
+#include "..\utils\StaticHash.h"
 
 namespace ds {
 
@@ -25,7 +26,7 @@ namespace ds {
 			RID id;
 			ResourceType type;
 			uint32_t nameIndex;
-			IdString hash;
+			StaticHash hash;
 		};
 
 		// ------------------------------------------------------
@@ -38,7 +39,7 @@ namespace ds {
 			uint32_t resourceIndex;
 			Array<BaseResource*> resources;
 			Array<ResourceIndex> indices;
-			std::map<IdString, ParseFunc> parsers;
+			std::map<StaticHash, ParseFunc> parsers;
 			ParticleManager* particles;
 			
 		};
@@ -184,7 +185,7 @@ namespace ds {
 		// cretate internal resource entry
 		// ------------------------------------------------------
 		static RID create(const char* name, ResourceType type) {
-			IdString hash = string::murmur_hash(name);
+			StaticHash hash = StaticHash(name);
 			ResourceIndex ri;
 			// this one gets called after we have already the resource
 			ri.id = _resCtx->resources.size() - 1;
@@ -1136,29 +1137,29 @@ namespace ds {
 			_resCtx->device = device;
 			_resCtx->resourceIndex = 0;				
 			_resCtx->particles = 0;
-			_resCtx->parsers[string::murmur_hash("constant_buffer")] = parseConstantBuffer;
-			_resCtx->parsers[string::murmur_hash("quad_index_buffer")] = parseQuadIndexBuffer;
-			_resCtx->parsers[string::murmur_hash("index_buffer")] = parseIndexBuffer;
-			_resCtx->parsers[string::murmur_hash("dialog")] = parseDialog;
-			_resCtx->parsers[string::murmur_hash("sprite_buffer")] = parseSpriteBuffer;
-			_resCtx->parsers[string::murmur_hash("shader")] = parseShader;
-			_resCtx->parsers[string::murmur_hash("sampler_state")] = parseSamplerState;
-			_resCtx->parsers[string::murmur_hash("input_layout")] = parseInputLayout;
-			_resCtx->parsers[string::murmur_hash("vertex_buffer")] = parseVertexBuffer;
-			_resCtx->parsers[string::murmur_hash("font")] = parseFont;
-			_resCtx->parsers[string::murmur_hash("texture")] = parseTexture;
-			_resCtx->parsers[string::murmur_hash("blendstate")] = parseBlendState;
-			_resCtx->parsers[string::murmur_hash("imgui")] = parseIMGUI;
-			_resCtx->parsers[string::murmur_hash("mesh")] = parseMesh;
-			_resCtx->parsers[string::murmur_hash("mesh_buffer")] = parseMeshBuffer;
-			_resCtx->parsers[string::murmur_hash("quad_buffer")] = parseQuadBuffer;
-			_resCtx->parsers[string::murmur_hash("scene")] = parseScene;
-			_resCtx->parsers[string::murmur_hash("texture_cube")] = parseTextureCube;
-			_resCtx->parsers[string::murmur_hash("skybox")] = parseSkyBox;
-			_resCtx->parsers[string::murmur_hash("material")] = parseMaterial;
-			_resCtx->parsers[string::murmur_hash("particle_manager")] = parseParticleManager;
-			_resCtx->parsers[string::murmur_hash("render_target")] = parseRenderTarget;
-			_resCtx->parsers[string::murmur_hash("spritesheet")] = parseSpriteSheet;
+			_resCtx->parsers[SID("constant_buffer")] = parseConstantBuffer;
+			_resCtx->parsers[SID("quad_index_buffer")] = parseQuadIndexBuffer;
+			_resCtx->parsers[SID("index_buffer")] = parseIndexBuffer;
+			_resCtx->parsers[SID("dialog")] = parseDialog;
+			_resCtx->parsers[SID("sprite_buffer")] = parseSpriteBuffer;
+			_resCtx->parsers[SID("shader")] = parseShader;
+			_resCtx->parsers[SID("sampler_state")] = parseSamplerState;
+			_resCtx->parsers[SID("input_layout")] = parseInputLayout;
+			_resCtx->parsers[SID("vertex_buffer")] = parseVertexBuffer;
+			_resCtx->parsers[SID("font")] = parseFont;
+			_resCtx->parsers[SID("texture")] = parseTexture;
+			_resCtx->parsers[SID("blendstate")] = parseBlendState;
+			_resCtx->parsers[SID("imgui")] = parseIMGUI;
+			_resCtx->parsers[SID("mesh")] = parseMesh;
+			_resCtx->parsers[SID("mesh_buffer")] = parseMeshBuffer;
+			_resCtx->parsers[SID("quad_buffer")] = parseQuadBuffer;
+			_resCtx->parsers[SID("scene")] = parseScene;
+			_resCtx->parsers[SID("texture_cube")] = parseTextureCube;
+			_resCtx->parsers[SID("skybox")] = parseSkyBox;
+			_resCtx->parsers[SID("material")] = parseMaterial;
+			_resCtx->parsers[SID("particle_manager")] = parseParticleManager;
+			_resCtx->parsers[SID("render_target")] = parseRenderTarget;
+			_resCtx->parsers[SID("spritesheet")] = parseSpriteSheet;
 		}
 
 		// ------------------------------------------------------
@@ -1167,7 +1168,7 @@ namespace ds {
 		void parseJSONFile(const char* fileName) {
 			JSONReader reader;
 			char buffer[256];
-			IdString importHash = string::murmur_hash("import");
+			StaticHash importHash = SID("import");
 			sprintf_s(buffer, 256, "content\\%s", fileName);
 			LOG << "Loading resource file: " << fileName;
 			bool ret = reader.parse(buffer);
@@ -1175,7 +1176,7 @@ namespace ds {
 			int children[256];
 			int num = reader.get_categories(children, 256);
 			for (int i = 0; i < num; ++i) {
-				IdString hash = string::murmur_hash(reader.get_category_name(i));
+				StaticHash hash = SID(reader.get_category_name(i));
 				// special category to import other files
 				if (hash == importHash) {
 					const char* fileName = reader.get_string(children[i], "file");
@@ -1227,7 +1228,7 @@ namespace ds {
 		}
 
 		RID find(const char* name, ResourceType type) {
-			IdString hash = string::murmur_hash(name);
+			StaticHash hash = SID(name);
 			int idx = -1;
 			for (uint32_t i = 0; i < _resCtx->indices.size(); ++i) {
 				if (_resCtx->indices[i].hash == hash) {

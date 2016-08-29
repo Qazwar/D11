@@ -4,12 +4,13 @@
 #include "..\Common.h"
 #include "..\utils\Color.h"
 #include <Vector.h>
+#include "..\utils\StaticHash.h"
 
 namespace ds {
 
 	struct ResourceDescriptor {
 		uint32_t nameIndex;
-		IdString hash;
+		StaticHash hash;
 	};
 	
 	struct IndexBufferDescriptor {

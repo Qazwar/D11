@@ -5,6 +5,7 @@
 #include "..\memory\DefaultAllocator.h"
 #include "..\lib\BlockArray.h"
 #include "..\math\FloatArray.h"
+#include "..\utils\StaticHash.h"
 
 namespace ds {
 
@@ -105,12 +106,12 @@ namespace ds {
 		char* _text;
 
 		BlockArray _category_buffer;
-		unsigned int* _hashes;
+		StaticHash* _hashes;
 		int* _parents;
 		int* _indices;
 
 		BlockArray _data_buffer;
-		unsigned int* _data_keys;
+		StaticHash* _data_keys;
 		int* _data_categories;
 		int* _data_indices;
 		int* _data_sizes;
@@ -188,7 +189,7 @@ namespace ds {
 		char* _text;
 		CharBuffer _name_buffer;
 		BlockArray _data_buffer;
-		unsigned int* _data_keys;
+		StaticHash* _data_keys;
 		int* _data_indices;
 		int* _data_sizes;
 		CharBuffer _values;

@@ -140,7 +140,7 @@ void load_buffer(CharBuffer* buffer, FILE* fp) {
 // -------------------------------------------
 void JSONReader::allocCategoryBuffer(int size) {
 	if (_category_buffer.resize(size)) {
-		_hashes = (unsigned int*)_category_buffer.get_ptr(0);
+		_hashes = (StaticHash*)_category_buffer.get_ptr(0);
 		_parents = (int*)_category_buffer.get_ptr(1);
 		_indices = (int*)_category_buffer.get_ptr(2);
 	}
@@ -153,7 +153,7 @@ int JSONReader::add_category(const char* name, int parent) {
 	if (_category_buffer.size + 1 > _category_buffer.capacity) {
 		allocCategoryBuffer(_category_buffer.size * 2 + 8);
 	}
-	_hashes[_category_buffer.size] = string::murmur_hash(name);
+	_hashes[_category_buffer.size] = StaticHash(name);
 	_parents[_category_buffer.size] = parent;
 	_indices[_category_buffer.size] = _name_buffer.size;
 	++_category_buffer.size;
@@ -358,7 +358,7 @@ int JSONReader::get_categories(int* result, int max, int parent) const {
 // find category
 // -------------------------------------------
 int JSONReader::find_category(const char* name, int parent) const {
-	unsigned int hash = string::murmur_hash(name);
+	StaticHash hash(name);
 	for (int i = 0; i < _category_buffer.size; ++i) {
 		if (_parents[i] == parent && _hashes[i] == hash) {
 			return i;
@@ -383,7 +383,7 @@ const char* JSONReader::get_category_name(int category_id) const {
 // -------------------------------------------
 bool JSONReader::matches(int category_id, const char* name) const {
 	if (category_id >= 0 && category_id < _category_buffer.size) {
-		unsigned int hash = string::murmur_hash(name);
+		StaticHash hash(name);
 		if (_hashes[category_id] == hash) {
 			return true;
 		}
@@ -544,7 +544,7 @@ int JSONReader::num_properties(int category_id) const {
 // -------------------------------------------
 int JSONReader::get_index(int category_id, const char* name) const {
 	if (category_id >= 0 && category_id < _category_buffer.size) {
-		unsigned int key = string::murmur_hash(name);
+		StaticHash key(name);
 		for (int i = 0; i < _data_buffer.size; ++i) {
 			if (_data_categories[i] == category_id && _data_keys[i] == key) {
 				return i;
@@ -735,7 +735,7 @@ int JSONReader::get_array(int category_id, const char* name, int* values, int ma
 // -------------------------------------------
 void JSONReader::alloc(int elements) {
 	if (_data_buffer.resize(elements)) {
-		_data_keys = (unsigned int*)_data_buffer.get_ptr(0);
+		_data_keys = (StaticHash*)_data_buffer.get_ptr(0);
 		_data_categories = (int*)_data_buffer.get_ptr(1);
 		_data_indices = (int*)_data_buffer.get_ptr(2);
 		_data_sizes = (int*)_data_buffer.get_ptr(3);
@@ -749,7 +749,7 @@ int JSONReader::create_property(const char* name, int category) {
 	if (_data_buffer.size + 1 > _data_buffer.capacity) {
 		alloc(_data_buffer.size * 2 + 8);
 	}
-	_data_keys[_data_buffer.size] = string::murmur_hash(name);
+	_data_keys[_data_buffer.size] = StaticHash(name);
 	_data_categories[_data_buffer.size] = category;
 	_data_indices[_data_buffer.size] = _values.num;
 	_data_sizes[_data_buffer.size] = 0;
@@ -1073,7 +1073,7 @@ void FlatJSONReader::buildName(const Stack<CategoryEntry>& stack, char* buffer) 
 // -------------------------------------------
 void FlatJSONReader::alloc(int elements) {
 	if (_data_buffer.resize(elements)) {
-		_data_keys = (unsigned int*)_data_buffer.get_ptr(0);
+		_data_keys = (StaticHash*)_data_buffer.get_ptr(0);
 		_data_indices = (int*)_data_buffer.get_ptr(1);
 		_data_sizes = (int*)_data_buffer.get_ptr(2);
 	}
@@ -1086,7 +1086,7 @@ int FlatJSONReader::create_property(const char* name) {
 	if (_data_buffer.size + 1 > _data_buffer.capacity) {
 		alloc(_data_buffer.size * 2 + 8);
 	}
-	_data_keys[_data_buffer.size] = string::murmur_hash(name);
+	_data_keys[_data_buffer.size] = StaticHash(name);
 	_data_indices[_data_buffer.size] = _values.num;
 	_data_sizes[_data_buffer.size] = 0;
 	++_data_buffer.size;
@@ -1129,7 +1129,7 @@ void FlatJSONReader::add(int pIndex, char c) {
 // get index
 // -------------------------------------------
 int FlatJSONReader::get_index(const char* name) const {
-	unsigned int key = string::murmur_hash(name);
+	StaticHash key(name);
 	for (int i = 0; i < _data_buffer.size; ++i) {
 		if (_data_keys[i] == key) {
 			return i;

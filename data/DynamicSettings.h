@@ -6,6 +6,7 @@
 #include "..\lib\collection_types.h"
 #include "..\imgui\IMGUI.h"
 #include "..\io\DataFile.h"
+#include "..\utils\StaticHash.h"
 
 namespace ds {
 
@@ -25,7 +26,7 @@ namespace ds {
 	// -------------------------------------------------------
 	struct SettingsItem {
 		const char* name;
-		IdString hash;
+		StaticHash hash;
 		SettingsType type;
 		union {
 			int* iPtr;

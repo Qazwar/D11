@@ -147,7 +147,7 @@ public:
 
 	virtual void activate();
 	virtual void deactivate();		
-	const IdString& getHashName() const {
+	const StaticHash& getHas() const {
 		return m_HashName;
 	}
 	void updateMousePos(const Vector2f& mousePos);
@@ -187,7 +187,7 @@ private:
 	bool remove(int id);
 	v2 getPosition(int index);
 
-	IdString m_HashName;
+	StaticHash m_HashName;
 	RID _font;
 	Bitmapfont* _bitmapFont;
 

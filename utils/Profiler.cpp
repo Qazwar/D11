@@ -5,6 +5,7 @@
 //#include "..\DialogResources.h"
 #include <algorithm>
 #include <functional>
+#include "..\utils\StaticHash.h"
 
 StopWatch::StopWatch() {
 	//QueryPerformanceFrequency(&_frequency);
@@ -54,7 +55,7 @@ namespace perf {
 	}
 
 	struct ZoneTrackerEvent {
-		IdString hash;
+		ds::StaticHash hash;
 		int parent;
 		LARGE_INTEGER started;
 		float duration;
@@ -65,7 +66,7 @@ namespace perf {
 	struct ZoneTrackerContext {
 		LARGE_INTEGER frequency;
 		ds::CharBuffer names;
-		ds::Array<IdString> hashes;
+		ds::Array<ds::StaticHash> hashes;
 		int current_parent;
 		int root_event;
 		ds::Array<ZoneTrackerEvent> events;
@@ -139,7 +140,7 @@ namespace perf {
 		++zoneTrackerCtx->frames;
 	}
 
-	int findHash(IdString hash) {
+	int findHash(const ds::StaticHash& hash) {
 		for (uint32_t i = 0; i < zoneTrackerCtx->events.size(); ++i) {
 			if (zoneTrackerCtx->events[i].hash == hash) {
 				return i;
@@ -154,7 +155,7 @@ namespace perf {
 		event.parent = zoneTrackerCtx->current_parent;
 		QueryPerformanceCounter(&event.started);
 		event.ident = zoneTrackerCtx->ident++;
-		event.hash = ds::string::murmur_hash(name);
+		event.hash = ds::StaticHash(name);
 		event.duration = -1.0f;
 		int idx = findHash(event.hash);
 		if (idx == -1) {
@@ -194,7 +195,7 @@ namespace perf {
 
 	struct CallAggregator {
 
-		IdString hash;
+		ds::StaticHash hash;
 		int calls;
 		float total;
 		int name_index;

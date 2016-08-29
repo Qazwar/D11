@@ -144,7 +144,7 @@ namespace ds {
 	}
 
 	int GameStateMachine::find(const char* name) const {
-		IdString hash = string::murmur_hash(name);
+		StaticHash hash(name);
 		for (size_t i = 0; i < _gameStates.size(); ++i) {
 			if (_gameStates[i]->getHash() == hash) {
 				return i;

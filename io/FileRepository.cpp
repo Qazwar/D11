@@ -6,6 +6,7 @@
 #include "DataFile.h"
 #include "..\utils\FileUtils.h"
 #include "..\utils\GlobalStringBuffer.h"
+#include "..\utils\StaticHash.h"
 
 namespace ds {
 
@@ -15,7 +16,7 @@ namespace ds {
 		// FileInfo
 		// -----------------------------------------------------------
 		struct FileInfo {
-			IdString hash;
+			StaticHash hash;
 			DataFile* dataFile;
 			FILETIME filetime;
 		};
@@ -25,7 +26,7 @@ namespace ds {
 		// -----------------------------------------------------------
 		struct RepositoryEntry {
 			int name_index;
-			IdString hash;
+			StaticHash hash;
 			int index;
 			int size;
 			bool encoded;
@@ -58,7 +59,7 @@ namespace ds {
 					LOG << "repository entries: " << sz;
 					for ( int i = 0; i < sz; ++i ) {
 						RepositoryEntry entry;
-						fread(&entry.hash, sizeof(IdString), 1, f);
+						fread(&entry.hash, sizeof(StaticHash), 1, f);
 						fread(&entry.size, sizeof(int), 1, f);
 						fread(&entry.index, sizeof(int), 1, f);
 						fread(&entry.encoded, sizeof(bool), 1, f);
@@ -73,7 +74,7 @@ namespace ds {
 		// already loaded
 		// -----------------------------------------------------------
 		bool already_loaded(const char* fileName) {
-			IdString hash = string::murmur_hash(fileName);
+			StaticHash hash = StaticHash(fileName);
 			for (size_t i = 0; i < _repository->entries.size(); ++i) {
 				const RepositoryEntry& entry = _repository->entries[i];
 				if (entry.hash == hash) {
@@ -101,7 +102,7 @@ namespace ds {
 		// already in the watch list
 		// -----------------------------------------------------------
 		bool already_watching(const char* fileName) {
-			IdString hash = string::murmur_hash(fileName);
+			StaticHash hash = StaticHash(fileName);
 			for (size_t i = 0; i < _repository->infos.size(); ++i) {
 				const FileInfo& entry = _repository->infos[i];
 				if (entry.hash == hash) {
@@ -116,7 +117,7 @@ namespace ds {
 				int size = 0;
 				FileInfo info;
 				info.dataFile = file;
-				info.hash = string::murmur_hash(file->getFileName());
+				info.hash = StaticHash(file->getFileName());
 				file::getFileTime(file->getFileName(), info.filetime);
 				_repository->infos.push_back(info);
 			}
@@ -170,7 +171,7 @@ namespace ds {
 					*size = sz;
 					if (!already_loaded(fileName)) {
 						RepositoryEntry entry;
-						entry.hash = string::murmur_hash(fileName);
+						entry.hash = StaticHash(fileName);
 						entry.name_index = _repository->name_buffer.append(fileName);
 						entry.size = sz;
 						entry.index = -1;
@@ -191,7 +192,7 @@ namespace ds {
 			}
 			else {
 				RepositoryEntry* selected = 0;
-				IdString hash = string::murmur_hash(fileName);
+				StaticHash hash = StaticHash(fileName);
 				for (size_t i = 0; i < _repository->entries.size(); ++i) {
 					const RepositoryEntry& entry = _repository->entries[i];
 					if (entry.hash == hash) {
@@ -333,7 +334,7 @@ namespace ds {
 				fread(&sz, sizeof(int), 1, f);
 				for (int i = 0; i < sz; ++i) {
 					RepositoryEntry entry;
-					fread(&entry.hash, sizeof(IdString), 1, f);
+					fread(&entry.hash, sizeof(StaticHash), 1, f);
 					fread(&entry.size, sizeof(int), 1, f);
 					fread(&entry.index, sizeof(int), 1, f);
 					entries.push_back(entry);

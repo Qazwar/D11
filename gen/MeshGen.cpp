@@ -4,7 +4,8 @@
 #include "..\io\json.h"
 #include "..\io\FileRepository.h"
 #include "..\io\BinaryFile.h"
-#include<stdarg.h>
+#include "..\utils\StaticHash.h"
+#include <stdarg.h>
 
 #define EPSILON 0.000001
 
@@ -33,18 +34,18 @@ namespace ds {
 	struct OpcodeDefinition {
 	
 		const char* name;
-		IdString hash;
+		StaticHash hash;
 		int args;
 		int types[8];
 		int var_count;
 		gen::MeshGenFunc func;
 
 		OpcodeDefinition(const char* n) : name(n), args(0) , var_count(0) {
-			hash = string::murmur_hash(n);
+			hash = SID(n);
 		}
 
 		OpcodeDefinition(const char* n, int a, ...) : name(n) , args(a) {
-			hash = string::murmur_hash(n);
+			hash = SID(n);
 			va_list ap;
 			va_start(ap, a);
 			for (int i = 0; i < a; ++i) {
@@ -56,7 +57,7 @@ namespace ds {
 		}
 
 		OpcodeDefinition(const char* n,gen::MeshGenFunc fn, int a, ...) : name(n), args(a) {
-			hash = string::murmur_hash(n);
+			hash = SID(n);
 			func = fn;
 			va_list ap;
 			va_start(ap, a);
@@ -144,7 +145,7 @@ namespace ds {
 	// find opcode by name
 	// --------------------------------------------
 	OpcodeDefinition find_opcode_definition(const char* name) {
-		IdString hash = string::murmur_hash(name);
+		StaticHash hash(name);
 		for (int i = 0; i < OPCODE_MAPPING_COUNT; ++i) {
 			if (OPCODE_MAPPING[i].hash == hash) {
 				return OPCODE_MAPPING[i];
@@ -157,7 +158,7 @@ namespace ds {
 	// find opcode by name
 	// --------------------------------------------
 	int find_definition_index(const char* name) {
-		IdString hash = string::murmur_hash(name);
+		StaticHash hash(name);
 		for (int i = 0; i < OPCODE_MAPPING_COUNT; ++i) {
 			if (OPCODE_MAPPING[i].hash == hash) {
 				return i;

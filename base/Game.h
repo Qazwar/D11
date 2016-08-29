@@ -1,6 +1,7 @@
 #pragma once
 #include "..\lib\collection_types.h"
 #include "..\scene\Scene.h"
+#include "..\utils\StaticHash.h"
 
 namespace ds {
 
@@ -20,7 +21,7 @@ namespace ds {
 		void save(const ReportWriter& writer);
 	private:
 		int findSceneIndex(const char* name) const;
-		Array<IdString> _names;
+		Array<StaticHash> _names;
 		Array<Scene*> _scenes;
 	};
 
