@@ -16,7 +16,7 @@ namespace ds {
 
 	bool TileMapReader::parse(const char* fileName) {
 		int size = -1;
-		const char* txt = ds::repository::load(fileName, &size);
+		const char* txt = ds::repository::load(SID(fileName), &size);
 		ds::Tokenizer t;
 		t.parse(txt);
 		LOG << "file: " << fileName;

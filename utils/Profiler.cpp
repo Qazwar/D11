@@ -55,7 +55,7 @@ namespace perf {
 	}
 
 	struct ZoneTrackerEvent {
-		ds::StaticHash hash;
+		StaticHash hash;
 		int parent;
 		LARGE_INTEGER started;
 		float duration;
@@ -66,7 +66,7 @@ namespace perf {
 	struct ZoneTrackerContext {
 		LARGE_INTEGER frequency;
 		ds::CharBuffer names;
-		ds::Array<ds::StaticHash> hashes;
+		ds::Array<StaticHash> hashes;
 		int current_parent;
 		int root_event;
 		ds::Array<ZoneTrackerEvent> events;
@@ -140,7 +140,7 @@ namespace perf {
 		++zoneTrackerCtx->frames;
 	}
 
-	int findHash(const ds::StaticHash& hash) {
+	int findHash(const StaticHash& hash) {
 		for (uint32_t i = 0; i < zoneTrackerCtx->events.size(); ++i) {
 			if (zoneTrackerCtx->events[i].hash == hash) {
 				return i;
@@ -155,7 +155,7 @@ namespace perf {
 		event.parent = zoneTrackerCtx->current_parent;
 		QueryPerformanceCounter(&event.started);
 		event.ident = zoneTrackerCtx->ident++;
-		event.hash = ds::StaticHash(name);
+		event.hash = StaticHash(name);
 		event.duration = -1.0f;
 		int idx = findHash(event.hash);
 		if (idx == -1) {
@@ -195,7 +195,7 @@ namespace perf {
 
 	struct CallAggregator {
 
-		ds::StaticHash hash;
+		StaticHash hash;
 		int calls;
 		float total;
 		int name_index;

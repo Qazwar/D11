@@ -16,9 +16,9 @@ namespace ds {
 		// check length
 		StopWatch s;
 		s.start();
-		LOG << "Reading simplified json file: " << _name;
+		//LOG << "Reading simplified json file: " << _name;
 		JSONReader reader;
-		if (reader.parse(_name)) {
+		if (reader.parse(_hash)) {
 			if (_loaded) {
 				LOG << "-> Reloading";
 				ret = reloadData(reader);
@@ -33,7 +33,7 @@ namespace ds {
 			repository::add(this);
 		}
 		else {
-			LOG << "Error: Cannot parse file: " << _name;
+			//LOG << "Error: Cannot parse file: " << _hash;
 			ret = false;
 		}
 		s.end();
@@ -49,9 +49,9 @@ namespace ds {
 		// check length
 		StopWatch s;
 		s.start();
-		LOG << "Reading simplified json file: " << _name;
+		LOG << "Reading simplified json file: " << _hash.get();
 		FlatJSONReader reader;
-		if (reader.parse(_name)) {
+		if (reader.parse(_hash)) {
 			if (_loaded) {
 				LOG << "-> Reloading";
 				ret = reloadData(reader);
@@ -66,7 +66,7 @@ namespace ds {
 			repository::add(this);
 		}
 		else {
-			LOG << "Error: Cannot parse file: " << _name;
+			LOG << "Error: Cannot parse file: " << _hash.get();
 			ret = false;
 		}
 		s.end();

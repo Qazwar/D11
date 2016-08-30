@@ -63,7 +63,7 @@ namespace ds {
 	public:
 		JSONReader();
 		~JSONReader();
-		bool parse(const char* fileName);
+		bool parse(const StaticHash& fileName);
 		void save_binary(const char* fileName);
 		bool load_binary(const char* fileName);
 		int get_categories(int* result, int max, int parent = -1) const;
@@ -167,7 +167,7 @@ namespace ds {
 				delete _text;
 			}
 		}
-		bool parse(const char* fileName);
+		bool parse(const StaticHash& fileName);
 		bool get_float(const char* name, float* ret) const;
 		bool get(const char* name, float* ret) const;
 		bool get(const char* name, int* ret) const;

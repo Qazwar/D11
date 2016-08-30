@@ -478,7 +478,7 @@ namespace ds {
 			float textureSize = 1024.0f;
 			Bitmapfont* font = new Bitmapfont;
 			JSONReader reader;
-			bool ret = reader.parse(buffer);
+			bool ret = reader.parse(SID(buffer));
 			assert(ret);
 			int flipped = 0;
 			int info = reader.find_category("settings");
@@ -1168,10 +1168,12 @@ namespace ds {
 		void parseJSONFile(const char* fileName) {
 			JSONReader reader;
 			char buffer[256];
+			StaticHash hh = SID("content\\resources.json");
+
 			StaticHash importHash = SID("import");
 			sprintf_s(buffer, 256, "content\\%s", fileName);
 			LOG << "Loading resource file: " << fileName;
-			bool ret = reader.parse(buffer);
+			bool ret = reader.parse(SID(buffer));
 			XASSERT(ret, "Failed parsing json file");
 			int children[256];
 			int num = reader.get_categories(children, 256);

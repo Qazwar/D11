@@ -250,7 +250,7 @@ bool JSONReader::load_binary(const char* fileName) {
 // -------------------------------------------
 // parse
 // -------------------------------------------
-bool JSONReader::parse(const char* fileName) {
+bool JSONReader::parse(const StaticHash& fileName) {
 	//Token tokens[1024];
 	int fileSize = -1;
 	_text = repository::load(fileName, &fileSize);
@@ -1255,7 +1255,7 @@ bool FlatJSONReader::contains(const char* name) const {
 // -------------------------------------------
 // parse
 // -------------------------------------------
-bool FlatJSONReader::parse(const char* fileName) {
+bool FlatJSONReader::parse(const StaticHash& fileName) {
 	int fileSize = -1;
 	_text = repository::load(fileName, &fileSize);
 	if (fileSize == -1) {

@@ -1583,7 +1583,7 @@ namespace ds {
 			char name[256];
 			Array<MeshGenOpcode> tmp_opcodes;
 			DataStore store;
-			const char* txt = repository::load(buffer, &size);
+			const char* txt = repository::load(SID(buffer), &size);
 			if (size != -1) {
 				Tokenizer t;
 				t.parse(txt);

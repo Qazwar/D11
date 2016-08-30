@@ -9,12 +9,11 @@ namespace ds {
 
 	public:
 		DataFile(const char* fileName) : _loaded(false) {
-			assert(strlen(fileName) < 128);
-			sprintf_s(_name, 128, "%s", fileName);
+			_hash = StaticHash(fileName);
 		}
 		virtual ~DataFile() {}
-		const char* getFileName() const {
-			return _name;
+		const StaticHash& getFileName() const {
+			return _hash;
 		}
 		virtual bool load() = 0;
 		bool isLoaded() const {
@@ -22,7 +21,7 @@ namespace ds {
 		}
 	protected:
 		bool _loaded;
-		char _name[128];
+		StaticHash _hash;
 	};
 
 	class JSONAssetFile : public DataFile {

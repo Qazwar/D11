@@ -1,59 +1,54 @@
 #pragma once
-#include "..\Common.h"
-#include "StringUtils.h"
+#include <stdint.h>
 
-#define SID(str) (ds::StaticHash(str))
-//#define SID_VAL(str) (ds::string::murmur_hash(str))
+const uint32_t FNV_Prime = 0x01000193; //   16777619
+const uint32_t FNV_Seed = 0x811C9DC5; // 2166136261
 
-namespace ds {
-
-	class StringHash {
-
-	private:
-		uint32_t m_val;
-
-		template<size_t N> inline uint32_t _Hash(const char(&str)[N]) const
-		{
-			typedef const char(&truncated_str)[N - 1];
-			return str[N - 1] + 65599 * _Hash((truncated_str)str);
-		}
-		inline uint32_t _Hash(const char(&str)[2]) const { return str[1] + 65599 * str[0]; }
-
-	public:
-		template <size_t N> StringHash(const char(&str)[N]) { m_val = _Hash(str); }
-		inline operator uint32_t() const { return m_val; }
-	};
-
-	class StaticHash {
-
-	public:
-		StaticHash() {
-			_hash = 0;
-		}
-		explicit StaticHash(const char* text) {
-			_hash = murmur_hash(text);
-		}
-		explicit StaticHash(unsigned int hash) {
-			_hash = hash;
-		}
-		~StaticHash() {}
-		const unsigned int get() const {
-			return _hash;
-		}
-		const bool operator<(const ds::StaticHash &rhs) const {
-			return _hash < rhs.get();
-		}
-	private:
-		unsigned int murmur_hash(const char* text);
-		unsigned int murmur_hash(const void * key, int len, unsigned int seed);
-		unsigned int _hash;
-	};
-
+inline uint32_t fnv1a(const char* text, uint32_t hash = FNV_Seed) {
+	const unsigned char* ptr = (const unsigned char*)text;
+	while (*ptr) {
+		hash = (*ptr++ ^ hash) * FNV_Prime;
+	}
+	return hash;
 }
 
-const bool operator==(const ds::StaticHash& lhs, const ds::StaticHash &rhs);
+uint32_t murmur_hash(const char* text);
+uint32_t murmur_hash(const void * key, int len, uint32_t seed);
 
-const bool operator<(const ds::StaticHash& lhs, const ds::StaticHash &rhs);
+#define SID(str) (StaticHash(str))
+#define SID_VAL(str) (fnv1a(str))
 
-const bool operator!=(const ds::StaticHash& lhs, const ds::StaticHash &rhs);
+// ----------------------------------------------------
+// Static Hash 
+// ----------------------------------------------------
+class StaticHash {
+
+public:
+	StaticHash() {
+		_hash = 0;
+	}
+	explicit StaticHash(const char* text) {
+		_hash = fnv1a(text);
+	}
+	explicit StaticHash(uint32_t hash) {
+		_hash = hash;
+	}
+	~StaticHash() {}
+	const uint32_t get() const {
+		return _hash;
+	}
+	const bool operator<(const StaticHash &rhs) const {
+		return _hash < rhs.get();
+	}
+private:	
+	uint32_t _hash;
+};
+
+const StaticHash INVALID_HASH = StaticHash(static_cast<unsigned int>(0));
+
+const bool operator==(const StaticHash& lhs, const StaticHash &rhs);
+
+const bool operator!=(const StaticHash& lhs, const StaticHash &rhs);
+
+
 

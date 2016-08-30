@@ -9,6 +9,30 @@
 
 namespace ds {
 
+	class DString {
+
+	public:
+
+		void add(char c) {
+			_buffer.push_back(c);
+		}
+
+		void add(const char* txt) {
+			int n = strlen(txt);
+			for (int i = 0; i < n; ++i) {
+				_buffer.push_back(txt[i]);
+			}
+		}
+
+		const char* c_str() {
+			_buffer.push_back('\0');
+			_buffer.pop_back();
+			return _buffer.data();
+		}
+	private:
+		Array<char> _buffer;
+	};
+
 	class StringStream {
 
 	typedef Array<char> Buffer;

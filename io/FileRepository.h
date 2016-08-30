@@ -1,9 +1,10 @@
 #pragma once
+#include <stdint.h>
+#include "..\utils\StaticHash.h"
 
 namespace ds {
 
 	class DataFile;
-	class AssetFile;
 
 	namespace repository {
 
@@ -22,7 +23,7 @@ namespace ds {
 
 		void shutdown();
 
-		char* load(const char* fileName, int* size, FileType type = FT_TEXT);
+		char* load(const StaticHash& hash, int* size, FileType type = FT_TEXT);
 
 		void load(DataFile* file, FileType type = FT_TEXT);
 
