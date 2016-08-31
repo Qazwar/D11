@@ -65,6 +65,9 @@
     <Filter Include="io">
       <UniqueIdentifier>{d669cf6b-5410-4d9f-9ddf-f9ee958b476b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="audio">
+      <UniqueIdentifier>{6e3d6316-e736-4a9f-a40a-72d688a0fd18}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="renderer\sprites.cpp">
@@ -192,6 +195,15 @@
     </ClCompile>
     <ClCompile Include="utils\font.cpp">
       <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="audio\AudioBuffer.cpp">
+      <Filter>audio</Filter>
+    </ClCompile>
+    <ClCompile Include="audio\AudioManager.cpp">
+      <Filter>audio</Filter>
+    </ClCompile>
+    <ClCompile Include="audio\Sound.cpp">
+      <Filter>audio</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -347,6 +359,15 @@
     </ClInclude>
     <ClInclude Include="utils\font.h">
       <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="audio\AudioBuffer.h">
+      <Filter>audio</Filter>
+    </ClInclude>
+    <ClInclude Include="audio\AudioManager.h">
+      <Filter>audio</Filter>
+    </ClInclude>
+    <ClInclude Include="audio\Sound.h">
+      <Filter>audio</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

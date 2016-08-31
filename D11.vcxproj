@@ -83,6 +83,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="audio\AudioBuffer.cpp" />
+    <ClCompile Include="audio\AudioManager.cpp" />
+    <ClCompile Include="audio\Sound.cpp" />
     <ClCompile Include="base\BaseApp.cpp" />
     <ClCompile Include="base\Game.cpp" />
     <ClCompile Include="base\InputSystem.cpp" />
@@ -127,6 +130,9 @@
     <ClCompile Include="utils\ObjLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="audio\AudioBuffer.h" />
+    <ClInclude Include="audio\AudioManager.h" />
+    <ClInclude Include="audio\Sound.h" />
     <ClInclude Include="base\BaseApp.h" />
     <ClInclude Include="base\Game.h" />
     <ClInclude Include="base\InputSystem.h" />
