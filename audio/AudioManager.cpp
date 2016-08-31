@@ -50,7 +50,7 @@ namespace ds {
 				return false;
 			}
 			if (pDSBPrimary != 0) {
-				delete pDSBPrimary;
+				pDSBPrimary->Release();
 			}
 			return true;
 
@@ -58,16 +58,45 @@ namespace ds {
 
 		void shutdown() {
 			if (audioCtx != nullptr) {
-				delete audioCtx->directSound;
+				audioCtx->directSound->Release();
 				delete audioCtx;
 			}
 		}
 
+		struct  WaveHeader {
+			char                RIFF[4];        // RIFF Header      Magic header
+			unsigned long       ChunkSize;      // RIFF Chunk Size
+			char                WAVE[4];        // WAVE Header
+			char                fmt[4];         // FMT header
+			unsigned long       Subchunk1Size;  // Size of the fmt chunk
+			unsigned short      AudioFormat;    // Audio format 1=PCM,6=mulaw,7=alaw, 257=IBM Mu-Law, 258=IBM A-Law, 259=ADPCM
+			unsigned short      NumOfChan;      // Number of channels 1=Mono 2=Sterio
+			unsigned long       SamplesPerSec;  // Sampling Frequency in Hz
+			unsigned long       bytesPerSec;    // bytes per second
+			unsigned short      blockAlign;     // 2=16-bit mono, 4=16-bit stereo
+			unsigned short      bitsPerSample;  // Number of bits per sample
+			char                Subchunk2ID[4]; // "data"  string
+			unsigned long       Subchunk2Size;  // Sampled data length
+		};
+		// http://rogerchansdigitalworld.blogspot.de/2010/05/how-to-read-wav-format-file-in-c.html
+		// http://stackoverflow.com/questions/13660777/c-reading-the-data-part-of-a-wav-file
+		// http://stackoverflow.com/questions/16075233/reading-and-processing-wav-file-data-in-c-c
 		void load(const StaticHash& hash) {
 			Sound *s = new Sound(hash);
 			int size = -1;
 			//LOG << "loading sound " << fileName;
 			char* data = repository::load(hash, &size, repository::FileType::FT_BINARY);
+			WaveHeader header;
+			memcpy(&header, data, sizeof(WaveHeader));
+			LOG << "Magic header: " << header.RIFF;
+			LOG << "Wave header: " << header.WAVE;
+			LOG << "FMT header: " << header.fmt;
+			LOG << "FMT chunk: " << header.Subchunk1Size;
+			LOG << "format: " << header.AudioFormat;
+			LOG << "Samples: " << header.SamplesPerSec;
+			LOG << "Bits: " << header.bitsPerSample;
+			LOG << "Subchunk2: " << header.Subchunk2ID;
+			LOG << "Sub2 size: " << header.Subchunk2Size;
 			//int ret = s->loadWavFile(fileName);
 			//if (ret > 0) {
 				//createAudioBuffer(s);
