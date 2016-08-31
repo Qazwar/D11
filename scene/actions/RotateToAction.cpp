@@ -1,6 +1,6 @@
 #include "RotateToAction.h"
-#include "..\..\utils\Log.h"
-#include "..\..\math\GameMath.h"
+#include "core\log\Log.h"
+#include "core\math\GameMath.h"
 
 namespace ds {
 	// -------------------------------------------------------

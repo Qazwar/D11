@@ -1,6 +1,6 @@
 #pragma once
 #include "..\renderer\render_types.h"
-#include "..\lib\collection_types.h"
+#include "core\lib\collection_types.h"
 #include "..\sprites\Sprite.h"
 #include "..\renderer\BitmapFont.h"
 

@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <Point.h>
 #include "render_types.h"
-#include "..\utils\Color.h"
+#include "core\graphics\Color.h"
 #include "graphics.h"
 #include "..\resources\ResourceDescriptors.h"
 #include "..\sprites\Sprite.h"

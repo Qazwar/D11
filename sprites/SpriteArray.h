@@ -1,9 +1,10 @@
 #pragma once
 #include <Vector.h>
-#include "..\utils\Color.h"
+#include "core\graphics\Color.h"
 #include "..\renderer\render_types.h"
 #include "Sprite.h"
-#include "..\lib\collection_types.h"
+#include "core\lib\collection_types.h"
+#include "core\graphics\Texture.h"
 #include <stdint.h>
 
 namespace ds {

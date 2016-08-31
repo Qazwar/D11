@@ -1,9 +1,9 @@
 #include "SkyBox.h"
 #include "..\renderer\graphics.h"
-#include "..\math\math_types.h"
-#include "..\math\matrix.h"
+#include "core\math\math_types.h"
+#include "core\math\matrix.h"
 #include "..\resources\ResourceContainer.h"
-#include "..\utils\Profiler.h"
+#include "core\profiler\Profiler.h"
 #include "..\stats\DrawCounter.h"
 
 // http://rbwhitaker.wikidot.com/skyboxes-1

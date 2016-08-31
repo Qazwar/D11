@@ -1,6 +1,6 @@
 #include "InputSystem.h"
 #include <Windows.h>
-#include "..\utils\Log.h"
+#include "core\log\Log.h"
 
 namespace ds {
 

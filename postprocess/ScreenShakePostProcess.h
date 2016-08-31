@@ -1,7 +1,7 @@
 #pragma once
 #include "PostProcess.h"
 #include "..\renderer\VertexTypes.h"
-#include "..\Common.h"
+#include "core\Common.h"
 
 namespace ds {
 

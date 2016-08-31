@@ -3,8 +3,8 @@
 #include <Point.h>
 #include "..\renderer\BitmapFont.h"
 #include "..\renderer\render_types.h"
-#include "..\lib\collection_types.h"
-#include "..\utils\Color.h"
+#include "core\lib\collection_types.h"
+#include "core\graphics\Color.h"
 #include "..\resources\ResourceDescriptors.h"
 
 namespace gui {

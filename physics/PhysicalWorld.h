@@ -2,8 +2,8 @@
 #include "..\sprites\SpriteArray.h"
 #include "ColliderArray.h"
 #include <map>
-#include "..\math\Bitset.h"
-#include "..\lib\collection_types.h"
+#include "core\math\Bitset.h"
+#include "core\lib\collection_types.h"
 #include <Point.h>
 
 namespace ds {

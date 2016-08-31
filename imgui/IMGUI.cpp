@@ -1,10 +1,10 @@
 #include "IMGUI.h"
-#include "..\math\math.h"
+#include "core\math\math.h"
 #include "..\renderer\graphics.h"
 #include "..\renderer\sprites.h"
 #include "..\resources\ResourceContainer.h"
-#include "..\utils\Profiler.h"
-#include "..\utils\Log.h"
+#include "core\profiler\Profiler.h"
+#include "core\log\Log.h"
 #include "..\utils\font.h"
 #include "..\base\InputSystem.h"
 #include <stdarg.h>

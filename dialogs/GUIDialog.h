@@ -1,12 +1,12 @@
 #pragma once
-#include "..\lib\collection_types.h"
+#include "core\lib\collection_types.h"
 #include "..\renderer\render_types.h"
 #include "..\sprites\Sprite.h"
-#include "..\math\tweening.h"
+#include "core\math\tweening.h"
 #include "..\renderer\BitmapFont.h"
 #include "..\imgui\IMGUI.h"
-#include "..\utils\GameTimer.h"
-#include "..\io\DataFile.h"
+#include "core\utils\GameTimer.h"
+#include "core\io\DataFile.h"
 #include "..\resources\ResourceDescriptors.h"
 #include "..\renderer\sprites.h"
 

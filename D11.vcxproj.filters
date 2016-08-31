@@ -14,18 +14,6 @@
     <Filter Include="base">
       <UniqueIdentifier>{89dc0097-eca2-4350-9399-cd1990468d8d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="io">
-      <UniqueIdentifier>{fabe7d9c-aff5-41bc-86a2-991571ef0f0b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="memory">
-      <UniqueIdentifier>{06464231-cb3a-4ec5-b16c-61fa74a2331a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib">
-      <UniqueIdentifier>{897b94d5-e66b-4d29-8fbe-4826c3a2c6d2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="math">
-      <UniqueIdentifier>{ea8be514-4dbd-4983-93cc-8e435139a6b4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="content">
       <UniqueIdentifier>{0f7e376b-9539-4e68-b62a-ab8f1b45cb79}</UniqueIdentifier>
     </Filter>
@@ -53,9 +41,6 @@
     <Filter Include="dialogs">
       <UniqueIdentifier>{8b070728-2af1-4142-8741-c1a4686a27ac}</UniqueIdentifier>
     </Filter>
-    <Filter Include="data">
-      <UniqueIdentifier>{5384c1d7-53b5-4997-baa4-5495a8bd7cf6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="gen">
       <UniqueIdentifier>{c9d93cf0-37cb-46a6-a1b2-57cc3074720a}</UniqueIdentifier>
     </Filter>
@@ -77,58 +62,16 @@
     <Filter Include="shaders\postprocess">
       <UniqueIdentifier>{5583694e-52aa-4d57-b9f7-d0bd7e9a1e39}</UniqueIdentifier>
     </Filter>
+    <Filter Include="io">
+      <UniqueIdentifier>{d669cf6b-5410-4d9f-9ddf-f9ee958b476b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="utils\Log.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
     <ClCompile Include="renderer\sprites.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
-    <ClCompile Include="utils\Color.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
     <ClCompile Include="base\BaseApp.cpp">
       <Filter>base</Filter>
-    </ClCompile>
-    <ClCompile Include="io\json.cpp">
-      <Filter>io</Filter>
-    </ClCompile>
-    <ClCompile Include="memory\DefaultAllocator.cpp">
-      <Filter>memory</Filter>
-    </ClCompile>
-    <ClCompile Include="io\ReportWriter.cpp">
-      <Filter>io</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\BlockArray.cpp">
-      <Filter>lib</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\StringUtils.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="io\FileRepository.cpp">
-      <Filter>io</Filter>
-    </ClCompile>
-    <ClCompile Include="io\DataFile.cpp">
-      <Filter>io</Filter>
-    </ClCompile>
-    <ClCompile Include="io\TextCompressor.cpp">
-      <Filter>io</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\Profiler.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\FileUtils.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\GlobalStringBuffer.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="math\math.cpp">
-      <Filter>math</Filter>
-    </ClCompile>
-    <ClCompile Include="math\matrix.cpp">
-      <Filter>math</Filter>
     </ClCompile>
     <ClCompile Include="resources\ResourceContainer.cpp">
       <Filter>resources</Filter>
@@ -139,9 +82,6 @@
     <ClCompile Include="gamestates\GameStateMachine.cpp">
       <Filter>gamestates</Filter>
     </ClCompile>
-    <ClCompile Include="math\tweening.cpp">
-      <Filter>math</Filter>
-    </ClCompile>
     <ClCompile Include="sprites\SpriteArray.cpp">
       <Filter>sprites</Filter>
     </ClCompile>
@@ -150,24 +90,6 @@
     </ClCompile>
     <ClCompile Include="physics\PhysicalWorld.cpp">
       <Filter>physics</Filter>
-    </ClCompile>
-    <ClCompile Include="math\CubicBezierPath.cpp">
-      <Filter>math</Filter>
-    </ClCompile>
-    <ClCompile Include="math\hex.cpp">
-      <Filter>math</Filter>
-    </ClCompile>
-    <ClCompile Include="math\StraightPath.cpp">
-      <Filter>math</Filter>
-    </ClCompile>
-    <ClCompile Include="base\CrashReporter.cpp">
-      <Filter>base</Filter>
-    </ClCompile>
-    <ClCompile Include="math\GameMath.cpp">
-      <Filter>math</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\mtrand.cpp">
-      <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="particles\ParticleManager.cpp">
       <Filter>particles</Filter>
@@ -184,9 +106,6 @@
     <ClCompile Include="imgui\IMGUI.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="utils\font.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
     <ClCompile Include="base\WindowMain.cpp">
       <Filter>base</Filter>
     </ClCompile>
@@ -195,9 +114,6 @@
     </ClCompile>
     <ClCompile Include="renderer\graphics.cpp">
       <Filter>renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="base\EventStream.cpp">
-      <Filter>base</Filter>
     </ClCompile>
     <ClCompile Include="renderer\Camera.cpp">
       <Filter>renderer</Filter>
@@ -214,12 +130,6 @@
     <ClCompile Include="renderer\MeshBuffer.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
-    <ClCompile Include="utils\StateManager.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="data\DynamicSettings.cpp">
-      <Filter>data</Filter>
-    </ClCompile>
     <ClCompile Include="gen\MeshGen.cpp">
       <Filter>gen</Filter>
     </ClCompile>
@@ -228,12 +138,6 @@
     </ClCompile>
     <ClCompile Include="gen\MeshGenCommand.cpp">
       <Filter>gen</Filter>
-    </ClCompile>
-    <ClCompile Include="io\BinaryFile.cpp">
-      <Filter>io</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\TileMapReader.cpp">
-      <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="stats\DrawCounter.cpp">
       <Filter>stats</Filter>
@@ -274,77 +178,34 @@
     <ClCompile Include="postprocess\SimplePostProcess.cpp">
       <Filter>postprocess</Filter>
     </ClCompile>
+    <ClCompile Include="postprocess\ScreenShakePostProcess.cpp">
+      <Filter>postprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="postprocess\PostProcess.cpp">
+      <Filter>postprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\SpriteSheet.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="io\ReportWriter.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\font.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="utils\Log.h">
-      <Filter>utils</Filter>
-    </ClInclude>
     <ClInclude Include="renderer\render_types.h">
       <Filter>renderer</Filter>
     </ClInclude>
     <ClInclude Include="renderer\sprites.h">
       <Filter>renderer</Filter>
     </ClInclude>
-    <ClInclude Include="utils\Color.h">
-      <Filter>utils</Filter>
-    </ClInclude>
     <ClInclude Include="base\BaseApp.h">
       <Filter>base</Filter>
     </ClInclude>
-    <ClInclude Include="io\json.h">
-      <Filter>io</Filter>
-    </ClInclude>
-    <ClInclude Include="memory\DefaultAllocator.h">
-      <Filter>memory</Filter>
-    </ClInclude>
-    <ClInclude Include="memory\memory_types.h">
-      <Filter>memory</Filter>
-    </ClInclude>
-    <ClInclude Include="io\ReportWriter.h">
-      <Filter>io</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\BlockArray.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\collection_types.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\DataArray.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\StringUtils.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="io\FileRepository.h">
-      <Filter>io</Filter>
-    </ClInclude>
-    <ClInclude Include="io\DataFile.h">
-      <Filter>io</Filter>
-    </ClInclude>
-    <ClInclude Include="io\TextCompressor.h">
-      <Filter>io</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\Profiler.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\FileUtils.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\GlobalStringBuffer.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="math\math.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="Common.h" />
     <ClInclude Include="base\Settings.h">
       <Filter>base</Filter>
-    </ClInclude>
-    <ClInclude Include="math\math_types.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="math\matrix.h">
-      <Filter>math</Filter>
     </ClInclude>
     <ClInclude Include="resources\ResourceDescriptors.h">
       <Filter>resources</Filter>
@@ -361,9 +222,6 @@
     <ClInclude Include="gamestates\GameStateMachine.h">
       <Filter>gamestates</Filter>
     </ClInclude>
-    <ClInclude Include="math\tweening.h">
-      <Filter>math</Filter>
-    </ClInclude>
     <ClInclude Include="sprites\Sprite.h">
       <Filter>sprites</Filter>
     </ClInclude>
@@ -375,42 +233,6 @@
     </ClInclude>
     <ClInclude Include="physics\PhysicalWorld.h">
       <Filter>physics</Filter>
-    </ClInclude>
-    <ClInclude Include="physics\physic_types.h">
-      <Filter>physics</Filter>
-    </ClInclude>
-    <ClInclude Include="math\Bitset.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="math\CubicBezierPath.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="math\FloatArray.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="math\hex.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="math\HexGrid.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="math\StraightPath.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="math\BezierCurve.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="base\CrashReporter.h">
-      <Filter>base</Filter>
-    </ClInclude>
-    <ClInclude Include="math\GameMath.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\mtrand.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\Assert.h">
-      <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="particles\Particle.h">
       <Filter>particles</Filter>
@@ -433,20 +255,11 @@
     <ClInclude Include="imgui\IMGUI.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="utils\font.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\GameTimer.h">
-      <Filter>utils</Filter>
-    </ClInclude>
     <ClInclude Include="dialogs\GUIDialog.h">
       <Filter>dialogs</Filter>
     </ClInclude>
     <ClInclude Include="renderer\graphics.h">
       <Filter>renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="base\EventStream.h">
-      <Filter>base</Filter>
     </ClInclude>
     <ClInclude Include="renderer\Camera.h">
       <Filter>renderer</Filter>
@@ -466,17 +279,8 @@
     <ClInclude Include="renderer\MeshBuffer.h">
       <Filter>renderer</Filter>
     </ClInclude>
-    <ClInclude Include="lib\Grid.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\StateManager.h">
-      <Filter>utils</Filter>
-    </ClInclude>
     <ClInclude Include="resources\Resource.h">
       <Filter>resources</Filter>
-    </ClInclude>
-    <ClInclude Include="data\DynamicSettings.h">
-      <Filter>data</Filter>
     </ClInclude>
     <ClInclude Include="gen\MeshGen.h">
       <Filter>gen</Filter>
@@ -487,12 +291,6 @@
     <ClInclude Include="gen\MeshGenCommand.h">
       <Filter>gen</Filter>
     </ClInclude>
-    <ClInclude Include="io\BinaryFile.h">
-      <Filter>io</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\TileMapReader.h">
-      <Filter>utils</Filter>
-    </ClInclude>
     <ClInclude Include="stats\DrawCounter.h">
       <Filter>stats</Filter>
     </ClInclude>
@@ -502,7 +300,6 @@
     <ClInclude Include="renderer\RenderTarget.h">
       <Filter>renderer</Filter>
     </ClInclude>
-    <ClInclude Include="lib\TileMap.h" />
     <ClInclude Include="scene\ActionEventBuffer.h">
       <Filter>scene</Filter>
     </ClInclude>
@@ -530,9 +327,6 @@
     <ClInclude Include="base\Game.h">
       <Filter>base</Filter>
     </ClInclude>
-    <ClInclude Include="data\HighscoreService.h">
-      <Filter>data</Filter>
-    </ClInclude>
     <ClInclude Include="postprocess\PostProcess.h">
       <Filter>postprocess</Filter>
     </ClInclude>
@@ -542,12 +336,21 @@
     <ClInclude Include="postprocess\SimplePostProcess.h">
       <Filter>postprocess</Filter>
     </ClInclude>
+    <ClInclude Include="postprocess\ScreenShakePostProcess.h">
+      <Filter>postprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\SpriteSheet.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="io\ReportWriter.h">
+      <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\font.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="content\engine_settings.json">
-      <Filter>content</Filter>
-    </None>
-    <None Include="content\resources.json">
       <Filter>content</Filter>
     </None>
     <None Include="content\resources\xscale.json">
@@ -584,6 +387,12 @@
     <None Include="shaders\postprocess\PostProcessCommon.inc">
       <Filter>shaders\postprocess</Filter>
     </None>
+    <None Include="shaders\postprocess\ScreenShake_PS_Main.inc">
+      <Filter>shaders\postprocess</Filter>
+    </None>
+    <None Include="shaders\postprocess\ScreenShake_VS_Main.inc">
+      <Filter>shaders\postprocess</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\Sprite.fx">
@@ -593,6 +402,9 @@
       <Filter>shaders\postprocess</Filter>
     </FxCompile>
     <FxCompile Include="shaders\postprocess\BasicPostProcess.fx">
+      <Filter>shaders\postprocess</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\postprocess\ScreenShake.fx">
       <Filter>shaders\postprocess</Filter>
     </FxCompile>
   </ItemGroup>

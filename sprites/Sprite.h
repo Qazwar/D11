@@ -1,9 +1,10 @@
 #pragma once
-#include "..\math\math_types.h"
+#include "core\math\math_types.h"
 #include "Vector.h"
-#include "..\utils\Color.h"
+#include "core\math\math_types.h"
 #include "..\renderer\render_types.h"
-#include "..\Common.h"
+#include "core\Common.h"
+#include "core\graphics\Texture.h"
 
 namespace ds {
 

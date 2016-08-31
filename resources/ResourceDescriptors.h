@@ -1,10 +1,11 @@
 #pragma once
 #include <stdint.h>
 #include <d3d11.h>
-#include "..\Common.h"
-#include "..\utils\Color.h"
+#include "core\Common.h"
+#include "core\math\math_types.h"
 #include <Vector.h>
-#include "..\utils\StaticHash.h"
+#include "core\string\StaticHash.h"
+#include "core\graphics\Color.h"
 
 namespace ds {
 

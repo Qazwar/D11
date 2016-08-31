@@ -1,12 +1,12 @@
 #include "MeshBuffer.h"
 #include "..\renderer\graphics.h"
-#include "..\math\math_types.h"
-#include "..\math\matrix.h"
+#include "core\math\math_types.h"
+#include "core\math\matrix.h"
 #include "..\resources\ResourceDescriptors.h"
 #include "..\resources\ResourceContainer.h"
-#include "..\utils\Log.h"
-#include "..\utils\Profiler.h"
-#include "..\io\BinaryFile.h"
+#include "core\log\Log.h"
+#include "core\profiler\Profiler.h"
+#include "core\io\BinaryFile.h"
 #include "..\stats\DrawCounter.h"
 
 namespace ds {

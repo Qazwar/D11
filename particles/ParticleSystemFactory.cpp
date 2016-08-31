@@ -1,6 +1,6 @@
 #include "ParticleSystemFactory.h"
 #include "ParticleSystem.h"
-#include "..\utils\GlobalStringBuffer.h"
+#include "core\string\GlobalStringBuffer.h"
 
 namespace ds {
 

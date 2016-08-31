@@ -1,6 +1,6 @@
 #include "PostProcess.h"
 #include "..\renderer\graphics.h"
-#include "..\utils\Profiler.h"
+#include "core\profiler\Profiler.h"
 #include "..\renderer\VertexTypes.h"
 #include "..\resources\ResourceContainer.h"
 

@@ -2,16 +2,16 @@
 #include <D3D11.h>
 #include <D3Dcompiler.h>
 #include <map>
-#include "..\io\json.h"
+#include "core\io\json.h"
 #include "ResourceDescriptors.h"
 #include "..\renderer\graphics.h"
 #include <string.h>
-#include "..\utils\Log.h"
+#include "core\log\Log.h"
 #include "..\renderer\render_types.h"
 #include "..\imgui\IMGUI.h"
-#include "..\utils\Assert.h"
+#include "core\base\Assert.h"
 #include "Resource.h"
-#include "..\utils\StaticHash.h"
+#include "core\string\StaticHash.h"
 
 namespace ds {
 

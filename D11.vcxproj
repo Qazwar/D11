@@ -39,8 +39,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(IncludePath);$(DXSDK_DIR)Include;..\math</IncludePath>
-    <LibraryPath>$(LibraryPath);$(DXSDK_DIR)Lib\x86</LibraryPath>
+    <IncludePath>$(IncludePath);$(DXSDK_DIR)Include;..\math;..\DieselCore</IncludePath>
+    <LibraryPath>$(LibraryPath);$(DXSDK_DIR)Lib\x86;..\DieselCore\Debug</LibraryPath>
     <OutDir>$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
   </PropertyGroup>
@@ -84,33 +84,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="base\BaseApp.cpp" />
-    <ClCompile Include="base\CrashReporter.cpp" />
-    <ClCompile Include="base\EventStream.cpp" />
     <ClCompile Include="base\Game.cpp" />
     <ClCompile Include="base\InputSystem.cpp" />
     <ClCompile Include="base\WindowMain.cpp" />
-    <ClCompile Include="data\DynamicSettings.cpp" />
     <ClCompile Include="dialogs\GUIDialog.cpp" />
     <ClCompile Include="gamestates\GameStateMachine.cpp" />
     <ClCompile Include="gen\MeshGen.cpp" />
     <ClCompile Include="gen\MeshGenCommand.cpp" />
     <ClCompile Include="gen\MeshGenGUI.cpp" />
     <ClCompile Include="imgui\IMGUI.cpp" />
-    <ClCompile Include="io\BinaryFile.cpp" />
-    <ClCompile Include="io\DataFile.cpp" />
-    <ClCompile Include="io\FileRepository.cpp" />
-    <ClCompile Include="io\json.cpp" />
     <ClCompile Include="io\ReportWriter.cpp" />
-    <ClCompile Include="io\TextCompressor.cpp" />
-    <ClCompile Include="lib\BlockArray.cpp" />
-    <ClCompile Include="math\CubicBezierPath.cpp" />
-    <ClCompile Include="math\GameMath.cpp" />
-    <ClCompile Include="math\hex.cpp" />
-    <ClCompile Include="math\math.cpp" />
-    <ClCompile Include="math\matrix.cpp" />
-    <ClCompile Include="math\StraightPath.cpp" />
-    <ClCompile Include="math\tweening.cpp" />
-    <ClCompile Include="memory\DefaultAllocator.cpp" />
     <ClCompile Include="particles\ParticleManager.cpp" />
     <ClCompile Include="particles\ParticleModule.cpp" />
     <ClCompile Include="particles\ParticleSystem.cpp" />
@@ -119,6 +102,8 @@
     <ClCompile Include="physics\ColliderArray.cpp" />
     <ClCompile Include="physics\PhysicalWorld.cpp" />
     <ClCompile Include="postprocess\GrayFadePostProcess.cpp" />
+    <ClCompile Include="postprocess\PostProcess.cpp" />
+    <ClCompile Include="postprocess\ScreenShakePostProcess.cpp" />
     <ClCompile Include="postprocess\SimplePostProcess.cpp" />
     <ClCompile Include="renderer\Bitmapfont.cpp" />
     <ClCompile Include="renderer\Camera.cpp" />
@@ -128,6 +113,7 @@
     <ClCompile Include="renderer\RenderTarget.cpp" />
     <ClCompile Include="renderer\SkyBox.cpp" />
     <ClCompile Include="renderer\sprites.cpp" />
+    <ClCompile Include="renderer\SpriteSheet.cpp" />
     <ClCompile Include="resources\ResourceContainer.cpp" />
     <ClCompile Include="scene\actions\AbstractAction.cpp" />
     <ClCompile Include="scene\actions\MoveToAction.cpp" />
@@ -137,28 +123,14 @@
     <ClCompile Include="scene\Scene.cpp" />
     <ClCompile Include="sprites\SpriteArray.cpp" />
     <ClCompile Include="stats\DrawCounter.cpp" />
-    <ClCompile Include="utils\Color.cpp" />
-    <ClCompile Include="utils\FileUtils.cpp" />
     <ClCompile Include="utils\font.cpp" />
-    <ClCompile Include="utils\GlobalStringBuffer.cpp" />
-    <ClCompile Include="utils\Log.cpp" />
-    <ClCompile Include="utils\mtrand.cpp" />
     <ClCompile Include="utils\ObjLoader.cpp" />
-    <ClCompile Include="utils\Profiler.cpp" />
-    <ClCompile Include="utils\StateManager.cpp" />
-    <ClCompile Include="utils\StringUtils.cpp" />
-    <ClCompile Include="utils\TileMapReader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="base\BaseApp.h" />
-    <ClInclude Include="base\CrashReporter.h" />
-    <ClInclude Include="base\EventStream.h" />
     <ClInclude Include="base\Game.h" />
     <ClInclude Include="base\InputSystem.h" />
     <ClInclude Include="base\Settings.h" />
-    <ClInclude Include="Common.h" />
-    <ClInclude Include="data\DynamicSettings.h" />
-    <ClInclude Include="data\HighscoreService.h" />
     <ClInclude Include="dialogs\GUIDialog.h" />
     <ClInclude Include="gamestates\GameState.h" />
     <ClInclude Include="gamestates\GameStateMachine.h" />
@@ -166,31 +138,7 @@
     <ClInclude Include="gen\MeshGenCommand.h" />
     <ClInclude Include="gen\MeshGenGUI.h" />
     <ClInclude Include="imgui\IMGUI.h" />
-    <ClInclude Include="io\BinaryFile.h" />
-    <ClInclude Include="io\DataFile.h" />
-    <ClInclude Include="io\FileRepository.h" />
-    <ClInclude Include="io\json.h" />
     <ClInclude Include="io\ReportWriter.h" />
-    <ClInclude Include="io\TextCompressor.h" />
-    <ClInclude Include="lib\BlockArray.h" />
-    <ClInclude Include="lib\collection_types.h" />
-    <ClInclude Include="lib\DataArray.h" />
-    <ClInclude Include="lib\Grid.h" />
-    <ClInclude Include="lib\TileMap.h" />
-    <ClInclude Include="math\BezierCurve.h" />
-    <ClInclude Include="math\Bitset.h" />
-    <ClInclude Include="math\CubicBezierPath.h" />
-    <ClInclude Include="math\FloatArray.h" />
-    <ClInclude Include="math\GameMath.h" />
-    <ClInclude Include="math\hex.h" />
-    <ClInclude Include="math\HexGrid.h" />
-    <ClInclude Include="math\math.h" />
-    <ClInclude Include="math\math_types.h" />
-    <ClInclude Include="math\matrix.h" />
-    <ClInclude Include="math\StraightPath.h" />
-    <ClInclude Include="math\tweening.h" />
-    <ClInclude Include="memory\DefaultAllocator.h" />
-    <ClInclude Include="memory\memory_types.h" />
     <ClInclude Include="particles\Particle.h" />
     <ClInclude Include="particles\ParticleEmitter.h" />
     <ClInclude Include="particles\ParticleManager.h" />
@@ -200,9 +148,9 @@
     <ClInclude Include="particles\ParticleSystemRenderer.h" />
     <ClInclude Include="physics\ColliderArray.h" />
     <ClInclude Include="physics\PhysicalWorld.h" />
-    <ClInclude Include="physics\physic_types.h" />
     <ClInclude Include="postprocess\GrayFadePostProcess.h" />
     <ClInclude Include="postprocess\PostProcess.h" />
+    <ClInclude Include="postprocess\ScreenShakePostProcess.h" />
     <ClInclude Include="postprocess\SimplePostProcess.h" />
     <ClInclude Include="renderer\Bitmapfont.h" />
     <ClInclude Include="renderer\Camera.h" />
@@ -213,6 +161,7 @@
     <ClInclude Include="renderer\render_types.h" />
     <ClInclude Include="renderer\SkyBox.h" />
     <ClInclude Include="renderer\sprites.h" />
+    <ClInclude Include="renderer\SpriteSheet.h" />
     <ClInclude Include="renderer\VertexTypes.h" />
     <ClInclude Include="resources\Resource.h" />
     <ClInclude Include="resources\ResourceContainer.h" />
@@ -227,23 +176,11 @@
     <ClInclude Include="sprites\Sprite.h" />
     <ClInclude Include="sprites\SpriteArray.h" />
     <ClInclude Include="stats\DrawCounter.h" />
-    <ClInclude Include="utils\Assert.h" />
-    <ClInclude Include="utils\Color.h" />
-    <ClInclude Include="utils\FileUtils.h" />
     <ClInclude Include="utils\font.h" />
-    <ClInclude Include="utils\GameTimer.h" />
-    <ClInclude Include="utils\GlobalStringBuffer.h" />
-    <ClInclude Include="utils\Log.h" />
-    <ClInclude Include="utils\mtrand.h" />
     <ClInclude Include="utils\ObjLoader.h" />
-    <ClInclude Include="utils\Profiler.h" />
-    <ClInclude Include="utils\StateManager.h" />
-    <ClInclude Include="utils\StringUtils.h" />
-    <ClInclude Include="utils\TileMapReader.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="content\engine_settings.json" />
-    <None Include="content\resources.json" />
     <None Include="content\resources\xscale.json" />
     <None Include="shaders\compile_shaders.cmd" />
     <None Include="shaders\postprocess\BasicPostProcess_PS_Main.inc" />
@@ -251,6 +188,8 @@
     <None Include="shaders\postprocess\GrayFade_PS_Main.inc" />
     <None Include="shaders\postprocess\GrayFade_VS_Main.inc" />
     <None Include="shaders\postprocess\PostProcessCommon.inc" />
+    <None Include="shaders\postprocess\ScreenShake_PS_Main.inc" />
+    <None Include="shaders\postprocess\ScreenShake_VS_Main.inc" />
     <None Include="shaders\Sprite_GS_Main.inc" />
     <None Include="shaders\Sprite_PS_Main.inc" />
     <None Include="shaders\Sprite_VS_Main.inc" />
@@ -265,6 +204,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="shaders\postprocess\GrayFade.fx">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="shaders\postprocess\ScreenShake.fx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="shaders\Sprite.fx">

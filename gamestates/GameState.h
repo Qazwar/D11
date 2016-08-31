@@ -1,11 +1,11 @@
 #pragma once
 #include <Windows.h>
-#include "..\Common.h"
-#include "..\utils\StringUtils.h"
+#include "core\Common.h"
+#include "core\string\StringUtils.h"
 #include "..\dialogs\GUIDialog.h"
 #include "..\resources\ResourceContainer.h"
 #include "..\base\Game.h"
-#include "..\base\EventStream.h"
+#include "core\base\EventStream.h"
 
 namespace ds {
 

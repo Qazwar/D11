@@ -1,5 +1,5 @@
 #include "font.h"
-#include "..\utils\Log.h"
+#include "core\log\Log.h"
 #include "..\resources\ResourceContainer.h"
 
 namespace ds {

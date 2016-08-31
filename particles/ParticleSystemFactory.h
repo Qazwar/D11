@@ -1,5 +1,5 @@
 #pragma once
-#include "..\lib\collection_types.h"
+#include "core\lib\collection_types.h"
 #include "ParticleEmitter.h"
 #include "ParticleModule.h"
 

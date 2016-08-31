@@ -1,6 +1,7 @@
 #pragma once
 #include "render_types.h"
-#include "..\math\math_types.h"
+#include "core\math\math_types.h"
+#include "core\graphics\Texture.h"
 
 namespace ds {
 

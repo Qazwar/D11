@@ -1,11 +1,11 @@
 #include "ObjLoader.h"
 #include <fstream>
 #include <vector>
-#include "Log.h"
-#include "..\io\json.h"
+#include "core\log\Log.h"
+#include "core\io\json.h"
 #include <map>
 #include "..\renderer\VertexTypes.h"
-#include "..\utils\StaticHash.h"
+#include "core\string\StaticHash.h"
 
 namespace ds {
 	

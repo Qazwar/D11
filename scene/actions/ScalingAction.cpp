@@ -1,6 +1,6 @@
 #include "ScalingAction.h"
-#include "..\..\math\GameMath.h"
-#include "..\..\utils\Log.h"
+#include "core\math\GameMath.h"
+#include "core\log\Log.h"
 
 namespace ds {
 	// -------------------------------------------------------

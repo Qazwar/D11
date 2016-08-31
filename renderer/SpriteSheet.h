@@ -1,8 +1,8 @@
 #pragma once
 #include "render_types.h"
-#include "..\lib\collection_types.h"
-#include "..\io\DataFile.h"
-#include "..\utils\StaticHash.h"
+#include "core\lib\collection_types.h"
+#include "core\io\DataFile.h"
+#include "core\string\StaticHash.h"
 
 namespace ds {
 

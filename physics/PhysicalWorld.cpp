@@ -1,6 +1,6 @@
 #include "PhysicalWorld.h"
-#include "..\utils\Log.h"
-#include "..\utils\Profiler.h"
+#include "core\log\Log.h"
+#include "core\profiler\Profiler.h"
 
 namespace ds {
 

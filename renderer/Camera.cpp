@@ -1,6 +1,6 @@
 #include "Camera.h"
-#include "..\Common.h"
-#include "..\utils\Log.h"
+#include "core\Common.h"
+#include "core\log\Log.h"
 #include "..\base\InputSystem.h"
 #include <d3dx9math.h>
 

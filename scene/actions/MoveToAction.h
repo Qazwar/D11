@@ -1,8 +1,7 @@
 #pragma once
 #include "..\..\renderer\render_types.h"
-#include "..\..\math\tweening.h"
+#include "core\math\tweening.h"
 #include "..\Scene.h"
-#include "..\..\math\tweening.h"
 #include "AbstractAction.h"
 
 namespace ds {

@@ -1,9 +1,8 @@
 #pragma once
 #include "..\..\renderer\render_types.h"
-#include "..\..\math\tweening.h"
+#include "core\math\tweening.h"
 #include <map>
 #include "..\Scene.h"
-#include "..\..\math\tweening.h"
 #include "AbstractAction.h"
 #include "..\EntityArray.h"
 

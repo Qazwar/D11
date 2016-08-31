@@ -4,9 +4,9 @@
 #include "Settings.h"
 #include "..\resources\ResourceContainer.h"
 #include "..\gamestates\GameStateMachine.h"
-#include "EventStream.h"
+#include "core\base\EventStream.h"
 #include "Game.h"
-#include "system_info.h"
+#include "core\base\system_info.h"
 #include <thread>
 
 namespace ds {

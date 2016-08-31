@@ -1,14 +1,14 @@
 #pragma once
 #include <stdint.h>
 #include "render_types.h"
-#include "..\utils\Color.h"
+#include "core\math\math_types.h"
 #include "graphics.h"
 #include "..\resources\ResourceDescriptors.h"
 #include "..\sprites\Sprite.h"
-#include "..\lib\collection_types.h"
+#include "core\lib\collection_types.h"
 #include "VertexTypes.h"
 #include "QuadBuffer.h"
-#include "..\physics\physic_types.h"
+#include "core\math\AABBox.h"
 
 namespace ds {
 

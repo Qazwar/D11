@@ -1,7 +1,7 @@
 #include "SpriteSheet.h"
-#include "..\utils\Log.h"
-#include "..\utils\StringUtils.h"
-#include "..\utils\Assert.h"
+#include "core\log\Log.h"
+#include "core\string\StringUtils.h"
+#include "core\base\Assert.h"
 
 namespace ds {
 

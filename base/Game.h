@@ -1,7 +1,7 @@
 #pragma once
-#include "..\lib\collection_types.h"
+#include "core\lib\collection_types.h"
 #include "..\scene\Scene.h"
-#include "..\utils\StaticHash.h"
+#include "core\string\StaticHash.h"
 
 namespace ds {
 

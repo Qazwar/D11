@@ -1,6 +1,6 @@
 #include "GrayFadePostProcess.h"
 #include "..\renderer\graphics.h"
-#include "..\utils\Profiler.h"
+#include "core\profiler\Profiler.h"
 #include "..\resources\ResourceContainer.h"
 #include "..\shaders\postprocess\GrayFade_PS_Main.inc"
 #include "..\shaders\postprocess\GrayFade_VS_Main.inc"

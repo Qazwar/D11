@@ -1,6 +1,6 @@
 #pragma once
 #include "Particle.h"
-#include "..\io\json.h"
+#include "core\io\json.h"
 
 namespace ds {
 

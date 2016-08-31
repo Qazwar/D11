@@ -1,9 +1,9 @@
 #include "SpriteArray.h"
-#include "..\utils\Log.h"
-#include "..\memory\DefaultAllocator.h"
-#include "..\Common.h"
-#include "..\math\math.h"
-#include "..\utils\Assert.h"
+#include "core\log\Log.h"
+#include "core\memory\DefaultAllocator.h"
+#include "core\Common.h"
+#include "core\math\math.h"
+#include "core\base\Assert.h"
 
 namespace ds {
 

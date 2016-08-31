@@ -1,11 +1,10 @@
 #pragma once
 #include "..\..\renderer\render_types.h"
-#include "..\..\math\tweening.h"
+#include "core\math\tweening.h"
 #include "..\EntityArray.h"
-#include "..\..\math\tweening.h"
-#include "..\..\lib\BlockArray.h"
+#include "core\lib\BlockArray.h"
 #include "..\..\io\ReportWriter.h"
-#include "..\..\utils\StaticHash.h"
+#include "core\string\StaticHash.h"
 
 namespace ds {
 	/*

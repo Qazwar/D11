@@ -1,11 +1,11 @@
 #pragma once
 #include <stdint.h>
 #include "render_types.h"
-#include "..\utils\Color.h"
+#include "core\graphics\Color.h"
 #include "graphics.h"
 #include "..\resources\ResourceDescriptors.h"
 #include "..\sprites\Sprite.h"
-#include "..\lib\collection_types.h"
+#include "core\lib\collection_types.h"
 #include "VertexTypes.h"
 
 namespace ds {

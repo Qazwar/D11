@@ -1,9 +1,9 @@
 #include "graphics.h"
 
 #include <assert.h>
-#include "..\utils\Log.h"
+#include "core\log\Log.h"
 #include <vector>
-#include "..\math\matrix.h"
+#include "core\math\matrix.h"
 #include "..\resources\ResourceContainer.h"
 #include "sprites.h"
 #include "..\base\InputSystem.h"

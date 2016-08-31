@@ -1,12 +1,12 @@
 #pragma once
-#include "..\lib\DataArray.h"
+#include "core\lib\DataArray.h"
 #include <Vector.h>
-#include "..\Common.h"
+#include "core\Common.h"
 #include "..\renderer\MeshBuffer.h"
 #include "..\renderer\Camera.h"
 #include "EntityArray.h"
 #include "ActionEventBuffer.h"
-#include "..\math\tweening.h"
+#include "core\math\tweening.h"
 #include "actions\AbstractAction.h"
 #include "..\particles\ParticleSystem.h"
 #include "..\postprocess\PostProcess.h"

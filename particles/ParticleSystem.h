@@ -1,9 +1,9 @@
 #pragma once
-#include "..\io\DataFile.h"
+#include "core\io\DataFile.h"
 #include "Particle.h"
-#include "..\utils\Profiler.h"
+#include "core\profiler\Profiler.h"
 #include "ParticleSystemFactory.h"
-#include "..\lib\collection_types.h"
+#include "core\lib\collection_types.h"
 #include "ParticleModule.h"
 
 namespace ds {

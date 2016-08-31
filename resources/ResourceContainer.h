@@ -2,7 +2,7 @@
 #include <d3d11.h>
 #include <vector>
 #include "ResourceDescriptors.h"
-#include "..\Common.h"
+#include "core\Common.h"
 #include "..\renderer\Bitmapfont.h"
 #include "..\renderer\sprites.h"
 #include "..\particles\ParticleManager.h"

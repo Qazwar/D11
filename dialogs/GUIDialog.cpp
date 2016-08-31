@@ -1,8 +1,8 @@
 #include "GUIDialog.h"
-#include "..\utils\Log.h"
-#include "..\utils\StringUtils.h"
+#include "core\log\Log.h"
+#include "core\string\StringUtils.h"
 #include "..\utils\font.h"
-#include "..\utils\Assert.h"
+#include "core\base\Assert.h"
 #include "..\resources\ResourceContainer.h"
 #include "..\base\InputSystem.h"
 

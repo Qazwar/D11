@@ -1,10 +1,10 @@
 #include "MeshGen.h"
-#include "..\math\math.h"
-#include "..\utils\Log.h"
-#include "..\io\json.h"
-#include "..\io\FileRepository.h"
-#include "..\io\BinaryFile.h"
-#include "..\utils\StaticHash.h"
+#include "core\math\math.h"
+#include "core\log\Log.h"
+#include "core\io\json.h"
+#include "core\io\FileRepository.h"
+#include "core\io\BinaryFile.h"
+#include "core\string\StaticHash.h"
 #include <stdarg.h>
 
 #define EPSILON 0.000001

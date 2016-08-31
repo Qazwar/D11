@@ -1,6 +1,6 @@
 #pragma once
-#include "..\Common.h"
-#include "..\lib\collection_types.h"
+#include "core\Common.h"
+#include "core\lib\collection_types.h"
 
 namespace ds {
 

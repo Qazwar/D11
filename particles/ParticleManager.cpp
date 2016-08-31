@@ -1,8 +1,8 @@
 #include "ParticleManager.h"
-#include "..\utils\Profiler.h"
-#include "..\math\matrix.h"
-#include "..\utils\Log.h"
-#include "..\io\FileRepository.h"
+#include "core\profiler\Profiler.h"
+#include "core\math\matrix.h"
+#include "core\log\Log.h"
+#include "core\io\FileRepository.h"
 #include "..\resources\ResourceContainer.h"
 
 namespace ds {

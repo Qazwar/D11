@@ -1,6 +1,7 @@
 #pragma once
-#include "..\utils\Color.h"
-#include "..\io\FileRepository.h"
+#include "core\math\math_types.h"
+#include "core\io\FileRepository.h"
+#include "core\graphics\Color.h"
 
 namespace ds {
 

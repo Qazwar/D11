@@ -4,9 +4,9 @@
 #include <d3dx11.h>
 #include <DxErr.h>
 #include "..\base\Settings.h"
-#include "..\math\math_types.h"
+#include "core\math\math_types.h"
 #include "..\resources\ResourceDescriptors.h"
-#include "..\Common.h"
+#include "core\Common.h"
 #include "Bitmapfont.h"
 #include "Camera.h"
 

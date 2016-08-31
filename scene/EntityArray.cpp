@@ -1,5 +1,5 @@
 #include "EntityArray.h"
-#include "..\utils\Log.h"
+#include "core\log\Log.h"
 
 namespace ds {
 

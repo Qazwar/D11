@@ -1,7 +1,7 @@
 #include "ParticleSystem.h"
-#include "..\utils\Profiler.h"
+#include "core\profiler\Profiler.h"
 #include "..\renderer\graphics.h"
-#include "..\utils\Log.h"
+#include "core\log\Log.h"
 #include "ParticleManager.h"
 
 namespace ds {

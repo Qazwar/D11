@@ -1,8 +1,8 @@
 #pragma once
-#include "..\utils\Color.h"
-#include "..\math\math_types.h"
-#include "..\memory\DefaultAllocator.h"
-#include "..\utils\Log.h"
+#include "core\graphics\Color.h"
+#include "core\math\math_types.h"
+#include "core\memory\DefaultAllocator.h"
+#include "core\log\Log.h"
 
 namespace ds {
 

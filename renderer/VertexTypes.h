@@ -1,6 +1,6 @@
 #pragma once
 #include <Vector.h>
-#include "..\utils\Color.h"
+#include "core\graphics\Color.h"
 
 namespace ds {
 

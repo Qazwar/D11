@@ -1,7 +1,7 @@
 #include "ParticleModule.h"
-#include "..\utils\Profiler.h"
-#include "..\utils\Assert.h"
-#include "..\math\math.h"
+#include "core\profiler\Profiler.h"
+#include "core\base\Assert.h"
+#include "core\math\math.h"
 
 namespace ds {
 

@@ -2,7 +2,7 @@
 #include <Vector.h>
 #include "..\renderer\render_types.h"
 #include "..\sprites\Sprite.h"
-#include "physic_types.h"
+#include "core\math\AABBox.h"
 
 namespace ds {
 

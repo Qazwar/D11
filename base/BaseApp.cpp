@@ -1,14 +1,14 @@
 #include "BaseApp.h"
 #include "..\renderer\graphics.h"
-#include "..\utils\Log.h"
-#include "..\io\json.h"
-#include "..\utils\GlobalStringBuffer.h"
-#include "..\io\FileRepository.h"
-#include "..\utils\Profiler.h"
+#include "core\log\Log.h"
+#include "core\io\json.h"
+#include "core\string\GlobalStringBuffer.h"
+#include "core\io\FileRepository.h"
+#include "core\profiler\Profiler.h"
 #include "..\imgui\IMGUI.h"
 #include "InputSystem.h"
 #include <strsafe.h>
-#include "..\data\DynamicSettings.h"
+#include "core\data\DynamicSettings.h"
 #include "..\stats\DrawCounter.h"
 #include <thread>
 
@@ -216,10 +216,10 @@ namespace ds {
 				ReportWriter rw(filename);
 				if (rw.isOpen()) {
 					gDrawCounter->save(rw);
-					perf::save(rw);
+					//perf::save(rw);
 					res::save(rw);
 					game->save(rw);
-					gDefaultMemory->save(rw);
+					//gDefaultMemory->save(rw);
 				}
 				else {
 					LOGE << "Cannot write Report";

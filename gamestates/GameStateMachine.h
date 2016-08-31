@@ -1,7 +1,7 @@
 #pragma once
 #include "GameState.h"
-#include "..\utils\Log.h"
-#include "..\lib\collection_types.h"
+#include "core\log\Log.h"
+#include "core\lib\collection_types.h"
 
 namespace ds {
 

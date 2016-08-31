@@ -1,6 +1,6 @@
 #include "ScreenShakePostProcess.h"
 #include "..\renderer\graphics.h"
-#include "..\utils\Profiler.h"
+#include "core\profiler\Profiler.h"
 #include "..\resources\ResourceContainer.h"
 #include "..\shaders\postprocess\ScreenShake_PS_Main.inc"
 #include "..\shaders\postprocess\ScreenShake_VS_Main.inc"

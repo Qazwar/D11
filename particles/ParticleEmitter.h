@@ -1,7 +1,7 @@
 #pragma once
 #include "Particle.h"
-#include "..\Common.h"
-#include "..\lib\DataArray.h"
+#include "core\Common.h"
+#include "core\lib\DataArray.h"
 
 namespace ds {
 
