@@ -11,6 +11,7 @@
 #include "core\data\DynamicSettings.h"
 #include "..\stats\DrawCounter.h"
 #include <thread>
+#include "..\audio\AudioManager.h"
 
 void ErrorExit(LPTSTR lpszFunction)
 {
@@ -79,6 +80,7 @@ namespace ds {
 
 	BaseApp::~BaseApp() {
 		delete game;
+		audio::shutdown();
 		repository::shutdown();
 		perf::shutdown();		
 		events::shutdown();
@@ -152,7 +154,7 @@ namespace ds {
 		_stateMachine = new GameStateMachine;
 		events::init();
 		math::init_random(GetTickCount());
-		
+		audio::initialize(m_hWnd);
 		LOG << "---------- System information ----------";
 		LOG << "Processor : " << _systemInfo.processor;
 		LOG << "Speed     : " << _systemInfo.mhz;
@@ -195,6 +197,7 @@ namespace ds {
 			perf::reset();
 			events::reset();
 			tick();
+			audio::mix();
 			renderFrame();
 			perf::finalize();
 			// check for internal events
