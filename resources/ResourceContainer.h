@@ -52,6 +52,7 @@ namespace ds {
 		MATERIAL,
 		PARTICLEMANAGER,
 		SPRITESHEET,
+		SOUND,
 		UNKNOWN
 	};
 

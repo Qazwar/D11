@@ -141,6 +141,8 @@
 
 #include <stdint.h>
 #include <core\log\Log.h>
+#include <core\string\StaticHash.h>
+
 // read this in the event of tsLoadWAV/tsLoadOGG errors
 extern const char* g_tsErrorReason;
 
@@ -150,6 +152,7 @@ typedef struct
 	int sample_count;
 	int channel_count;
 	void* channels[ 2 ];
+	StaticHash hash;
 } tsLoadedSound;
 
 // represents an instance of a tsLoadedSound, can be played through

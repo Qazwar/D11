@@ -12,9 +12,9 @@ namespace ds {
 
 		void shutdown();
 
-		int load(const StaticHash& hash);
+		int load(const StaticHash& name, const StaticHash& file);
 
-		void play(int id);
+		void play(const StaticHash& name);
 
 		void mix();
 

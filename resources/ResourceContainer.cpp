@@ -12,6 +12,7 @@
 #include "core\base\Assert.h"
 #include "Resource.h"
 #include "core\string\StaticHash.h"
+#include "..\audio\AudioManager.h"
 
 namespace ds {
 
@@ -127,6 +128,7 @@ namespace ds {
 			"MATERIAL",
 			"PARTICLEMANAGER",
 			"SPRITESHEET",
+			"SOUND",
 			"UNKNOWN"
 		};
 
@@ -1104,6 +1106,18 @@ namespace ds {
 		}
 
 		// ------------------------------------------------------
+		// parse Mesh
+		// ------------------------------------------------------
+		static void parseSound(JSONReader& reader, int childIndex) {
+			SoundDescriptor descriptor;
+			descriptor.fileName = reader.get_string(childIndex, "file");
+			descriptor.name = reader.get_string(childIndex, "name");
+			char buffer[256];
+			sprintf_s(buffer, 256, "content\\sounds\\%s", descriptor.fileName);
+			audio::load(SID(descriptor.name),SID(buffer));
+		}
+
+		// ------------------------------------------------------
 		// parse IMGUI
 		// ------------------------------------------------------
 		void parseIMGUI(JSONReader& reader, int childIndex) {
@@ -1160,6 +1174,7 @@ namespace ds {
 			_resCtx->parsers[SID("particle_manager")] = parseParticleManager;
 			_resCtx->parsers[SID("render_target")] = parseRenderTarget;
 			_resCtx->parsers[SID("spritesheet")] = parseSpriteSheet;
+			_resCtx->parsers[SID("sound")] = parseSound;
 		}
 
 		// ------------------------------------------------------
@@ -1191,7 +1206,7 @@ namespace ds {
 						(*f)(reader, i);
 					}
 					else {
-						LOG << "No matching parser for '" << reader.get_category_name(i) << "'";
+						LOGE << "No matching parser for '" << reader.get_category_name(i) << "'";
 					}
 				}
 			}
