@@ -531,8 +531,8 @@ void tsReadMemWAV( const void* memory, tsLoadedSound* sound )
 	} Fmt;
 	#pragma pack( pop )
 
-	char* data = (char*)memory;
-	char* first = data;
+	char* first = (char*)memory;
+	char* data = first;
 	CHECK( data, "Unable to read input file (file doesn't exist, or could not allocate heap memory." );
 	CHECK( tsFourCC( "RIFF", data ), "Incorrect file header; is this a WAV file?" );
 	CHECK( tsFourCC( "WAVE", data + 8 ), "Incorrect file header; is this a WAV file?" );
