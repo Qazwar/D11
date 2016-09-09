@@ -1583,16 +1583,16 @@ namespace ds {
 			char name[256];
 			Array<MeshGenOpcode> tmp_opcodes;
 			DataStore store;
-			const char* txt = repository::load(SID(buffer), &size);
-			if (size != -1) {
+			File f(SID(buffer));
+			if (repository::load(&f) == FileStatus::FS_OK) {
 				Tokenizer t;
-				t.parse(txt);
+				t.parse(f.data);
 				int cnt = 0;
 				while (cnt < t.size()) {
 					Token& tk = t.get(cnt);
 					if (tk.type == Token::NAME) {
 						MeshGenOpcode oc;
-						strncpy(name, txt + tk.index, tk.size);
+						strncpy(name, f.data + tk.index, tk.size);
 						name[tk.size] = '\0';
 						//oc.type = find_opcode_type(name);		
 						int def_idx = find_definition_index(name);
@@ -1634,7 +1634,6 @@ namespace ds {
 				}
 				executeOpcodes(tmp_opcodes, store);
 				recalculate_normals();
-				delete txt;
 			}
 		}
 

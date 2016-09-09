@@ -43,21 +43,16 @@ namespace ds {
 
 		
 		int load(const StaticHash& name, const StaticHash& file) {
-			int size = -1;
-			char* data = repository::load(file, &size, repository::FileType::FT_BINARY);
-			if (size == -1) {
-				LOGE << "Cannot load sound file";
-			}
-			tsLoadedSound sound = tsLoadWAVRaw(data);			
-			delete[] data;
-			if (sound.channels != 0) {
-				sound.hash = name;
-				audioCtx->sounds.push_back(sound);
-				return audioCtx->sounds.size() - 1;
-			}
-			else {
-				return -1;
-			}
+			ds::File f(name,ds::FT_BINARY);
+			if (repository::load(&f) == ds::FileStatus::FS_OK) {
+				tsLoadedSound sound = tsLoadWAVRaw(f.data);
+				if (sound.channels != 0) {
+					sound.hash = name;
+					audioCtx->sounds.push_back(sound);
+					return audioCtx->sounds.size() - 1;
+				}
+			}	
+			return -1;
 		}
 
 		static int find(const StaticHash& hash) {

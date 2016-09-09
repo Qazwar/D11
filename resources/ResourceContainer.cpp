@@ -412,51 +412,15 @@ namespace ds {
 			ID3D11ShaderResourceView* srv = 0;
 			char buffer[256];
 			sprintf_s(buffer, 256, "content\\textures\\%s", descriptor.name);
-			int x, y, n = 0;
-			unsigned char *data = stbi_load(buffer, &x, &y, &n, 4);
-
-			D3D11_TEXTURE2D_DESC desc;
-			desc.Width = x;
-			desc.Height = y;
-			desc.MipLevels = 1;
-			desc.ArraySize = 1;
-			desc.Format = DXGI_FORMAT_R8G8B8A8_UINT;
-			desc.SampleDesc.Count = 1;
-			desc.SampleDesc.Quality = 0;
-			desc.Usage = D3D11_USAGE_DEFAULT;
-			desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-			desc.CPUAccessFlags = 0;
-			desc.MiscFlags = 0;
-
-			D3D11_SUBRESOURCE_DATA subres;
-			subres.pSysMem = data;
-			subres.SysMemPitch = x * n;
-			subres.SysMemSlicePitch = 0;
-
-			ID3D11Texture2D *texture2D = 0;
-
-			HRESULT result = _resCtx->device->CreateTexture2D(&desc, &subres, &texture2D);
-			if (FAILED(result))
-			{
-				stbi_image_free(data);
+			ds::File f(SID(buffer), FileType::FT_BINARY);
+			if (repository::load(&f) != ds::FileStatus::FS_OK) {
+				LOGE << "Cannot load texture file";
+			}
+			HRESULT d3dResult = D3DX11CreateShaderResourceViewFromMemory(_resCtx->device, f.data, f.size, 0, 0, &srv, 0);
+			if (FAILED(d3dResult)) {
+				DXTRACE_MSG("Failed to load the texture image!");
 				return INVALID_RID;
 			}
-
-			result = _resCtx->device->CreateShaderResourceView(texture2D, NULL, &srv);
-			if (FAILED(result))
-			{
-				stbi_image_free(data);
-				return INVALID_RID;
-			}
-
-			//HRESULT d3dResult = D3DX11CreateShaderResourceViewFromMemory(_resCtx->device, data, x*y, 0, 0, &srv, 0);
-			//HRESULT d3dResult = D3DX11CreateShaderResourceViewFromFile(_resCtx->device, buffer, 0, 0, &srv, 0);
-			//if (FAILED(d3dResult)) {
-				//DXTRACE_MSG("Failed to load the texture image!");
-				//stbi_image_free(data);
-				//return INVALID_RID;
-			//}
-			stbi_image_free(data);
 			ShaderResourceViewResource* cbr = new ShaderResourceViewResource(srv);
 			_resCtx->resources.push_back(cbr);
 			return create(name, ResourceType::TEXTURE);

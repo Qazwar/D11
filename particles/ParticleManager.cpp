@@ -174,7 +174,9 @@ namespace ds {
 						system->activateEvents();
 					}
 					LOG << "id: " << id << " name: " << name;
-					repository::load(system);
+					system->load();
+					repository::add(system);
+					//repository::load(system);
 					_systems[id] = system;
 				}
 			}
