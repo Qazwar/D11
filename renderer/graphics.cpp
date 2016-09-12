@@ -516,6 +516,7 @@ namespace graphics {
 	// begin rendering
 	// ------------------------------------------------------
 	void beginRendering() {
+		_context->d3dContext->OMSetRenderTargets(1, &_context->backBufferTarget, _context->depthStencilView);
 		_context->d3dContext->ClearRenderTargetView(_context->backBufferTarget, _context->clearColor);
 		_context->d3dContext->ClearDepthStencilView(_context->depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0.0);
 		turnOnZBuffer();		
@@ -636,6 +637,8 @@ namespace graphics {
 	}
 
 	void setRenderTarget(RID rtID) {
+		_context->sprites->end();
+		_context->sprites->begin();
 		ds::RenderTarget* rt = ds::res::getRenderTarget(rtID);
 		rt->begin(_context->d3dContext);
 	}
@@ -741,8 +744,8 @@ namespace graphics {
 
 	void restoreBackbuffer() {
 		_context->d3dContext->OMSetRenderTargets(1, &_context->backBufferTarget, _context->depthStencilView);
-		_context->d3dContext->ClearRenderTargetView(_context->backBufferTarget, _context->clearColor);
-		_context->d3dContext->ClearDepthStencilView(_context->depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0.0);
+		//_context->d3dContext->ClearRenderTargetView(_context->backBufferTarget, _context->clearColor);
+		//_context->d3dContext->ClearDepthStencilView(_context->depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0.0);
 	}
 
 }

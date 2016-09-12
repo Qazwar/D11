@@ -73,13 +73,10 @@ namespace ds {
 		_start = std::chrono::steady_clock::now();
 		_num = 0;
 		_reload = false;
-		game = new Game;
-		
 	}
 
 
 	BaseApp::~BaseApp() {
-		delete game;
 		audio::shutdown();
 		repository::shutdown();
 		perf::shutdown();		
@@ -221,7 +218,6 @@ namespace ds {
 					gDrawCounter->save(rw);
 					//perf::save(rw);
 					res::save(rw);
-					game->save(rw);
 					//gDefaultMemory->save(rw);
 				}
 				else {
@@ -334,7 +330,6 @@ namespace ds {
 						ZoneTracker u2("UPDATE::main");
 						update(_accu);
 					}
-					game->update(_accu);
 					_stateMachine->update(_accu);
 					// updating particles
 					ParticleManager* pm = res::getParticleManager();
@@ -358,11 +353,7 @@ namespace ds {
 		{
 			ZoneTracker("Render::render");
 			render();
-		}		
-		{
-			ZoneTracker("Render::Game");
-			game->render();
-		}
+		}				
 		{
 			ZoneTracker("Render::stateMachine");
 			_stateMachine->render();

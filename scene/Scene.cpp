@@ -388,17 +388,16 @@ namespace ds {
 	// draw
 	// ------------------------------------
 	void Scene2D::draw() {
+		SpriteBuffer* sprites = graphics::getSpriteBuffer();
 		if (_renderTarget != INVALID_RID && _rtActive) {
 			graphics::setRenderTarget(_renderTarget);
 		}
-		SpriteBuffer* sprites = graphics::getSpriteBuffer();
-		sprites->begin();
 		for (int i = 0; i < _data.num; ++i) {
 			if (_data.active[i]) {
 				sprites->draw(_data.positions[i].xy(), _data.textures[i],_data.rotations[i].z,_data.scales[i].xy(),_data.colors[i], _data.materials[i]);
 			}
 		}
-
+		/*
 		for (uint32_t i = 0; i < _particleSystems.numObjects; ++i) {
 			const ParticleArray& array = _particleSystems.objects[i].system->getArray();
 			const Texture& t = _particleSystems.objects[i].system->getTexture();
@@ -409,16 +408,23 @@ namespace ds {
 				}
 			}
 		}
+		*/
+		if (_rtActive) {
+			sprites->end();
+			sprites->begin();
+		}		
+		int cnt = 0;
+		for (uint32_t i = 0; i < _postProcesses.size(); ++i) {
+			if (_postProcesses[i]->isActive()) {
+				_postProcesses[i]->render();
+				++cnt;
+			}
+		}
 
-
-		sprites->end();
 		if (_renderTarget != INVALID_RID && _rtActive) {
 			graphics::restoreBackbuffer();
 		}
-
-		for (uint32_t i = 0; i < _postProcesses.size(); ++i) {
-			_postProcesses[i]->render();
-		}
+		
 	}
 
 	void Scene2D::tick(float dt) {

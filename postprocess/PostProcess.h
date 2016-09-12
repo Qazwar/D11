@@ -30,6 +30,9 @@ namespace ds {
 			onDeactivate();
 		}
 		virtual void updateConstantBuffer() = 0;
+		bool isActive() const {
+			return _active;
+		}
 	protected:
 		PostProcess(const PostProcess& other) {}
 		bool _active;

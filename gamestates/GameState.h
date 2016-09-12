@@ -4,7 +4,6 @@
 #include "core\string\StringUtils.h"
 #include "..\dialogs\GUIDialog.h"
 #include "..\resources\ResourceContainer.h"
-#include "..\base\Game.h"
 #include "core\base\EventStream.h"
 
 namespace ds {
@@ -15,7 +14,7 @@ namespace ds {
 class GameState {
 
 public:
-	GameState(const char* name, Game* g) : _name(name) , game(g) , _initialized(false) , _hash(name) {
+	GameState(const char* name) : _name(name) , _initialized(false) , _hash(name) {
 	}
 	virtual ~GameState(void) {}
 	virtual void init() {}
@@ -59,8 +58,6 @@ public:
 	void endInitialisation() {
 		_initialized = true;
 	}
-protected:
-	Game* game;
 private:
 	bool _initialized;
 	GameState(const GameState& other) {}
@@ -75,7 +72,7 @@ private:
 class BasicMenuGameState : public GameState , public GUIHoverCallback {
 
 public:
-	BasicMenuGameState(const char* name, const char* dialogName, Game* g) : GameState(name, g), _dialogName(dialogName) {
+	BasicMenuGameState(const char* name, const char* dialogName) : GameState(name), _dialogName(dialogName) {
 		_dialog = res::getGUIDialog(dialogName);
 	}
 	~BasicMenuGameState() {}

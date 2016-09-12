@@ -16,6 +16,9 @@ namespace ds {
 			// set render target
 			graphics::setRenderTarget(_target);
 		}
+		else {
+			graphics::restoreBackbuffer();
+		}
 		unsigned int stride = sizeof(PTCVertex);
 		unsigned int offset = 0;
 		graphics::turnOffZBuffer();
