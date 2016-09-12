@@ -385,7 +385,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// add button 
 	// -------------------------------------------------------
-	GUID GUIDialog::addButton(int id,float x,float y, const char* text, const Rect& textureRect, const Color& textColor, const v2& textScale, bool centered) {
+	GUID GUIDialog::addButton(int id, float x, float y, const char* text, const Rect& textureRect, const Color& textColor, const v2& textScale, bool centered, const Color& imageColor) {
 		GUID& gid = _ids[_idIndex++];
 		XASSERT(gid.id == -1, "The id %d is already in use", id);
 		gid.id = id;
@@ -397,7 +397,8 @@ namespace ds {
 		DialogItem item;
 		item.pos = p;
 		item.centered = centered;
-		item.color = Color::WHITE;
+		item.color = imageColor;
+		item.secondaryColor = textColor;
 		item.rotation = 0.0f;
 		item.scale = v2(1, 1);
 		item.type = GIT_BUTTON;
@@ -463,10 +464,14 @@ namespace ds {
 				const DialogItem& item = _items[i];
 				if (item.visible) {
 					int start = item.index;
-					int end = start + item.num;
+					int end = start + item.num;					
 					for (int j = start; j < end; ++j) {
-						const DialogVertex& v = _vertices[j];
-						_sprites->draw(item.pos + v.offset, v.texture, item.rotation, item.scale, item.color);
+						const DialogVertex& v = _vertices[j];						
+						Color current = item.color;
+						if (item.type == GIT_BUTTON && j > start) {
+							current = item.secondaryColor;
+						}
+						_sprites->draw(item.pos + v.offset, v.texture, item.rotation, item.scale, current);
 					}
 				}
 			}
@@ -774,7 +779,9 @@ namespace ds {
 				Rect r;
 				reader.get(cats[i], "rect", &r);
 				const char* label = reader.get_string(cats[i], "text");
-				GUID gid = addButton(id, item.pos.x, item.pos.y, label, r, item.color, item.scale, item.centered);
+				Color clr = Color::WHITE;
+				reader.get(cats[i], "image_color", &clr);
+				GUID gid = addButton(id, item.pos.x, item.pos.y, label, r, item.color, item.scale, item.centered, clr);
 			}
 			else if (reader.matches(cats[i], "text")) {
 				DialogItem item;

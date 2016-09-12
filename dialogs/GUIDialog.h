@@ -47,6 +47,7 @@ struct DialogItem {
 	v2 pos;
 	bool centered;
 	Color color;
+	Color secondaryColor;
 	v2 scale;
 	float rotation;
 	Rect boundingRect;
@@ -129,7 +130,7 @@ public:
 	GUID addImageButton(int id,int x,int y,const Rect& textureRect,bool centered = true);
 
 	// FIXME: add button with x and y position
-	GUID addButton(int id,float x,float y,const char* text,const Rect& textureRect,const Color& textColor = Color(1.0f,1.0f,1.0f,1.0f), const v2& scale = v2(1, 1),bool centered = true);
+	GUID addButton(int id,float x,float y,const char* text,const Rect& textureRect,const Color& textColor = Color(1.0f,1.0f,1.0f,1.0f), const v2& scale = v2(1, 1),bool centered = true, const Color& imageColor = Color::WHITE);
 	void setButtonTexture(int id,const Rect& textureRect);
 
 	GUID addText(int id,int x,int y,const char* text,const Color& color = Color(1.0f,1.0f,1.0f,1.0f), const v2& scale = v2(1, 1),bool centered = true);
