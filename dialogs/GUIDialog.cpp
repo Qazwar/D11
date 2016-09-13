@@ -43,6 +43,7 @@ namespace ds {
 				return i;
 			}
 		}
+		FAIL("Not a valid id - no matching index found - id: %d", id);
 		return -1;
 	}
 	
@@ -262,7 +263,7 @@ namespace ds {
 	// -------------------------------------------------------
 	void GUIDialog::resetTimer(int id) {
 		int idx = getIndexByID(id);
-		XASSERT(idx < MAX_GUID, "Not a valid index - id: %d", id);
+		XASSERT(idx >= 0 && idx < MAX_GUID, "Not a valid index - id: %d", id);
 		const GUID& gid = _ids[idx];
 		const DialogItem& item = _items[gid.index];
 		XASSERT(item.type == GIT_TIMER,"The GUI item %d is not a timer",id);
@@ -274,7 +275,7 @@ namespace ds {
 	// -------------------------------------------------------
 	void GUIDialog::startTimer(int id) {
 		int idx = getIndexByID(id);
-		XASSERT(idx < MAX_GUID, "Not a valid index - id: %d", id);
+		XASSERT(idx >= 0 && idx < MAX_GUID, "Not a valid index - id: %d", id);
 		const GUID& gid = _ids[idx];
 		const DialogItem& item = _items[gid.index];
 		XASSERT(item.type == GIT_TIMER, "The GUI item %d is not a timer", id);
@@ -286,7 +287,7 @@ namespace ds {
 	// -------------------------------------------------------
 	GameTimer* GUIDialog::getTimer(int id) {
 		int idx = getIndexByID(id);
-		XASSERT(idx < MAX_GUID, "Not a valid index - id: %d", id);
+		XASSERT(idx >= 0 && idx < MAX_GUID, "Not a valid index - id: %d", id);
 		const GUID& gid = _ids[idx];
 		const DialogItem& item = _items[gid.index];
 		XASSERT(item.type == GIT_TIMER, "The GUI item %d is not a timer", id);
@@ -298,7 +299,7 @@ namespace ds {
 	// -------------------------------------------------------
 	void GUIDialog::updateText(int id,int x,int y,const char* text,const Color& color, const v2& scale,bool centered) {
 		int idx = getIndexByID(id);
-		XASSERT(idx < MAX_GUID, "Not a valid index - id: %d", id);
+		XASSERT(idx >= 0 && idx < MAX_GUID, "Not a valid index - id: %d", id);
 		const GUID& gid = _ids[idx];
 		DialogItem& item = _items[gid.index];
 		XASSERT(item.type == GIT_TEXT, "The GUI item %d is not a text item", id);
@@ -329,7 +330,7 @@ namespace ds {
 	// -------------------------------------------------------
 	void GUIDialog::updateText(int id,const char* text) {	
 		int idx = getIndexByID(id);
-		XASSERT(idx < MAX_GUID, "Not a valid index - id: %d", id);
+		XASSERT(idx >= 0 && idx < MAX_GUID, "Not a valid index - id: %d", id);
 		const GUID& gid = _ids[idx];
 		DialogItem& item = _items[gid.index];
 		//XASSERT(item.type == GIT_TEXT, "The GUI item %d is not a text item", id);
@@ -345,7 +346,7 @@ namespace ds {
 
 	void GUIDialog::setVisible(ID id, bool visible) {
 		int idx = getIndexByID(id);
-		XASSERT(idx < MAX_GUID, "Not a valid index - id: %d", id);
+		XASSERT(idx >= 0 && idx < MAX_GUID, "Not a valid index - id: %d", id);
 		const GUID& gid = _ids[idx];
 		DialogItem& item = _items[gid.index];
 		item.visible = visible;

@@ -571,12 +571,18 @@ namespace ds {
 		static RID createDialog(const char* name, const GUIDialogDescriptor& descriptor) {
 			char fileName[256];
 			sprintf_s(fileName, 256, "content\\dialogs\\%s.json", descriptor.file);
+			LOG << "loading dialog: " << fileName;
 			GUIDialog* dialog = new GUIDialog(descriptor,fileName);
-			dialog->load();
-			int idx = _resCtx->resources.size();
-			GUIDialogResource* cbr = new GUIDialogResource(dialog);
-			_resCtx->resources.push_back(cbr);
-			return create(name, ResourceType::GUIDIALOG);
+			if (dialog->load()) {
+				int idx = _resCtx->resources.size();
+				GUIDialogResource* cbr = new GUIDialogResource(dialog);
+				_resCtx->resources.push_back(cbr);
+				return create(name, ResourceType::GUIDIALOG);
+			}
+			else {
+				delete dialog;
+				return INVALID_RID;
+			}
 		}
 
 		// ------------------------------------------------------

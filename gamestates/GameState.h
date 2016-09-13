@@ -110,6 +110,10 @@ public:
 #endif
 		return 0;
 	}
+	virtual int update(float dt) {
+		_dialog->tick(dt);
+		return 0;
+	}
 	virtual void entering(ID id) {}
 	virtual void leaving(ID id) {}
 protected:
