@@ -6,6 +6,7 @@
 #include "..\gamestates\GameStateMachine.h"
 #include "core\base\EventStream.h"
 #include "core\base\system_info.h"
+#include <core\base\ShortcutsHandler.h>
 #include <thread>
 
 namespace ds {
@@ -51,6 +52,7 @@ namespace ds {
 		bool isRunning() const;
 		void sendKeyUp(WPARAM virtualKey);
 		void sendKeyDown(WPARAM virtualKey);
+		void addShortcut(const char* label, char key, uint32_t eventType);
 	protected:
 		void addGameState(GameState* gameState);
 		void activate(const char* name);
@@ -78,6 +80,7 @@ namespace ds {
 		bool _alive;
 		bool _reload;
 		GameStateMachine* _stateMachine;
+		ShortcutsHandler* _shortcuts;
 		KeyStates _keyStates;
 		ButtonState _buttonState;
 		bool _createReport;

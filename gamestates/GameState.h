@@ -4,7 +4,7 @@
 #include "core\string\StringUtils.h"
 #include "..\dialogs\GUIDialog.h"
 #include "..\resources\ResourceContainer.h"
-#include "core\base\EventStream.h"
+#include <core\base\EventStream.h>
 
 namespace ds {
 
@@ -43,9 +43,6 @@ public:
 	virtual int onKeyUp(WPARAM virtualKey) {
 		return 0;
 	}
-	//virtual int processEvents(const EventStream& events) {
-		//return 0;
-	//}
 	const StaticHash& getHash() const {
 		return _hash;
 	}

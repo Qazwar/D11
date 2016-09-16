@@ -83,6 +83,7 @@ namespace ds {
 		events::shutdown();
 		input::shutdown();
 		res::shutdown();
+		delete _shortcuts;
 		delete gDrawCounter;
 		delete _stateMachine;
 		delete gStringBuffer;		
@@ -149,6 +150,7 @@ namespace ds {
 		perf::init();
 		repository::initialize(_settings.repositoryMode);
 		_stateMachine = new GameStateMachine;
+		_shortcuts = new ShortcutsHandler();
 		events::init();
 		math::init_random(GetTickCount());
 		audio::initialize(m_hWnd);
@@ -177,9 +179,12 @@ namespace ds {
 			// FIXME: will handle repository reloading - can we do it like this?
 			_thread = std::thread(repoReloading,2);
 			_thread.detach();
-
+			_shortcuts->debug();
+			events::reset();
 			return true;
-		}		
+		}			
+		_shortcuts->debug();
+		events::reset();
 		_loading = false;
 		return false;
 	}
@@ -192,7 +197,8 @@ namespace ds {
 			}
 			gDrawCounter->reset();
 			perf::reset();
-			events::reset();
+			_updated = false;
+			//events::reset();
 			tick();
 			audio::mix();
 			renderFrame();
@@ -285,6 +291,10 @@ namespace ds {
 
 	}
 
+	void BaseApp::addShortcut(const char* label, char key, uint32_t eventType) {
+		_shortcuts->add(label, key, eventType);
+	}
+
 	// -------------------------------------------------------
 	// tick
 	// -------------------------------------------------------
@@ -296,6 +306,7 @@ namespace ds {
 				if (_keyStates.onChar) {
 					_keyStates.onChar = false;
 					_stateMachine->onChar(_keyStates.ascii);
+					_shortcuts->handleInput(_keyStates.ascii);
 					OnChar(_keyStates.ascii);
 				}
 				if (!_buttonState.processed) {
@@ -339,9 +350,11 @@ namespace ds {
 				}
 				_accu -= _dt;
 				_updated = true;
-			}
+			}		
+		}		
+		if (_updated) {
+			events::reset();
 		}
-		
 	}
 
 	// -------------------------------------------------------
