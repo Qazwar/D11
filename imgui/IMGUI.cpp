@@ -73,7 +73,7 @@ namespace gui {
 			return false;
 		}
 		// Save text in a string class instance
-		sprintf_s(buffer, max, pszText);
+		sprintf_s(buffer, max, "%s",pszText);
 
 		// Release the lock
 		GlobalUnlock(hData);
