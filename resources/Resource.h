@@ -283,4 +283,15 @@ namespace ds {
 			}
 		}
 	};
+
+	class ScriptResource : public AbstractResource<vm::Script*> {
+
+	public:
+		ScriptResource(vm::Script* t) : AbstractResource(t) {}
+		virtual ~ScriptResource() {
+			if (_data != 0) {
+				delete _data;
+			}
+		}
+	};
 }

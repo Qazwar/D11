@@ -12,6 +12,7 @@
 #include "core\base\Assert.h"
 #include "Resource.h"
 #include "core\string\StaticHash.h"
+#include "core\string\StringUtils.h"
 #include "..\audio\AudioManager.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "..\renderer\stb_image.h"
@@ -131,6 +132,7 @@ namespace ds {
 			"PARTICLEMANAGER",
 			"SPRITESHEET",
 			"SOUND",
+			"SCRIPT",
 			"UNKNOWN"
 		};
 
@@ -581,6 +583,48 @@ namespace ds {
 			}
 			else {
 				delete dialog;
+				return INVALID_RID;
+			}
+		}
+
+		// ------------------------------------------------------
+		// create script
+		// ------------------------------------------------------
+		static RID createScript(const char* name, const ScriptDescriptor& descriptor) {
+			char fileName[256];
+			sprintf_s(fileName, 256, "content\\scripts\\%s.script", descriptor.fileName);
+			LOG << "loading script: " << fileName;
+			vm::Script* ctx = new vm::Script(fileName);
+			if (descriptor.variables != 0) {
+				int positions[16];
+				int nr = string::count_delimiters(descriptor.variables, positions, 16, ',');
+				if (nr > 0) {
+					char name[32];
+					int s = 0;
+					for (int i = 0; i < nr; ++i) {			
+						int l = positions[i] - s;
+						strncpy(name, descriptor.variables + s, l);
+						name[l] = '\0';
+						ctx->registerVar(SID(name));
+						s = positions[i] + 1;
+					}
+					int l = strlen(descriptor.variables) - s;
+					strncpy(name, descriptor.variables + s, l);
+					name[l] = '\0';
+					ctx->registerVar(SID(name));
+				}
+				else {
+					ctx->registerVar(SID(descriptor.variables));
+				}
+			}
+			if (ctx->load()) {
+				int idx = _resCtx->resources.size();
+				ScriptResource* cbr = new ScriptResource(ctx);
+				_resCtx->resources.push_back(cbr);
+				return create(name, ResourceType::SCRIPT);
+			}
+			else {
+				delete ctx;
 				return INVALID_RID;
 			}
 		}
@@ -1153,6 +1197,17 @@ namespace ds {
 			createDialog(name, descriptor);
 		}
 
+		// ------------------------------------------------------
+		// parse script
+		// ------------------------------------------------------
+		void parseScript(JSONReader& reader, int childIndex) {
+			ScriptDescriptor descriptor;
+			descriptor.variables = reader.get_string(childIndex, "variables");
+			descriptor.fileName = reader.get_string(childIndex, "file");
+			const char* name = reader.get_string(childIndex, "name");
+			createScript(name, descriptor);
+		}
+
 
 
 		// ------------------------------------------------------
@@ -1187,6 +1242,7 @@ namespace ds {
 			_resCtx->parsers[SID("render_target")] = parseRenderTarget;
 			_resCtx->parsers[SID("spritesheet")] = parseSpriteSheet;
 			_resCtx->parsers[SID("sound")] = parseSound;
+			_resCtx->parsers[SID("script")] = parseScript;
 		}
 
 		// ------------------------------------------------------
@@ -1380,6 +1436,12 @@ namespace ds {
 		SkyBox* getSkyBox(const char* name) {
 			RID rid = find(name, ResourceType::SKYBOX);
 			SkyBoxResource* res = static_cast<SkyBoxResource*>(_resCtx->resources[rid]);
+			return res->get();
+		}
+
+		vm::Script* getScript(const char* name) {
+			RID rid = find(name, ResourceType::SCRIPT);
+			ScriptResource* res = static_cast<ScriptResource*>(_resCtx->resources[rid]);
 			return res->get();
 		}
 

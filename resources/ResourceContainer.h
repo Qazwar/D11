@@ -13,6 +13,7 @@
 #include "..\renderer\SkyBox.h"
 #include "..\renderer\RenderTarget.h"
 #include "..\renderer\SpriteSheet.h"
+#include <core\script\vm.h>
 #include "Resource.h"
 
 namespace ds {
@@ -53,6 +54,7 @@ namespace ds {
 		PARTICLEMANAGER,
 		SPRITESHEET,
 		SOUND,
+		SCRIPT,
 		UNKNOWN
 	};
 
@@ -145,6 +147,8 @@ namespace ds {
 		Mesh* getMesh(const char* name);
 
 		SkyBox* getSkyBox(const char* name);
+
+		vm::Script* getScript(const char* name);
 
 		int findInputElement(const char* name);
 

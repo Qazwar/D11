@@ -207,4 +207,12 @@ namespace ds {
 		const char* name;
 	};
 
+	struct ScriptDescriptor {
+		const char* fileName;
+		const char* name;
+		const char* variables;
+
+		ScriptDescriptor() : fileName(0), name(0), variables(0) {}
+	};
+
 }
