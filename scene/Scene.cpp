@@ -1,8 +1,5 @@
 #include "Scene.h"
 #include "..\resources\ResourceContainer.h"
-#include "actions\ScalingAction.h"
-#include "actions\MoveToAction.h"
-#include "actions\RotateToAction.h"
 
 namespace ds {
 
@@ -10,12 +7,7 @@ namespace ds {
 		//_meshBuffer = res::getMeshBuffer(descriptor.meshBuffer);
 		//_camera = graphics::getFPSCamera();
 		_depthEnabled = descriptor.depthEnabled;
-		for (size_t i = 0; i < MAX_ACTIONS; ++i) {
-			_actions[i] = 0;
-		}
-		_actions[AT_SCALE] = new ScalingAction;
-		_actions[AT_MOVE_TO] = new MoveToAction;
-		_actions[AT_ROTATE_TO] = new RotateToAction;
+
 
 	}
 
@@ -23,11 +15,7 @@ namespace ds {
 		if (_data.buffer != 0) {
 			DEALLOC(_data.buffer);
 		}
-		for (size_t i = 0; i < MAX_ACTIONS; ++i) {
-			if (_actions[i] != 0) {
-				delete _actions[i];
-			}
-		}
+
 	}
 
 	// ------------------------------------
@@ -273,36 +261,7 @@ namespace ds {
 	// tick
 	// ------------------------------------
 	void Scene::tick(float dt) {
-		ZoneTracker z("World:tick");
-		_eventBuffer.reset();
-		{
-			ZoneTracker z1("World:tick:actions");
-			for (size_t i = 0; i < MAX_ACTIONS; ++i) {
-				if (_actions[i] != 0) {
-					_actions[i]->update(_data, dt, _eventBuffer);
-				}
-			}
-		}
-		{
-			ZoneTracker z2("World:tick:transform");
-			for (int i = 0; i < _data.num; ++i) {
-				if (_data.active[i] && _data.dirty[i]) {					
-					updateWorld(i);
-				}
-			}
-		}
-		{
-			ZoneTracker z2("World:tick:kill");
-			for (uint32_t i = 0; i < _eventBuffer.events.size(); ++i) {
-				const ActionEvent& e = _eventBuffer.events[i];
-				if (e.type == AT_KILL) {
-					remove(e.id);
-				}
-			}
-		}
-		//if (_checkCollisions) {
-			//m_Physics.tick(&m_Data, dt);
-		//}
+		
 	}
 
 	// ------------------------------------
@@ -313,6 +272,7 @@ namespace ds {
 		//sprintf_s(buffer, 256, "Scene - %s", res::getName(_descriptor.id));
 		//writer.startBox(buffer);
 		const char* HEADERS[] = { "ID", "Pos", "Scale", "Rotation" };
+		/*
 		writer.startTable(HEADERS, 4);
 		for (uint32_t i = 0; i < _data.num; ++i) {
 			writer.startRow();
@@ -329,8 +289,9 @@ namespace ds {
 			}
 		}
 		writer.endBox();
+		*/
 	}
-
+	/*
 	// ------------------------------------
 	// scale to
 	// ------------------------------------
@@ -354,7 +315,7 @@ namespace ds {
 		RotateToAction* action = (RotateToAction*)_actions[AT_ROTATE_TO];
 		action->attach(id, startRotation, endRotation, ttl, mode, tweeningType);
 	}
-
+	*/
 
 
 	// ------------------------------------
@@ -437,6 +398,7 @@ namespace ds {
 	// -------------------------------------------------------------------------
 	// scale to
 	// -------------------------------------------------------------------------
+	/*
 	void Scene2D::scaleTo(ID id, const v2& startScale, const v2& endScale, float ttl, int mode, const tweening::TweeningType& tweeningType) {
 		ScalingAction* action = (ScalingAction*)_actions[AT_SCALE];
 		action->attach(id, v3(startScale,0.0f), v3(endScale,0.0f), ttl, mode, tweeningType);
@@ -446,7 +408,7 @@ namespace ds {
 		int idx = _data.getIndex(id);
 		_data.scales[idx] = v3(scale, 0.0f);
 	}
-
+	*/
 	void Scene2D::setTexture(ID id, const Texture& t) {
 		int idx = _data.getIndex(id);
 		_data.textures[idx] = t;

@@ -5,9 +5,8 @@
 #include "..\renderer\MeshBuffer.h"
 #include "..\renderer\Camera.h"
 #include "EntityArray.h"
-#include "ActionEventBuffer.h"
+#include <core\world\ActionEventBuffer.h>
 #include "core\math\tweening.h"
-#include "actions\AbstractAction.h"
 #include "..\particles\ParticleSystem.h"
 #include "..\postprocess\PostProcess.h"
 
@@ -51,10 +50,6 @@ namespace ds {
 		void setPosition(ID id, const v3& p);
 
 		// actions
-		void scaleTo(ID sid, const v3& startScale, const v3& endScale, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
-		void moveTo(ID sid, const v3& startPos, const v3& endPos, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
-		void rotateTo(ID sid, const v3& startRotation, const v3& endRotation, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
-
 		bool hasEvents() const {
 			return _eventBuffer.events.size() > 0;
 		}
@@ -76,7 +71,6 @@ namespace ds {
 		}
 	protected:
 		EntityArray _data;
-		AbstractAction* _actions[MAX_ACTIONS];
 	private:
 		bool _active;
 		void updateWorld(int idx);
@@ -117,8 +111,6 @@ namespace ds {
 		void addPostProcess(PostProcess* pp);
 		virtual void tick(float dt);
 		void draw();
-		void scale(ID id, const v2& scale);
-		void scaleTo(ID id, const v2& startScale, const v2& endScale, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 		void setTexture(ID id, const Texture& t);
 		void useRenderTarget(const char* name);
 		void activateRenderTarget();

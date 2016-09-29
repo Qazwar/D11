@@ -2,7 +2,7 @@
 #include "core\Common.h"
 #include "..\renderer\render_types.h"
 #include "..\renderer\MeshBuffer.h"
-#include "ActionEventBuffer.h"
+#include <core\world\ActionEventBuffer.h>
 
 namespace ds {
 

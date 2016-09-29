@@ -16,6 +16,7 @@
 #include "..\audio\AudioManager.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "..\renderer\stb_image.h"
+#include "..\io\ReportWriter.h"
 
 namespace ds {
 
