@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include "..\io\ReportWriter.h"
+#include "core\io\ReportWriter.h"
 
 namespace ds {
 
