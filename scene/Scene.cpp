@@ -232,6 +232,7 @@ namespace ds {
 			if (_data.active[i]) {
 				AABBox bb = _data.meshes[i]->boundingBox;
 				bb.transpose(_data.positions[i]);
+				/*
 				if (bb.intersects(ray, &t0, &t1)) {
 					if (ret == INVALID_ID) {
 						tm = t0;
@@ -244,6 +245,7 @@ namespace ds {
 						}
 					}
 				}
+				*/
 			}
 		}
 		/*
