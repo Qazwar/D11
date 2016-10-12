@@ -11,6 +11,7 @@ namespace ds {
 		virtual ~ParticleSystemRenderer() {}
 
 		virtual void render(const ParticleArray& array, const Texture& t) = 0;
+		virtual void end() = 0;
 	};
 
 	class ParticleSystemRenderer2D : public ParticleSystemRenderer {
@@ -20,6 +21,7 @@ namespace ds {
 		virtual ~ParticleSystemRenderer2D() {}
 
 		void render(const ParticleArray& array, const Texture& t);
+		void end() {}
 
 	private:
 		SpriteBuffer* _particles;

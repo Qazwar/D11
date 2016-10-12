@@ -9,6 +9,7 @@ namespace ds {
 	
 
 	void ParticleSystemRenderer2D::render(const ParticleArray& array, const Texture& t) {
+		ZoneTracker("particles::render2D");
 		_particles->begin();
 		int batchSize = 0;
 		_particles->begin();

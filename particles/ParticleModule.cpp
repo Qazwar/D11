@@ -21,6 +21,7 @@ namespace ds {
 	}
 
 	void  ParticleTimeModule::update(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt) {
+		ZoneTracker("PM:lifetime");
 		float* timers = static_cast<float*>(buffer);
 		for (uint32_t i = 0; i < array->countAlive; ++i) {
 			array->timer[i].x += dt;
@@ -63,6 +64,7 @@ namespace ds {
 	// Size Module
 	// -------------------------------------------------------
 	void SizeModule::update(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt) {
+		ZoneTracker("PM:size");
 		XASSERT(data != 0, "Required data not found");
 		const SizeModuleData* my_data = static_cast<const SizeModuleData*>(data);
 		v2* scales = static_cast<v2*>(buffer);
@@ -157,6 +159,7 @@ namespace ds {
 	}
 
 	void ColorModule::update(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt) {
+		ZoneTracker("PM:color");
 		XASSERT(data != 0, "Required data not found");
 		const ColorModuleData* my_data = static_cast<const ColorModuleData*>(data);
 		if (my_data->modifier == MMT_LINEAR) {
@@ -175,6 +178,7 @@ namespace ds {
 	// Alpha Module
 	// -------------------------------------------------------
 	void AlphaModule::update(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt) {
+		ZoneTracker("PM:alpha");
 		XASSERT(data != 0, "Required data not found");
 		const AlphaModuleData* my_data = static_cast<const AlphaModuleData*>(data);
 		v2* alphas = static_cast<v2*>(buffer);
@@ -223,6 +227,7 @@ namespace ds {
 	}
 
 	void RotationModule::update(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt) {
+		ZoneTracker("PM:rotation");
 		XASSERT(data != 0, "Required data not found");
 		const RotationModuleData* my_data = static_cast<const RotationModuleData*>(data);
 		float* rotations = static_cast<float*>(buffer);
@@ -250,6 +255,7 @@ namespace ds {
 	}
 
 	void AccelerationModule::update(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt) {
+		ZoneTracker("PM:acceleration");
 		XASSERT(data != 0, "Required data not found");
 		const AccelerationModuleData* my_data = static_cast<const AccelerationModuleData*>(data);
 		v2* accelerations = static_cast<v2*>(buffer);
@@ -289,6 +295,7 @@ namespace ds {
 	}
 
 	void VelocityModule::update(ParticleArray* array, const ParticleModuleData* data, void* buffer, float dt) {
+		ZoneTracker("PM:velocity");
 		XASSERT(data != 0, "Required data not found");
 		const VelocityModuleData* my_data = static_cast<const VelocityModuleData*>(data);
 		v2* velocities = static_cast<v2*>(buffer);

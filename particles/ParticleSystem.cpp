@@ -194,55 +194,65 @@ namespace ds {
 		for (uint32_t i = 0; i < m_Array.countAlive; ++i) {
 			m_Array.forces[i] = v2(0, 0);
 		}
-
-		updateSpawners(elapsed);
-		for (uint32_t i = 0; i < _spawnerInstances.numObjects; ++i) {
-			ParticleSpawnerInstance& instance = _spawnerInstances.objects[i];
-			emittParticles(instance, elapsed, &start, &end);
-			if (_sendEvents) {
-				for (uint32_t i = start; i < end; ++i) {
-					ParticleEvent event;
-					event.instance = instance.id;
-					event.type = ParticleEvent::PARTICLE_EMITTED;
-					event.pos = m_Array.position[i].xy();
-					events.push_back(event);
-				}
-			}
-		}
-		for (int i = 0; i < _count_modules; ++i) {
-			const ModuleInstance& instance = _module_instances[i];
-			void* p = _buffer.get_ptr(i);
-			instance.module->update(&m_Array, instance.data, p, elapsed);
-		}
-
-		// kill dead particles
-		bool killed = false;
-		uint32_t cnt = 0;
-		while (cnt < m_Array.countAlive) {
-			//if (m_Array.timer[cnt].x > m_Array.timer[cnt].z) {
-			if (m_Array.timer[cnt].y >= 1.0f) {
+		{
+			ZoneTracker z("PS:update:spawn");
+			updateSpawners(elapsed);
+			for (uint32_t i = 0; i < _spawnerInstances.numObjects; ++i) {
+				ParticleSpawnerInstance& instance = _spawnerInstances.objects[i];
+				emittParticles(instance, elapsed, &start, &end);
 				if (_sendEvents) {
-					ParticleEvent event;
-					event.instance = INVALID_ID;
-					event.type = ParticleEvent::PARTICLE_KILLED;
-					event.pos = m_Array.position[cnt].xy();
-					events.push_back(event);
+					for (uint32_t i = start; i < end; ++i) {
+						ParticleEvent event;
+						event.instance = instance.id;
+						event.type = ParticleEvent::PARTICLE_EMITTED;
+						event.pos = m_Array.position[i].xy();
+						events.push_back(event);
+					}
 				}
-				//LOG << "killing at " << cnt << " id: " << m_Array.ids[cnt];
-				_buffer.swap(cnt, m_Array.countAlive - 1);
-				m_Array.kill(cnt);
-				// kill data
-				//_buffer.remove(cnt);				
-				killed = true;
 			}
-			++cnt;
+		}
+		{
+			ZoneTracker z("PS:update:modules");
+			for (int i = 0; i < _count_modules; ++i) {
+				const ModuleInstance& instance = _module_instances[i];
+				void* p = _buffer.get_ptr(i);
+				instance.module->update(&m_Array, instance.data, p, elapsed);
+			}
+		}
+		{
+			ZoneTracker z("PS:update:kill");
+			// kill dead particles
+			bool killed = false;
+			uint32_t cnt = 0;
+			while (cnt < m_Array.countAlive) {
+				//if (m_Array.timer[cnt].x > m_Array.timer[cnt].z) {
+				if (m_Array.timer[cnt].y >= 1.0f) {
+					if (_sendEvents) {
+						ParticleEvent event;
+						event.instance = INVALID_ID;
+						event.type = ParticleEvent::PARTICLE_KILLED;
+						event.pos = m_Array.position[cnt].xy();
+						events.push_back(event);
+					}
+					//LOG << "killing at " << cnt << " id: " << m_Array.ids[cnt];
+					_buffer.swap(cnt, m_Array.countAlive - 1);
+					m_Array.kill(cnt);
+					// kill data
+					//_buffer.remove(cnt);				
+					killed = true;
+				}
+				++cnt;
+			}
 		}
 		//if (killed) {
 			//LOG << "alive: " << m_Array.countAlive;
 		//}
 		// move particles based on force
-		for (uint32_t i = 0; i < m_Array.countAlive; ++i) {
-			m_Array.position[i] += m_Array.forces[i] * elapsed;
+		{
+			ZoneTracker z("PS:update:force");
+			for (uint32_t i = 0; i < m_Array.countAlive; ++i) {
+				m_Array.position[i] += m_Array.forces[i] * elapsed;
+			}
 		}
 	}
 
@@ -346,11 +356,13 @@ namespace ds {
 					LOGE << "cannot find module: " << mod_name;
 				}
 			}
-		}			
+		}	
+		/*
 		LOG << "init buffer - sizes: " << _count_modules;
 		for (int i = 0; i < _count_modules; ++i) {
 			LOG << i << " : " << _sizes[i];
 		}
+		*/
 		_buffer.init(_sizes, _count_modules);
 		_buffer.resize(1024);
 		return true;

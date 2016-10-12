@@ -215,12 +215,14 @@ namespace ds {
 		//_particles->begin();
 		ZoneTracker z("ParticleManager::render");
 		//SpriteVertex v;
+		int total = 0;
 		for (int i = 0; i < MAX_PARTICLE_SYSTEMS; ++i) {
 			if (_systems[i] != 0) {
 				ParticleSystemRenderer* renderer = _renderer[_systems[i]->getRenderMode()];
-				//const ParticleArray& array = _systems[i]->getArray();
-				//const Texture& t = _systems[i]->getTexture();
-				//renderer->render(array, t);
+				const ParticleArray& array = _systems[i]->getArray();
+				const Texture& t = _systems[i]->getTexture();
+				renderer->render(array, t);
+				total += array.countAlive;
 				/*
 				if (array.countAlive > 0) {
 					for (int j = 0; j < array.countAlive; ++j) {
@@ -230,13 +232,6 @@ namespace ds {
 				*/
 			}
 		}
-		/*
-		if (_particles->size() > 0) {
-		_particles->flush();
-		}
-		*/
-		//_particles->end();
-
 		/*
 		_particles->begin();
 		int batchSize = 0;
