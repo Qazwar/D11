@@ -222,7 +222,7 @@ namespace ds {
 				ReportWriter rw(filename);
 				if (rw.isOpen()) {
 					gDrawCounter->save(rw);
-					//perf::save(rw);
+					perf::save(rw);
 					res::save(rw);
 					//gDefaultMemory->save(rw);
 				}
