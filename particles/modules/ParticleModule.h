@@ -16,7 +16,8 @@ namespace ds {
 		PM_ALPHA,
 		PM_ROTATION,
 		PM_VELOCITY,
-		PM_ACCELERATION
+		PM_ACCELERATION,
+		PM_WIGGLE
 	};
 
 	enum ModuleModifierType {

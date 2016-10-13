@@ -9,6 +9,7 @@
 #include "modules\AlphaModule.h"
 #include "modules\AccelerationModule.h"
 #include "modules\RingEmitterModule.h"
+#include "modules\WiggleModule.h"
 
 namespace ds {
 
@@ -23,6 +24,7 @@ namespace ds {
 		_known_modules[_count_modules++] = new RotationModule();
 		_known_modules[_count_modules++] = new VelocityModule();
 		_known_modules[_count_modules++] = new AccelerationModule();
+		_known_modules[_count_modules++] = new WiggleModule();
 		for (int i = 0; i < _count_modules; ++i) {
 			_known_module_names.push_back(gStringBuffer->add(_known_modules[i]->getName()));
 		}
@@ -66,6 +68,7 @@ namespace ds {
 			case PM_ROTATION: return new RotationModuleData(); break;
 			case PM_VELOCITY: return new VelocityModuleData(); break;
 			case PM_ACCELERATION: return new AccelerationModuleData(); break;
+			case PM_WIGGLE: return new WiggleModuleData(); break;
 		}
 		return 0;
 	}
