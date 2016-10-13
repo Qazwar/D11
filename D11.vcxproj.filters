@@ -50,9 +50,6 @@
     <Filter Include="scene">
       <UniqueIdentifier>{c4c42552-b2e5-4304-b02a-ef97c02a009a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="scene\actions">
-      <UniqueIdentifier>{6f4c7579-491c-4b5e-b30e-3c9dda357e4b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="shaders">
       <UniqueIdentifier>{999ea310-6151-4234-b00d-0dbae0d8c822}</UniqueIdentifier>
     </Filter>
@@ -62,11 +59,11 @@
     <Filter Include="shaders\postprocess">
       <UniqueIdentifier>{5583694e-52aa-4d57-b9f7-d0bd7e9a1e39}</UniqueIdentifier>
     </Filter>
-    <Filter Include="io">
-      <UniqueIdentifier>{d669cf6b-5410-4d9f-9ddf-f9ee958b476b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="audio">
       <UniqueIdentifier>{6e3d6316-e736-4a9f-a40a-72d688a0fd18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="particles\modules">
+      <UniqueIdentifier>{b56fe18a-f5a9-4876-9665-97b258f1004a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -95,9 +92,6 @@
       <Filter>physics</Filter>
     </ClCompile>
     <ClCompile Include="particles\ParticleManager.cpp">
-      <Filter>particles</Filter>
-    </ClCompile>
-    <ClCompile Include="particles\ParticleModule.cpp">
       <Filter>particles</Filter>
     </ClCompile>
     <ClCompile Include="particles\ParticleSystem.cpp">
@@ -157,23 +151,8 @@
     <ClCompile Include="scene\Scene.cpp">
       <Filter>scene</Filter>
     </ClCompile>
-    <ClCompile Include="scene\actions\AbstractAction.cpp">
-      <Filter>scene\actions</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\actions\MoveToAction.cpp">
-      <Filter>scene\actions</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\actions\ScalingAction.cpp">
-      <Filter>scene\actions</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\actions\RotateToAction.cpp">
-      <Filter>scene\actions</Filter>
-    </ClCompile>
     <ClCompile Include="particles\ParticleSystemRenderer.cpp">
       <Filter>particles</Filter>
-    </ClCompile>
-    <ClCompile Include="base\Game.cpp">
-      <Filter>base</Filter>
     </ClCompile>
     <ClCompile Include="postprocess\GrayFadePostProcess.cpp">
       <Filter>postprocess</Filter>
@@ -190,20 +169,35 @@
     <ClCompile Include="renderer\SpriteSheet.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
-    <ClCompile Include="io\ReportWriter.cpp">
-      <Filter>io</Filter>
-    </ClCompile>
     <ClCompile Include="utils\font.cpp">
       <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="audio\AudioBuffer.cpp">
-      <Filter>audio</Filter>
     </ClCompile>
     <ClCompile Include="audio\AudioManager.cpp">
       <Filter>audio</Filter>
     </ClCompile>
-    <ClCompile Include="audio\Sound.cpp">
-      <Filter>audio</Filter>
+    <ClCompile Include="particles\modules\ParticleTimeModule.cpp">
+      <Filter>particles\modules</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\modules\SizeModule.cpp">
+      <Filter>particles\modules</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\modules\ColorModule.cpp">
+      <Filter>particles\modules</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\modules\RotationModule.cpp">
+      <Filter>particles\modules</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\modules\VelocityModule.cpp">
+      <Filter>particles\modules</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\modules\AlphaModule.cpp">
+      <Filter>particles\modules</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\modules\AccelerationModule.cpp">
+      <Filter>particles\modules</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\modules\RingEmitterModule.cpp">
+      <Filter>particles\modules</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -253,9 +247,6 @@
       <Filter>particles</Filter>
     </ClInclude>
     <ClInclude Include="particles\ParticleManager.h">
-      <Filter>particles</Filter>
-    </ClInclude>
-    <ClInclude Include="particles\ParticleModule.h">
       <Filter>particles</Filter>
     </ClInclude>
     <ClInclude Include="particles\ParticleSystem.h">
@@ -312,32 +303,14 @@
     <ClInclude Include="renderer\RenderTarget.h">
       <Filter>renderer</Filter>
     </ClInclude>
-    <ClInclude Include="scene\ActionEventBuffer.h">
-      <Filter>scene</Filter>
-    </ClInclude>
     <ClInclude Include="scene\EntityArray.h">
       <Filter>scene</Filter>
     </ClInclude>
     <ClInclude Include="scene\Scene.h">
       <Filter>scene</Filter>
     </ClInclude>
-    <ClInclude Include="scene\actions\AbstractAction.h">
-      <Filter>scene\actions</Filter>
-    </ClInclude>
-    <ClInclude Include="scene\actions\MoveToAction.h">
-      <Filter>scene\actions</Filter>
-    </ClInclude>
-    <ClInclude Include="scene\actions\ScalingAction.h">
-      <Filter>scene\actions</Filter>
-    </ClInclude>
-    <ClInclude Include="scene\actions\RotateToAction.h">
-      <Filter>scene\actions</Filter>
-    </ClInclude>
     <ClInclude Include="particles\ParticleSystemRenderer.h">
       <Filter>particles</Filter>
-    </ClInclude>
-    <ClInclude Include="base\Game.h">
-      <Filter>base</Filter>
     </ClInclude>
     <ClInclude Include="postprocess\PostProcess.h">
       <Filter>postprocess</Filter>
@@ -354,20 +327,41 @@
     <ClInclude Include="renderer\SpriteSheet.h">
       <Filter>renderer</Filter>
     </ClInclude>
-    <ClInclude Include="io\ReportWriter.h">
-      <Filter>io</Filter>
-    </ClInclude>
     <ClInclude Include="utils\font.h">
       <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="audio\AudioBuffer.h">
-      <Filter>audio</Filter>
     </ClInclude>
     <ClInclude Include="audio\AudioManager.h">
       <Filter>audio</Filter>
     </ClInclude>
-    <ClInclude Include="audio\Sound.h">
+    <ClInclude Include="audio\tinysound.h">
       <Filter>audio</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\modules\ParticleModule.h">
+      <Filter>particles\modules</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\modules\ParticleTimeModule.h">
+      <Filter>particles\modules</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\modules\SizeModule.h">
+      <Filter>particles\modules</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\modules\ColorModule.h">
+      <Filter>particles\modules</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\modules\RotationModule.h">
+      <Filter>particles\modules</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\modules\VelocityModule.h">
+      <Filter>particles\modules</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\modules\AlphaModule.h">
+      <Filter>particles\modules</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\modules\AccelerationModule.h">
+      <Filter>particles\modules</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\modules\RingEmitterModule.h">
+      <Filter>particles\modules</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

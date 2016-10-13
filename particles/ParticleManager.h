@@ -1,7 +1,6 @@
 #pragma once
 #include "ParticleSystem.h"
 #include "ParticleSystemFactory.h"
-//#include "..\renderer\sprites.h"
 #include "..\resources\ResourceDescriptors.h"
 #include "ParticleSystemRenderer.h"
 

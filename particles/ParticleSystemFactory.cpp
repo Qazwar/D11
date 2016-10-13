@@ -1,13 +1,21 @@
 #include "ParticleSystemFactory.h"
 #include "ParticleSystem.h"
 #include "core\string\GlobalStringBuffer.h"
+#include "modules\ParticleTimeModule.h"
+#include "modules\SizeModule.h"
+#include "modules\ColorModule.h"
+#include "modules\RotationModule.h"
+#include "modules\VelocityModule.h"
+#include "modules\AlphaModule.h"
+#include "modules\AccelerationModule.h"
+#include "modules\RingEmitterModule.h"
 
 namespace ds {
 
 	ParticleSystemFactory::ParticleSystemFactory() {
 		_count_modules = 0;
 		_known_modules = new ParticleModule*[64];
-		_known_modules[_count_modules++] = new RingLocationModule();
+		_known_modules[_count_modules++] = new RingEmitterModule();
 		_known_modules[_count_modules++] = new ParticleTimeModule();
 		_known_modules[_count_modules++] = new SizeModule();
 		_known_modules[_count_modules++] = new ColorModule();
@@ -51,7 +59,7 @@ namespace ds {
 	ParticleModuleData* ParticleSystemFactory::createData(ParticleModuleType type) const {
 		switch (type) {
 			case PM_LIFECYCLE: return new LifetimeModuleData(); break;
-			case PM_RING: return new RingLocationModuleData(); break;
+			case PM_RING: return new RingEmitterModuleData(); break;
 			case PM_SIZE: return new SizeModuleData(); break;
 			case PM_COLOR: return new ColorModuleData(); break;
 			case PM_ALPHA: return new AlphaModuleData(); break;

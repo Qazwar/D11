@@ -8,17 +8,17 @@ namespace ds {
 	}
 	
 
-	void ParticleSystemRenderer2D::render(const ParticleArray& array, const Texture& t) {
-		ZoneTracker("particles::render2D");
-		_particles->begin();
-		int batchSize = 0;
-		_particles->begin();
+	void ParticleSystemRenderer2D::render(const ParticleArray& array, const Texture& t) {		
 		if (array.countAlive > 0) {
+			ZoneTracker("particles::render2D");
+			_particles->begin();
+			int batchSize = 0;
+			_particles->begin();
 			for (uint32_t j = 0; j < array.countAlive; ++j) {
 				_particles->draw(array.position[j].xy(), t, array.rotation[j], array.scale[j], array.color[j]);
 			}
+			_particles->end();
 		}
-		_particles->end();
 	}
 
 }

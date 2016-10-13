@@ -16,6 +16,7 @@ namespace ds {
 		_factory = factory;
 		_counter = 0;
 		_renderMode = renderMode;
+		_dbgCounter = 0;
 	}
 
 	ParticleSystem::~ParticleSystem() {
@@ -211,47 +212,53 @@ namespace ds {
 				}
 			}
 		}
-		{
-			ZoneTracker z("PS:update:modules");
-			for (int i = 0; i < _count_modules; ++i) {
-				const ModuleInstance& instance = _module_instances[i];
-				void* p = _buffer.get_ptr(i);
-				instance.module->update(&m_Array, instance.data, p, elapsed);
-			}
-		}
-		{
-			ZoneTracker z("PS:update:kill");
-			// kill dead particles
-			bool killed = false;
-			uint32_t cnt = 0;
-			while (cnt < m_Array.countAlive) {
-				//if (m_Array.timer[cnt].x > m_Array.timer[cnt].z) {
-				if (m_Array.timer[cnt].y >= 1.0f) {
-					if (_sendEvents) {
-						ParticleEvent event;
-						event.instance = INVALID_ID;
-						event.type = ParticleEvent::PARTICLE_KILLED;
-						event.pos = m_Array.position[cnt].xy();
-						events.push_back(event);
+		if (m_Array.countAlive > 0) {
+			// update modules
+			{
+				ZoneTracker z("PS:update:modules");
+				StopWatch sw;
+				sw.start();
+				for (int i = 0; i < _count_modules; ++i) {
+					const ModuleInstance& instance = _module_instances[i];
+					void* p = _buffer.get_ptr(i);
+					{
+						ZoneTracker z("PS:update:modules:inside");
+						instance.module->update(&m_Array, instance.data, p, elapsed);
 					}
-					//LOG << "killing at " << cnt << " id: " << m_Array.ids[cnt];
-					_buffer.swap(cnt, m_Array.countAlive - 1);
-					m_Array.kill(cnt);
-					// kill data
-					//_buffer.remove(cnt);				
-					killed = true;
 				}
-				++cnt;
+				sw.end();
+				_dbgValues[_dbgCounter++] = sw.elapsed();
+				if (_dbgCounter > 64) {
+					_dbgCounter = 0;
+				}
 			}
-		}
-		//if (killed) {
-			//LOG << "alive: " << m_Array.countAlive;
-		//}
-		// move particles based on force
-		{
-			ZoneTracker z("PS:update:force");
-			for (uint32_t i = 0; i < m_Array.countAlive; ++i) {
-				m_Array.position[i] += m_Array.forces[i] * elapsed;
+			// kill dead particles
+			{
+				ZoneTracker z("PS:update:kill");
+				bool killed = false;
+				uint32_t cnt = 0;
+				while (cnt < m_Array.countAlive) {
+					if (m_Array.timer[cnt].y >= 1.0f) {
+						if (_sendEvents) {
+							ParticleEvent event;
+							event.instance = INVALID_ID;
+							event.type = ParticleEvent::PARTICLE_KILLED;
+							event.pos = m_Array.position[cnt].xy();
+							events.push_back(event);
+						}
+						_buffer.swap(cnt, m_Array.countAlive - 1);
+						m_Array.kill(cnt);
+						killed = true;
+					}
+					++cnt;
+				}
+			}		
+			// move particles based on force
+			{
+				ZoneTracker z("PS:update:force");
+				for (uint32_t i = 0; i < m_Array.countAlive; ++i) {
+					m_Array.position[i] += m_Array.forces[i] * elapsed;
+				}
 			}
 		}
 	}

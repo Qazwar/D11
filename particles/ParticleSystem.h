@@ -4,7 +4,7 @@
 #include "core\profiler\Profiler.h"
 #include "ParticleSystemFactory.h"
 #include "core\lib\collection_types.h"
-#include "ParticleModule.h"
+#include "modules\ParticleModule.h"
 
 namespace ds {
 
@@ -120,6 +120,9 @@ private:
 	bool _sendEvents;
 	uint32_t _counter;
 	ParticleRenderMode _renderMode;
+
+	float _dbgValues[64];
+	int _dbgCounter;
 };
 
 }

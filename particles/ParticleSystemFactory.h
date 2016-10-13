@@ -1,7 +1,7 @@
 #pragma once
 #include "core\lib\collection_types.h"
 #include "ParticleEmitter.h"
-#include "ParticleModule.h"
+#include "modules\ParticleModule.h"
 
 namespace ds {
 
