@@ -134,10 +134,11 @@ namespace ds {
 
 
 	bool BaseApp::prepare() {
+		gDefaultMemory = new DefaultAllocator(_settings.initialMemorySize * 1024 * 1024);
 		// let the actual app define the settings
 		prepare(&_settings);
 		// prepare the initial systems
-		init_logger(_settings.logTypes, 200, 600);
+		init_logger(_settings.logTypes, 600, 800);
 
 		createWindow();
 		// get system information
@@ -145,7 +146,7 @@ namespace ds {
 		sysinfo::getGFX(&_systemInfo);
 		sysinfo::getRAMInformation(&_systemInfo);
 		// FIXME: make sure that we have the amount of memory available
-		gDefaultMemory = new DefaultAllocator(_settings.initialMemorySize * 1024 * 1024);
+		
 		gStringBuffer = new GlobalStringBuffer();
 		perf::init();
 		repository::initialize(_settings.repositoryMode);
