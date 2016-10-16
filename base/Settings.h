@@ -5,12 +5,6 @@
 
 namespace ds {
 
-	enum LogTypes {
-		LT_NONE,
-		LT_CONSOLE,
-		LT_FILE
-	};
-
 	struct Settings {
 
 		Color clearColor;
@@ -22,8 +16,7 @@ namespace ds {
 		const char* reportingDirectory;
 		int initialMemorySize;
 		repository::RepositoryMode repositoryMode;
-		int logTypes;
-
+	
 		Settings() {
 			screenWidth = 1024;
 			screenHeight = 768;
@@ -34,7 +27,6 @@ namespace ds {
 			initialMemorySize = 64;
 			repositoryMode = repository::RM_DEBUG;
 			reportingDirectory = "reports";
-			logTypes = 0;
 		}
 	};
 

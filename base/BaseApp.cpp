@@ -138,7 +138,7 @@ namespace ds {
 		// let the actual app define the settings
 		prepare(&_settings);
 		// prepare the initial systems
-		init_logger(_settings.logTypes, 600, 800);
+		init_logger();
 
 		createWindow();
 		// get system information

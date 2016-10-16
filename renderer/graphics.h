@@ -9,6 +9,7 @@
 #include "core\Common.h"
 #include "Bitmapfont.h"
 #include "Camera.h"
+#include "Viewport.h"
 
 struct Access{
 
@@ -102,12 +103,21 @@ namespace graphics {
 
 	ds::Ray getCameraRay(ds::Camera* camera);
 
-	void updateSpriteConstantBuffer(const ds::SpriteBufferCB& buffer);
+	void updateSpriteConstantBuffer(ds::SpriteBufferCB& buffer);
 
 	ds::SpriteBuffer* getSpriteBuffer();
 
 	void setRenderTarget(RID rtID);
 
 	void restoreBackbuffer();
+
+	int addViewport(const ds::Viewport& vp);
+
+	void setViewportPosition(int idx, const v2& pos);
+
+	const ds::Viewport& getViewport(int idx);
+
+	void selectViewport(int idx);
+
 }
 

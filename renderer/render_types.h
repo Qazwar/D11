@@ -38,6 +38,10 @@ namespace ds {
 			screenCenter.y = screenDimension.y * 0.5f;
 		}
 
+		void setScreenCenter(const v2& center) {
+			screenCenter = v4(center.x,center.y,0.0f,0.0f);
+		}
+
 		void setTextureSize(float w, float h) {
 			screenDimension.z = w;
 			screenDimension.w = h;

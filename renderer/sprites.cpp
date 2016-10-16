@@ -18,6 +18,7 @@ namespace ds {
 		_vertices = new SpriteVertex[4 * descriptor.size];
 		//_screenDimension = v4(graphics::getScreenWidth(), graphics::getScreenHeight(), 1024.0f, 1024.0f);
 		_constantBuffer.setScreenSize(v2(graphics::getScreenWidth(), graphics::getScreenHeight()));
+		
 		_constantBuffer.setTextureSize(1024.0f, 1024.0f);
 	}
 

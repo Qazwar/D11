@@ -13,6 +13,7 @@
 #include "..\shaders\Sprite_GS_Main.inc"
 #include "..\shaders\postprocess\BasicPostProcess_VS_Main.inc"
 
+
 namespace graphics {
 
 	struct GraphicContext {
@@ -53,6 +54,8 @@ namespace graphics {
 		ID3D11Buffer* spriteCB;
 		ds::SpriteBuffer* sprites;
 		bool depthEnabled;
+		ds::Array<ds::Viewport> viewports;
+		int selectedViewport;
 	};
 
 	static GraphicContext* _context;
@@ -441,6 +444,10 @@ namespace graphics {
 		_context->orthoCamera = new ds::OrthoCamera(graphics::getScreenWidth(), graphics::getScreenHeight());
 		_context->fpsCamera = new ds::FPSCamera(graphics::getScreenWidth(), graphics::getScreenHeight());
 		
+		ds::Viewport vw;
+		vw.setDimension(graphics::getScreenWidth(), graphics::getScreenHeight());
+		_context->viewports.push_back(vw);
+		_context->selectedViewport = 0;
 		return true;
 	}
 
@@ -625,7 +632,9 @@ namespace graphics {
 		return _context->sprites;
 	}
 
-	void updateSpriteConstantBuffer(const ds::SpriteBufferCB& buffer) {
+	void updateSpriteConstantBuffer(ds::SpriteBufferCB& buffer) {
+		const ds::Viewport& vp = _context->viewports[_context->selectedViewport];
+		buffer.setScreenCenter(vp.getPosition());
 		D3D11_MAPPED_SUBRESOURCE resource;
 		HRESULT hResult = _context->d3dContext->Map(_context->spriteCB, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
 		void* ptr = resource.pData;
@@ -732,6 +741,26 @@ namespace graphics {
 			ray.sign[i] = (ray.invDir.data[i] < 0.0f);
 		}
 		return ray;
+	}
+
+	void setViewportPosition(int idx, const v2& pos) {
+		assert(idx >= 0 && idx < _context->viewports.size());
+		_context->viewports[idx].setPosition(pos);
+	}
+
+	int addViewport(const ds::Viewport& vp) {
+		_context->viewports.push_back(vp);
+		return _context->viewports.size() - 1;
+	}
+
+	void selectViewport(int idx) {
+		assert(idx >= 0 && idx < _context->viewports.size());
+		_context->selectedViewport = idx;
+	}
+
+	const ds::Viewport& getViewport(int idx) {
+		assert(idx >= 0 && idx < _context->viewports.size());
+		return _context->viewports[idx];
 	}
 
 	// ------------------------------------------------------
