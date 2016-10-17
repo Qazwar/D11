@@ -11,12 +11,16 @@ namespace ds {
 		float radial;
 		float radialVariance;
 		v2 acceleration;
+		float damping;
 
-		AccelerationModuleData() : radial(0.0f), radialVariance(0.0f), acceleration(0, 0) {}
+		AccelerationModuleData() : radial(0.0f), radialVariance(0.0f), acceleration(0, 0) , damping(1.0f) {}
 
 		void read(const JSONReader& reader, int category) {
 			reader.get_float(category, "radial", &radial);
 			reader.get_float(category, "radial_variance", &radialVariance);
+			float v;
+			reader.get(category, "damping", &v);
+			damping = math::clamp(v, 0.0f, 1.0f);
 		}
 	};
 
@@ -34,7 +38,7 @@ namespace ds {
 			return PM_ACCELERATION;
 		}
 		int getDataSize() const {
-			return sizeof(v2) * 2;
+			return sizeof(v2) * 3;
 		}
 		void debug(const ParticleModuleData* data, void* buffer, uint32_t count);
 	};

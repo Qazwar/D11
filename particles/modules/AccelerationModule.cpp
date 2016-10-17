@@ -12,12 +12,14 @@ namespace ds {
 		uint32_t count = end - start;
 		const AccelerationModuleData* my_data = static_cast<const AccelerationModuleData*>(data);
 		v2* accelerations = static_cast<v2*>(buffer);
-		accelerations += start * 2;
+		accelerations += start * 3;
 		for (uint32_t i = 0; i < count; ++i) {
 			float v = math::randomRange(my_data->radial, my_data->radialVariance);
-			*accelerations = math::getRadialVelocity(array->rotation[start + i], v);
+			*accelerations = math::getRadialVelocity(array->rotation[start + i], v); // acceleration
 			++accelerations;
-			*accelerations = v2(0, 0);
+			*accelerations = v2(0,0); // velocity
+			++accelerations;
+			*accelerations = v2(my_data->damping, 0.0f); // damping
 			++accelerations;
 		}
 	}
@@ -28,8 +30,9 @@ namespace ds {
 		const AccelerationModuleData* my_data = (AccelerationModuleData*)data;
 		v2* accelerations = (v2*)buffer;
 		for (uint32_t i = 0; i < array->countAlive; ++i) {
-			accelerations[i * 2 + 1] += accelerations[i * 2] * dt;
-			array->forces[i] += v3(accelerations[i * 2 + 1]);
+			accelerations[i * 3 + 1] += accelerations[i * 3] * dt;
+			accelerations[i * 3] *= 1.0f - accelerations[i * 3 + 2].x;// *dt;
+			array->forces[i] += v3(accelerations[i * 3 + 1]);
 		}
 	}
 
