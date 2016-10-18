@@ -213,6 +213,17 @@ namespace ds {
 		}
 	};
 
+	class WorldEntityTemplatesResource : public AbstractResource<WorldEntityTemplates*> {
+
+	public:
+		WorldEntityTemplatesResource(WorldEntityTemplates* t) : AbstractResource(t) {}
+		virtual ~WorldEntityTemplatesResource() {
+			if (_data != 0) {
+				delete _data;
+			}
+		}
+	};
+
 	class RenderTargetResource : public AbstractResource<RenderTarget*> {
 
 	public:

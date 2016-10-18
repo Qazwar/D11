@@ -134,6 +134,7 @@ namespace ds {
 			"SPRITESHEET",
 			"SOUND",
 			"SCRIPT",
+			"ENTITY_TEMPLATES",
 			"UNKNOWN"
 		};
 
@@ -470,12 +471,22 @@ namespace ds {
 
 		static RID loadSpriteSheet(const char* name) {
 			char buffer[256];
-			sprintf_s(buffer, 256, "content\\%s.json", name);
+			sprintf_s(buffer, 256, "content\\resources\\%s.json", name);
 			SpriteSheet* sheet = new SpriteSheet(buffer);
 			sheet->load();
 			SpriteSheetResource* cbr = new SpriteSheetResource(sheet);
 			_resCtx->resources.push_back(cbr);
 			return create(name, ResourceType::SPRITESHEET);
+		}
+
+		static RID loadWorldEntityTemplates(const char* name) {
+			char buffer[256];
+			sprintf_s(buffer, 256, "content\\resources\\%s.json", name);
+			WorldEntityTemplates* sheet = new WorldEntityTemplates(buffer);
+			sheet->load();
+			WorldEntityTemplatesResource* cbr = new WorldEntityTemplatesResource(sheet);
+			_resCtx->resources.push_back(cbr);
+			return create(name, ResourceType::ENTITY_TEMPLATES);
 		}
 
 		// ------------------------------------------------------
@@ -1020,6 +1031,14 @@ namespace ds {
 		}
 
 		// ------------------------------------------------------
+		// parse spritesheet
+		// ------------------------------------------------------
+		void parseWorldEntityTemplates(JSONReader& reader, int childIndex) {
+			const char* name = reader.get_string(childIndex, "name");
+			loadWorldEntityTemplates(name);
+		}
+
+		// ------------------------------------------------------
 		// parse particle manager
 		// ------------------------------------------------------
 		void parseParticleManager(JSONReader& reader, int childIndex) {			
@@ -1244,6 +1263,7 @@ namespace ds {
 			_resCtx->parsers[SID("spritesheet")] = parseSpriteSheet;
 			_resCtx->parsers[SID("sound")] = parseSound;
 			_resCtx->parsers[SID("script")] = parseScript;
+			_resCtx->parsers[SID("world_entity_templates")] = parseWorldEntityTemplates;
 		}
 
 		// ------------------------------------------------------

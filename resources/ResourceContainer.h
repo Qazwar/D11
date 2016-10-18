@@ -13,6 +13,7 @@
 #include "..\renderer\SkyBox.h"
 #include "..\renderer\RenderTarget.h"
 #include "..\renderer\SpriteSheet.h"
+#include <core\world\WorldEntityTemplates.h>
 #include <core\script\vm.h>
 #include "Resource.h"
 
@@ -55,6 +56,7 @@ namespace ds {
 		SPRITESHEET,
 		SOUND,
 		SCRIPT,
+		ENTITY_TEMPLATES,
 		UNKNOWN
 	};
 
