@@ -1333,19 +1333,24 @@ namespace ds {
 			return res_idx.type == type;
 		}
 
-		RID find(const char* name, ResourceType type) {
-			StaticHash hash = SID(name);
+		RID find(StaticHash hash, ResourceType type) {
 			int idx = -1;
 			for (uint32_t i = 0; i < _resCtx->indices.size(); ++i) {
 				if (_resCtx->indices[i].hash == hash) {
 					idx = i;
 				}
 			}
-			XASSERT(idx != -1, "No matching resource found for: %s", name);
+			XASSERT(idx != -1, "No matching resource found for: %d", hash);
 			const ResourceIndex& res_idx = _resCtx->indices[idx];
-			XASSERT(res_idx.type == type, "Different resource types - expected %s but found %s", ResourceTypeNames[res_idx.type],ResourceTypeNames[type]);
+			XASSERT(res_idx.type == type, "Different resource types - expected %s but found %s", ResourceTypeNames[res_idx.type], ResourceTypeNames[type]);
 			return res_idx.id;
 		}
+
+		RID find(const char* name, ResourceType type) {
+			return find(SID(name),type);			
+		}
+
+		
 
 		ID3D11Buffer* getConstantBuffer(const char* name) {
 			RID rid = find(name, ResourceType::CONSTANTBUFFER);
@@ -1504,6 +1509,12 @@ namespace ds {
 			const ResourceIndex& res_idx = _resCtx->indices[rid];
 			XASSERT(res_idx.type == ResourceType::GUIDIALOG, "Different resource types - expected GUIDIALOG but found %s", ResourceTypeNames[res_idx.type]);
 			GUIDialogResource* res = static_cast<GUIDialogResource*>(_resCtx->resources[res_idx.id]);
+			return res->get();
+		}
+
+		WorldEntityTemplates* getWorldEntityTemplates(StaticHash hash) {
+			RID rid = find(hash, ResourceType::ENTITY_TEMPLATES);
+			WorldEntityTemplatesResource* res = static_cast<WorldEntityTemplatesResource*>(_resCtx->resources[rid]);
 			return res->get();
 		}
 

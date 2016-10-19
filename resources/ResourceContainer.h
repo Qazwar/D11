@@ -126,6 +126,8 @@ namespace ds {
 
 		SpriteSheet* getSpriteSheet(const char* name);
 
+		WorldEntityTemplates* getWorldEntityTemplates(StaticHash hash);
+
 		SpriteBuffer* getSpriteBuffer(const char* name);
 
 		SpriteBuffer* getSpriteBuffer(RID rid);
