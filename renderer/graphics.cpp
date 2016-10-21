@@ -56,6 +56,7 @@ namespace graphics {
 		bool depthEnabled;
 		ds::Array<ds::Viewport> viewports;
 		int selectedViewport;
+		RID selectedBlendState;
 	};
 
 	static GraphicContext* _context;
@@ -157,6 +158,25 @@ namespace graphics {
 		return true;
 	}
 
+	void createBlendStates() {
+		ds::BlendStateDescriptor bsDesc;
+		bsDesc.alphaEnabled = true;
+		bsDesc.srcBlend = ds::res::findBlendStateMapping("SRC_ALPHA");
+		bsDesc.srcAlphaBlend = ds::res::findBlendStateMapping("SRC_ALPHA");
+		bsDesc.destBlend = ds::res::findBlendStateMapping("INV_SRC_ALPHA");
+		bsDesc.destAlphaBlend = ds::res::findBlendStateMapping("INV_SRC_ALPHA");
+		RID bs_id = ds::res::createBlendState("DefaultBlendState", bsDesc);
+
+		ds::BlendStateDescriptor asDesc;
+		asDesc.alphaEnabled = true;
+		asDesc.srcBlend = ds::res::findBlendStateMapping("ONE");
+		asDesc.srcAlphaBlend = ds::res::findBlendStateMapping("ONE");
+		//asDesc.destBlend = ds::res::findBlendStateMapping("ONE");
+		asDesc.destBlend = ds::res::findBlendStateMapping("INV_SRC_ALPHA");
+		asDesc.destAlphaBlend = ds::res::findBlendStateMapping("ZERO");
+		RID as_id = ds::res::createBlendState("AdditiveBlendState", asDesc);
+	}
+
 	void createPostProcessResources() {
 
 		// Position Texture Color layout
@@ -169,7 +189,7 @@ namespace graphics {
 		ilDesc.byteCode = BasicPostProcess_VS_Main;
 		ilDesc.byteCodeSize = sizeof(BasicPostProcess_VS_Main);
 		RID il_id = ds::res::createInputLayout("PTCLayout", ilDesc);
-
+		/*
 		ds::BlendStateDescriptor bsDesc;
 		bsDesc.alphaEnabled = true;
 		bsDesc.srcBlend = ds::res::findBlendState("SRC_ALPHA");
@@ -177,7 +197,7 @@ namespace graphics {
 		bsDesc.destBlend = ds::res::findBlendState("INV_SRC_ALPHA");
 		bsDesc.destAlphaBlend = ds::res::findBlendState("INV_SRC_ALPHA");
 		RID bs_id = ds::res::createBlendState("DefaultBlendState", bsDesc);
-
+		*/
 		ds::PTCVertex vertices[6];
 		vertices[0] = ds::PTCVertex(v3(-1, -1, 0), v2(0, 1), ds::Color::WHITE);
 		vertices[1] = ds::PTCVertex(v3(-1, 1, 0), v2(0, 0), ds::Color::WHITE);
@@ -243,17 +263,9 @@ namespace graphics {
 		vbDesc.size = 8192;
 		RID vb_id = ds::res::createVertexBuffer("SpriteVertexBuffer", vbDesc);
 
-		ds::BlendStateDescriptor bsDesc;
-		bsDesc.alphaEnabled = true;
-		bsDesc.srcBlend = ds::res::findBlendState("SRC_ALPHA");
-		bsDesc.srcAlphaBlend = ds::res::findBlendState("SRC_ALPHA");
-		bsDesc.destBlend = ds::res::findBlendState("INV_SRC_ALPHA");
-		bsDesc.destAlphaBlend = ds::res::findBlendState("INV_SRC_ALPHA");
-		RID bs_id = ds::res::createBlendState("SpriteBlendState", bsDesc);
-
 		ds::MaterialDescriptor mtrlDesc;
 		mtrlDesc.shader = shader_id;
-		mtrlDesc.blendstate = bs_id;
+		mtrlDesc.blendstate = ds::res::findBlendState("DefaultBlendState");
 		mtrlDesc.texture = INVALID_RID;
 		mtrlDesc.renderTarget = INVALID_RID;
 		RID mtrl_id = ds::res::createMaterial("SpriteMaterial", mtrlDesc);
@@ -526,6 +538,7 @@ namespace graphics {
 		_context->d3dContext->OMSetRenderTargets(1, &_context->backBufferTarget, _context->depthStencilView);
 		_context->d3dContext->ClearRenderTargetView(_context->backBufferTarget, _context->clearColor);
 		_context->d3dContext->ClearDepthStencilView(_context->depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0.0);
+		_context->selectedBlendState = 0;
 		turnOnZBuffer();		
 		_context->sprites->begin();
 	}
@@ -561,7 +574,7 @@ namespace graphics {
 
 	void setMaterial(RID rid) {
 		ds::Material* m = ds::res::getMaterial(rid);
-		setBlendState(m->blendState);
+		setBlendState(_context->selectedBlendState);
 		setShader(m->shader);
 		if (m->texture != INVALID_RID) {
 			setPixelShaderResourceView(m->texture);
@@ -756,6 +769,10 @@ namespace graphics {
 	void selectViewport(int idx) {
 		assert(idx >= 0 && idx < _context->viewports.size());
 		_context->selectedViewport = idx;
+	}
+
+	void selectBlendState(RID rid) {
+		_context->selectedBlendState = rid;
 	}
 
 	const ds::Viewport& getViewport(int idx) {

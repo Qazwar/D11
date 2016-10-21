@@ -11,7 +11,7 @@ namespace ds {
 	struct Material {
 		Color diffuse;
 		Color ambient;
-		RID blendState;
+		//RID blendState;
 		RID shader;
 		RID texture;
 		RID renderTarget;

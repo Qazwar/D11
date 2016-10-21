@@ -96,7 +96,11 @@ public:
 	}
 	virtual void render() {
 		graphics::turnOffZBuffer();
+		graphics::selectViewport(0);
+		ds::SpriteBuffer* sprites = graphics::getSpriteBuffer();
+		sprites->begin();		
 		_dialog->render();
+		sprites->end();
 		graphics::turnOnZBuffer();
 	}
 	virtual int onChar(int ascii) {

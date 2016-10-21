@@ -30,10 +30,18 @@ namespace ds {
 }
 
 namespace graphics {
+
+	enum BlendState {
+		BS_NORMAL,
+		BS_ONE,
+		BS_ADDITIVE
+	};
 	
 	bool initialize(HINSTANCE hInstance, HWND hwnd, const ds::Settings& settings);
 
 	HWND getWindowsHandle();
+
+	void createBlendStates();
 
 	void createInternalSpriteBuffer();
 
@@ -118,6 +126,8 @@ namespace graphics {
 	const ds::Viewport& getViewport(int idx);
 
 	void selectViewport(int idx);
+
+	void selectBlendState(RID rid);
 
 }
 

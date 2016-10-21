@@ -165,6 +165,7 @@ namespace ds {
 		// now set up the graphic subsystem
 		if (graphics::initialize(hInstance, m_hWnd, _settings)) {
 			res::initialize(graphics::getDevice());
+			graphics::createBlendStates();
 			graphics::createInternalSpriteBuffer();
 			graphics::createPostProcessResources();
 			res::parseJSONFile();

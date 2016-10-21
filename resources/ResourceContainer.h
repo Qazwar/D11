@@ -66,7 +66,9 @@ namespace ds {
 
 		void shutdown();
 
-		int findBlendState(const char* text);
+		int findBlendStateMapping(const char* text);
+
+		RID findBlendState(const char* name);
 
 		RID createShader(const char* name, const ShaderDescriptor& descriptor);
 
@@ -155,8 +157,6 @@ namespace ds {
 		vm::Script* getScript(const char* name);
 
 		int findInputElement(const char* name);
-
-		int findBlendState(const char* text);
 
 		void debug();
 

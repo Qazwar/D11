@@ -155,7 +155,7 @@ namespace ds {
 		// ------------------------------------------------------
 		// find blendstate by name
 		// ------------------------------------------------------
-		int findBlendState(const char* text) {
+		int findBlendStateMapping(const char* text) {
 			for (int i = 0; i < 17; ++i) {
 				if (strcmp(BLEND_STATE_MAPPINGS[i].name, text) == 0) {
 					return i;
@@ -308,7 +308,6 @@ namespace ds {
 			Material* m = new Material;
 			m->ambient = descriptor.ambient;
 			m->diffuse = descriptor.diffuse;
-			m->blendState = descriptor.blendstate;
 			m->shader = descriptor.shader;
 			m->texture = descriptor.texture;
 			m->renderTarget = descriptor.renderTarget;
@@ -946,13 +945,13 @@ namespace ds {
 		void parseBlendState(JSONReader& reader, int childIndex) {
 			BlendStateDescriptor descriptor;
 			const char* entry = reader.get_string(childIndex, "src_blend");
-			descriptor.srcBlend = findBlendState(entry);
+			descriptor.srcBlend = findBlendStateMapping(entry);
 			entry = reader.get_string(childIndex, "dest_blend");
-			descriptor.destBlend = findBlendState(entry);
+			descriptor.destBlend = findBlendStateMapping(entry);
 			entry = reader.get_string(childIndex, "src_blend_alpha");
-			descriptor.srcAlphaBlend = findBlendState(entry);
+			descriptor.srcAlphaBlend = findBlendStateMapping(entry);
 			entry = reader.get_string(childIndex, "dest_blend_alpha");
-			descriptor.destAlphaBlend = findBlendState(entry);
+			descriptor.destAlphaBlend = findBlendStateMapping(entry);
 			reader.get(childIndex, "alpha_enabled", &descriptor.alphaEnabled);
 			const char* name = reader.get_string(childIndex, "name");
 			createBlendState(name, descriptor);
@@ -1350,7 +1349,9 @@ namespace ds {
 			return find(SID(name),type);			
 		}
 
-		
+		RID findBlendState(const char* name) {
+			return find(name, ResourceType::BLENDSTATE);
+		}
 
 		ID3D11Buffer* getConstantBuffer(const char* name) {
 			RID rid = find(name, ResourceType::CONSTANTBUFFER);
