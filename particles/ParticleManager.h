@@ -62,6 +62,7 @@ public:
 	const ParticleEvent& getEvent(int index) {
 		return _events[index];
 	}
+	int getSystemIds(int* ids, int max);
 private:
 	int findGroup(uint32_t id);
 	ParticleSystem** _systems;

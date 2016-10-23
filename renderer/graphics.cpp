@@ -167,13 +167,20 @@ namespace graphics {
 		bsDesc.destAlphaBlend = ds::res::findBlendStateMapping("INV_SRC_ALPHA");
 		RID bs_id = ds::res::createBlendState("DefaultBlendState", bsDesc);
 
+		ds::BlendStateDescriptor pmsDesc;
+		pmsDesc.alphaEnabled = true;
+		pmsDesc.srcBlend = ds::res::findBlendStateMapping("ONE");
+		pmsDesc.srcAlphaBlend = ds::res::findBlendStateMapping("ONE");
+		pmsDesc.destBlend = ds::res::findBlendStateMapping("SRC_ALPHA");
+		pmsDesc.destAlphaBlend = ds::res::findBlendStateMapping("INV_SRC_ALPHA");
+		RID pm_id = ds::res::createBlendState("PremultipliedBlendState", pmsDesc);
+
 		ds::BlendStateDescriptor asDesc;
 		asDesc.alphaEnabled = true;
-		asDesc.srcBlend = ds::res::findBlendStateMapping("ONE");
-		asDesc.srcAlphaBlend = ds::res::findBlendStateMapping("ONE");
-		//asDesc.destBlend = ds::res::findBlendStateMapping("ONE");
-		asDesc.destBlend = ds::res::findBlendStateMapping("INV_SRC_ALPHA");
-		asDesc.destAlphaBlend = ds::res::findBlendStateMapping("ZERO");
+		asDesc.srcBlend = ds::res::findBlendStateMapping("SRC_ALPHA");
+		asDesc.srcAlphaBlend = ds::res::findBlendStateMapping("SRC_ALPHA");
+		asDesc.destBlend = ds::res::findBlendStateMapping("ONE");
+		asDesc.destAlphaBlend = ds::res::findBlendStateMapping("ONE");
 		RID as_id = ds::res::createBlendState("AdditiveBlendState", asDesc);
 	}
 
@@ -189,15 +196,7 @@ namespace graphics {
 		ilDesc.byteCode = BasicPostProcess_VS_Main;
 		ilDesc.byteCodeSize = sizeof(BasicPostProcess_VS_Main);
 		RID il_id = ds::res::createInputLayout("PTCLayout", ilDesc);
-		/*
-		ds::BlendStateDescriptor bsDesc;
-		bsDesc.alphaEnabled = true;
-		bsDesc.srcBlend = ds::res::findBlendState("SRC_ALPHA");
-		bsDesc.srcAlphaBlend = ds::res::findBlendState("SRC_ALPHA");
-		bsDesc.destBlend = ds::res::findBlendState("INV_SRC_ALPHA");
-		bsDesc.destAlphaBlend = ds::res::findBlendState("INV_SRC_ALPHA");
-		RID bs_id = ds::res::createBlendState("DefaultBlendState", bsDesc);
-		*/
+
 		ds::PTCVertex vertices[6];
 		vertices[0] = ds::PTCVertex(v3(-1, -1, 0), v2(0, 1), ds::Color::WHITE);
 		vertices[1] = ds::PTCVertex(v3(-1, 1, 0), v2(0, 0), ds::Color::WHITE);

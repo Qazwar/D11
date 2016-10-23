@@ -34,6 +34,18 @@ namespace ds {
 		delete _renderer[PRM_2D];
 	}
 
+	int ParticleManager::getSystemIds(int* ids, int max) {
+		int cnt = 0;
+		for (int i = 0; i < MAX_PARTICLE_SYSTEMS; ++i) {
+			if (_systems[i] != 0) {
+				if (cnt < max) {
+					ids[cnt++] = i;
+				}
+			}
+		}
+		return cnt;
+	}
+
 	ParticleSystem* ParticleManager::create(int id, const char* name, ParticleRenderMode renderMode) {
 		char buffer[128];
 		sprintf_s(buffer, 128, "content\\particles\\%s.json", name);
