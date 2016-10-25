@@ -232,8 +232,7 @@ namespace ds {
 	}
 
 	void BaseApp::saveReport() {
-		StopWatch sw;
-		sw.start();
+		
 		char timeFormat[255];
 		time_t now;
 		time(&now);
@@ -251,8 +250,6 @@ namespace ds {
 		else {
 			LOGE << "Cannot write Report";
 		}
-		sw.end();
-		LOG << "report took: " << sw.elapsed() << " perf time: " << perf::get_current_total_time();
 	}
 	// -------------------------------------------------------
 	// send key up
