@@ -214,7 +214,7 @@ namespace ds {
 			perf::finalize();
 
 			if (perf::get_current_total_time() > 10.0f && _updated) {
-				saveReport();
+				_createReport = true;
 			}
 			// check for internal events
 			if (events::num() > 0) {
@@ -232,6 +232,8 @@ namespace ds {
 	}
 
 	void BaseApp::saveReport() {
+		StopWatch sw;
+		sw.start();
 		char timeFormat[255];
 		time_t now;
 		time(&now);
@@ -249,6 +251,8 @@ namespace ds {
 		else {
 			LOGE << "Cannot write Report";
 		}
+		sw.end();
+		LOG << "report took: " << sw.elapsed() << " perf time: " << perf::get_current_total_time();
 	}
 	// -------------------------------------------------------
 	// send key up
@@ -286,6 +290,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// http://gafferongames.com/game-physics/fix-your-timestep/
 	void BaseApp::tick(double elapsed) {
+		ZoneTracker all("tick");
 		{
 			ZoneTracker z("INPUT");
 			if (_running) {
