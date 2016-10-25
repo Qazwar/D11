@@ -68,7 +68,8 @@ namespace ds {
 			return true;
 		}
 	private:
-		void tick();
+		void saveReport();
+		void tick(double elapsed);
 		void renderFrame();
 		Settings _settings;
 		HINSTANCE hInstance;
@@ -78,7 +79,6 @@ namespace ds {
 		bool _loading;
 		bool _running;
 		bool _alive;
-		bool _reload;
 		GameStateMachine* _stateMachine;
 		ShortcutsHandler* _shortcuts;
 		KeyStates _keyStates;

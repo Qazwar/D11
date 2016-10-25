@@ -72,7 +72,6 @@ namespace ds {
 		_buttonState.processed = true;
 		_start = std::chrono::steady_clock::now();
 		_num = 0;
-		_reload = false;
 	}
 
 
@@ -193,18 +192,30 @@ namespace ds {
 
 	void BaseApp::buildFrame() {
 		if (_alive) {
-			if (_reload) {
-				_reload = false;
-				repository::reload();
-			}
 			gDrawCounter->reset();
 			perf::reset();
 			_updated = false;
+			_now = std::chrono::steady_clock::now();
+			auto duration = _now - _start;
+			auto time_span = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+			double elapsed = static_cast<double>(time_span) / 1000.0f / 1000.0f;
+			_ar[_num++] = elapsed;
+			if (_num >= 255) {
+				_num = 0;
+			}
+			_start = _now;
 			//events::reset();
-			tick();
-			audio::mix();
+			tick(elapsed);
+			{
+				ZoneTracker az("Audio:mix");
+				audio::mix();
+			}
 			renderFrame();
 			perf::finalize();
+
+			if (perf::get_current_total_time() > 10.0f && _updated) {
+				saveReport();
+			}
 			// check for internal events
 			if (events::num() > 0) {
 				for (uint32_t i = 0; i < events::num(); ++i) {
@@ -214,73 +225,46 @@ namespace ds {
 				}
 			}
 			if (_updated && _createReport) {
-				char timeFormat[255];
-				time_t now;
-				time(&now);
-				tm *now_tm = localtime(&now);
-				strftime(timeFormat, 255, "%Y%m%d_%H%M%S", now_tm);
-				char filename[255];
-				sprintf_s(filename, "%s\\%s.html", _settings.reportingDirectory, timeFormat);
-				ReportWriter rw(filename);
-				if (rw.isOpen()) {
-					gDrawCounter->save(rw);
-					perf::save(rw);
-					res::save(rw);
-					//gDefaultMemory->save(rw);
-				}
-				else {
-					LOGE << "Cannot write Report";
-				}
+				saveReport();
 				_createReport = false;
 			}
 		}
 	}
 
+	void BaseApp::saveReport() {
+		char timeFormat[255];
+		time_t now;
+		time(&now);
+		tm *now_tm = localtime(&now);
+		strftime(timeFormat, 255, "%Y%m%d_%H%M%S", now_tm);
+		char filename[255];
+		sprintf_s(filename, "%s\\%s.html", _settings.reportingDirectory, timeFormat);
+		ReportWriter rw(filename);
+		if (rw.isOpen()) {
+			gDrawCounter->save(rw);
+			perf::save(rw);
+			res::save(rw);
+			gDefaultMemory->save(rw);
+		}
+		else {
+			LOGE << "Cannot write Report";
+		}
+	}
 	// -------------------------------------------------------
 	// send key up
 	// -------------------------------------------------------
 	void BaseApp::sendKeyUp(WPARAM virtualKey) {
 		_keyStates.keyUp = true;
 		_keyStates.keyReleased = virtualKey;
-		//if (editor::isActive()) {
 		gui::sendSpecialKey(virtualKey);
-		//}
 //#ifdef DEBUG
 		if (virtualKey == VK_F1) {
 			_createReport = true;
 		}		
-		else if (virtualKey == VK_F2) {
-			_reload = true;
-		}
-		/*
-		else if (virtualKey == VK_F3) {
-		m_DebugInfo.showProfiler = !m_DebugInfo.showProfiler;
-		m_DebugInfo.profilerTicks = 0;
-		m_DebugInfo.snapshotCount = profiler::get_snapshot(_snapshots, 64);
-		}
-		*/
 		else if (virtualKey == VK_F4) {
 			_running = !_running;
 			LOG << "toggle running: " << _running;
 		}
-		/*
-		else if (virtualKey == VK_F5) {
-		m_DebugInfo.performanceOverlay = !m_DebugInfo.performanceOverlay;
-		}
-		else if (virtualKey == VK_F6) {
-		bool ret = editor::toggle();
-		m_Running = !ret;
-		}
-		else if (virtualKey == VK_F7 && !m_DebugInfo.debugRenderer) {
-		m_DebugInfo.debugRenderer = true;
-		}
-		else if (virtualKey == VK_F8) {
-		m_DebugInfo.showActionBar = !m_DebugInfo.showActionBar;
-		}
-		else if (virtualKey == VK_F9) {
-		m_DebugInfo.showConsole = !m_DebugInfo.showConsole;
-		}
-		*/
 //#endif
 	}
 
@@ -301,7 +285,7 @@ namespace ds {
 	// tick
 	// -------------------------------------------------------
 	// http://gafferongames.com/game-physics/fix-your-timestep/
-	void BaseApp::tick() {
+	void BaseApp::tick(double elapsed) {
 		{
 			ZoneTracker z("INPUT");
 			if (_running) {
@@ -324,19 +308,12 @@ namespace ds {
 				}
 			}
 		}
-		_now = std::chrono::steady_clock::now();
-		auto duration = _now - _start;
-		auto time_span = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
-		double elapsed = static_cast<double>(time_span) / 1000.0f / 1000.0f;
-		_ar[_num++] = elapsed;
-		if (_num >= 255) {
-			_num = 0;
-		}
-		_start = _now;
+		
 		_accu += elapsed;
 		perf::tickFPS(elapsed);
 		{
 			ZoneTracker u1("UPDATE");
+			int uc = 0;
 			while (_accu >= _dt) {
 				if (_running) {
 					{
@@ -352,7 +329,11 @@ namespace ds {
 				}
 				_accu -= _dt;
 				_updated = true;
+				++uc;
 			}		
+			if (uc > 2) {
+				LOG << "uc: " << uc;
+			}
 		}		
 		if (_updated) {
 			events::reset();
