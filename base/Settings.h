@@ -16,6 +16,7 @@ namespace ds {
 		const char* reportingDirectory;
 		int initialMemorySize;
 		repository::RepositoryMode repositoryMode;
+		bool reloading;
 	
 		Settings() {
 			screenWidth = 1024;
@@ -23,6 +24,7 @@ namespace ds {
 			clearColor = Color(100, 149, 237, 255);
 			fullScreen = false;
 			synched = true;
+			reloading = true;
 			mode = 1;
 			initialMemorySize = 64;
 			repositoryMode = repository::RM_DEBUG;

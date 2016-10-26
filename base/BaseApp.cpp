@@ -178,8 +178,10 @@ namespace ds {
 			_start = std::chrono::steady_clock::now();
 
 			// FIXME: will handle repository reloading - can we do it like this?
-			_thread = std::thread(repoReloading,2);
-			_thread.detach();
+			if (_settings.reloading) {
+				_thread = std::thread(repoReloading, 2);
+				_thread.detach();
+			}
 			_shortcuts->debug();
 			events::reset();
 			return true;
