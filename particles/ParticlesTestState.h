@@ -14,6 +14,11 @@ namespace ds {
 		ParticlesTestSettings() : blendState(0), render(true), screenSize(1024, 768) {}
 	};
 
+	struct ParticleTestEntry {
+		ParticleSystemInfo info;
+		bool active;
+	};
+
 	class ParticlesTestState : public GameState {
 
 	public:
@@ -29,9 +34,7 @@ namespace ds {
 		ParticlesTestSettings _settings;
 		ParticleManager* _particles;
 		int _index;
-		int _num;
-		int _ids[64];
-		int _states[64];
+		Array<ParticleTestEntry> _entries;
 
 	};
 

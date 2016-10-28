@@ -13,6 +13,7 @@ namespace ds {
 	// constructor
 	// --------------------------------------------------------------------------
 	ParticleManager::ParticleManager(const ParticleSystemsDescriptor& descriptor) : JSONAssetFile("content\\particles\\particlesystems.json") {
+		_numSystems = 0;
 		_systems = new ParticleSystem*[MAX_PARTICLE_SYSTEMS];
 		for (int i = 0; i < 128; ++i) {
 			_systems[i] = 0;
@@ -181,6 +182,9 @@ namespace ds {
 					reader.get(cats[i], "send_events", &se);
 				}
 				if (id != -1) {
+					ParticleSystemInfo info;
+					strcpy(info.name, name);
+					info.id = id;
 					ParticleSystem* system = create(id, name, ParticleRenderMode::PRM_2D);
 					if (se) {
 						system->activateEvents();
@@ -190,6 +194,8 @@ namespace ds {
 					repository::add(system);
 					//repository::load(system);
 					_systems[id] = system;
+					_systemInfos.push_back(info);
+					++_numSystems;
 				}
 			}
 		}

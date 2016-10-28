@@ -10,6 +10,11 @@ const int MAX_PARTICLES = 16386;
 
 const int MAX_RENDERER = 2;
 
+struct ParticleSystemInfo {
+	uint32_t id;
+	char name[32];
+};
+
 struct ParticleSystemGroup {
 	uint32_t id;
 	char name[20];
@@ -63,15 +68,23 @@ public:
 		return _events[index];
 	}
 	int getSystemIds(int* ids, int max);
+	const ParticleSystemInfo& getSystemInfo(int idx) const {
+		return _systemInfos[idx];
+	}
+	uint32_t numSystems() const {
+		return _numSystems;
+	}
 private:
 	int findGroup(uint32_t id);
 	ParticleSystem** _systems;
+	int _numSystems;
 	int m_BlendState;
 	//SpriteBuffer* _particles;
 	ParticleSystemFactory _factory;
 	Array<ParticleSystemGroup> _groups;
 	Array<ParticleEvent> _events;
 	ParticleSystemRenderer* _renderer[MAX_RENDERER];
+	Array<ParticleSystemInfo> _systemInfos;
 };
 
 }

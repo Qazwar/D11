@@ -8,7 +8,6 @@ namespace ds {
 
 	ParticlesTestState::ParticlesTestState(const ParticlesTestSettings& settings) : ds::GameState("ParticlesTestState"), _settings(settings) {
 		_index = 0;
-		_num = 0;
 		_particles = ds::res::getParticleManager();
 	}
 
@@ -28,10 +27,20 @@ namespace ds {
 	// -------------------------------------------------------
 	void ParticlesTestState::activate() {
 		_index = 0;
-		_num = _particles->getSystemIds(_ids, 64);
-		for (int i = 0; i < 64; ++i) {
-			_states[i] = 0;
+		for (uint32_t i = 0; i < _particles->numSystems(); ++i) {
+			const ParticleSystemInfo& info = _particles->getSystemInfo(i);
+			ParticleTestEntry entry;
+			entry.info = info;
+			entry.active = false;
+			_entries.push_back(entry);
 		}
+		LOG << "'e' : Exit";
+		LOG << "'+' : Increment index";
+		LOG << "'-' : Decrement index";
+		LOG << "'s' : Toggle state of selected particle system";
+		LOG << "'d' : Debug states";
+		LOG << "'1' : Start one of all selected particle systems";
+		LOG << "'2' : Start five of all selected particle systems";
 	}
 
 	// -------------------------------------------------------
@@ -66,37 +75,44 @@ namespace ds {
 		}
 		if (ascii == '+') {
 			++_index;
-			if (_index > _num) {
+			if (_index >= _entries.size()) {
 				_index = 0;
 			}
-			LOG << "index: " << _index;
+			const ParticleTestEntry& entry = _entries[_index];
+			LOG << "index: " << _index << " " << entry.info.name;
 		}
 		if (ascii == '-') {
 			--_index;
 			if (_index < 0) {
-				_index = _num - 1;
+				_index = _entries.size() - 1;
 			}
-			LOG << "index: " << _index;
+			const ParticleTestEntry& entry = _entries[_index];
+			LOG << "index: " << _index << " " << entry.info.name;
 		}
 		if (ascii == 's') {
-			if (_states[_index] == 1) {
-				_states[_index] = 0;
+			const ParticleTestEntry& entry = _entries[_index];
+			if (_entries[_index].active) {
+				_entries[_index].active = false;				
+				LOG << "Deactivated " << entry.info.id << " " << entry.info.name;
 			}
 			else {
-				_states[_index] = 1;
+				_entries[_index].active = true;
+				LOG << "Activated " << entry.info.id << " " << entry.info.name;
 			}
 		}
 		if (ascii == 'd') {
-			for (int i = 0; i < _num; ++i) {
-				LOG << i << " = " << _states[i];
+			for (int i = 0; i < _entries.size(); ++i) {
+				const ParticleTestEntry& entry = _entries[i];
+				LOG << i << " = " << entry.info.id << " " << entry.info.name << " = " << entry.active;
 			}
 		}
 		if (ascii == '1') {
-			for (int i = 0; i < _num; ++i) {
-				if (_states[i] == 1) {
+			for (int i = 0; i < _entries.size(); ++i) {
+				if (_entries[i].active == 1) {
 					float x = _settings.screenSize.x * 0.5f;
 					float y = _settings.screenSize.y * 0.5f;
-					_particles->start(_ids[i], v2(x, y));
+					LOG << "starting " << _entries[i].info.id << " " << _entries[i].info.name;
+					_particles->start(_entries[i].info.id, v2(x, y));
 				}
 			}
 		}
@@ -104,9 +120,10 @@ namespace ds {
 			for (int i = 0; i < 5; ++i) {
 				float x = math::random(100.0f, _settings.screenSize.x - 200.0f);
 				float y = math::random(100.0f, _settings.screenSize.y - 200.0f);
-				for (int j = 0; j < _num; ++j) {
-					if (_states[j] == 1) {
-						_particles->start(_ids[j], v2(x, y));
+				for (int j = 0; j < _entries.size(); ++j) {
+					if (_entries[j].active == 1) {
+						LOG << "starting " << (i + 1) << "/5 " << _entries[j].info.id << " " << _entries[j].info.name;
+						_particles->start(_entries[j].info.id, v2(x, y));
 					}
 				}
 			}
