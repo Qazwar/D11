@@ -30,6 +30,13 @@ namespace ds {
 			bool processed;
 		};
 
+		struct DebugInfo {
+			bool showPerfHud;
+			bool createReport;
+			bool updated;
+			bool showGameStateDialog;
+		};
+
 	public:
 		BaseApp();
 		virtual ~BaseApp();
@@ -82,14 +89,11 @@ namespace ds {
 		GameStateMachine* _stateMachine;
 		ShortcutsHandler* _shortcuts;
 		KeyStates _keyStates;
-		ButtonState _buttonState;
-		bool _createReport;
-		bool _updated;
+		ButtonState _buttonState;		
 		std::chrono::steady_clock::time_point _start, _now;
-		float _ar[256];
-		int _num;
 		std::thread _thread;
 		SystemInfo _systemInfo;
+		DebugInfo _debugInfo;
 	};
 
 }

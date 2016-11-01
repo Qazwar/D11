@@ -99,6 +99,8 @@ namespace gui {
 
 	void initialize(const ds::IMGUIDescriptor& descriptor, bool editorMode = false);
 
+	bool isInitialized(); 
+
 	void switchEditorMode(bool editorMode);
 
 	void start(int id,v2* startPos,bool forcePosition = false);

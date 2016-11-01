@@ -9,19 +9,19 @@ namespace ds {
 	GameStateMachine::GameStateMachine() {
 		_activeState = 0;
 		_currentIndex = -1;
-		//_dialogPos = v2(1050, 690);
-		//_dialogState = 1;
-		//_offset = 0;
+		_dialogPos = v2(10, graphics::getScreenHeight() - 10.0f);
+		_dialogState = 1;
+		_offset = 0;
 	}
 
 	GameStateMachine::~GameStateMachine() {
-		//_model.clear();
+		_model.clear();
 		_gameStates.destroy_all();
 	}
 
 	void GameStateMachine::add(GameState* gameState) {
 		_gameStates.push_back(gameState);
-		//_model.add(gameState->getName(), gameState);
+		_model.add(gameState->getName(), gameState);
 	}
 
 	void GameStateMachine::initializeStates() {
@@ -72,6 +72,9 @@ namespace ds {
 		ZoneTracker z("GameStateMachine:render");
 		if (_activeState != 0) {
 			_activeState->render();
+			if (gui::isInitialized()) {
+				_activeState->renderGUI();
+			}
 		}		
 	}
 
@@ -155,7 +158,7 @@ namespace ds {
 
 	void GameStateMachine::switchState(int newIndex) {
 		if (_activeState != 0) {
-			//LOG << "deactivating " << _activeState->getName();
+			LOG << "deactivating " << _activeState->getName();
 			_activeState->deactivate();
 		}
 		_activeState = _gameStates[newIndex];
@@ -163,24 +166,25 @@ namespace ds {
 			_activeState->init();
 			_activeState->endInitialisation();
 		}
-		//LOG << "activating " << _activeState->getName();
+		LOG << "activating " << _activeState->getName();
 		_activeState->activate();
 		_currentIndex = newIndex;
 	}
-	/*
+	
 	void GameStateMachine::showDialog() {
 		ZoneTracker z("GameStateMachine::showDialog");
-		gui::start(GAMESTATE_ID,&_dialogPos);
+		gui::start(100,&_dialogPos);
 		if (gui::begin("GameStates", &_dialogState)) {
 			gui::DropDownBox(&_model, &_offset);
 			if (gui::Button("Activate")) {
 				if (_model.hasSelection()) {
-					GameState* state = _model.getSelectedValue();
-					activate(state->getName());
+					switchState(_model.getSelection());
+					//GameState* state = _model.getSelectedValue();
+					//activate(state->getName());
 				}
 			}
 		}
 		gui::end();
 	}
-	*/
+	
 }

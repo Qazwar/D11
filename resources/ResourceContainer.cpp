@@ -1197,10 +1197,10 @@ namespace ds {
 		// ------------------------------------------------------
 		void parseIMGUI(JSONReader& reader, int childIndex) {
 			IMGUIDescriptor descriptor;
-			const char* spriteBufferName = reader.get_string(childIndex, "sprite_buffer");
-			descriptor.spriteBuffer = find(spriteBufferName, ResourceType::SPRITEBUFFER);
 			const char* fontName = reader.get_string(childIndex, "font");
 			descriptor.font = find(fontName, ResourceType::BITMAPFONT);
+			const char* texName = reader.get_string(childIndex, "texture");
+			descriptor.texture = find(texName, ResourceType::TEXTURE);
 			gui::initialize(descriptor);
 		}
 

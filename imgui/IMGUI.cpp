@@ -8,6 +8,7 @@
 #include "..\utils\font.h"
 #include "..\base\InputSystem.h"
 #include <stdarg.h>
+#include "..\renderer\graphics.h"
 
 namespace gui {
 
@@ -299,7 +300,8 @@ namespace gui {
 		bool modal;
 		float settings[32];
 		float backup[32];
-		ds::SpriteBuffer* spriteBuffer;
+		RID material;
+		
 
 		GUIContext() {
 			textureID = -1;
@@ -317,6 +319,7 @@ namespace gui {
 			active = -1;
 			settings[GS_LABELSIZE] = 80.0f;
 			settings[GS_LINE_HEIGHT] = 26.0f;
+			
 		}
 
 		void reset() {
@@ -1736,13 +1739,25 @@ namespace gui {
 	}
 
 	// -------------------------------------------------------
+	// is initialized
+	// -------------------------------------------------------	
+	bool isInitialized() {
+		return guiContext != 0;
+	}
+	// -------------------------------------------------------
 	// intialize gui
 	// -------------------------------------------------------	
 	void initialize(const ds::IMGUIDescriptor& descriptor,bool editorMode) {
 		assert(guiContext == 0);
-		guiContext = new GUIContext;
-		guiContext->spriteBuffer = ds::res::getSpriteBuffer(descriptor.spriteBuffer);
+		guiContext = new GUIContext;		
 		guiContext->font = descriptor.font;
+
+		ds::MaterialDescriptor mtrlDesc;
+		mtrlDesc.shader = ds::res::find("SpriteShader", ds::ResourceType::SHADER);
+		mtrlDesc.blendstate = ds::res::findBlendState("DefaultBlendState");
+		mtrlDesc.texture = descriptor.texture;
+		mtrlDesc.renderTarget = INVALID_RID;
+		guiContext->material = ds::res::createMaterial("IMGUIMaterial",mtrlDesc);
 
 
 		guiContext->clicked = false;
@@ -1838,7 +1853,7 @@ namespace gui {
 				dim.x = hd.x;
 			}
 		}
-		dim.x = dim.x - start.x;
+		//dim.x = dim.x - start.x;
 		dim.y = start.y - dim.y - BOX_HEIGHT;		
 		if (guiContext->editorMode) {
 			dim.x = 500.0f;
@@ -1851,7 +1866,11 @@ namespace gui {
 	void end() {
 		ZoneTracker z("IMGUI::end");
 		assert(guiContext->ready);
-		guiContext->spriteBuffer->begin();
+		ds::SpriteBuffer* spriteBuffer = graphics::getSpriteBuffer();
+		spriteBuffer->end();
+		spriteBuffer->begin();
+		RID current = spriteBuffer->getCurrentMaterial();
+		spriteBuffer->setMaterial(guiContext->material);		
 		//int current = ds::sprites::getCurrentTextureID();
 		//ds::sprites::setTexture(guiContext->textureID);
 		// get dimension of entire panel
@@ -1866,11 +1885,11 @@ namespace gui {
 		v2 startPos = guiContext->startPosition;
 		if (guiContext->useHeader) {			
 			p.x -= 10.0f;
-			guiContext->spriteBuffer->drawTiledX(p, dim.x, guiContext->textures[ICN_HEADER_BOX], 18.0f, mainColor);
+			spriteBuffer->drawTiledX(p, dim.x, guiContext->textures[ICN_HEADER_BOX], 18.0f, mainColor);
 			// draw text
 			p.y -= 8.0f;
 			p.x = startPos.x + 10.0f;
-			guiContext->spriteBuffer->drawText(guiContext->font, p.x, p.y, guiContext->header, 2);
+			spriteBuffer->drawText(guiContext->font, p.x, p.y, guiContext->header, 2);
 			/*
 			// draw icon
 			p.x = startPos.x;// +.0f;
@@ -1894,7 +1913,7 @@ namespace gui {
 			if (guiContext->useHeader) {
 				p.y = startPos.y - BOX_HEIGHT * 0.5f;
 			}
-			guiContext->spriteBuffer->drawTiledXY(p, dim, guiContext->textures[ICN_PANEL_BACKGROUND], 10.0f, mainColor);
+			spriteBuffer->drawTiledXY(p, dim, guiContext->textures[ICN_PANEL_BACKGROUND], 10.0f, mainColor);
 
 
 			if (win.calls.size() > 0) {
@@ -1904,40 +1923,40 @@ namespace gui {
 					clr.a = guiContext->settings[GS_ALPHA];
 					if (call.type == DCT_BOX) {
 						if (call.tilingDef == TD_NONE) {
-							guiContext->spriteBuffer->draw(call.position, buildBoxTexture(call.size.x, call.size.y), 0.0f, v2(1.0f, 1.0f), clr);
+							spriteBuffer->draw(call.position, buildBoxTexture(call.size.x, call.size.y), 0.0f, v2(1.0f, 1.0f), clr);
 						}
 						else {
 							v2 cp = call.position;
 							float sx = dim.x - 20.0f;
 							cp.x += dim.x * 0.5f - 60.0f;
-							guiContext->spriteBuffer->draw(cp, buildBoxTexture(sx, call.size.y), 0.0f, v2(1.0f, 1.0f), clr);
+							spriteBuffer->draw(cp, buildBoxTexture(sx, call.size.y), 0.0f, v2(1.0f, 1.0f), clr);
 						}
 					}
 					else if (call.type == DCT_TEXT) {
 						clr.a = 1.0f;
 						const char* text = win.textBuffer.data + call.textIndex;
-						guiContext->spriteBuffer->drawText(guiContext->font, call.position.x, call.position.y, text, call.padding);
+						spriteBuffer->drawText(guiContext->font, call.position.x, call.position.y, text, call.padding);
 					}
 					else if (call.type == DCT_IMAGE) {
 						if (call.tilingDef == TD_NONE) {
-							guiContext->spriteBuffer->draw(call.position, call.texture, 0.0f, call.size, clr);
+							spriteBuffer->draw(call.position, call.texture, 0.0f, call.size, clr);
 						}
 						else  if (call.tilingDef == TD_TILE_X) {
-							guiContext->spriteBuffer->drawTiledX(call.position, call.size.x, call.texture, call.additional, clr);
+							spriteBuffer->drawTiledX(call.position, call.size.x, call.texture, call.additional, clr);
 						}
 						else  if (call.tilingDef == TD_TILE_BOTH) {
-							guiContext->spriteBuffer->drawTiledXY(call.position, call.size, call.texture, call.additional, clr);
+							spriteBuffer->drawTiledXY(call.position, call.size, call.texture, call.additional, clr);
 						}
 					}
 					else if (call.type == DCT_HEADER) {
 						v2 p = call.position;
 						p.x -= 10.0f;
-						guiContext->spriteBuffer->drawTiledX(p, dim.x, guiContext->textures[ICN_HEADER_BOX], 16.0f, clr);
+						spriteBuffer->drawTiledX(p, dim.x, guiContext->textures[ICN_HEADER_BOX], 16.0f, clr);
 						// draw text
 						p.y -= 8.0f;
 						p.x += 20.0f;
 						const char* text = win.textBuffer.data + call.textIndex;
-						guiContext->spriteBuffer->drawText(guiContext->font, p.x, p.y, text, call.padding);
+						spriteBuffer->drawText(guiContext->font, p.x, p.y, text, call.padding);
 					}
 					else if (call.type == DCT_EXTERNAL_IMAGE) {
 						//int current = ds::sprites::getCurrentTextureID();
@@ -1950,9 +1969,10 @@ namespace gui {
 			}
 		}
 		//ds::sprites::setTexture(current);
-		guiContext->spriteBuffer->end();
+		spriteBuffer->end();
 		guiContext->position.y -= 8.0f;
 		graphics::turnOnZBuffer();
+		spriteBuffer->setMaterial(current);
 	}
 
 	// -------------------------------------------

@@ -27,6 +27,15 @@ namespace ds {
 		void end();
 
 		void drawScreenQuad(RID material);
+		RID getCurrentMaterial() const {
+			return _currentMtrl;
+		}
+		void setMaterial(RID mtrl) {
+			if (mtrl != _currentMtrl) {
+				flush();
+				_currentMtrl = mtrl;
+			}
+		}
 	private:
 		void flush();
 		int _index;

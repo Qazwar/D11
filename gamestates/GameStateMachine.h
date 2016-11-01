@@ -53,10 +53,10 @@ private:
 	GameState* _activeState;
 	GameStates _gameStates;
 	Connections _connections;
-	//gui::ComponentModel<GameState*> _model;
-	//v2 _dialogPos;
-	//int _dialogState;
-	//int _offset;
+	gui::ComponentModel<GameState*> _model;
+	v2 _dialogPos;
+	int _dialogState;
+	int _offset;
 };
 
 }

@@ -145,7 +145,7 @@ namespace ds {
 
 	struct IMGUIDescriptor {
 		RID font;
-		RID spriteBuffer;
+		RID texture;
 	};
 
 	struct ParticleSystemsDescriptor {

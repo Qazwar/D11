@@ -64,14 +64,15 @@ namespace ds {
 		_dt = 1.0f / 60.0f;
 		_accu = 0.0f;
 		_loading = true;
-		_createReport = false;
-		_updated = false;
+		_debugInfo.createReport = false;
+		_debugInfo.updated = false;
+		_debugInfo.showPerfHud = false;
+		_debugInfo.showGameStateDialog = false;
 		_running = true;
 		
 		gDrawCounter = new DrawCounter;
 		_buttonState.processed = true;
 		_start = std::chrono::steady_clock::now();
-		_num = 0;
 	}
 
 
@@ -148,8 +149,7 @@ namespace ds {
 		
 		gStringBuffer = new GlobalStringBuffer();
 		perf::init();
-		repository::initialize(_settings.repositoryMode);
-		_stateMachine = new GameStateMachine;
+		repository::initialize(_settings.repositoryMode);		
 		_shortcuts = new ShortcutsHandler();
 		events::init();
 		math::init_random(GetTickCount());
@@ -160,7 +160,11 @@ namespace ds {
 		LOG << "GPU Model : " << _systemInfo.gpuModel;
 		LOG << "Total RAM : " << _systemInfo.total_memory_MB;
 		LOG << "Free  RAM : " << _systemInfo.free_memory_MB;
-
+		LOG << "---------- Keys ------------------------";
+		LOG << "F1 = Save report";
+		LOG << "F2 = toggle perf HUD";
+		LOG << "F3 = toggle game state dialog";
+		LOG << "F4 = toggle update";
 		// now set up the graphic subsystem
 		if (graphics::initialize(hInstance, m_hWnd, _settings)) {
 			res::initialize(graphics::getDevice());
@@ -169,6 +173,7 @@ namespace ds {
 			graphics::createPostProcessResources();
 			res::parseJSONFile();
 			input::init(m_hWnd, _settings.screenWidth, _settings.screenHeight);			
+			_stateMachine = new GameStateMachine;
 			LOG << "------------------ start load content ------------------";
 			loadContent();
 			init();
@@ -196,15 +201,11 @@ namespace ds {
 		if (_alive) {
 			gDrawCounter->reset();
 			perf::reset();
-			_updated = false;
+			_debugInfo.updated = false;
 			_now = std::chrono::steady_clock::now();
 			auto duration = _now - _start;
 			auto time_span = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
 			double elapsed = static_cast<double>(time_span) / 1000.0f / 1000.0f;
-			_ar[_num++] = elapsed;
-			if (_num >= 255) {
-				_num = 0;
-			}
 			_start = _now;
 			//events::reset();
 			tick(elapsed);
@@ -214,9 +215,9 @@ namespace ds {
 			}
 			renderFrame();
 			perf::finalize();
-
-			if (perf::get_current_total_time() > 10.0f && _updated) {
-				_createReport = true;
+			perf::addTimerValue("Duration", perf::get_current_total_time());
+			if (perf::get_current_total_time() > 10.0f && _debugInfo.updated) {
+				_debugInfo.createReport = true;
 			}
 			// check for internal events
 			if (events::num() > 0) {
@@ -226,9 +227,9 @@ namespace ds {
 					}
 				}
 			}
-			if (_updated && _createReport) {
+			if (_debugInfo.updated && _debugInfo.createReport) {
 				saveReport();
-				_createReport = false;
+				_debugInfo.createReport = false;
 			}
 		}
 	}
@@ -262,8 +263,14 @@ namespace ds {
 		gui::sendSpecialKey(virtualKey);
 //#ifdef DEBUG
 		if (virtualKey == VK_F1) {
-			_createReport = true;
+			_debugInfo.createReport = true;
 		}		
+		else if (virtualKey == VK_F2) {
+			_debugInfo.showPerfHud = !_debugInfo.showPerfHud;
+		}
+		else if (virtualKey == VK_F3) {
+			_debugInfo.showGameStateDialog = !_debugInfo.showGameStateDialog;
+		}
 		else if (virtualKey == VK_F4) {
 			_running = !_running;
 			LOG << "toggle running: " << _running;
@@ -332,14 +339,14 @@ namespace ds {
 					}
 				}
 				_accu -= _dt;
-				_updated = true;
+				_debugInfo.updated = true;
 				++uc;
 			}		
 			if (uc > 2) {
 				LOG << "uc: " << uc;
 			}
 		}		
-		if (_updated) {
+		if (_debugInfo.updated) {
 			events::reset();
 		}
 	}
@@ -347,6 +354,34 @@ namespace ds {
 	// -------------------------------------------------------
 	// render frame
 	// -------------------------------------------------------
+	float niceNum(float range, bool round) {
+		float exponent = floor(std::log10(range));
+		float fraction = range / std::pow(10, exponent);
+		float niceFraction = 0.0f;
+		bool niceRound = true;
+		if (niceRound) {
+			if (fraction < 1.5f)
+				niceFraction = 1.0f;
+			else if (fraction < 3.0f)
+				niceFraction = 2.0f;
+			else if (fraction < 7.0f)
+				niceFraction = 5.0f;
+			else
+				niceFraction = 10.0f;
+		}
+		else {
+			if (fraction <= 1.0f)
+				niceFraction = 1.0f;
+			else if (fraction <= 2.0f)
+				niceFraction = 2.0f;
+			else if (fraction <= 5.0f)
+				niceFraction = 5.0f;
+			else
+				niceFraction = 10.0f;
+		}
+		return niceFraction * std::pow(10, exponent);
+	}
+
 	void BaseApp::renderFrame() {
 		ZoneTracker("Render");
 		graphics::beginRendering();
@@ -357,6 +392,32 @@ namespace ds {
 		{
 			ZoneTracker("Render::stateMachine");
 			_stateMachine->render();
+		}
+		if (_debugInfo.showPerfHud) {			
+			v2 p(10, graphics::getScreenHeight() - 10.0f);
+			gui::start(1, &p);
+			int state = 1;
+			gui::begin("Perf HUD",&state);
+			float values[16];
+			int num = perf::getTimerValues("Duration",values, 16);
+			float min = 100000.0f;
+			float max = 0.0f;
+			for (int i = 0; i < num; ++i) {
+				if (values[i] > max) {
+					max = values[i];
+				}
+				if (values[i] < min) {
+					min = values[i];
+				}
+			}
+			float tickSpacing = 0.1f;
+			float niceMin = std::floor(min);
+			float niceMax = std::ceil(max);
+			gui::Histogram(values, num, niceMin, niceMax, tickSpacing);
+			gui::end();
+		}
+		if (_debugInfo.showGameStateDialog) {
+			_stateMachine->showDialog();
 		}
 		{
 			ZoneTracker("Render::endFrame");

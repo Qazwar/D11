@@ -55,6 +55,7 @@ public:
 	void endInitialisation() {
 		_initialized = true;
 	}
+	virtual void renderGUI() {}
 private:
 	bool _initialized;
 	GameState(const GameState& other) {}
