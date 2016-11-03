@@ -329,13 +329,13 @@ namespace ds {
 				if (_running) {
 					{
 						ZoneTracker u2("UPDATE::main");
-						update(_accu);
+						update(_dt);
 					}
-					_stateMachine->update(_accu);
+					_stateMachine->update(_dt);
 					// updating particles
 					ParticleManager* pm = res::getParticleManager();
 					if (pm != 0) {
-						pm->update(_accu);
+						pm->update(_dt);
 					}
 				}
 				_accu -= _dt;
