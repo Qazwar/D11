@@ -56,6 +56,27 @@ namespace ds {
 		}
 	}
 
+	void SpriteBuffer::drawLine(const v2& start, const v2& end, const ds::Texture& texture, const Color& color, RID material) {
+		if (_started) {
+			if (material != INVALID_RID && material != _currentMtrl) {
+				flush();
+				_currentMtrl = material;
+			}
+			if (_index >= _maxSprites) {
+				flush();
+			}
+			v2 center = (start + end) * 0.5f;
+			Sprite& sprite = _sprites[_index++];
+			sprite.position = center;
+			sprite.texture = texture;
+			sprite.color = color;
+			float l = length(end - start);
+			float sx = l / texture.dim.x;
+			sprite.scale = v2(sx,1.0f);
+			sprite.rotation = math::getAngle(start,end);
+		}
+	}
+
 	void SpriteBuffer::drawText(RID fontID, int x, int y, const char* text, int padding, float scaleX, float scaleY, const Color& color) {
 		ds::Bitmapfont* font = ds::res::getFont(fontID);
 		int len = strlen(text);
