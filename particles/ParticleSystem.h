@@ -64,7 +64,9 @@ public:
 	void getModuleNames(Array<const char*>& names);
 	ParticleModuleData* getData(const char* modifierName);
 	ParticleModuleData* getData(ParticleModuleType type);
-	ParticleModule* getModule(ParticleModuleType type);
+	ParticleSpawner* getSpawner() {
+		return &_spawner;
+	}
 	const int getCountAlive() const {
 		return m_Array.countAlive;
 	}
@@ -75,9 +77,6 @@ public:
 	int getID() const {
 		return _id;
 	}
-	void removeModuleByName(const char* name);
-
-	bool saveData(JSONWriter& writer);
 
 	virtual bool loadData(const JSONReader& loader);
 	virtual bool reloadData(const JSONReader& loader) {

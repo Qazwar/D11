@@ -288,46 +288,6 @@ namespace ds {
 	}
 
 	// -----------------------------------------------------------
-	// save data
-	// -----------------------------------------------------------
-	bool ParticleSystem::saveData(JSONWriter& writer) {
-		/*
-		writer.startCategory("particlesystem");
-		writer.write("max", 1024);
-		writer.write("texture_id", _system_data.textureID);
-		writer.write("texture_rect", _system_data.texture.rect);
-		writer.startCategory("emitter");
-		writer.write("count", _emitter_data.count);
-		writer.write("ejection_period", _emitter_data.ejectionPeriod);
-		writer.write("ejection_variance", _emitter_data.ejectionVariance);
-		writer.write("ejection_counter", _emitter_data.ejectionCounter);
-		writer.endCategory();
-		writer.startCategory("generators");
-		for (int i = 0; i < _count_generators; ++i) {
-			const GeneratorInstance& instance = _generator_instances[i];
-			writer.startCategory(instance.generator->getName());
-			if (instance.data != 0) {
-				instance.data->save(writer);
-			}
-			writer.endCategory();
-		}
-		writer.endCategory();
-		writer.startCategory("modifiers");
-		for (int i = 0; i < _count_modifiers; ++i) {
-			const ModifierInstance& instance = _modifier_instances[i];
-			writer.startCategory(instance.modifier->getName());
-			if (instance.data != 0) {
-				instance.data->save(writer);
-			}
-			writer.endCategory();
-		}
-		writer.endCategory();
-		writer.endCategory();
-		*/
-		return true;
-	}
-
-	// -----------------------------------------------------------
 	// load data
 	// -----------------------------------------------------------
 	bool ParticleSystem::loadData(const JSONReader& reader) {
