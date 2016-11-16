@@ -282,20 +282,17 @@ namespace graphics {
 	}
 
 	ds::SquareBuffer* createSquareBuffer(const char* name, int size, RID texture) {
-		// FIXME: create SpriteBufferCB
-		int d = sizeof(ds::SpriteBufferCB) % 16;
-		assert(d == 0);
-		D3D11_BUFFER_DESC constDesc;
-		ZeroMemory(&constDesc, sizeof(constDesc));
-		constDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		constDesc.ByteWidth = sizeof(ds::SpriteBufferCB);
-		constDesc.Usage = D3D11_USAGE_DYNAMIC;
-		constDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-		HRESULT d3dResult = _context->d3dDevice->CreateBuffer(&constDesc, 0, &_context->squareCB);
-		if (FAILED(d3dResult)) {
-			DXTRACE_MSG("Failed to create constant buffer!");
+		
+		RID cb_id = INVALID_RID;
+		if (ds::res::contains(SID("SquareCB"), ds::ResourceType::CONSTANTBUFFER)) {
+			cb_id = ds::res::find("SquareCB", ds::ResourceType::CONSTANTBUFFER);
 		}
-
+		else {
+			ds::ConstantBufferDescriptor descr;
+			descr.size = sizeof(ds::SpriteBufferCB);
+			cb_id = ds::res::createConstantBuffer("SquareCB", descr);
+		}
+		
 		// FIXME: use SpriteSampler
 		ds::SamplerStateDescriptor ssDesc;
 		ssDesc.addressU = 2;
@@ -357,6 +354,7 @@ namespace graphics {
 		spDesc.indexBuffer = ds::res::find("QuadIndexBuffer", ds::ResourceType::INDEXBUFFER);
 		spDesc.vertexBuffer = vb_id;
 		spDesc.material = mtrl_id;
+		spDesc.constantBuffer = cb_id;
 		return new ds::SquareBuffer(spDesc);
 	}
 

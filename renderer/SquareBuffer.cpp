@@ -15,6 +15,8 @@ namespace ds {
 		// create data
 		_maxSprites = descriptor.size;
 		_vertices = new QuadVertex[4 * descriptor.size];
+		_constantBuffer.setScreenSize(v2(graphics::getScreenWidth(), graphics::getScreenHeight()));
+		_constantBuffer.setTextureSize(1024.0f, 1024.0f);
 	}
 
 	SquareBuffer::~SquareBuffer() {
@@ -57,15 +59,16 @@ namespace ds {
 			ZoneTracker("SquareBuffer::flush");
 			unsigned int stride = sizeof(QuadVertex);
 			unsigned int offset = 0;
+			unsigned int idx = _index / 4 * 6;
 			graphics::turnOffZBuffer();
 			graphics::setIndexBuffer(_descriptor.indexBuffer);
-			graphics::setVertexBuffer(_descriptor.vertexBuffer, &stride, &offset, D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+			graphics::setVertexBuffer(_descriptor.vertexBuffer, &stride, &offset, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			graphics::setMaterial(_currentMtrl);
 			graphics::mapData(_descriptor.vertexBuffer, _vertices, _index * sizeof(QuadVertex));
 			mat4 w = matrix::m4identity();
 			_constantBuffer.wvp = ds::matrix::mat4Transpose(w * graphics::getOrthoCamera()->getViewProjectionMatrix());
-			graphics::updateSpriteConstantBuffer(_constantBuffer);
-			graphics::drawIndexed(_index);
+			graphics::updateConstantBuffer(_descriptor.constantBuffer,&_constantBuffer,sizeof(SpriteBufferCB));
+			graphics::drawIndexed(idx);
 			graphics::turnOnZBuffer();
 			//gDrawCounter->sprites += _index;
 			_index = 0;

@@ -24,7 +24,10 @@ struct PS_Input {
 
 PS_Input VS_Main(VS_Input vertex) {
 	PS_Input vsOut = (PS_Input)0;
-	vsOut.pos = float4(vertex.pos, 1.0);
+	float4 pos = float4(vertex.pos, 1.0);
+	pos -= float4(screenCenter.x, screenCenter.y, 0.0, 1.0);
+	vsOut.pos = mul(float4(pos.x,pos.y,0.0,1.0), wvp);
+	vsOut.pos.z = 1.0;
 	vsOut.tex0 = vertex.tex;
 	vsOut.color = vertex.color;
 	return vsOut;
