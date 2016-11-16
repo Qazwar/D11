@@ -27,6 +27,8 @@ namespace ds {
 	class ResourceContainer;
 
 	class SpriteBuffer;
+
+	class SquareBuffer;
 }
 
 namespace graphics {
@@ -46,6 +48,8 @@ namespace graphics {
 	void createInternalSpriteBuffer();
 
 	void createPostProcessResources();
+
+	ds::SquareBuffer* createSquareBuffer(const char* name, int size, RID texture);
 
 	ID3D11DeviceContext* getContext();
 

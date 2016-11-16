@@ -135,6 +135,17 @@ namespace ds {
 		}
 	};
 
+	class SquareBufferResource : public AbstractResource<SquareBuffer*> {
+
+	public:
+		SquareBufferResource(SquareBuffer* t) : AbstractResource(t) {}
+		virtual ~SquareBufferResource() {
+			if (_data != 0) {
+				delete _data;
+			}
+		}
+	};
+
 	class QuadBufferResource : public AbstractResource<QuadBuffer*> {
 
 	public:

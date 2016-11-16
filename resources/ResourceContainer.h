@@ -13,6 +13,7 @@
 #include "..\renderer\SkyBox.h"
 #include "..\renderer\RenderTarget.h"
 #include "..\renderer\SpriteSheet.h"
+#include "..\renderer\SquareBuffer.h"
 #include <core\world\WorldEntityTemplates.h>
 #include <core\script\vm.h>
 #include "Resource.h"
@@ -57,6 +58,7 @@ namespace ds {
 		SOUND,
 		SCRIPT,
 		ENTITY_TEMPLATES,
+		SQUAREBUFFER,
 		UNKNOWN
 	};
 
@@ -93,6 +95,8 @@ namespace ds {
 		RID find(const char* name, ResourceType type);
 
 		BaseResource* getResource(RID rid, ResourceType type);
+
+		bool contains(StaticHash hash, ResourceType type);
 
 		bool contains(RID rid, ResourceType type);
 
@@ -151,6 +155,8 @@ namespace ds {
 		Mesh* getMesh(RID rid);
 
 		Mesh* getMesh(const char* name);
+
+		SquareBuffer* getSquareBuffer(RID rid);
 
 		SkyBox* getSkyBox(const char* name);
 

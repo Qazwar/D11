@@ -135,6 +135,7 @@ namespace ds {
 			"SOUND",
 			"SCRIPT",
 			"ENTITY_TEMPLATES",
+			"SQUAREBUFFER",
 			"UNKNOWN"
 		};
 
@@ -247,10 +248,9 @@ namespace ds {
 				return -1;
 			}
 			delete[] data;
-			RID rid = create(name, ResourceType::INDEXBUFFER);
 			IndexBufferResource* cbr = new IndexBufferResource(buffer);
 			_resCtx->resources.push_back(cbr);
-			return rid;
+			return create(name, ResourceType::INDEXBUFFER);
 		}
 
 		// ------------------------------------------------------
@@ -330,6 +330,16 @@ namespace ds {
 
 		// ------------------------------------------------------
 		// create sprite buffer
+		// ------------------------------------------------------
+		static RID createSquareBuffer(const char* name, int size, RID texture) {
+			SquareBuffer* buffer = graphics::createSquareBuffer(name, size, texture);
+			SquareBufferResource* cbr = new SquareBufferResource(buffer);
+			_resCtx->resources.push_back(cbr);
+			return create(name, ResourceType::SQUAREBUFFER);
+		}
+
+		// ------------------------------------------------------
+		// create square buffer
 		// ------------------------------------------------------
 		static RID createSpriteBuffer(const char* name, const SpriteBufferDescriptor& descriptor) {
 			SpriteBuffer* buffer = new SpriteBuffer(descriptor);
@@ -1093,6 +1103,18 @@ namespace ds {
 		}
 
 		// ------------------------------------------------------
+		// parse sqaure buffer
+		// ------------------------------------------------------
+		void parseSquareBuffer(JSONReader& reader, int childIndex) {
+			uint32_t size = 0;
+			reader.get(childIndex, "size", &size);
+			const char* textureName = reader.get_string(childIndex, "texture");
+			RID texture = find(textureName, ResourceType::TEXTURE);
+			const char* name = reader.get_string(childIndex, "name");
+			createSquareBuffer(name, size, texture);
+		}
+
+		// ------------------------------------------------------
 		// parse quad buffer
 		// ------------------------------------------------------
 		void parseQuadBuffer(JSONReader& reader, int childIndex) {
@@ -1263,6 +1285,7 @@ namespace ds {
 			_resCtx->parsers[SID("sound")] = parseSound;
 			_resCtx->parsers[SID("script")] = parseScript;
 			_resCtx->parsers[SID("world_entity_templates")] = parseWorldEntityTemplates;
+			_resCtx->parsers[SID("square_buffer")] = parseSquareBuffer;
 		}
 
 		// ------------------------------------------------------
@@ -1325,6 +1348,20 @@ namespace ds {
 			XASSERT(res_idx.type == ResourceType::BLENDSTATE, "Different resource types - expected BLENDSTATE but found %s", ResourceTypeNames[res_idx.type]);
 			BlendStateResource* res = static_cast<BlendStateResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
+		}
+
+		bool contains(StaticHash hash, ResourceType type) {
+			int idx = -1;
+			for (uint32_t i = 0; i < _resCtx->indices.size(); ++i) {
+				if (_resCtx->indices[i].hash == hash) {
+					idx = i;
+				}
+			}
+			if (idx == -1) {
+				return false;
+			}
+			const ResourceIndex& res_idx = _resCtx->indices[idx];
+			return (res_idx.type == type);
 		}
 
 		bool contains(RID rid, ResourceType type) {
@@ -1424,6 +1461,13 @@ namespace ds {
 			const ResourceIndex& res_idx = _resCtx->indices[rid];
 			XASSERT(res_idx.type == ResourceType::SPRITEBUFFER, "Different resource types - expected SPRITEBUFFER but found %s", ResourceTypeNames[res_idx.type]);
 			SpriteBufferResource* res = static_cast<SpriteBufferResource*>(_resCtx->resources[res_idx.id]);
+			return res->get();
+		}
+
+		SquareBuffer* getSquareBuffer(RID rid) {
+			const ResourceIndex& res_idx = _resCtx->indices[rid];
+			XASSERT(res_idx.type == ResourceType::SQUAREBUFFER, "Different resource types - expected SQUREBUFFER but found %s", ResourceTypeNames[res_idx.type]);
+			SquareBufferResource* res = static_cast<SquareBufferResource*>(_resCtx->resources[res_idx.id]);
 			return res->get();
 		}
 

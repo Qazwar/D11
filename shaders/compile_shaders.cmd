@@ -9,11 +9,17 @@ rem Copyright (c) Microsoft Corporation. All rights reserved.
 setlocal
 set error=0
 
-set FX_PATH=C:\devtools\DirectX_SDK\Utilities\bin\x86
+rem set FX_PATH=C:\devtools\DirectX_SDK\Utilities\bin\x86
+set FX_PATH=C:\devtools\DirectX\Utilities\bin\x86
 
+rem SpriteBuffer
 call :CompileShader%1 Sprite Sprite vs VS_Main
 call :CompileShader%1 Sprite Sprite ps PS_Main
 call :CompileShader%1 Sprite Sprite gs GS_Main
+
+rem QuadBuffer
+call :CompileShader%1 Quad Quad vs VS_Main
+call :CompileShader%1 Quad Quad ps PS_Main
 
 rem GrayFade effect
 call :CompileShader%1 postprocess\GrayFade GrayFade vs VS_Main

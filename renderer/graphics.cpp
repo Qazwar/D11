@@ -6,11 +6,14 @@
 #include "core\math\matrix.h"
 #include "..\resources\ResourceContainer.h"
 #include "sprites.h"
+#include "SquareBuffer.h"
 #include "..\base\InputSystem.h"
 #include "..\resources\Resource.h"
 #include "..\shaders\Sprite_VS_Main.inc"
 #include "..\shaders\Sprite_PS_Main.inc"
 #include "..\shaders\Sprite_GS_Main.inc"
+#include "..\shaders\Quad_VS_Main.inc"
+#include "..\shaders\Quad_PS_Main.inc"
 #include "..\shaders\postprocess\BasicPostProcess_VS_Main.inc"
 
 
@@ -53,6 +56,8 @@ namespace graphics {
 
 		ID3D11Buffer* spriteCB;
 		ds::SpriteBuffer* sprites;
+		ID3D11Buffer* squareCB;
+		ds::SquareBuffer* squareBuffer;
 		bool depthEnabled;
 		ds::Array<ds::Viewport> viewports;
 		int selectedViewport;
@@ -274,6 +279,85 @@ namespace graphics {
 		spDesc.vertexBuffer = vb_id;
 		spDesc.material = mtrl_id;
 		_context->sprites = new ds::SpriteBuffer(spDesc);
+	}
+
+	ds::SquareBuffer* createSquareBuffer(const char* name, int size, RID texture) {
+		// FIXME: create SpriteBufferCB
+		int d = sizeof(ds::SpriteBufferCB) % 16;
+		assert(d == 0);
+		D3D11_BUFFER_DESC constDesc;
+		ZeroMemory(&constDesc, sizeof(constDesc));
+		constDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		constDesc.ByteWidth = sizeof(ds::SpriteBufferCB);
+		constDesc.Usage = D3D11_USAGE_DYNAMIC;
+		constDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		HRESULT d3dResult = _context->d3dDevice->CreateBuffer(&constDesc, 0, &_context->squareCB);
+		if (FAILED(d3dResult)) {
+			DXTRACE_MSG("Failed to create constant buffer!");
+		}
+
+		// FIXME: use SpriteSampler
+		ds::SamplerStateDescriptor ssDesc;
+		ssDesc.addressU = 2;
+		ssDesc.addressV = 2;
+		ssDesc.addressW = 2;
+		RID ss_id = ds::res::createSamplerState("SquareSampler", ssDesc);
+		RID il_id = INVALID_ID;
+		if (ds::res::contains(SID("SquareInputLayout"), ds::ResourceType::INPUTLAYOUT)) {
+			il_id = ds::res::find("SquareInputLayout", ds::ResourceType::INPUTLAYOUT);
+		}
+		RID shader_id = INVALID_RID;
+		if (ds::res::contains(SID("SquareShader"), ds::ResourceType::SHADER)) {
+			shader_id = ds::res::find("SquareShader", ds::ResourceType::SHADER);
+		}
+		else {
+			shader_id = ds::res::createEmptyShader("SquareShader");
+			ds::Shader* s = ds::res::getShader(shader_id);
+
+			_context->d3dDevice->CreateVertexShader(Quad_VS_Main, sizeof(Quad_VS_Main), 0, &s->vertexShader);
+			_context->d3dDevice->CreatePixelShader(Quad_PS_Main, sizeof(Quad_PS_Main), 0, &s->pixelShader);
+			s->samplerState = ds::res::getSamplerState(ss_id);
+			
+			if (il_id == INVALID_RID) {
+				ds::InputLayoutDescriptor ilDesc;
+				ilDesc.num = 0;
+				ilDesc.indices[ilDesc.num++] = 0;
+				ilDesc.indices[ilDesc.num++] = 2;
+				ilDesc.indices[ilDesc.num++] = 1;
+				ilDesc.shader = INVALID_RID;
+				ilDesc.byteCode = Quad_VS_Main;
+				ilDesc.byteCodeSize = sizeof(Quad_VS_Main);
+
+				il_id = ds::res::createInputLayout("SquareInputLayout", ilDesc);
+			}
+		}
+
+		RID vb_id = INVALID_ID;
+		if (ds::res::contains(SID("SquareVertexBuffer"), ds::ResourceType::VERTEXBUFFER)) {
+			vb_id = ds::res::find("SquareVertexBuffer", ds::ResourceType::VERTEXBUFFER);
+		}
+		else {
+			ds::VertexBufferDescriptor vbDesc;
+			vbDesc.dynamic = true;
+			vbDesc.layout = il_id;
+			vbDesc.size = size;
+			vb_id = ds::res::createVertexBuffer("SquareVertexBuffer", vbDesc);
+		}
+		char buff[128];
+		sprintf(buff, "%sMaterial", name);
+		ds::MaterialDescriptor mtrlDesc;
+		mtrlDesc.shader = shader_id;
+		mtrlDesc.blendstate = ds::res::findBlendState("DefaultBlendState");
+		mtrlDesc.texture = texture;
+		mtrlDesc.renderTarget = INVALID_RID;
+		RID mtrl_id = ds::res::createMaterial(buff, mtrlDesc);
+
+		ds::SquareBufferDescriptor spDesc;
+		spDesc.size = size;
+		spDesc.indexBuffer = ds::res::find("QuadIndexBuffer", ds::ResourceType::INDEXBUFFER);
+		spDesc.vertexBuffer = vb_id;
+		spDesc.material = mtrl_id;
+		return new ds::SquareBuffer(spDesc);
 	}
 
 	bool initialize(HINSTANCE hInstance, HWND hwnd, const ds::Settings& settings) {

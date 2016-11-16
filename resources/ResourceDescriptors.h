@@ -109,6 +109,14 @@ namespace ds {
 		RID font;
 	};
 
+	struct SquareBufferDescriptor {
+		uint32_t size;
+		RID indexBuffer;
+		RID constantBuffer;
+		RID vertexBuffer;
+		RID material;
+	};
+
 	struct QuadBufferDescriptor {
 		uint32_t size;
 		RID indexBuffer;
