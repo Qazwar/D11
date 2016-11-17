@@ -8,13 +8,14 @@
 #include "..\resources\ResourceContainer.h"
 #include "core\log\Log.h"
 #include "core\profiler\Profiler.h"
+#include "..\stats\DrawCounter.h"
 
 namespace ds {
 	
 	SquareBuffer::SquareBuffer(const SquareBufferDescriptor& descriptor) : _descriptor(descriptor), _index(0), _started(false) {
 		// create data
 		_maxSprites = descriptor.size;
-		_vertices = new QuadVertex[4 * descriptor.size];
+		_vertices = new QuadVertex[descriptor.size];
 		_constantBuffer.setScreenSize(v2(graphics::getScreenWidth(), graphics::getScreenHeight()));
 		_constantBuffer.setTextureSize(1024.0f, 1024.0f);
 	}
@@ -34,12 +35,34 @@ namespace ds {
 		}
 	}
 
-	void SquareBuffer::draw(const v3& position, const v2& uv, const Color& color) {
+	void SquareBuffer::drawLine(const v3& start, const v3& end, float thickness, const Texture& t, const Color& color) {
 		if (_started) {
-			if (_index >= _maxSprites) {
+			if ((_index + 4) >= _maxSprites) {
 				flush();
 			}
-			_vertices[_index++] = QuadVertex(position, uv, color);
+			v3 p[4];
+			v3 d = end - start;
+			v3 dn = normalize(d);
+			v3 rn = v3(-dn.y, dn.x, 0.0f);
+			p[0] = end + rn * thickness * 0.5f;
+			p[1] = end - rn * thickness * 0.5f;
+			p[2] = start - rn * thickness * 0.5f;
+			p[3] = start + rn * thickness * 0.5f;
+			draw(p, t, color);
+		}
+	}
+
+	void SquareBuffer::drawLine(const v3& start, const v3& end, const v3& offset, const Texture& t, const Color& color) {
+		if (_started) {
+			if ((_index + 4) >= _maxSprites) {
+				flush();
+			}
+			v3 p[4];
+			p[0] = end - offset;
+			p[1] = end + offset;
+			p[2] = start + offset;
+			p[3] = start - offset;
+			draw(p, t, color);
 		}
 	}
 	
@@ -70,7 +93,8 @@ namespace ds {
 			graphics::updateConstantBuffer(_descriptor.constantBuffer,&_constantBuffer,sizeof(SpriteBufferCB));
 			graphics::drawIndexed(idx);
 			graphics::turnOnZBuffer();
-			//gDrawCounter->sprites += _index;
+			gDrawCounter->squares += _index;
+			gDrawCounter->flushes += 1;
 			_index = 0;
 		}
 	}

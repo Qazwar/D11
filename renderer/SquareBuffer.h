@@ -15,7 +15,8 @@ namespace ds {
 	public:
 		SquareBuffer(const SquareBufferDescriptor& descriptor);
 		~SquareBuffer();
-		void draw(const v3& position, const v2& uv, const Color& color = Color(255, 255, 255, 255));
+		void drawLine(const v3& start, const v3& end, float thickness, const Texture& t, const Color& color = Color(255, 255, 255, 255));
+		void drawLine(const v3& start, const v3& end, const v3& offset, const Texture& t, const Color& color = Color(255, 255, 255, 255));
 		void draw(v3* positions, const Texture& t, const Color& color = Color(255, 255, 255, 255));
 		void begin();
 		void end();

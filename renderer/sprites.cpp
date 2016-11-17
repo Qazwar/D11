@@ -209,6 +209,7 @@ namespace ds {
 			graphics::draw(_index);
 			graphics::turnOnZBuffer();
 			gDrawCounter->sprites += _index;
+			gDrawCounter->spriteFlushes += 1;
 			_index = 0;
 		}
 	}
@@ -231,6 +232,7 @@ namespace ds {
 		graphics::draw(1);
 		graphics::turnOnZBuffer();
 		gDrawCounter->sprites += _index;
+		gDrawCounter->spriteFlushes += 1;
 	}
 
 }

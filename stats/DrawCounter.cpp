@@ -10,6 +10,7 @@ namespace ds {
 		indices = 0;
 		sprites = 0;
 		spriteFlushes = 0;
+		squares = 0;
 	}
 
 	void DrawCounter::save(const ReportWriter& writer) {
@@ -31,6 +32,10 @@ namespace ds {
 		writer.startRow();
 		writer.addCell("Sprite flushes");
 		writer.addCell(spriteFlushes);
+		writer.endRow();
+		writer.startRow();
+		writer.addCell("Squares");
+		writer.addCell(squares);
 		writer.endRow();
 		writer.endTable();
 		writer.endBox();

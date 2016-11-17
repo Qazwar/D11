@@ -11,6 +11,7 @@ namespace ds {
 		uint32_t indices;
 		uint32_t sprites;
 		uint32_t spriteFlushes;
+		uint32_t squares;
 
 		void reset();
 
