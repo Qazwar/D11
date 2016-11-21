@@ -135,7 +135,7 @@ namespace ds {
 
 	void SpriteArray::debug() {
 		for (int i = 0; i < num; ++i) {
-			LOG << i << " : id: " << ids[i] << " type: " << types[i] << " pos: " << DBG_V2(positions[i]);
+			LOG << i << " : id: " << ids[i] << " type: " << types[i] << " pos: " << positions[i];
 		}
 	}
 
@@ -144,14 +144,14 @@ namespace ds {
 		assertSID(sid);
 		LOG << "id      : " << sid;
 		LOG << "index   : " << in.index;
-		LOG << "position: " << DBG_V2(positions[in.index]);
-		LOG << "scale   : " << DBG_V2(scales[in.index]);
+		LOG << "position: " << positions[in.index];
+		LOG << "scale   : " << scales[in.index];
 		LOG << "rotation: " << RADTODEG(rotations[in.index]);
-		LOG << "color   : " << DBG_CLR(colors[in.index]);
+		LOG << "color   : " << colors[in.index];
 		LOG << "type    : " << types[in.index];
 		LOG << "layer   : " << layers[in.index];
-		LOG << "previous: " << DBG_V2(previous[in.index]);
-		LOG << "extents : " << DBG_V2(extents[in.index]);
+		LOG << "previous: " << previous[in.index];
+		LOG << "extents : " << extents[in.index];
 		LOG << "shape   : " << shapeTypes[in.index];
 	}
 	

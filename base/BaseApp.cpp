@@ -73,6 +73,8 @@ namespace ds {
 		gDrawCounter = new DrawCounter;
 		_buttonState.processed = true;
 		_start = std::chrono::steady_clock::now();
+
+		gDefaultMemory = new DefaultAllocator(_settings.initialMemorySize * 1024 * 1024);
 	}
 
 
@@ -134,7 +136,7 @@ namespace ds {
 
 
 	bool BaseApp::prepare() {
-		gDefaultMemory = new DefaultAllocator(_settings.initialMemorySize * 1024 * 1024);
+		//gDefaultMemory = new DefaultAllocator(_settings.initialMemorySize * 1024 * 1024);
 		// let the actual app define the settings
 		prepare(&_settings);
 		// prepare the initial systems

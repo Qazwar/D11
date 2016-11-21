@@ -50,7 +50,7 @@ namespace ds {
 	void VelocityModule::debug(const ParticleModuleData* data, void* buffer, uint32_t count) {
 		v2* velocities = static_cast<v2*>(buffer);
 		for (uint32_t i = 0; i < count; ++i) {
-			LOG << "velocity: (" << i << ") : " << DBG_V2(velocities[i]);
+			LOG << "velocity: (" << i << ") : " << velocities[i];
 		}
 	}
 }

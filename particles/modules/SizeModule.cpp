@@ -56,7 +56,7 @@ namespace ds {
 	void SizeModule::debug(const ParticleModuleData* data, void* buffer, uint32_t count) {
 		v2* scales = static_cast<v2*>(buffer);
 		for (uint32_t i = 0; i < count; ++i) {
-			LOG << "scale: (" << i << ") : " << DBG_V2(scales[i]);
+			LOG << "scale: (" << i << ") : " << scales[i];
 		}
 	}
 }

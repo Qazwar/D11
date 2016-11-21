@@ -31,8 +31,8 @@ namespace ds {
 		LOGC("viewport") << "delta " << deltaX << " " << deltaY;
 		m_Max = v2(m_WorldSize.x * 0.5f + deltaX, m_WorldSize.y * 0.5f + deltaY);
 		m_Min = v2(m_WorldSize.x * 0.5f - deltaX,m_WorldSize.y * 0.5f - deltaY);
-		LOGC("viewport") << "max: " << DBG_V2(m_Max);
-		LOGC("viewport") << "min: " << DBG_V2(m_Min);
+		LOGC("viewport") << "max: " << m_Max;
+		LOGC("viewport") << "min: " << m_Min;
 		setPosition(worldWidth / 2, worldHeight / 2);
 	}
 

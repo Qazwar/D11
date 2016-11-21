@@ -1822,7 +1822,7 @@ namespace gui {
 		if (win.calls.size() > 0) {
 			for (int i = 0; i < win.calls.size(); ++i) {
 				const DrawCall& call = win.calls[i];
-				LOG << "type: " << call.type << " position: " << DBG_V2(call.position) << " size: " << DBG_V2(call.size);
+				LOG << "type: " << call.type << " position: " << call.position << " size: " << call.size;
 			}
 
 		}

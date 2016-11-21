@@ -39,7 +39,7 @@ namespace ds {
 	void AccelerationModule::debug(const ParticleModuleData* data, void* buffer, uint32_t count) {
 		v2* accelerations = static_cast<v2*>(buffer);
 		for (uint32_t i = 0; i < count; ++i) {
-			LOG << "acceleration: (" << i << ") : " << DBG_V2(accelerations[i * 2]) << " velocity: " << DBG_V2(accelerations[i * 2 + 1]);
+			LOG << "acceleration: (" << i << ") : " << accelerations[i * 2] << " velocity: " << accelerations[i * 2 + 1];
 		}
 	}
 

@@ -371,12 +371,12 @@ namespace ds {
 			LOG << "faces: " << _faces.size();
 			for (uint32_t i = 0; i < _faces.size(); ++i) {
 				const Face& f = _faces[i];
-				LOG << "=> edge: " << f.edge << " normal: " << DBG_V3(f.n) << " color: " << DBG_CLR(f.color) << " group: " << f.group;
+				LOG << "=> edge: " << f.edge << " normal: " << f.n << " color: " << f.color << " group: " << f.group;
 				const Edge& e = _edges[f.edge];
 				int idx = f.edge;
 				for (int j = 0; j < 4; ++j) {
 					Edge& e = _edges[idx];
-					LOG << "edge: " << idx << " v: " << e.vert_index << " next: " << e.next << " prev: " << e.prev << " vertex (" << e.vert_index<< ") : " << DBG_V3(_vertices[e.vert_index]);
+					LOG << "edge: " << idx << " v: " << e.vert_index << " next: " << e.next << " prev: " << e.prev << " vertex (" << e.vert_index<< ") : " << _vertices[e.vert_index];
 					idx = e.next;
 				}
 			}
@@ -385,7 +385,7 @@ namespace ds {
 		void MeshGen::debug_face(uint16_t face_index) {
 			if (face_index < _faces.size()) {
 				const Face& f = _faces[face_index];
-				LOG << "=> Face: " << face_index << " edge: " << f.edge << " normal: " << DBG_V3(f.n) << " color: " << DBG_CLR(f.color) << " group: " << f.group;
+				LOG << "=> Face: " << face_index << " edge: " << f.edge << " normal: " << f.n << " color: " << f.color << " group: " << f.group;
 				const Edge& e = _edges[f.edge];
 				int idx = f.edge;
 				for (int j = 0; j < 4; ++j) {
@@ -401,7 +401,7 @@ namespace ds {
 
 		void MeshGen::debug_edge(uint16_t edgeIndex) {
 			Edge& e = _edges[edgeIndex];
-			LOG << "edge: " << edgeIndex << " v: " << e.vert_index << " next: " << e.next << " prev: " << e.prev << " vertex (" << e.vert_index << ") : " << DBG_V3(_vertices[e.vert_index]);
+			LOG << "edge: " << edgeIndex << " v: " << e.vert_index << " next: " << e.next << " prev: " << e.prev << " vertex (" << e.vert_index << ") : " << _vertices[e.vert_index];
 		}
 
 		// ----------------------------------------------

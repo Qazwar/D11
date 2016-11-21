@@ -82,7 +82,7 @@ namespace ds {
 			boundingBox.position = (min_p + max_p) * 0.5f;
 			boundingBox.extent = (max_p - min_p) * 0.5f;
 		}
-		LOG << "AABBox - center: " << DBG_V3(boundingBox.position) << " extent: " << DBG_V3(boundingBox.extent);
+		LOG << "AABBox - center: " << boundingBox.position << " extent: " << boundingBox.extent;
 	}
 	
 	// ------------------------------------------------------

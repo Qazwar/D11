@@ -122,7 +122,7 @@ namespace ds {
 				}
 				else if (line.find("Kd") != std::string::npos) {
 					readColor(line, &m->diffuse);
-					LOG << "diffuse: " << DBG_CLR(m->diffuse);
+					LOG << "diffuse: " << m->diffuse;
 				}
 				else if (line.find("Ks") != std::string::npos) {
 					readColor(line, &m->specular);
