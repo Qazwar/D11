@@ -83,11 +83,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="audio\AudioBuffer.cpp" />
     <ClCompile Include="audio\AudioManager.cpp" />
-    <ClCompile Include="audio\Sound.cpp" />
     <ClCompile Include="base\BaseApp.cpp" />
-    <ClCompile Include="base\Game.cpp" />
     <ClCompile Include="base\InputSystem.cpp" />
     <ClCompile Include="base\WindowMain.cpp" />
     <ClCompile Include="dialogs\GUIDialog.cpp" />
@@ -96,9 +93,18 @@
     <ClCompile Include="gen\MeshGenCommand.cpp" />
     <ClCompile Include="gen\MeshGenGUI.cpp" />
     <ClCompile Include="imgui\IMGUI.cpp" />
-    <ClCompile Include="io\ReportWriter.cpp" />
+    <ClCompile Include="particles\modules\AccelerationModule.cpp" />
+    <ClCompile Include="particles\modules\AlphaModule.cpp" />
+    <ClCompile Include="particles\modules\ColorModule.cpp" />
+    <ClCompile Include="particles\modules\ParticleTimeModule.cpp" />
+    <ClCompile Include="particles\modules\PointEmitterModule.cpp" />
+    <ClCompile Include="particles\modules\RingEmitterModule.cpp" />
+    <ClCompile Include="particles\modules\RotationModule.cpp" />
+    <ClCompile Include="particles\modules\SizeModule.cpp" />
+    <ClCompile Include="particles\modules\VelocityModule.cpp" />
+    <ClCompile Include="particles\modules\WiggleModule.cpp" />
     <ClCompile Include="particles\ParticleManager.cpp" />
-    <ClCompile Include="particles\ParticleModule.cpp" />
+    <ClCompile Include="particles\ParticlesTestState.cpp" />
     <ClCompile Include="particles\ParticleSystem.cpp" />
     <ClCompile Include="particles\ParticleSystemFactory.cpp" />
     <ClCompile Include="particles\ParticleSystemRenderer.cpp" />
@@ -117,11 +123,27 @@
     <ClCompile Include="renderer\SkyBox.cpp" />
     <ClCompile Include="renderer\sprites.cpp" />
     <ClCompile Include="renderer\SpriteSheet.cpp" />
+    <ClCompile Include="renderer\SquareBuffer.cpp" />
+    <ClCompile Include="renderer\Viewport.cpp" />
+    <ClCompile Include="resources\parser\BlendStateParser.cpp" />
+    <ClCompile Include="resources\parser\ConstantBufferParser.cpp" />
+    <ClCompile Include="resources\parser\DialogParser.cpp" />
+    <ClCompile Include="resources\parser\FontParser.cpp" />
+    <ClCompile Include="resources\parser\IMGUIParser.cpp" />
+    <ClCompile Include="resources\parser\MaterialParser.cpp" />
+    <ClCompile Include="resources\parser\ParticleManagerParser.cpp" />
+    <ClCompile Include="resources\parser\QuadIndexBufferParser.cpp" />
+    <ClCompile Include="resources\parser\RenderTargetParser.cpp" />
+    <ClCompile Include="resources\parser\ResourceParser.cpp" />
+    <ClCompile Include="resources\parser\SamplerStateParser.cpp" />
+    <ClCompile Include="resources\parser\ScriptParser.cpp" />
+    <ClCompile Include="resources\parser\ShaderParser.cpp" />
+    <ClCompile Include="resources\parser\SoundParser.cpp" />
+    <ClCompile Include="resources\parser\SpritesheetParser.cpp" />
+    <ClCompile Include="resources\parser\SquareBufferParser.cpp" />
+    <ClCompile Include="resources\parser\TextureParser.cpp" />
+    <ClCompile Include="resources\parser\WorldEntityTemplatesParser.cpp" />
     <ClCompile Include="resources\ResourceContainer.cpp" />
-    <ClCompile Include="scene\actions\AbstractAction.cpp" />
-    <ClCompile Include="scene\actions\MoveToAction.cpp" />
-    <ClCompile Include="scene\actions\RotateToAction.cpp" />
-    <ClCompile Include="scene\actions\ScalingAction.cpp" />
     <ClCompile Include="scene\EntityArray.cpp" />
     <ClCompile Include="scene\Scene.cpp" />
     <ClCompile Include="sprites\SpriteArray.cpp" />
@@ -130,11 +152,9 @@
     <ClCompile Include="utils\ObjLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="audio\AudioBuffer.h" />
     <ClInclude Include="audio\AudioManager.h" />
-    <ClInclude Include="audio\Sound.h" />
+    <ClInclude Include="audio\tinysound.h" />
     <ClInclude Include="base\BaseApp.h" />
-    <ClInclude Include="base\Game.h" />
     <ClInclude Include="base\InputSystem.h" />
     <ClInclude Include="base\Settings.h" />
     <ClInclude Include="dialogs\GUIDialog.h" />
@@ -144,11 +164,21 @@
     <ClInclude Include="gen\MeshGenCommand.h" />
     <ClInclude Include="gen\MeshGenGUI.h" />
     <ClInclude Include="imgui\IMGUI.h" />
-    <ClInclude Include="io\ReportWriter.h" />
+    <ClInclude Include="particles\modules\AccelerationModule.h" />
+    <ClInclude Include="particles\modules\AlphaModule.h" />
+    <ClInclude Include="particles\modules\ColorModule.h" />
+    <ClInclude Include="particles\modules\ParticleModule.h" />
+    <ClInclude Include="particles\modules\ParticleTimeModule.h" />
+    <ClInclude Include="particles\modules\PointEmitterModule.h" />
+    <ClInclude Include="particles\modules\RingEmitterModule.h" />
+    <ClInclude Include="particles\modules\RotationModule.h" />
+    <ClInclude Include="particles\modules\SizeModule.h" />
+    <ClInclude Include="particles\modules\VelocityModule.h" />
+    <ClInclude Include="particles\modules\WiggleModule.h" />
     <ClInclude Include="particles\Particle.h" />
     <ClInclude Include="particles\ParticleEmitter.h" />
     <ClInclude Include="particles\ParticleManager.h" />
-    <ClInclude Include="particles\ParticleModule.h" />
+    <ClInclude Include="particles\ParticlesTestState.h" />
     <ClInclude Include="particles\ParticleSystem.h" />
     <ClInclude Include="particles\ParticleSystemFactory.h" />
     <ClInclude Include="particles\ParticleSystemRenderer.h" />
@@ -168,15 +198,30 @@
     <ClInclude Include="renderer\SkyBox.h" />
     <ClInclude Include="renderer\sprites.h" />
     <ClInclude Include="renderer\SpriteSheet.h" />
+    <ClInclude Include="renderer\SquareBuffer.h" />
     <ClInclude Include="renderer\VertexTypes.h" />
+    <ClInclude Include="renderer\Viewport.h" />
+    <ClInclude Include="resources\parser\BlendStateParser.h" />
+    <ClInclude Include="resources\parser\ConstantBufferParser.h" />
+    <ClInclude Include="resources\parser\DialogParser.h" />
+    <ClInclude Include="resources\parser\FontParser.h" />
+    <ClInclude Include="resources\parser\IMGUIParser.h" />
+    <ClInclude Include="resources\parser\MaterialParser.h" />
+    <ClInclude Include="resources\parser\ParticleManagerParser.h" />
+    <ClInclude Include="resources\parser\QuadIndexBufferParser.h" />
+    <ClInclude Include="resources\parser\RenderTargetParser.h" />
+    <ClInclude Include="resources\parser\ResourceParser.h" />
+    <ClInclude Include="resources\parser\SamplerStateParser.h" />
+    <ClInclude Include="resources\parser\ScriptParser.h" />
+    <ClInclude Include="resources\parser\ShaderParser.h" />
+    <ClInclude Include="resources\parser\SoundParser.h" />
+    <ClInclude Include="resources\parser\SpritesheetParser.h" />
+    <ClInclude Include="resources\parser\SquareBufferParser.h" />
+    <ClInclude Include="resources\parser\TextureParser.h" />
+    <ClInclude Include="resources\parser\WorldEntityTemplatesParser.h" />
     <ClInclude Include="resources\Resource.h" />
     <ClInclude Include="resources\ResourceContainer.h" />
     <ClInclude Include="resources\ResourceDescriptors.h" />
-    <ClInclude Include="scene\ActionEventBuffer.h" />
-    <ClInclude Include="scene\actions\AbstractAction.h" />
-    <ClInclude Include="scene\actions\MoveToAction.h" />
-    <ClInclude Include="scene\actions\RotateToAction.h" />
-    <ClInclude Include="scene\actions\ScalingAction.h" />
     <ClInclude Include="scene\EntityArray.h" />
     <ClInclude Include="scene\Scene.h" />
     <ClInclude Include="sprites\Sprite.h" />
@@ -196,6 +241,8 @@
     <None Include="shaders\postprocess\PostProcessCommon.inc" />
     <None Include="shaders\postprocess\ScreenShake_PS_Main.inc" />
     <None Include="shaders\postprocess\ScreenShake_VS_Main.inc" />
+    <None Include="shaders\Quad_PS_Main.inc" />
+    <None Include="shaders\Quad_VS_Main.inc" />
     <None Include="shaders\Sprite_GS_Main.inc" />
     <None Include="shaders\Sprite_PS_Main.inc" />
     <None Include="shaders\Sprite_VS_Main.inc" />
@@ -213,6 +260,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="shaders\postprocess\ScreenShake.fx">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="shaders\Quad.fx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="shaders\Sprite.fx">

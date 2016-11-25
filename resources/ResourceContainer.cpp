@@ -1,7 +1,6 @@
 #include "ResourceContainer.h"
 #include <D3D11.h>
 #include <D3Dcompiler.h>
-#include <map>
 #include "core\io\json.h"
 #include "ResourceDescriptors.h"
 #include "..\renderer\graphics.h"
@@ -17,65 +16,38 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "..\renderer\stb_image.h"
 #include "core\io\ReportWriter.h"
+#include "parser\ResourceParser.h"
+#include "parser\ConstantBufferParser.h"
+#include "parser\DialogParser.h"
+#include "parser\MaterialParser.h"
+#include "parser\FontParser.h"
+#include "parser\SoundParser.h"
+#include "parser\RenderTargetParser.h"
+#include "parser\SpritesheetParser.h"
+#include "parser\TextureParser.h"
+#include "parser\SamplerStateParser.h"
+#include "parser\ParticleManagerParser.h"
+#include "parser\QuadIndexBufferParser.h"
+#include "parser\ScriptParser.h"
+#include "parser\SquareBufferParser.h"
+#include "parser\WorldEntityTemplatesParser.h"
+#include "parser\IMGUIParser.h"
+#include "parser\ShaderParser.h"
+#include "parser\BlendStateParser.h"
 
 namespace ds {
 
 	namespace res {	
 
-		typedef void(*ParseFunc)(JSONReader&, int);
+		
+		static std::map<StaticHash, ParseFunc> parsers;
 
-		// ------------------------------------------------------
-		// resource index
-		// ------------------------------------------------------
-		struct ResourceIndex {
-			RID id;
-			ResourceType type;
-			uint32_t nameIndex;
-			StaticHash hash;
-		};
-
-		// ------------------------------------------------------
-		// resource context
-		// ------------------------------------------------------
-		struct ResourceContext {
-
-			CharBuffer nameBuffer;
-			ID3D11Device* device;
-			uint32_t resourceIndex;
-			Array<BaseResource*> resources;
-			Array<ResourceIndex> indices;
-			std::map<StaticHash, ParseFunc> parsers;
-			ParticleManager* particles;
-			
-		};
+		static std::map<StaticHash, ResourceParser*> nparsers;
+		
 
 		static ResourceContext* _resCtx;
 
-		struct BlendStateMapping {
-			const char* name;
-			D3D11_BLEND blend;
-			BlendStateMapping(const char* n, D3D11_BLEND b) : name(n), blend(b) {}
-		};
-
-		static const BlendStateMapping BLEND_STATE_MAPPINGS[] = {
-			{ "ZERO", D3D11_BLEND_ZERO },
-			{ "ONE", D3D11_BLEND_ONE },
-			{ "SRC_COLOR", D3D11_BLEND_SRC_COLOR },
-			{ "INV_SRC_COLOR", D3D11_BLEND_INV_SRC_COLOR },
-			{ "SRC_ALPHA", D3D11_BLEND_SRC_ALPHA },
-			{ "INV_SRC_ALPHA", D3D11_BLEND_INV_SRC_ALPHA },
-			{ "DEST_ALPHA", D3D11_BLEND_DEST_ALPHA },
-			{ "INV_DEST_ALPHA", D3D11_BLEND_INV_DEST_ALPHA },
-			{ "DEST_COLOR", D3D11_BLEND_DEST_COLOR },
-			{ "INV_DEST_COLOR", D3D11_BLEND_INV_DEST_COLOR },
-			{ "SRC_ALPHA_SAT", D3D11_BLEND_SRC_ALPHA_SAT },
-			{ "BLEND_FACTOR", D3D11_BLEND_BLEND_FACTOR },
-			{ "INV_BLEND_FACTOR", D3D11_BLEND_INV_BLEND_FACTOR },
-			{ "SRC1_COLOR", D3D11_BLEND_SRC1_COLOR },
-			{ "INV_SRC1_COLOR", D3D11_BLEND_INV_SRC1_COLOR },
-			{ "SRC1_ALPHA", D3D11_BLEND_SRC1_ALPHA },
-			{ "INV_SRC1_ALPHA", D3D11_BLEND_INV_SRC1_ALPHA },
-		};
+		
 
 		struct InputElementDescriptor {
 
@@ -96,74 +68,7 @@ namespace ds {
 			{ "NORMAL",   DXGI_FORMAT_R32G32B32_FLOAT, 12 }
 		};
 
-		struct TextureAddressModeMapping {
-			const char* name;
-			D3D11_TEXTURE_ADDRESS_MODE mode;
-		};
-
-		static const TextureAddressModeMapping TEXTURE_ADDRESS_MODES[] = {
-			{ "WRAP", D3D11_TEXTURE_ADDRESS_WRAP },
-			{ "MIRROR", D3D11_TEXTURE_ADDRESS_MIRROR },
-			{ "CLAMP", D3D11_TEXTURE_ADDRESS_CLAMP },
-			{ "BORDER", D3D11_TEXTURE_ADDRESS_BORDER },
-			{ "MIRROR_ONCE", D3D11_TEXTURE_ADDRESS_MIRROR_ONCE },
-		};
-
-		static const char* ResourceTypeNames[] = {
-			"SHADER",
-			"TEXTURE",
-			"VERTEXBUFFER",
-			"INDEXBUFFER",
-			"CONSTANTBUFFER",
-			"BLENDSTATE",
-			"INPUTLAYOUT",
-			"BITMAPFONT",
-			"SPRITEBUFFER",
-			"WORLD",
-			"SAMPLERSTATE",
-			"GUIDIALOG",
-			"QUADBUFFER",
-			"MESHBUFFER",
-			"MESH",
-			"SCENE",
-			"CAMERA",
-			"RENDERTARGET",
-			"SKYBOX",
-			"MATERIAL",
-			"PARTICLEMANAGER",
-			"SPRITESHEET",
-			"SOUND",
-			"SCRIPT",
-			"ENTITY_TEMPLATES",
-			"SQUAREBUFFER",
-			"UNKNOWN"
-		};
-
 		
-
-		// ------------------------------------------------------
-		// find sampler state by name
-		// ------------------------------------------------------
-		static int findTextureAddressMode(const char* name) {
-			for (int i = 0; i < 5; ++i) {
-				if (strcmp(TEXTURE_ADDRESS_MODES[i].name, name) == 0) {
-					return i;
-				}
-			}
-			return -1;
-		}
-
-		// ------------------------------------------------------
-		// find blendstate by name
-		// ------------------------------------------------------
-		int findBlendStateMapping(const char* text) {
-			for (int i = 0; i < 17; ++i) {
-				if (strcmp(BLEND_STATE_MAPPINGS[i].name, text) == 0) {
-					return i;
-				}
-			}
-			return -1;
-		}
 
 		// ------------------------------------------------------
 		// find inputelement by name
@@ -207,51 +112,7 @@ namespace ds {
 			return ri.id;
 		}
 
-		// ------------------------------------------------------
-		// cretate quad index buffer
-		// ------------------------------------------------------
-		static RID createQuadIndexBuffer(const char* name,const QuadIndexBufferDescriptor& descriptor) {
-			
-			// FIXME: check that size % 6 == 0 !!!
-			D3D11_BUFFER_DESC bufferDesc;
-			bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-			bufferDesc.CPUAccessFlags = 0;
-			bufferDesc.ByteWidth = sizeof(uint32_t) * descriptor.size;
-			bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-			bufferDesc.MiscFlags = 0;
-
-			uint32_t* data = new uint32_t[descriptor.size];
-			int base = 0;
-			int cnt = 0;
-			int num = descriptor.size / 6;
-			for (int i = 0; i < num; ++i) {
-				data[base] = cnt;
-				data[base + 1] = cnt + 1;
-				data[base + 2] = cnt + 3;
-				data[base + 3] = cnt + 1;
-				data[base + 4] = cnt + 2;
-				data[base + 5] = cnt + 3;
-				base += 6;
-				cnt += 4;
-			}
-			// Define the resource data.
-			D3D11_SUBRESOURCE_DATA InitData;
-			InitData.pSysMem = data;
-			InitData.SysMemPitch = 0;
-			InitData.SysMemSlicePitch = 0;
-			// Create the buffer with the device.
-			ID3D11Buffer* buffer;
-			HRESULT hr = _resCtx->device->CreateBuffer(&bufferDesc, &InitData, &buffer);
-			if (FAILED(hr)) {
-				delete[] data;
-				DXTRACE_MSG("Failed to create quad index buffer!");
-				return -1;
-			}
-			delete[] data;
-			IndexBufferResource* cbr = new IndexBufferResource(buffer);
-			_resCtx->resources.push_back(cbr);
-			return create(name, ResourceType::INDEXBUFFER);
-		}
+		
 
 		// ------------------------------------------------------
 		// create index buffer
@@ -278,64 +139,6 @@ namespace ds {
 			IndexBufferResource* cbr = new IndexBufferResource(buffer);
 			_resCtx->resources.push_back(cbr);
 			return create(name, ResourceType::INDEXBUFFER);
-		}
-
-		// ------------------------------------------------------
-		// create constant buffer
-		// ------------------------------------------------------
-		RID createConstantBuffer(const char* name, const ConstantBufferDescriptor& descriptor) {
-			D3D11_BUFFER_DESC constDesc;
-			ZeroMemory(&constDesc, sizeof(constDesc));
-			constDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-			constDesc.ByteWidth = descriptor.size;
-			constDesc.Usage = D3D11_USAGE_DYNAMIC;
-			constDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-			ID3D11Buffer* buffer = 0;
-			HRESULT d3dResult = _resCtx->device->CreateBuffer(&constDesc, 0, &buffer);
-			if (FAILED(d3dResult))	{
-				DXTRACE_MSG("Failed to create constant buffer!");
-				return -1;
-			}
-			ConstantBufferResource* cbr = new ConstantBufferResource(buffer);
-			_resCtx->resources.push_back(cbr);
-			return create(name, ResourceType::CONSTANTBUFFER);
-		}
-
-		// ------------------------------------------------------
-		// create material
-		// ------------------------------------------------------
-		RID createMaterial(const char* name, const MaterialDescriptor& descriptor) {
-			Material* m = new Material;
-			m->ambient = descriptor.ambient;
-			m->diffuse = descriptor.diffuse;
-			m->shader = descriptor.shader;
-			m->texture = descriptor.texture;
-			m->renderTarget = descriptor.renderTarget;
-			MaterialResource* cbr = new MaterialResource(m);
-			_resCtx->resources.push_back(cbr);
-			return create(name, ResourceType::MATERIAL);
-		}
-
-		// ------------------------------------------------------
-		// create render target
-		// ------------------------------------------------------
-		static RID createRenderTarget(const char* name, const RenderTargetDescriptor& descriptor) {
-			RenderTarget* rt = new RenderTarget(descriptor);
-			bool ret = rt->init(graphics::getDevice(), descriptor.width, descriptor.height);
-			XASSERT(ret, "Could not create rendertarget: %s", name);
-			RenderTargetResource* cbr = new RenderTargetResource(rt);			
-			_resCtx->resources.push_back(cbr);
-			return create(name, ResourceType::RENDERTARGET);
-		}
-
-		// ------------------------------------------------------
-		// create sprite buffer
-		// ------------------------------------------------------
-		static RID createSquareBuffer(const char* name, int size, RID texture) {
-			SquareBuffer* buffer = graphics::createSquareBuffer(name, size, texture);
-			SquareBufferResource* cbr = new SquareBufferResource(buffer);
-			_resCtx->resources.push_back(cbr);
-			return create(name, ResourceType::SQUAREBUFFER);
 		}
 
 		// ------------------------------------------------------
@@ -396,48 +199,7 @@ namespace ds {
 		// ------------------------------------------------------
 		// create sampler state
 		// ------------------------------------------------------
-		RID createSamplerState(const char* name, const SamplerStateDescriptor& descriptor) {
-			D3D11_SAMPLER_DESC colorMapDesc;
-			ZeroMemory(&colorMapDesc, sizeof(colorMapDesc));
-			colorMapDesc.AddressU = TEXTURE_ADDRESS_MODES[descriptor.addressU].mode;
-			colorMapDesc.AddressV = TEXTURE_ADDRESS_MODES[descriptor.addressV].mode;
-			colorMapDesc.AddressW = TEXTURE_ADDRESS_MODES[descriptor.addressW].mode;
-			colorMapDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-			//colorMapDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-			//colorMapDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-			colorMapDesc.Filter = D3D11_FILTER_ANISOTROPIC;
-			colorMapDesc.MaxLOD = D3D11_FLOAT32_MAX;
-			ID3D11SamplerState* sampler;
-			HRESULT d3dResult = _resCtx->device->CreateSamplerState(&colorMapDesc, &sampler);
-			if (FAILED(d3dResult)) {
-				DXTRACE_MSG("Failed to create SamplerState!");
-				return INVALID_RID;
-			}
-			SamplerStateResource* cbr = new SamplerStateResource(sampler);
-			_resCtx->resources.push_back(cbr);
-			return create(name, ResourceType::SAMPLERSTATE);
-		}
-
-		// ------------------------------------------------------
-		// load texture
-		// ------------------------------------------------------
-		static RID loadTexture(const char* name, const TextureDescriptor& descriptor) {
-			ID3D11ShaderResourceView* srv = 0;
-			char buffer[256];
-			sprintf_s(buffer, 256, "content\\textures\\%s", descriptor.name);
-			ds::File f(SID(buffer), FileType::FT_BINARY);
-			if (repository::load(&f) != ds::FileStatus::FS_OK) {
-				LOGE << "Cannot load texture file";
-			}
-			HRESULT d3dResult = D3DX11CreateShaderResourceViewFromMemory(_resCtx->device, f.data, f.size, 0, 0, &srv, 0);
-			if (FAILED(d3dResult)) {
-				DXTRACE_MSG("Failed to load the texture image!");
-				return INVALID_RID;
-			}
-			ShaderResourceViewResource* cbr = new ShaderResourceViewResource(srv);
-			_resCtx->resources.push_back(cbr);
-			return create(name, ResourceType::TEXTURE);
-		}
+		
 
 		// ------------------------------------------------------
 		// load texture cube
@@ -477,105 +239,7 @@ namespace ds {
 			return create(name, ResourceType::TEXTURE);
 		}
 
-
-		static RID loadSpriteSheet(const char* name) {
-			char buffer[256];
-			sprintf_s(buffer, 256, "content\\resources\\%s.json", name);
-			SpriteSheet* sheet = new SpriteSheet(buffer);
-			sheet->load();
-			SpriteSheetResource* cbr = new SpriteSheetResource(sheet);
-			_resCtx->resources.push_back(cbr);
-			return create(name, ResourceType::SPRITESHEET);
-		}
-
-		static RID loadWorldEntityTemplates(const char* name) {
-			char buffer[256];
-			sprintf_s(buffer, 256, "content\\resources\\%s.json", name);
-			WorldEntityTemplates* sheet = new WorldEntityTemplates(buffer);
-			sheet->load();
-			WorldEntityTemplatesResource* cbr = new WorldEntityTemplatesResource(sheet);
-			_resCtx->resources.push_back(cbr);
-			return create(name, ResourceType::ENTITY_TEMPLATES);
-		}
-
-		// ------------------------------------------------------
-		// load bitmap font
-		// ------------------------------------------------------
-		static RID loadFont(const char* name,const BitmapfontDescriptor& descriptor) {
-			char buffer[256];
-			sprintf_s(buffer, 256, "content\\resources\\%s", descriptor.name);
-			float xOffset = 0.0f;
-			float yOffset = 0.0f;
-			float textureSize = 1024.0f;
-			Bitmapfont* font = new Bitmapfont;
-			JSONReader reader;
-			bool ret = reader.parse(SID(buffer));
-			assert(ret);
-			int flipped = 0;
-			int info = reader.find_category("settings");
-			if (info != -1) {
-				reader.get_float(info, "x_offset", &xOffset);
-				reader.get_float(info, "y_offset", &yOffset);
-				reader.get_float(info, "texture_size", &textureSize);
-				reader.get_int(info, "axis_flipped", &flipped);
-			}
-			int num = reader.find_category("characters");
-			char tmp[16];
-			Rect rect;
-			if (num != -1) {
-				for (int i = 32; i < 255; ++i) {
-					sprintf_s(tmp, 16, "C%d", i);
-					if (reader.contains_property(num, tmp)) {
-						reader.get(num, tmp, &rect);
-						if (flipped == 1) {
-							float w = rect.width();
-							float h = rect.height();
-							float tm = rect.top;
-							rect.top = rect.left;
-							rect.left = tm;
-							rect.right = rect.left + w;
-							rect.bottom = rect.top + h;
-						}
-						font->add(i, rect, xOffset, yOffset, textureSize);
-					}
-				}
-			}
-			BitmapfontResource* cbr = new BitmapfontResource(font);
-			_resCtx->resources.push_back(cbr);
-			return create(name, ResourceType::BITMAPFONT);
-		}
-
-		// ------------------------------------------------------
-		// create blend state
-		// ------------------------------------------------------
-		RID createBlendState(const char* name, const BlendStateDescriptor& descriptor) {
-			D3D11_BLEND_DESC blendDesc;
-			ZeroMemory(&blendDesc, sizeof(blendDesc));
-			if (descriptor.alphaEnabled) {
-				blendDesc.RenderTarget[0].BlendEnable = TRUE;
-			}
-			else {
-				blendDesc.RenderTarget[0].BlendEnable = FALSE;
-				//blendDesc.RenderTarget[0].BlendEnable = (srcBlend != D3D11_BLEND_ONE) || (destBlend != D3D11_BLEND_ZERO);
-			}
-			blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-			blendDesc.RenderTarget[0].SrcBlend = BLEND_STATE_MAPPINGS[descriptor.srcBlend].blend;
-			blendDesc.RenderTarget[0].DestBlend = BLEND_STATE_MAPPINGS[descriptor.destBlend].blend;
-			blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-			blendDesc.RenderTarget[0].SrcBlendAlpha = BLEND_STATE_MAPPINGS[descriptor.srcAlphaBlend].blend;
-			blendDesc.RenderTarget[0].DestBlendAlpha = BLEND_STATE_MAPPINGS[descriptor.destAlphaBlend].blend;
-			blendDesc.RenderTarget[0].RenderTargetWriteMask = 0x0F;
-
-			ID3D11BlendState* state;
-			HRESULT d3dResult = _resCtx->device->CreateBlendState(&blendDesc, &state);
-			if (FAILED(d3dResult)) {
-				DXTRACE_MSG("Failed to create blendstate!");
-				return INVALID_RID;
-			}
-			BlendStateResource* cbr = new BlendStateResource(state);
-			_resCtx->resources.push_back(cbr);
-			return create(name, ResourceType::BLENDSTATE);
-		}
+		
 
 		// ------------------------------------------------------
 		// create scene
@@ -588,79 +252,7 @@ namespace ds {
 			return create(name, ResourceType::SCENE);
 		}
 
-		// ------------------------------------------------------
-		// create dialog
-		// ------------------------------------------------------
-		static RID createDialog(const char* name, const GUIDialogDescriptor& descriptor) {
-			char fileName[256];
-			sprintf_s(fileName, 256, "content\\dialogs\\%s.json", descriptor.file);
-			LOG << "loading dialog: " << fileName;
-			GUIDialog* dialog = new GUIDialog(descriptor,fileName);
-			if (dialog->load()) {
-				int idx = _resCtx->resources.size();
-				GUIDialogResource* cbr = new GUIDialogResource(dialog);
-				_resCtx->resources.push_back(cbr);
-				return create(name, ResourceType::GUIDIALOG);
-			}
-			else {
-				delete dialog;
-				return INVALID_RID;
-			}
-		}
-
-		// ------------------------------------------------------
-		// create script
-		// ------------------------------------------------------
-		static RID createScript(const char* name, const ScriptDescriptor& descriptor) {
-			char fileName[256];
-			sprintf_s(fileName, 256, "content\\scripts\\%s.script", descriptor.fileName);
-			LOG << "loading script: " << fileName;
-			vm::Script* ctx = new vm::Script(fileName);
-			if (descriptor.variables != 0) {
-				int positions[16];
-				int nr = string::count_delimiters(descriptor.variables, positions, 16, ',');
-				if (nr > 0) {
-					char name[32];
-					int s = 0;
-					for (int i = 0; i < nr; ++i) {			
-						int l = positions[i] - s;
-						strncpy(name, descriptor.variables + s, l);
-						name[l] = '\0';
-						ctx->registerVar(SID(name));
-						s = positions[i] + 1;
-					}
-					int l = strlen(descriptor.variables) - s;
-					strncpy(name, descriptor.variables + s, l);
-					name[l] = '\0';
-					ctx->registerVar(SID(name));
-				}
-				else {
-					ctx->registerVar(SID(descriptor.variables));
-				}
-			}
-			if (ctx->load()) {
-				int idx = _resCtx->resources.size();
-				ScriptResource* cbr = new ScriptResource(ctx);
-				_resCtx->resources.push_back(cbr);
-				return create(name, ResourceType::SCRIPT);
-			}
-			else {
-				delete ctx;
-				return INVALID_RID;
-			}
-		}
-
-		// ------------------------------------------------------
-		// create particle manager
-		// ------------------------------------------------------
-		static RID createParticleManager(const ParticleSystemsDescriptor& descriptor) {
-			_resCtx->particles = new ParticleManager(descriptor);
-			_resCtx->particles->load();
-			int idx = _resCtx->resources.size();
-			ParticleManagerResource* cbr = new ParticleManagerResource(_resCtx->particles);
-			_resCtx->resources.push_back(cbr);
-			return create("ParticleManager", ResourceType::PARTICLEMANAGER);
-		}
+		
 
 		// ------------------------------------------------------
 		// create vertex buffer
@@ -748,67 +340,7 @@ namespace ds {
 			return create(name, ResourceType::INPUTLAYOUT);
 		}
 
-		static bool createVertexShader(ID3DBlob* buffer, ID3D11VertexShader** shader) {
-			XASSERT(buffer != 0, "The buffer must not be NULL");
-			HRESULT d3dResult = _resCtx->device->CreateVertexShader(buffer->GetBufferPointer(), buffer->GetBufferSize(), 0, shader);
-			if (d3dResult < 0) {
-				if (buffer) {
-					buffer->Release();
-				}
-				return false;
-			}
-			return true;
-		}
-
-		static bool createGeometryShader(ID3DBlob* buffer, ID3D11GeometryShader** shader) {
-			XASSERT(buffer != 0, "The buffer must not be NULL");
-			HRESULT d3dResult = _resCtx->device->CreateGeometryShader(buffer->GetBufferPointer(), buffer->GetBufferSize(), 0, shader);
-			if (d3dResult < 0) {
-				if (buffer) {
-					buffer->Release();
-				}
-				return false;
-			}
-			return true;
-		}
-
-		static bool createPixelShader(ID3DBlob* buffer, ID3D11PixelShader** shader) {
-			XASSERT(buffer != 0, "The buffer must not be NULL");
-			HRESULT d3dResult = _resCtx->device->CreatePixelShader(buffer->GetBufferPointer(), buffer->GetBufferSize(), 0, shader);
-			if (d3dResult < 0) {
-				if (buffer) {
-					buffer->Release();
-				}
-				return false;
-			}
-			return true;
-		}
-
-		static bool compileShader(const char* filePath, const  char* entry, const  char* shaderModel, ID3DBlob** buffer) {
-			DWORD shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
-
-#if defined( DEBUG ) || defined( _DEBUG )
-			shaderFlags |= D3DCOMPILE_DEBUG;
-#endif
-
-			ID3DBlob* errorBuffer = 0;
-			HRESULT result;
-
-			 result = D3DX11CompileFromFile(filePath, 0, 0, entry, shaderModel, shaderFlags, 0, 0, buffer, &errorBuffer, 0);
-
-			if (FAILED(result))	{
-				if (errorBuffer != 0) {
-					LOGE << "Error compiling shader: " << (char*)errorBuffer->GetBufferPointer();
-					errorBuffer->Release();
-				}
-				return false;
-			}
-			if (errorBuffer != 0) {
-				errorBuffer->Release();
-			}
-			return true;
-		}
-
+		
 		RID createEmptyShader(const char* name) {
 			Shader* s = new Shader;
 			s->vertexShaderBuffer = 0;
@@ -817,69 +349,7 @@ namespace ds {
 			return create(name, ResourceType::SHADER);
 		}
 
-		RID createShader(const char* name, const ShaderDescriptor& descriptor) {
-			Shader* s = new Shader;
-			s->vertexShaderBuffer = 0;
-			bool compileResult = compileShader(descriptor.file, descriptor.vertexShader, "vs_4_0", &s->vertexShaderBuffer);
-			if (!compileResult)	{
-				DXTRACE_MSG("Error compiling the vertex shader!");
-				return -1;
-			}
-			if (!createVertexShader(s->vertexShaderBuffer, &s->vertexShader)) {
-				DXTRACE_MSG("Error creating the vertex shader!");
-				return -1;
-			}
-			ID3DBlob* psBuffer = 0;
-			compileResult = compileShader(descriptor.file, descriptor.pixelShader, "ps_4_0", &psBuffer);
-			if (!compileResult)	{
-				DXTRACE_MSG("Error compiling pixel shader!");
-				return -1;
-			}
-
-			if (!createPixelShader(psBuffer, &s->pixelShader)) {
-				DXTRACE_MSG("Error creating pixel shader!");
-				return -1;
-			}
-			psBuffer->Release();
-			if (descriptor.geometryShader != 0) {
-				ID3DBlob* psBuffer = 0;
-				compileResult = compileShader(descriptor.file, descriptor.geometryShader, "gs_4_0", &psBuffer);
-				if (!compileResult)	{
-					DXTRACE_MSG("Error compiling geometry shader!");
-					return -1;
-				}
-
-				if (!createGeometryShader(psBuffer, &s->geometryShader)) {
-					DXTRACE_MSG("Error creating geometry shader!");
-					return -1;
-				}
-				psBuffer->Release();
-			}
-			s->samplerState = getSamplerState(descriptor.samplerState);
-			ShaderResource* cbr = new ShaderResource(s);
-			_resCtx->resources.push_back(cbr);
-			return create(name, ResourceType::SHADER);
-		}
-
-		// ------------------------------------------------------
-		// parse constant buffer
-		// ------------------------------------------------------
-		void parseConstantBuffer(JSONReader& reader, int childIndex) {
-			ConstantBufferDescriptor descriptor;
-			reader.get(childIndex, "size", &descriptor.size);
-			const char* name = reader.get_string(childIndex, "name");
-			createConstantBuffer(name, descriptor);
-		}
-
-		// ------------------------------------------------------
-		// parse quad index buffer
-		// ------------------------------------------------------
-		void parseQuadIndexBuffer(JSONReader& reader, int childIndex) {
-			QuadIndexBufferDescriptor descriptor;
-			reader.get(childIndex, "size", &descriptor.size);
-			const char* name = reader.get_string(childIndex, "name");
-			createQuadIndexBuffer(name, descriptor);
-		}
+		
 
 		// ------------------------------------------------------
 		// parse quad index buffer
@@ -889,35 +359,6 @@ namespace ds {
 			reader.get(childIndex, "size", &descriptor.size);
 			const char* name = reader.get_string(childIndex, "name");
 			createIndexBuffer(name, descriptor);
-		}
-
-		// ------------------------------------------------------
-		// parse material
-		// ------------------------------------------------------
-		void parseMaterial(JSONReader& reader, int childIndex) {
-			MaterialDescriptor descriptor;
-			const char* shaderName = reader.get_string(childIndex, "shader");
-			descriptor.shader = find(shaderName, ResourceType::SHADER);
-			const char* bsName = reader.get_string(childIndex, "blend_state");
-			descriptor.blendstate = find(bsName, ResourceType::BLENDSTATE);
-			const char* name = reader.get_string(childIndex, "name");
-			reader.get(childIndex, "diffuse", descriptor.diffuse);
-			reader.get(childIndex, "ambient", descriptor.ambient);
-			if (reader.contains_property(childIndex, "texture")) {
-				const char* texName = reader.get_string(childIndex, "texture");
-				descriptor.texture = find(texName, ResourceType::TEXTURE);
-			}
-			else {
-				descriptor.texture = INVALID_RID;
-			}
-			if (reader.contains_property(childIndex, "render_target")) {
-				const char* texName = reader.get_string(childIndex, "render_target");
-				descriptor.renderTarget = find(texName, ResourceType::RENDERTARGET);
-			}
-			else {
-				descriptor.renderTarget = INVALID_RID;
-			}
-			createMaterial(name, descriptor);
 		}
 
 		// ------------------------------------------------------
@@ -931,50 +372,6 @@ namespace ds {
 			descriptor.layout = find(layoutName, ResourceType::INPUTLAYOUT);
 			const char* name = reader.get_string(childIndex, "name");
 			createVertexBuffer(name, descriptor);
-		}
-
-		// ------------------------------------------------------
-		// parse shader
-		// ------------------------------------------------------
-		void parseShader(JSONReader& reader, int childIndex) {
-			ShaderDescriptor descriptor;
-			descriptor.file = reader.get_string(childIndex, "file");
-			descriptor.vertexShader = reader.get_string(childIndex, "vertex_shader");
-			descriptor.pixelShader = reader.get_string(childIndex, "pixel_shader");
-			descriptor.geometryShader = reader.get_string(childIndex, "geometry_shader");
-			descriptor.model = reader.get_string(childIndex, "shader_model");
-			const char* samplerStateName = reader.get_string(childIndex, "sampler_state");
-			descriptor.samplerState = find(samplerStateName, ResourceType::SAMPLERSTATE);
-			const char* name = reader.get_string(childIndex, "name");
-			createShader(name, descriptor);
-		}
-
-		// ------------------------------------------------------
-		// parse blend state
-		// ------------------------------------------------------
-		void parseBlendState(JSONReader& reader, int childIndex) {
-			BlendStateDescriptor descriptor;
-			const char* entry = reader.get_string(childIndex, "src_blend");
-			descriptor.srcBlend = findBlendStateMapping(entry);
-			entry = reader.get_string(childIndex, "dest_blend");
-			descriptor.destBlend = findBlendStateMapping(entry);
-			entry = reader.get_string(childIndex, "src_blend_alpha");
-			descriptor.srcAlphaBlend = findBlendStateMapping(entry);
-			entry = reader.get_string(childIndex, "dest_blend_alpha");
-			descriptor.destAlphaBlend = findBlendStateMapping(entry);
-			reader.get(childIndex, "alpha_enabled", &descriptor.alphaEnabled);
-			const char* name = reader.get_string(childIndex, "name");
-			createBlendState(name, descriptor);
-		}
-
-		// ------------------------------------------------------
-		// parse texture
-		// ------------------------------------------------------
-		void parseTexture(JSONReader& reader, int childIndex) {
-			TextureDescriptor descriptor;
-			descriptor.name = reader.get_string(childIndex, "file");
-			const char* name = reader.get_string(childIndex, "name");
-			loadTexture(name, descriptor);
 		}
 
 		// ------------------------------------------------------
@@ -1022,63 +419,6 @@ namespace ds {
 		}
 
 		// ------------------------------------------------------
-		// parse font
-		// ------------------------------------------------------
-		void parseFont(JSONReader& reader, int childIndex) {
-			BitmapfontDescriptor descriptor;
-			descriptor.name = reader.get_string(childIndex, "file");
-			const char* name = reader.get_string(childIndex, "name");
-			loadFont(name, descriptor);
-		}
-
-		// ------------------------------------------------------
-		// parse spritesheet
-		// ------------------------------------------------------
-		void parseSpriteSheet(JSONReader& reader, int childIndex) {
-			const char* name = reader.get_string(childIndex, "name");
-			loadSpriteSheet(name);
-		}
-
-		// ------------------------------------------------------
-		// parse spritesheet
-		// ------------------------------------------------------
-		void parseWorldEntityTemplates(JSONReader& reader, int childIndex) {
-			const char* name = reader.get_string(childIndex, "name");
-			loadWorldEntityTemplates(name);
-		}
-
-		// ------------------------------------------------------
-		// parse particle manager
-		// ------------------------------------------------------
-		void parseParticleManager(JSONReader& reader, int childIndex) {			
-			ParticleSystemsDescriptor descriptor;
-			reader.get(childIndex, "sprite_buffer", &descriptor.spriteBuffer);
-			const char* name = reader.get_string(childIndex, "name");
-			createParticleManager(descriptor);
-		}
-
-		// ------------------------------------------------------
-		// parse sampler state
-		// ------------------------------------------------------
-		void parseSamplerState(JSONReader& reader, int childIndex) {
-			SamplerStateDescriptor descriptor;
-			const char* mode = reader.get_string(childIndex, "addressU");
-			int idx = findTextureAddressMode(mode);
-			XASSERT(idx >= 0,"No matching address mode for addressU mode: '%s'",mode);
-			descriptor.addressU = idx;
-			mode = reader.get_string(childIndex, "addressV");
-			idx = findTextureAddressMode(mode);
-			XASSERT(idx >= 0, "No matching address mode for addressV mode: '%s'", mode);
-			descriptor.addressV = idx;
-			mode = reader.get_string(childIndex, "addressW");
-			idx = findTextureAddressMode(mode);
-			XASSERT(idx >= 0, "No matching address mode for addressW mode: '%s'", mode);
-			descriptor.addressW = idx;
-			const char* name = reader.get_string(childIndex, "name");
-			createSamplerState(name, descriptor);
-		}
-
-		// ------------------------------------------------------
 		// parse sprite buffer
 		// ------------------------------------------------------
 		void parseSpriteBuffer(JSONReader& reader, int childIndex) {
@@ -1100,18 +440,6 @@ namespace ds {
 			}
 			const char* name = reader.get_string(childIndex, "name");
 			createSpriteBuffer(name, descriptor);
-		}
-
-		// ------------------------------------------------------
-		// parse sqaure buffer
-		// ------------------------------------------------------
-		void parseSquareBuffer(JSONReader& reader, int childIndex) {
-			uint32_t size = 0;
-			reader.get(childIndex, "size", &size);
-			const char* textureName = reader.get_string(childIndex, "texture");
-			RID texture = find(textureName, ResourceType::TEXTURE);
-			const char* name = reader.get_string(childIndex, "name");
-			createSquareBuffer(name, size, texture);
 		}
 
 		// ------------------------------------------------------
@@ -1178,18 +506,6 @@ namespace ds {
 		}
 
 		// ------------------------------------------------------
-		// parse rendertarget
-		// ------------------------------------------------------
-		void parseRenderTarget(JSONReader& reader, int childIndex) {
-			RenderTargetDescriptor descriptor;
-			reader.get(childIndex, "width", &descriptor.width);
-			reader.get(childIndex, "height", &descriptor.height);
-			reader.get(childIndex, "clear_color", &descriptor.clearColor);
-			const char* name = reader.get_string(childIndex, "name");
-			createRenderTarget(name, descriptor);
-		}
-
-		// ------------------------------------------------------
 		// parse Mesh
 		// ------------------------------------------------------
 		void parseMesh(JSONReader& reader, int childIndex) {
@@ -1202,54 +518,25 @@ namespace ds {
 			createMesh(name, descriptor);
 		}
 
-		// ------------------------------------------------------
-		// parse Mesh
-		// ------------------------------------------------------
-		static void parseSound(JSONReader& reader, int childIndex) {
-			SoundDescriptor descriptor;
-			descriptor.fileName = reader.get_string(childIndex, "file");
-			descriptor.name = reader.get_string(childIndex, "name");
-			char buffer[256];
-			sprintf_s(buffer, 256, "content\\sounds\\%s", descriptor.fileName);
-			audio::load(SID(descriptor.name),SID(buffer));
+		RID createBlendState(const char* name, const BlendStateDescriptor& descriptor) {
+			BlendStateParser* p = (BlendStateParser*)nparsers[SID("blendstate")];
+			return p->createBlendState(name, descriptor);
 		}
 
-		// ------------------------------------------------------
-		// parse IMGUI
-		// ------------------------------------------------------
-		void parseIMGUI(JSONReader& reader, int childIndex) {
-			IMGUIDescriptor descriptor;
-			const char* fontName = reader.get_string(childIndex, "font");
-			descriptor.font = find(fontName, ResourceType::BITMAPFONT);
-			const char* texName = reader.get_string(childIndex, "texture");
-			descriptor.texture = find(texName, ResourceType::TEXTURE);
-			gui::initialize(descriptor);
+		RID createConstantBuffer(const char* name, const ConstantBufferDescriptor& descriptor) {
+			ConstantBufferParser* p = (ConstantBufferParser*)nparsers[SID("constant_buffer")];
+			return p->createConsantBuffer(name, descriptor);
 		}
 
-		// ------------------------------------------------------
-		// parse dialog
-		// ------------------------------------------------------
-		void parseDialog(JSONReader& reader, int childIndex) {
-			GUIDialogDescriptor descriptor;
-			const char* fontName = reader.get_string(childIndex, "font");
-			descriptor.font = find(fontName, ResourceType::BITMAPFONT);
-			descriptor.file = reader.get_string(childIndex, "file");
-			const char* name = reader.get_string(childIndex, "name");
-			createDialog(name, descriptor);
+		RID createMaterial(const char* name, const MaterialDescriptor& descriptor) {
+			MaterialParser* p = (MaterialParser*)nparsers[SID("material")];
+			return p->createMaterial(name, descriptor);
 		}
 
-		// ------------------------------------------------------
-		// parse script
-		// ------------------------------------------------------
-		void parseScript(JSONReader& reader, int childIndex) {
-			ScriptDescriptor descriptor;
-			descriptor.variables = reader.get_string(childIndex, "variables");
-			descriptor.fileName = reader.get_string(childIndex, "file");
-			const char* name = reader.get_string(childIndex, "name");
-			createScript(name, descriptor);
+		RID createSamplerState(const char* name, const SamplerStateDescriptor& descriptor) {
+			SamplerStateParser* p = (SamplerStateParser*)nparsers[SID("sampler_state")];
+			return p->createSamplerState(name, descriptor);
 		}
-
-
 
 		// ------------------------------------------------------
 		// initialize
@@ -1259,33 +546,36 @@ namespace ds {
 			_resCtx->device = device;
 			_resCtx->resourceIndex = 0;				
 			_resCtx->particles = 0;
-			_resCtx->parsers[SID("constant_buffer")] = parseConstantBuffer;
-			_resCtx->parsers[SID("quad_index_buffer")] = parseQuadIndexBuffer;
-			_resCtx->parsers[SID("index_buffer")] = parseIndexBuffer;
-			_resCtx->parsers[SID("dialog")] = parseDialog;
-			_resCtx->parsers[SID("sprite_buffer")] = parseSpriteBuffer;
-			_resCtx->parsers[SID("shader")] = parseShader;
-			_resCtx->parsers[SID("sampler_state")] = parseSamplerState;
-			_resCtx->parsers[SID("input_layout")] = parseInputLayout;
-			_resCtx->parsers[SID("vertex_buffer")] = parseVertexBuffer;
-			_resCtx->parsers[SID("font")] = parseFont;
-			_resCtx->parsers[SID("texture")] = parseTexture;
-			_resCtx->parsers[SID("blendstate")] = parseBlendState;
-			_resCtx->parsers[SID("imgui")] = parseIMGUI;
-			_resCtx->parsers[SID("mesh")] = parseMesh;
-			_resCtx->parsers[SID("mesh_buffer")] = parseMeshBuffer;
-			_resCtx->parsers[SID("quad_buffer")] = parseQuadBuffer;
-			_resCtx->parsers[SID("scene")] = parseScene;
-			_resCtx->parsers[SID("texture_cube")] = parseTextureCube;
-			_resCtx->parsers[SID("skybox")] = parseSkyBox;
-			_resCtx->parsers[SID("material")] = parseMaterial;
-			_resCtx->parsers[SID("particle_manager")] = parseParticleManager;
-			_resCtx->parsers[SID("render_target")] = parseRenderTarget;
-			_resCtx->parsers[SID("spritesheet")] = parseSpriteSheet;
-			_resCtx->parsers[SID("sound")] = parseSound;
-			_resCtx->parsers[SID("script")] = parseScript;
-			_resCtx->parsers[SID("world_entity_templates")] = parseWorldEntityTemplates;
-			_resCtx->parsers[SID("square_buffer")] = parseSquareBuffer;
+			nparsers[SID("constant_buffer")] = new ConstantBufferParser(_resCtx);
+			nparsers[SID("dialog")] = new DialogParser(_resCtx);
+			nparsers[SID("material")] = new MaterialParser(_resCtx);
+			nparsers[SID("font")] = new FontParser(_resCtx);
+			nparsers[SID("sound")] = new SoundParser(_resCtx);
+			nparsers[SID("spritesheet")] = new SpritesheetParser(_resCtx);
+			nparsers[SID("render_target")] = new RenderTargetParser(_resCtx);
+			nparsers[SID("texture")] = new TextureParser(_resCtx);
+			nparsers[SID("sampler_state")] = new SamplerStateParser(_resCtx);
+			nparsers[SID("particle_manager")] = new ParticleManagerParser(_resCtx);
+			nparsers[SID("quad_index_buffer")] = new QuadIndexBufferParser(_resCtx);
+			nparsers[SID("script")] = new ScriptParser(_resCtx);
+			nparsers[SID("square_buffer")] = new SquareBufferParser(_resCtx);
+			nparsers[SID("world_entity_templates")] = new WorldEntityTemplatesParser(_resCtx);
+			nparsers[SID("imgui")] = new IMGUIParser(_resCtx);
+			nparsers[SID("shader")] = new ShaderParser(_resCtx);
+			nparsers[SID("blendstate")] = new BlendStateParser(_resCtx);
+
+			parsers[SID("index_buffer")] = parseIndexBuffer;
+			parsers[SID("sprite_buffer")] = parseSpriteBuffer;
+			parsers[SID("input_layout")] = parseInputLayout;
+			parsers[SID("vertex_buffer")] = parseVertexBuffer;					
+			parsers[SID("mesh")] = parseMesh;
+			parsers[SID("mesh_buffer")] = parseMeshBuffer;
+			parsers[SID("quad_buffer")] = parseQuadBuffer;
+			parsers[SID("scene")] = parseScene;
+			parsers[SID("texture_cube")] = parseTextureCube;
+			parsers[SID("skybox")] = parseSkyBox;									
+			
+			
 		}
 
 		// ------------------------------------------------------
@@ -1311,10 +601,15 @@ namespace ds {
 					parseJSONFile(fileName);
 				}
 				else {
-					if (_resCtx->parsers.find(hash) != _resCtx->parsers.end()) {
-						ParseFunc f = _resCtx->parsers[hash];
+					if (parsers.find(hash) != parsers.end()) {
+						ParseFunc f = parsers[hash];
 						LOG << "Parsing '" << reader.get_category_name(i) << "'";
 						(*f)(reader, i);
+					}
+					else if (nparsers.find(hash) != nparsers.end()) {
+						ResourceParser* f = nparsers[hash];
+						LOG << "Parsing '" << reader.get_category_name(i) << "'";
+						f->parse(reader, i);
 					}
 					else {
 						LOGE << "No matching parser for '" << reader.get_category_name(i) << "'";

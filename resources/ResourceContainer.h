@@ -1,6 +1,7 @@
 #pragma once
 #include <d3d11.h>
 #include <vector>
+#include <map>
 #include "ResourceDescriptors.h"
 #include "core\Common.h"
 #include "..\renderer\Bitmapfont.h"
@@ -63,6 +64,62 @@ namespace ds {
 	};
 
 	namespace res {
+
+		typedef void(*ParseFunc)(JSONReader&, int);
+
+		// ------------------------------------------------------
+		// resource index
+		// ------------------------------------------------------
+		struct ResourceIndex {
+			RID id;
+			ResourceType type;
+			uint32_t nameIndex;
+			StaticHash hash;
+		};
+
+		// ------------------------------------------------------
+		// resource context
+		// ------------------------------------------------------
+		struct ResourceContext {
+
+			CharBuffer nameBuffer;
+			ID3D11Device* device;
+			uint32_t resourceIndex;
+			Array<BaseResource*> resources;
+			Array<ResourceIndex> indices;			
+			ParticleManager* particles;
+
+		};
+
+		static const char* ResourceTypeNames[] = {
+			"SHADER",
+			"TEXTURE",
+			"VERTEXBUFFER",
+			"INDEXBUFFER",
+			"CONSTANTBUFFER",
+			"BLENDSTATE",
+			"INPUTLAYOUT",
+			"BITMAPFONT",
+			"SPRITEBUFFER",
+			"WORLD",
+			"SAMPLERSTATE",
+			"GUIDIALOG",
+			"QUADBUFFER",
+			"MESHBUFFER",
+			"MESH",
+			"SCENE",
+			"CAMERA",
+			"RENDERTARGET",
+			"SKYBOX",
+			"MATERIAL",
+			"PARTICLEMANAGER",
+			"SPRITESHEET",
+			"SOUND",
+			"SCRIPT",
+			"ENTITY_TEMPLATES",
+			"SQUAREBUFFER",
+			"UNKNOWN"
+		};
 
 		void initialize(ID3D11Device* device);
 

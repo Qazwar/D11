@@ -65,6 +65,9 @@
     <Filter Include="particles\modules">
       <UniqueIdentifier>{b56fe18a-f5a9-4876-9665-97b258f1004a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="resources\parser">
+      <UniqueIdentifier>{24f6efef-d508-47ae-a204-dfbb5bbe8929}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="renderer\sprites.cpp">
@@ -198,6 +201,75 @@
     </ClCompile>
     <ClCompile Include="particles\modules\RingEmitterModule.cpp">
       <Filter>particles\modules</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\modules\WiggleModule.cpp">
+      <Filter>particles\modules</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\Viewport.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\ParticlesTestState.cpp">
+      <Filter>particles</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\modules\PointEmitterModule.cpp">
+      <Filter>particles\modules</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\SquareBuffer.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\parser\ResourceParser.cpp">
+      <Filter>resources\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\parser\ConstantBufferParser.cpp">
+      <Filter>resources\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\parser\DialogParser.cpp">
+      <Filter>resources\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\parser\MaterialParser.cpp">
+      <Filter>resources\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\parser\FontParser.cpp">
+      <Filter>resources\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\parser\RenderTargetParser.cpp">
+      <Filter>resources\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\parser\SoundParser.cpp">
+      <Filter>resources\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\parser\SpritesheetParser.cpp">
+      <Filter>resources\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\parser\TextureParser.cpp">
+      <Filter>resources\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\parser\SamplerStateParser.cpp">
+      <Filter>resources\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\parser\ParticleManagerParser.cpp">
+      <Filter>resources\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\parser\QuadIndexBufferParser.cpp">
+      <Filter>resources\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\parser\ScriptParser.cpp">
+      <Filter>resources\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\parser\SquareBufferParser.cpp">
+      <Filter>resources\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\parser\WorldEntityTemplatesParser.cpp">
+      <Filter>resources\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\parser\IMGUIParser.cpp">
+      <Filter>resources\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\parser\ShaderParser.cpp">
+      <Filter>resources\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\parser\BlendStateParser.cpp">
+      <Filter>resources\parser</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -363,6 +435,75 @@
     <ClInclude Include="particles\modules\RingEmitterModule.h">
       <Filter>particles\modules</Filter>
     </ClInclude>
+    <ClInclude Include="particles\modules\WiggleModule.h">
+      <Filter>particles\modules</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\Viewport.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\ParticlesTestState.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\modules\PointEmitterModule.h">
+      <Filter>particles\modules</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\SquareBuffer.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\parser\ResourceParser.h">
+      <Filter>resources\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\parser\ConstantBufferParser.h">
+      <Filter>resources\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\parser\DialogParser.h">
+      <Filter>resources\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\parser\MaterialParser.h">
+      <Filter>resources\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\parser\FontParser.h">
+      <Filter>resources\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\parser\RenderTargetParser.h">
+      <Filter>resources\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\parser\SoundParser.h">
+      <Filter>resources\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\parser\SpritesheetParser.h">
+      <Filter>resources\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\parser\TextureParser.h">
+      <Filter>resources\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\parser\SamplerStateParser.h">
+      <Filter>resources\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\parser\ParticleManagerParser.h">
+      <Filter>resources\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\parser\QuadIndexBufferParser.h">
+      <Filter>resources\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\parser\ScriptParser.h">
+      <Filter>resources\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\parser\SquareBufferParser.h">
+      <Filter>resources\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\parser\WorldEntityTemplatesParser.h">
+      <Filter>resources\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\parser\IMGUIParser.h">
+      <Filter>resources\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\parser\ShaderParser.h">
+      <Filter>resources\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\parser\BlendStateParser.h">
+      <Filter>resources\parser</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="content\engine_settings.json">
@@ -408,6 +549,12 @@
     <None Include="shaders\postprocess\ScreenShake_VS_Main.inc">
       <Filter>shaders\postprocess</Filter>
     </None>
+    <None Include="shaders\Quad_VS_Main.inc">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\Quad_PS_Main.inc">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\Sprite.fx">
@@ -421,6 +568,9 @@
     </FxCompile>
     <FxCompile Include="shaders\postprocess\ScreenShake.fx">
       <Filter>shaders\postprocess</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\Quad.fx">
+      <Filter>shaders</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>
