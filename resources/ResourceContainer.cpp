@@ -34,53 +34,22 @@
 #include "parser\IMGUIParser.h"
 #include "parser\ShaderParser.h"
 #include "parser\BlendStateParser.h"
+#include "parser\SpriteBufferParser.h"
+#include "parser\VertexBufferParser.h"
+#include "parser\IndexBufferParser.h"
+#include "parser\InputLayoutParser.h"
+#include "parser\MeshParser.h"
+#include "parser\MeshBufferParser.h"
 
 namespace ds {
 
 	namespace res {	
-
 		
 		static std::map<StaticHash, ParseFunc> parsers;
 
 		static std::map<StaticHash, ResourceParser*> nparsers;
-		
 
 		static ResourceContext* _resCtx;
-
-		
-
-		struct InputElementDescriptor {
-
-			const char* semantic;
-			DXGI_FORMAT format;
-			uint32_t size;
-
-			InputElementDescriptor(const char* sem, DXGI_FORMAT f, uint32_t s) :
-				semantic(sem), format(f), size(s) {
-			}
-		};
-
-		static const InputElementDescriptor INPUT_ELEMENT_DESCRIPTIONS[] = {
-
-			{ "POSITION", DXGI_FORMAT_R32G32B32_FLOAT, 12 },
-			{ "COLOR",    DXGI_FORMAT_R32G32B32A32_FLOAT, 16 },
-			{ "TEXCOORD", DXGI_FORMAT_R32G32_FLOAT, 8 },
-			{ "NORMAL",   DXGI_FORMAT_R32G32B32_FLOAT, 12 }
-		};
-
-		
-
-		// ------------------------------------------------------
-		// find inputelement by name
-		// ------------------------------------------------------
-		static int findInputElement(const char* name) {
-			for (int i = 0; i < 4; ++i) {
-				if (strcmp(INPUT_ELEMENT_DESCRIPTIONS[i].semantic, name) == 0) {
-					return i;
-				}
-			}
-			return -1;
-		}
 		
 		// ------------------------------------------------------
 		// shutdown
@@ -96,82 +65,15 @@ namespace ds {
 		}
 
 		// ------------------------------------------------------
-		// cretate internal resource entry
-		// ------------------------------------------------------
-		static RID create(const char* name, ResourceType type) {
-			StaticHash hash = StaticHash(name);
-			ResourceIndex ri;
-			// this one gets called after we have already the resource
-			ri.id = _resCtx->resources.size() - 1;
-			ri.nameIndex = _resCtx->nameBuffer.size;
-			_resCtx->nameBuffer.append(name);
-			ri.type = type;
-			ri.hash = hash;
-			LOG << "adding resource: '" << name << "' at " << ri.id << " type: " << ResourceTypeNames[type];
-			_resCtx->indices.push_back(ri);
-			return ri.id;
-		}
-
-		
-
-		// ------------------------------------------------------
-		// create index buffer
-		// ------------------------------------------------------
-		static RID createIndexBuffer(const char* name, const IndexBufferDescriptor& descriptor) {
-			D3D11_BUFFER_DESC bufferDesc;
-			if (descriptor.dynamic) {
-				bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-				bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-			}
-			else {
-				bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-				bufferDesc.CPUAccessFlags = 0;
-			}
-			bufferDesc.ByteWidth = sizeof(uint32_t) * descriptor.size;
-			bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-			bufferDesc.MiscFlags = 0;
-			ID3D11Buffer* buffer;
-			HRESULT hr = _resCtx->device->CreateBuffer(&bufferDesc, 0, &buffer);
-			if (FAILED(hr)) {
-				DXTRACE_MSG("Failed to create index buffer!");
-				return -1;
-			}
-			IndexBufferResource* cbr = new IndexBufferResource(buffer);
-			_resCtx->resources.push_back(cbr);
-			return create(name, ResourceType::INDEXBUFFER);
-		}
-
-		// ------------------------------------------------------
-		// create square buffer
-		// ------------------------------------------------------
-		static RID createSpriteBuffer(const char* name, const SpriteBufferDescriptor& descriptor) {
-			SpriteBuffer* buffer = new SpriteBuffer(descriptor);
-			SpriteBufferResource* cbr = new SpriteBufferResource(buffer);
-			_resCtx->resources.push_back(cbr);
-			return create(name, ResourceType::SPRITEBUFFER);
-		}
-
-		// ------------------------------------------------------
 		// create quad buffer
 		// ------------------------------------------------------
+		/*
 		static RID createQuadBuffer(const char* name, const QuadBufferDescriptor& descriptor) {
 			QuadBuffer* buffer = new QuadBuffer(descriptor);
 			QuadBufferResource* cbr = new QuadBufferResource(buffer);
 			_resCtx->resources.push_back(cbr);
 			return create(name, ResourceType::QUADBUFFER);
 		}
-
-		// ------------------------------------------------------
-		// create mesh buffer
-		// ------------------------------------------------------
-		static RID createMeshBuffer(const char* name, const MeshBufferDescriptor& descriptor) {
-			MeshBuffer* buffer = new MeshBuffer(descriptor);
-			MeshBufferResource* cbr = new MeshBufferResource(buffer);
-			_resCtx->resources.push_back(cbr);
-			return create(name, ResourceType::MESHBUFFER);
-		}
-
-		
 
 		// ------------------------------------------------------
 		// create skybox
@@ -182,24 +84,6 @@ namespace ds {
 			_resCtx->resources.push_back(cbr);
 			return create(name, ResourceType::SKYBOX);
 		}
-
-		// ------------------------------------------------------
-		// create mesh 
-		// ------------------------------------------------------
-		static RID createMesh(const char* name, const MeshDescriptor& descriptor) {
-			Mesh* mesh = new Mesh;
-			mesh->load(descriptor.fileName);
-			MeshResource* cbr = new MeshResource(mesh);
-			_resCtx->resources.push_back(cbr);
-			return create(name, ResourceType::MESH);
-		}
-
-		
-
-		// ------------------------------------------------------
-		// create sampler state
-		// ------------------------------------------------------
-		
 
 		// ------------------------------------------------------
 		// load texture cube
@@ -251,96 +135,23 @@ namespace ds {
 			_resCtx->resources.push_back(cbr);
 			return create(name, ResourceType::SCENE);
 		}
+		*/
 
-		
-
-		// ------------------------------------------------------
-		// create vertex buffer
-		// ------------------------------------------------------
-		RID createVertexBuffer(const char* name, const VertexBufferDescriptor& descriptor) {
-			InputLayoutResource* res = static_cast<InputLayoutResource*>(_resCtx->resources[descriptor.layout]);
-			UINT size = descriptor.size * res->size();
-
-			D3D11_BUFFER_DESC bufferDesciption;
-			ZeroMemory(&bufferDesciption, sizeof(bufferDesciption));
-			if (descriptor.dynamic) {
-				bufferDesciption.Usage = D3D11_USAGE_DYNAMIC;
-				bufferDesciption.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-			}
-			else {
-				bufferDesciption.Usage = D3D11_USAGE_DEFAULT;
-				bufferDesciption.CPUAccessFlags = 0;
-			}
-			bufferDesciption.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-			bufferDesciption.ByteWidth = size;
-
-			ID3D11Buffer* buffer = 0;
-			if (descriptor.dataSize == 0) {
-				HRESULT d3dResult = _resCtx->device->CreateBuffer(&bufferDesciption, 0, &buffer);
-				if (FAILED(d3dResult))	{
-					DXTRACE_MSG("Failed to create buffer!");
-					return -1;
-				}
-			}
-			else {
-				D3D11_SUBRESOURCE_DATA resource;
-				resource.pSysMem = descriptor.data;
-				resource.SysMemPitch = 0;
-				resource.SysMemSlicePitch = 0;
-				HRESULT d3dResult = _resCtx->device->CreateBuffer(&bufferDesciption, &resource, &buffer);
-				if (FAILED(d3dResult))	{
-					DXTRACE_MSG("Failed to create buffer!");
-					return -1;
-				}
-			}
-			int idx = _resCtx->resources.size();
-			VertexBufferResource* cbr = new VertexBufferResource(buffer, size, descriptor.layout);
-			_resCtx->resources.push_back(cbr);
-			return create(name, ResourceType::VERTEXBUFFER);
+		static RID create(const char* name, ResourceType type) {
+			StaticHash hash = StaticHash(name);
+			ResourceIndex ri;
+			             // this one gets called after we have already the resource
+			ri.id = _resCtx->resources.size() - 1;
+			ri.nameIndex = _resCtx->nameBuffer.size;
+			_resCtx->nameBuffer.append(name);
+			ri.type = type;
+			ri.hash = hash;
+			LOG << "adding resource: '" << name << "' at " << ri.id << " type: " << ResourceTypeNames[type];
+			_resCtx->indices.push_back(ri);
+			return ri.id;
 		}
 
-		// ------------------------------------------------------
-		// create vertex buffer
-		// ------------------------------------------------------
-		RID createInputLayout(const char* name, const InputLayoutDescriptor& descriptor) {
-			D3D11_INPUT_ELEMENT_DESC* descriptors = new D3D11_INPUT_ELEMENT_DESC[descriptor.num];
-			uint32_t index = 0;
-			uint32_t counter = 0;			
-			int si[8] = { 0 };
-			for (int i = 0; i < descriptor.num; ++i) {
-				const InputElementDescriptor& d = INPUT_ELEMENT_DESCRIPTIONS[descriptor.indices[i]];
-				D3D11_INPUT_ELEMENT_DESC& desc = descriptors[i];
-				desc.SemanticName = d.semantic;
-				desc.SemanticIndex = si[descriptor.indices[i]];// d.semanticIndex;
-				desc.Format = d.format;
-				desc.InputSlot = 0;
-				desc.AlignedByteOffset = index;
-				desc.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-				desc.InstanceDataStepRate = 0;
-				index += d.size;
-				si[descriptor.indices[i]] += 1;
-			}			
-			ID3D11InputLayout* layout = 0;
-			if (descriptor.shader == INVALID_RID) {
-				_resCtx->device->CreateInputLayout(descriptors, descriptor.num, descriptor.byteCode, descriptor.byteCodeSize, &layout);
-			}
-			else {
-				ShaderResource* sr = static_cast<ShaderResource*>(_resCtx->resources[descriptor.shader]);
-				Shader* s = sr->get();
-				assert(s != 0);
-				HRESULT d3dResult = _resCtx->device->CreateInputLayout(descriptors, descriptor.num, s->vertexShaderBuffer->GetBufferPointer(), s->vertexShaderBuffer->GetBufferSize(), &layout);
-				if (d3dResult < 0) {
-					LOGE << "Cannot create input layout '" << name << "'";
-					return INVALID_RID;
-				}
-			}
-			delete[] descriptors;
-			InputLayoutResource* ilr = new InputLayoutResource(layout,index);
-			_resCtx->resources.push_back(ilr);
-			return create(name, ResourceType::INPUTLAYOUT);
-		}
 
-		
 		RID createEmptyShader(const char* name) {
 			Shader* s = new Shader;
 			s->vertexShaderBuffer = 0;
@@ -349,44 +160,21 @@ namespace ds {
 			return create(name, ResourceType::SHADER);
 		}
 
-		
-
-		// ------------------------------------------------------
-		// parse quad index buffer
-		// ------------------------------------------------------
-		void parseIndexBuffer(JSONReader& reader, int childIndex) {
-			IndexBufferDescriptor descriptor;
-			reader.get(childIndex, "size", &descriptor.size);
-			const char* name = reader.get_string(childIndex, "name");
-			createIndexBuffer(name, descriptor);
-		}
-
-		// ------------------------------------------------------
-		// parse vertex buffer
-		// ------------------------------------------------------
-		void parseVertexBuffer(JSONReader& reader, int childIndex) {
-			VertexBufferDescriptor descriptor;
-			reader.get(childIndex, "size", &descriptor.size);
-			reader.get(childIndex, "dynamic", &descriptor.dynamic);
-			const char* layoutName = reader.get_string(childIndex, "layout");
-			descriptor.layout = find(layoutName, ResourceType::INPUTLAYOUT);
-			const char* name = reader.get_string(childIndex, "name");
-			createVertexBuffer(name, descriptor);
-		}
-
 		// ------------------------------------------------------
 		// parse texture cube
 		// ------------------------------------------------------
+		/*
 		void parseTextureCube(JSONReader& reader, int childIndex) {
 			TextureDescriptor descriptor;
 			descriptor.name = reader.get_string(childIndex, "file");
 			const char* name = reader.get_string(childIndex, "name");
 			loadTextureCube(name, descriptor);
 		}
-
+		*/
 		// ------------------------------------------------------
 		// parse scene
 		// ------------------------------------------------------
+		/*
 		void parseScene(JSONReader& reader, int childIndex) {
 			SceneDescriptor descriptor;
 			reader.get(childIndex, "size", &descriptor.size);
@@ -396,55 +184,11 @@ namespace ds {
 			const char* name = reader.get_string(childIndex, "name");
 			createScene(name, descriptor);
 		}
-
-		// ------------------------------------------------------
-		// parse input layout
-		// ------------------------------------------------------
-		void parseInputLayout(JSONReader& reader, int childIndex) {
-			InputLayoutDescriptor descriptor;
-			descriptor.num = 0;
-			const char* attributes = reader.get_string(childIndex, "attributes");
-			char buffer[256];
-			sprintf_s(buffer, 256, "%s", attributes);
-			char *token = token = strtok(buffer, ",");
-			while (token) {
-				int element = findInputElement(token);
-				descriptor.indices[descriptor.num++] = element;
-				token = strtok(NULL, ",");
-			}
-			const char* shaderName = reader.get_string(childIndex, "shader");
-			descriptor.shader = find(shaderName, ResourceType::SHADER);
-			const char* name = reader.get_string(childIndex, "name");
-			createInputLayout(name, descriptor);
-		}
-
-		// ------------------------------------------------------
-		// parse sprite buffer
-		// ------------------------------------------------------
-		void parseSpriteBuffer(JSONReader& reader, int childIndex) {
-			SpriteBufferDescriptor descriptor;
-			reader.get(childIndex, "size", &descriptor.size);
-			reader.get(childIndex, "index_buffer", &descriptor.indexBuffer);
-			const char* constantBufferName = reader.get_string(childIndex, "constant_buffer");
-			descriptor.constantBuffer = find(constantBufferName, ResourceType::CONSTANTBUFFER);
-			const char* vertexBufferName = reader.get_string(childIndex, "vertex_buffer");
-			descriptor.vertexBuffer = find(vertexBufferName, ResourceType::VERTEXBUFFER);
-			const char* materialName = reader.get_string(childIndex, "material");
-			descriptor.material = find(materialName, ResourceType::MATERIAL);
-			if (reader.contains_property(childIndex, "font")) {
-				const char* fontName = reader.get_string(childIndex, "font");
-				descriptor.font = find(fontName, ResourceType::BITMAPFONT);
-			}
-			else {
-				descriptor.font = INVALID_RID;
-			}
-			const char* name = reader.get_string(childIndex, "name");
-			createSpriteBuffer(name, descriptor);
-		}
-
+		*/
 		// ------------------------------------------------------
 		// parse quad buffer
 		// ------------------------------------------------------
+		/*
 		void parseQuadBuffer(JSONReader& reader, int childIndex) {
 			QuadBufferDescriptor descriptor;
 			reader.get(childIndex, "size", &descriptor.size);
@@ -458,33 +202,11 @@ namespace ds {
 			const char* name = reader.get_string(childIndex, "name");
 			createQuadBuffer(name, descriptor);
 		}
-
-		/*
-		mesh_buffer {
-		color_map : 5
-		}
 		*/
 		// ------------------------------------------------------
 		// parse Mesh buffer
 		// ------------------------------------------------------
-		void parseMeshBuffer(JSONReader& reader, int childIndex) {
-			MeshBufferDescriptor descriptor;
-			reader.get(childIndex, "size", &descriptor.size);
-			const char* indexBufferName = reader.get_string(childIndex, "index_buffer");
-			descriptor.indexBuffer = find(indexBufferName, ResourceType::INDEXBUFFER);
-			const char* constantBufferName = reader.get_string(childIndex, "constant_buffer");			
-			descriptor.constantBuffer = find(constantBufferName, ResourceType::CONSTANTBUFFER);
-			const char* vertexBufferName = reader.get_string(childIndex, "vertex_buffer");
-			descriptor.vertexBuffer = find(vertexBufferName, ResourceType::VERTEXBUFFER);
-			const char* materialName = reader.get_string(childIndex, "material");
-			descriptor.material = find(materialName, ResourceType::MATERIAL);
-			const char* name = reader.get_string(childIndex, "name");
-			createMeshBuffer(name, descriptor);
-		}
-
-		// ------------------------------------------------------
-		// parse Mesh buffer
-		// ------------------------------------------------------
+		/*
 		void parseSkyBox(JSONReader& reader, int childIndex) {
 			SkyBoxDescriptor descriptor;
 			reader.get(childIndex, "scale", &descriptor.scale);
@@ -504,20 +226,7 @@ namespace ds {
 			const char* name = reader.get_string(childIndex, "name");
 			createSkyBox(name, descriptor);
 		}
-
-		// ------------------------------------------------------
-		// parse Mesh
-		// ------------------------------------------------------
-		void parseMesh(JSONReader& reader, int childIndex) {
-			MeshDescriptor descriptor;
-			reader.get(childIndex, "position", &descriptor.position);
-			reader.get(childIndex, "scale", &descriptor.scale);
-			reader.get(childIndex, "rotation", &descriptor.rotation);
-			const char* name = reader.get_string(childIndex, "name");
-			descriptor.fileName = name;
-			createMesh(name, descriptor);
-		}
-
+		*/
 		RID createBlendState(const char* name, const BlendStateDescriptor& descriptor) {
 			BlendStateParser* p = (BlendStateParser*)nparsers[SID("blendstate")];
 			return p->createBlendState(name, descriptor);
@@ -526,6 +235,16 @@ namespace ds {
 		RID createConstantBuffer(const char* name, const ConstantBufferDescriptor& descriptor) {
 			ConstantBufferParser* p = (ConstantBufferParser*)nparsers[SID("constant_buffer")];
 			return p->createConsantBuffer(name, descriptor);
+		}
+
+		RID createVertexBuffer(const char* name, const VertexBufferDescriptor& descriptor) {
+			VertexBufferParser* p = (VertexBufferParser*)nparsers[SID("vertex_buffer")];
+			return p->createVertexBuffer(name, descriptor);
+		}
+
+		RID createInputLayout(const char* name, const InputLayoutDescriptor& descriptor) {
+			InputLayoutParser* p = (InputLayoutParser*)nparsers[SID("input_layout")];
+			return p->createInputLayout(name, descriptor);
 		}
 
 		RID createMaterial(const char* name, const MaterialDescriptor& descriptor) {
@@ -563,17 +282,17 @@ namespace ds {
 			nparsers[SID("imgui")] = new IMGUIParser(_resCtx);
 			nparsers[SID("shader")] = new ShaderParser(_resCtx);
 			nparsers[SID("blendstate")] = new BlendStateParser(_resCtx);
+			nparsers[SID("sprite_buffer")] = new SpriteBufferParser(_resCtx);
+			nparsers[SID("vertex_buffer")] = new VertexBufferParser(_resCtx);
+			nparsers[SID("index_buffer")] = new IndexBufferParser(_resCtx);
+			nparsers[SID("input_layout")] = new InputLayoutParser(_resCtx);
+			nparsers[SID("mesh")] = new MeshParser(_resCtx);
+			nparsers[SID("mesh_buffer")] = new MeshBufferParser(_resCtx);
 
-			parsers[SID("index_buffer")] = parseIndexBuffer;
-			parsers[SID("sprite_buffer")] = parseSpriteBuffer;
-			parsers[SID("input_layout")] = parseInputLayout;
-			parsers[SID("vertex_buffer")] = parseVertexBuffer;					
-			parsers[SID("mesh")] = parseMesh;
-			parsers[SID("mesh_buffer")] = parseMeshBuffer;
-			parsers[SID("quad_buffer")] = parseQuadBuffer;
-			parsers[SID("scene")] = parseScene;
-			parsers[SID("texture_cube")] = parseTextureCube;
-			parsers[SID("skybox")] = parseSkyBox;									
+			//parsers[SID("quad_buffer")] = parseQuadBuffer;
+			//parsers[SID("scene")] = parseScene;
+			//parsers[SID("texture_cube")] = parseTextureCube;
+			//parsers[SID("skybox")] = parseSkyBox;									
 			
 			
 		}

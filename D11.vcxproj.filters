@@ -271,6 +271,24 @@
     <ClCompile Include="resources\parser\BlendStateParser.cpp">
       <Filter>resources\parser</Filter>
     </ClCompile>
+    <ClCompile Include="resources\parser\SpriteBufferParser.cpp">
+      <Filter>resources\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\parser\VertexBufferParser.cpp">
+      <Filter>resources\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\parser\IndexBufferParser.cpp">
+      <Filter>resources\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\parser\InputLayoutParser.cpp">
+      <Filter>resources\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\parser\MeshParser.cpp">
+      <Filter>resources\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\parser\MeshBufferParser.cpp">
+      <Filter>resources\parser</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="renderer\render_types.h">
@@ -502,6 +520,24 @@
       <Filter>resources\parser</Filter>
     </ClInclude>
     <ClInclude Include="resources\parser\BlendStateParser.h">
+      <Filter>resources\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\parser\SpriteBufferParser.h">
+      <Filter>resources\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\parser\VertexBufferParser.h">
+      <Filter>resources\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\parser\IndexBufferParser.h">
+      <Filter>resources\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\parser\InputLayoutParser.h">
+      <Filter>resources\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\parser\MeshParser.h">
+      <Filter>resources\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\parser\MeshBufferParser.h">
       <Filter>resources\parser</Filter>
     </ClInclude>
   </ItemGroup>

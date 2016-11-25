@@ -130,7 +130,11 @@
     <ClCompile Include="resources\parser\DialogParser.cpp" />
     <ClCompile Include="resources\parser\FontParser.cpp" />
     <ClCompile Include="resources\parser\IMGUIParser.cpp" />
+    <ClCompile Include="resources\parser\IndexBufferParser.cpp" />
+    <ClCompile Include="resources\parser\InputLayoutParser.cpp" />
     <ClCompile Include="resources\parser\MaterialParser.cpp" />
+    <ClCompile Include="resources\parser\MeshBufferParser.cpp" />
+    <ClCompile Include="resources\parser\MeshParser.cpp" />
     <ClCompile Include="resources\parser\ParticleManagerParser.cpp" />
     <ClCompile Include="resources\parser\QuadIndexBufferParser.cpp" />
     <ClCompile Include="resources\parser\RenderTargetParser.cpp" />
@@ -139,9 +143,11 @@
     <ClCompile Include="resources\parser\ScriptParser.cpp" />
     <ClCompile Include="resources\parser\ShaderParser.cpp" />
     <ClCompile Include="resources\parser\SoundParser.cpp" />
+    <ClCompile Include="resources\parser\SpriteBufferParser.cpp" />
     <ClCompile Include="resources\parser\SpritesheetParser.cpp" />
     <ClCompile Include="resources\parser\SquareBufferParser.cpp" />
     <ClCompile Include="resources\parser\TextureParser.cpp" />
+    <ClCompile Include="resources\parser\VertexBufferParser.cpp" />
     <ClCompile Include="resources\parser\WorldEntityTemplatesParser.cpp" />
     <ClCompile Include="resources\ResourceContainer.cpp" />
     <ClCompile Include="scene\EntityArray.cpp" />
@@ -206,7 +212,11 @@
     <ClInclude Include="resources\parser\DialogParser.h" />
     <ClInclude Include="resources\parser\FontParser.h" />
     <ClInclude Include="resources\parser\IMGUIParser.h" />
+    <ClInclude Include="resources\parser\IndexBufferParser.h" />
+    <ClInclude Include="resources\parser\InputLayoutParser.h" />
     <ClInclude Include="resources\parser\MaterialParser.h" />
+    <ClInclude Include="resources\parser\MeshBufferParser.h" />
+    <ClInclude Include="resources\parser\MeshParser.h" />
     <ClInclude Include="resources\parser\ParticleManagerParser.h" />
     <ClInclude Include="resources\parser\QuadIndexBufferParser.h" />
     <ClInclude Include="resources\parser\RenderTargetParser.h" />
@@ -215,9 +225,11 @@
     <ClInclude Include="resources\parser\ScriptParser.h" />
     <ClInclude Include="resources\parser\ShaderParser.h" />
     <ClInclude Include="resources\parser\SoundParser.h" />
+    <ClInclude Include="resources\parser\SpriteBufferParser.h" />
     <ClInclude Include="resources\parser\SpritesheetParser.h" />
     <ClInclude Include="resources\parser\SquareBufferParser.h" />
     <ClInclude Include="resources\parser\TextureParser.h" />
+    <ClInclude Include="resources\parser\VertexBufferParser.h" />
     <ClInclude Include="resources\parser\WorldEntityTemplatesParser.h" />
     <ClInclude Include="resources\Resource.h" />
     <ClInclude Include="resources\ResourceContainer.h" />
