@@ -1,6 +1,13 @@
 #pragma once
 #include "ResourceParser.h"
-
+/*
+render_target {
+	name : "RT1"
+	width : 1024
+	height : 768
+	clear_color : 0,0,0,0
+}
+*/
 namespace ds {
 
 	namespace res {

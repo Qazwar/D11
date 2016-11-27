@@ -1,6 +1,11 @@
 #pragma once
 #include "ResourceParser.h"
-
+/*
+imgui {
+	font : "gui_font"
+	texture : "gui"
+}
+*/
 namespace ds {
 
 	namespace res {

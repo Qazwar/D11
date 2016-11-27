@@ -1,6 +1,11 @@
 #pragma once
 #include "ResourceParser.h"
-
+/*
+font {
+	name : "nullshock"
+	file : "nullshock.json"
+}
+*/
 namespace ds {
 
 	namespace res {

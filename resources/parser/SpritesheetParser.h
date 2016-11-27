@@ -1,6 +1,10 @@
 #pragma once
 #include "ResourceParser.h"
-
+/*
+spritesheet {
+	name : "spritesheet"
+}
+*/
 namespace ds {
 
 	namespace res {

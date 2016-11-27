@@ -1,6 +1,11 @@
 #pragma once
 #include "ResourceParser.h"
-
+/*
+texture {
+	name: "TextureArray"
+	file : "TextureArray.png"
+}
+*/
 namespace ds {
 
 	namespace res {

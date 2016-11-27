@@ -1,6 +1,11 @@
 #pragma once
 #include "ResourceParser.h"
-
+/*
+sound {
+	file : "255.wav"
+	name : "255"
+}
+*/
 namespace ds {
 
 	namespace res {

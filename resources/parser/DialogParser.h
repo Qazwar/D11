@@ -1,6 +1,12 @@
 #pragma once
 #include "ResourceParser.h"
-
+/*
+dialog {
+	name : "MainMenu"
+	file : "MainMenu"
+	font : "nullshock"
+}
+*/
 namespace ds {
 
 	namespace res {

@@ -1,6 +1,12 @@
 #pragma once
 #include "ResourceParser.h"
-
+/*
+square_buffer {
+	name : "Squares"
+	texture : "TextureArray"
+	size : 16384
+}
+*/
 namespace ds {
 
 	namespace res {

@@ -1,6 +1,10 @@
 #pragma once
 #include "ResourceParser.h"
-
+/*
+world_entity_templates {
+	name : "game_objects"
+}
+*/
 namespace ds {
 
 	namespace res {
