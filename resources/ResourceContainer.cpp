@@ -45,8 +45,6 @@ namespace ds {
 
 	namespace res {	
 		
-		static std::map<StaticHash, ParseFunc> parsers;
-
 		static std::map<StaticHash, ResourceParser*> nparsers;
 
 		static ResourceContext* _resCtx;
@@ -320,12 +318,7 @@ namespace ds {
 					parseJSONFile(fileName);
 				}
 				else {
-					if (parsers.find(hash) != parsers.end()) {
-						ParseFunc f = parsers[hash];
-						LOG << "Parsing '" << reader.get_category_name(i) << "'";
-						(*f)(reader, i);
-					}
-					else if (nparsers.find(hash) != nparsers.end()) {
+					if (nparsers.find(hash) != nparsers.end()) {
 						ResourceParser* f = nparsers[hash];
 						LOG << "Parsing '" << reader.get_category_name(i) << "'";
 						f->parse(reader, i);

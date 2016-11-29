@@ -104,14 +104,6 @@ public:
 		sprites->end();
 		graphics::turnOnZBuffer();
 	}
-	virtual int onChar(int ascii) {
-#ifdef DEBUG
-		if (ascii == 'r') {
-			res::reloadDialog(_dialogName);
-		}
-#endif
-		return 0;
-	}
 	virtual int update(float dt) {
 		_dialog->tick(dt);
 		return 0;

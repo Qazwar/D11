@@ -172,6 +172,9 @@ namespace ds {
 	}
 
 	void SpriteBuffer::begin() {
+		if (_index > 0) {
+			flush();
+		}
 		_index = 0;
 		_started = true;
 		_currentMtrl = _descriptor.material;

@@ -65,8 +65,6 @@ namespace ds {
 
 	namespace res {
 
-		typedef void(*ParseFunc)(JSONReader&, int);
-
 		// ------------------------------------------------------
 		// resource index
 		// ------------------------------------------------------
