@@ -155,18 +155,7 @@ namespace ds {
 		_shortcuts = new ShortcutsHandler();
 		events::init();
 		math::init_random(GetTickCount());
-		audio::initialize(m_hWnd);
-		LOG << "---------- System information ----------";
-		LOG << "Processor : " << _systemInfo.processor;
-		LOG << "Speed     : " << _systemInfo.mhz;
-		LOG << "GPU Model : " << _systemInfo.gpuModel;
-		LOG << "Total RAM : " << _systemInfo.total_memory_MB;
-		LOG << "Free  RAM : " << _systemInfo.free_memory_MB;
-		LOG << "---------- Keys ------------------------";
-		LOG << "F1 = Save report";
-		LOG << "F2 = toggle perf HUD";
-		LOG << "F3 = toggle game state dialog";
-		LOG << "F4 = toggle update";
+		audio::initialize(m_hWnd);		
 		// now set up the graphic subsystem
 		if (graphics::initialize(hInstance, m_hWnd, _settings)) {
 			res::initialize(graphics::getDevice());
@@ -189,10 +178,22 @@ namespace ds {
 				_thread = std::thread(repoReloading, 2);
 				_thread.detach();
 			}
+			LOG << "---------- System information ----------";
+			LOG << "Processor : " << _systemInfo.processor;
+			LOG << "Speed     : " << _systemInfo.mhz;
+			LOG << "GPU Model : " << _systemInfo.gpuModel;
+			LOG << "Total RAM : " << _systemInfo.total_memory_MB;
+			LOG << "Free  RAM : " << _systemInfo.free_memory_MB;
+			LOG << "---------- Keys ------------------------";
+			LOG << "F1 = Save report";
+			LOG << "F2 = toggle perf HUD";
+			LOG << "F3 = toggle game state dialog";
+			LOG << "F4 = toggle update";
 			_shortcuts->debug();
 			events::reset();
 			return true;
 		}			
+		
 		_shortcuts->debug();
 		events::reset();
 		_loading = false;
