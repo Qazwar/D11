@@ -2,7 +2,6 @@
 #include "..\renderer\graphics.h"
 #include "core\log\Log.h"
 #include "core\io\json.h"
-#include "core\string\GlobalStringBuffer.h"
 #include "core\io\FileRepository.h"
 #include "core\profiler\Profiler.h"
 #include "..\imgui\IMGUI.h"
@@ -75,6 +74,7 @@ namespace ds {
 		_start = std::chrono::steady_clock::now();
 
 		gDefaultMemory = new DefaultAllocator(_settings.initialMemorySize * 1024 * 1024);
+		gStringBuffer = new CharBuffer();
 	}
 
 
@@ -88,9 +88,9 @@ namespace ds {
 		delete _shortcuts;
 		delete gDrawCounter;
 		delete _stateMachine;
-		delete gStringBuffer;		
 		graphics::shutdown();
 		//gDefaultMemory->printOpenAllocations();		
+		delete gStringBuffer;
 		delete gDefaultMemory;		
 		shutdown_logger();
 	}
@@ -149,7 +149,6 @@ namespace ds {
 		sysinfo::getRAMInformation(&_systemInfo);
 		// FIXME: make sure that we have the amount of memory available
 		
-		gStringBuffer = new GlobalStringBuffer();
 		perf::init();
 		repository::initialize(_settings.repositoryMode);		
 		_shortcuts = new ShortcutsHandler();

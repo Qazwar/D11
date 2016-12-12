@@ -12,6 +12,10 @@
 
 namespace ds {
 
+	struct ModalDialogSettings {
+		RID font;
+	};
+
 const int MAX_GUID = 64;
 
 // -------------------------------------------------------
@@ -118,6 +122,7 @@ class GUIDialog : public JSONAssetFile {
 	typedef Array<GameTimer> Timers;
 
 public:
+	GUIDialog(const ModalDialogSettings& modalSettings);
 	GUIDialog(const GUIDialogDescriptor& descriptor,const char* fileName);
 	~GUIDialog(void);
 	void render();

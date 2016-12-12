@@ -1,6 +1,5 @@
 #include "ParticleSystemFactory.h"
 #include "ParticleSystem.h"
-#include "core\string\GlobalStringBuffer.h"
 #include "modules\ParticleTimeModule.h"
 #include "modules\SizeModule.h"
 #include "modules\ColorModule.h"
@@ -28,7 +27,7 @@ namespace ds {
 		_known_modules[_count_modules++] = new WiggleModule();
 		_known_modules[_count_modules++] = new PointEmitterModule();
 		for (int i = 0; i < _count_modules; ++i) {
-			_known_module_names.push_back(gStringBuffer->add(_known_modules[i]->getName()));
+			_known_module_names.push_back(gStringBuffer->append(_known_modules[i]->getName()));
 		}
 	}
 

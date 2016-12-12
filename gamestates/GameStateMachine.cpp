@@ -1,13 +1,13 @@
 #include "GameStateMachine.h"
 #include "core\log\Log.h"
 #include "core\profiler\Profiler.h"
-//#include "..\DialogResources.h"
+#include <core\base\Assert.h>
 
 namespace ds {
 
-	//GameStateMachine::GameStateMachine() : AssetEditor("GameStateEditor",0) {
 	GameStateMachine::GameStateMachine() {
 		_activeState = 0;
+		_activeModalState = 0;
 		_currentIndex = -1;
 		_dialogPos = v2(10, graphics::getScreenHeight() - 10.0f);
 		_dialogState = 1;
@@ -31,8 +31,7 @@ namespace ds {
 	}
 	void GameStateMachine::activate(const char* name) {
 		int idx = find(name);
-		//XASSERT(idx != -1,"Cannot find matching gamestate for %s",name);
-		assert(idx != -1);
+		XASSERT(idx != -1,"Cannot find matching gamestate for %s",name);
 		if (idx != -1) {
 			switchState(idx);
 		}
@@ -40,8 +39,7 @@ namespace ds {
 
 	void GameStateMachine::deactivate(const char* name) {
 		int idx = find(name);
-		//XASSERT(idx != -1, "Cannot find matching gamestate for %s", name);
-		assert(idx != -1);
+		XASSERT(idx != -1, "Cannot find matching gamestate for %s", name);
 		if (idx != -1) {
 			_gameStates[idx]->deactivate();
 			_activeState = 0;
@@ -51,15 +49,7 @@ namespace ds {
 	bool GameStateMachine::contains(const char* name) const {
 		return find(name) != -1;
 	}
-	/*
-	void GameStateMachine::processEvents(const EventStream& events) {
-		ZoneTracker z("GameStateMachine:processEvents");
-		if (_activeState != 0) {
-			int transition = _activeState->processEvents(events);
-			handleStateTransition(transition);
-		}
-	}
-	*/
+
 	void GameStateMachine::update(float dt) {
 		ZoneTracker z("GameStateMachine:update");
 		if (_activeState != 0) {
@@ -75,61 +65,87 @@ namespace ds {
 			if (gui::isInitialized()) {
 				_activeState->renderGUI();
 			}
-		}		
+		}
+		if (_activeModalState != 0) {
+			_activeModalState->render();
+			if (gui::isInitialized()) {
+				_activeModalState->renderGUI();
+			}
+		}
 	}
 
 	void GameStateMachine::onButtonDown(int button, int x, int y) {
-		if (_activeState != 0) {
-			int transition = _activeState->onButtonDown(button, x, y);
+		if (_activeModalState != 0) {
+			int transition = _activeModalState->onButtonDown(button, x, y);
 			handleStateTransition(transition);
+		}
+		else {
+			if (_activeState != 0) {
+				int transition = _activeState->onButtonDown(button, x, y);
+				handleStateTransition(transition);
+			}
 		}
 	}
 
 	void GameStateMachine::onKeyDown(WPARAM virtualKey) {
-		if (_activeState != 0) {
-			int transition = _activeState->onKeyDown(virtualKey);
+		if (_activeModalState != 0) {
+			int transition = _activeModalState->onKeyDown(virtualKey);
 			handleStateTransition(transition);
+		}
+		else {
+			if (_activeState != 0) {
+				int transition = _activeState->onKeyDown(virtualKey);
+				handleStateTransition(transition);
+			}
 		}
 	}
 
 	void GameStateMachine::onKeyUp(WPARAM virtualKey) {
-		if (_activeState != 0) {
-			int transition = _activeState->onKeyUp(virtualKey);
+		if (_activeModalState != 0) {
+			int transition = _activeModalState->onKeyUp(virtualKey);
 			handleStateTransition(transition);
+		}
+		else {
+			if (_activeState != 0) {
+				int transition = _activeState->onKeyUp(virtualKey);
+				handleStateTransition(transition);
+			}
 		}
 	}
 
 	void GameStateMachine::onButtonUp(int button, int x, int y) {
-		if (_activeState != 0) {
-			int transition = _activeState->onButtonUp(button, x, y);
+		if (_activeModalState != 0) {
+			int transition = _activeModalState->onButtonUp(button, x, y);
 			handleStateTransition(transition);
+		}
+		else {
+			if (_activeState != 0) {
+				int transition = _activeState->onButtonUp(button, x, y);
+				handleStateTransition(transition);
+			}
 		}
 	}
 
 	void GameStateMachine::onChar(int ascii) {
-		if (_activeState != 0) {
-			int transition = _activeState->onChar(ascii);
+		if (_activeModalState != 0) {
+			int transition = _activeModalState->onChar(ascii);
 			handleStateTransition(transition);
 		}
-	}
-	/*
-	void GameStateMachine::onGUIButton(ds::DialogID dlgID, int button) {
-		if (_activeState != 0) {
-			int transition = _activeState->onGUIButton(dlgID, button);
-			handleStateTransition(transition);
+		else {
+			if (_activeState != 0) {
+				int transition = _activeState->onChar(ascii);
+				handleStateTransition(transition);
+			}
 		}
 	}
-	*/
+
 	void GameStateMachine::connect(const char* firstStateName, int outcome, const char* secondStateName) {
-		//XASSERT(outcome != 0, "You need to define an outcome");
-		assert(outcome != 0);
+		XASSERT(outcome != 0, "You need to define an outcome");
 		FSMConnection connection;
 		connection.firstStateIndex = find(firstStateName);
-		//XASSERT(connection.firstStateIndex != -1,"Cannot find matching first state");
-		assert(connection.firstStateIndex != -1);
+		XASSERT(connection.firstStateIndex != -1,"Cannot find matching first state");
 		connection.secondStateIndex = find(secondStateName);
-		//XASSERT(connection.secondStateIndex != -1,"Cannot find matching second state");		
-		assert(connection.secondStateIndex != -1);
+		XASSERT(connection.secondStateIndex != -1,"Cannot find matching second state");		
 		connection.outcome = outcome;
 		_connections.push_back(connection);
 	}
@@ -157,18 +173,24 @@ namespace ds {
 	}
 
 	void GameStateMachine::switchState(int newIndex) {
-		if (_activeState != 0) {
-			LOG << "deactivating " << _activeState->getName();
-			_activeState->deactivate();
+		if (_gameStates[newIndex]->isModal()) {
+			_activeModalState = _gameStates[newIndex];
+			_activeModalState->activate();
 		}
-		_activeState = _gameStates[newIndex];
-		if (!_activeState->isInitialized()) {
-			_activeState->init();
-			_activeState->endInitialisation();
+		else {
+			if (_activeState != 0) {
+				LOG << "deactivating " << _activeState->getName();
+				_activeState->deactivate();
+			}
+			_activeState = _gameStates[newIndex];
+			if (!_activeState->isInitialized()) {
+				_activeState->init();
+				_activeState->endInitialisation();
+			}
+			LOG << "activating " << _activeState->getName();
+			_activeState->activate();
+			_currentIndex = newIndex;
 		}
-		LOG << "activating " << _activeState->getName();
-		_activeState->activate();
-		_currentIndex = newIndex;
 	}
 	
 	void GameStateMachine::showDialog() {
@@ -179,8 +201,6 @@ namespace ds {
 			if (gui::Button("Activate")) {
 				if (_model.hasSelection()) {
 					switchState(_model.getSelection());
-					//GameState* state = _model.getSelectedValue();
-					//activate(state->getName());
 				}
 			}
 		}

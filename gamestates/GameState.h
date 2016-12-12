@@ -56,6 +56,9 @@ public:
 		_initialized = true;
 	}
 	virtual void renderGUI() {}
+	virtual bool isModal() const {
+		return false;
+	}
 private:
 	bool _initialized;
 	GameState(const GameState& other) {}
@@ -113,6 +116,54 @@ public:
 protected:
 	GUIDialog* _dialog;
 	const char* _dialogName;
+};
+
+class ModalDialogGameState : public GameState {
+
+public:
+	ModalDialogGameState(const char* name,const ModalDialogSettings& settings) : GameState(name) {
+		_dialog = new GUIDialog(settings);
+	}
+	virtual ~ModalDialogGameState() {}
+	virtual int onButtonUp(int button, int x, int y) {
+		int ret = _dialog->onButton(button, x, y, true);
+		if (ret != -1) {
+			if (ret == 666) {
+				events::send(InternalEvents::ENGINE_SHUTDOWN);
+				return 0;
+			}
+			int tmp = onGUIButton(ret);
+			if (tmp != -1) {
+				return tmp;
+			}
+			return ret;
+		}
+		return 0;
+	}
+	virtual void activate() {
+		_dialog->activate();
+	}
+	virtual void deactivate() {
+		_dialog->deactivate();
+	}
+	virtual void render() {
+		graphics::turnOffZBuffer();
+		graphics::selectViewport(0);
+		ds::SpriteBuffer* sprites = graphics::getSpriteBuffer();
+		sprites->begin();
+		_dialog->render();
+		sprites->end();
+		graphics::turnOnZBuffer();
+	}
+	virtual int update(float dt) {
+		_dialog->tick(dt);
+		return 0;
+	}
+	bool isModal() const {
+		return true;
+	}
+private:
+	GUIDialog* _dialog;
 };
 
 }

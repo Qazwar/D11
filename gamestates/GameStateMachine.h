@@ -50,6 +50,7 @@ private:
 	int find(const char* name) const;
 	void switchState(int newIndex);
 	int _currentIndex;
+	GameState* _activeModalState;
 	GameState* _activeState;
 	GameStates _gameStates;
 	Connections _connections;

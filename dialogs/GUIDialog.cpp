@@ -7,6 +7,20 @@
 #include "..\base\InputSystem.h"
 
 namespace ds {
+
+	GUIDialog::GUIDialog(const ModalDialogSettings& modalSettings) : JSONAssetFile("fileName") {
+		_font = modalSettings.font;
+		_hoverCallback = 0;
+		_bitmapFont = res::getFont(_font);
+		_sprites = graphics::getSpriteBuffer();
+		_idIndex = 0;
+		_active = false;
+		for (int i = 0; i < MAX_GUID; ++i) {
+			_ids[i].id = -1;
+			_ids[i].index = -1;
+		}
+	}
+
 	GUIDialog::GUIDialog(const GUIDialogDescriptor& descriptor,const char* fileName) : JSONAssetFile(fileName) {
 		_font = descriptor.font;
 		_hoverCallback = 0;
