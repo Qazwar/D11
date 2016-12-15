@@ -12,7 +12,7 @@
 
 namespace ds {
 
-	const int MAX_ACTIONS = 32;
+	//const int MAX_ACTIONS = 32;
 
 	struct StaticMesh {
 		ID id;
