@@ -8,30 +8,15 @@
 #include "core\base\system_info.h"
 #include <core\base\ShortcutsHandler.h>
 #include <thread>
+#include "core\plugin\Plugin.h"
+#include <core\base\InputStates.h>
+#include "..\editor\GameEditor.h"
 
 namespace ds {
 
 	class BaseApp {
 
-		struct KeyStates {
-			uint8_t ascii;
-			bool onChar;
-			WPARAM keyPressed;
-			bool keyDown;
-			WPARAM keyReleased;
-			bool keyUp;
-		};
-
-		struct ButtonState {
-			int button;
-			int x;
-			int y;
-			bool down;
-			bool processed;
-		};
-
 		struct DebugInfo {
-			bool showPerfHud;
 			bool createReport;
 			bool updated;
 			bool showGameStateDialog;
@@ -88,6 +73,7 @@ namespace ds {
 		bool _alive;
 		GameStateMachine* _stateMachine;
 		ShortcutsHandler* _shortcuts;
+		GameEditor* _editor;
 		KeyStates _keyStates;
 		ButtonState _buttonState;		
 		std::chrono::steady_clock::time_point _start, _now;

@@ -1782,6 +1782,8 @@ namespace gui {
 		guiContext->textures[ICN_INPUT_ACTIVE]      = math::buildTexture(160.0f, 160.0f, 150.0f, BOX_HEIGHT);
 		guiContext->textures[ICN_HEADER_BOX]        = math::buildTexture(140.0f,   0.0f, 150.0f, 18.0f);
 		guiContext->textures[ICN_PANEL_BACKGROUND]  = math::buildTexture( 30.0f, 370.0f, 100.0f, 100.0f);
+		// for testing
+		//guiContext->textures[ICN_PANEL_BACKGROUND] = math::buildTexture(200.0f, 527.0f, 100.0f, 60.0f);
 		guiContext->textures[ICN_BOX_BACKGROUND]    = math::buildTexture( 30.0f, 500.0f, 100.0f, 100.0f);
 		guiContext->textures[ICN_SEPARATOR]         = math::buildTexture(140.0f,   0.0f, 150.0f, 2.0f);
 		guiContext->textures[ICN_STEP_INPUT_SMALL]  = math::buildTexture( 60.0f, 220.0f,  50.0f, BOX_HEIGHT);

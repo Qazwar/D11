@@ -358,6 +358,30 @@ namespace ds {
 		updateTextVertices(item.index, text, sx, sy);
 	}
 
+	v2 GUIDialog::getTextSize(int id) {
+		int idx = getIndexByID(id);
+		XASSERT(idx >= 0 && idx < MAX_GUID, "Not a valid index - id: %d", id);
+		const GUID& gid = _ids[idx];
+		DialogItem& item = _items[gid.index];
+		int start = item.index;
+		int end = start + item.num;
+		v2 p(0.0f);
+		for (int j = start; j < end; ++j) {
+			const DialogVertex& v = _vertices[j];
+			p.x += v.texture.dim.x + 2.0f;
+			p.y = v.texture.dim.y;
+		}
+		return p;
+	}
+
+	void GUIDialog::setPosition(int id, const v2& pos) {
+		int idx = getIndexByID(id);
+		XASSERT(idx >= 0 && idx < MAX_GUID, "Not a valid index - id: %d", id);
+		const GUID& gid = _ids[idx];
+		DialogItem& item = _items[gid.index];
+		item.pos = pos;
+	}
+
 	void GUIDialog::setVisible(ID id, bool visible) {
 		int idx = getIndexByID(id);
 		XASSERT(idx >= 0 && idx < MAX_GUID, "Not a valid index - id: %d", id);
@@ -457,6 +481,11 @@ namespace ds {
 		_active = false;
 	}
 
+	void GUIDialog::setColor(int id, const Color& clr) {
+		int idx = getIndexByID(id);
+		DialogItem& item = _items[idx];
+		item.color = clr;
+	}
 	// -------------------------------------------------------
 	// get position
 	// -------------------------------------------------------

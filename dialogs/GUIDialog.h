@@ -142,12 +142,14 @@ public:
 	void updateText(int id,int x,int y,const char* text,const Color& color = Color(1.0f,1.0f,1.0f,1.0f), const v2& scale = v2(1, 1),bool centered = true);
 	void updateText(int id,const char* text);
 	void updateTextFormatted(int id, const char* format,...);
-	
+	v2 getTextSize(int id);
 
 	GUID addTimer(int id,int x, int y, const v2& scale = v2(1, 1), const Color& color = Color::WHITE, bool centered = true);
 	void resetTimer(int id);
 	void startTimer(int id);
 	GameTimer* getTimer(int id);
+
+	void setPosition(int id, const v2& pos);
 
 	virtual int onButton(int button,int x,int y,bool down);
 
@@ -171,6 +173,7 @@ public:
 	void startTransition(int id, const v2& start, float ttl);
 	void fadeColor(int id, const Color& start, const Color& end, float ttl);
 
+	void setColor(int id, const Color& clr);
 
 	void registerCallback(GUIHoverCallback* hoverCallback) {
 		_hoverCallback = hoverCallback;

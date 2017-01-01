@@ -94,11 +94,26 @@ namespace ds {
 		v2 center = position;
 		center.x += size.x * 0.5f;
 		center.y -= size.y * 0.5f;
+		v2 innerSize = size - v2(2.0f * cornersize);
 		float ch = size.y - 2.0f * cornersize;
 		float cw = size.x - 2.0f * cornersize;
 		float hcz = cornersize * 0.5f;
-		float sx = (size.x - 2.0f * cornersize) / (texture.dim.x - 2.0f * cornersize);
-		float sy = (size.y - 2.0f * cornersize) / (texture.dim.y - 2.0f * cornersize);
+		float sx = (innerSize.x) / (texture.dim.x -2.0f * cornersize);
+		if (sx < 1.0f) {
+			sx = 1.0f;
+		}
+		float sy = (innerSize.y) / (texture.dim.y -2.0f * cornersize);
+		if (sy < 1.0f) {
+			sy = 1.0f;
+		}
+		float h = innerSize.y;
+		if (h >(texture.dim.y - 2.0f * cornersize)) {
+			h = texture.dim.y - 2.0f * cornersize;
+		}
+		float w = innerSize.x;
+		if (w > (texture.dim.x - 2.0f * cornersize)) {
+			w = texture.dim.x - 2.0f * cornersize;
+		}
 		// left top corner 
 		v2 p = center;
 		ds::Texture tex = math::buildTexture(texture.rect.top, texture.rect.left, cornersize, cornersize, texture.textureSize.x, texture.textureSize.y);
@@ -121,27 +136,27 @@ namespace ds {
 		p.y = center.y - ch * 0.5f - hcz;
 		draw(p, tex, 0.0f, v2(1.0f, 1.0f), color);
 		// top
-		tex = math::buildTexture(texture.rect.top, texture.rect.left + cornersize, texture.rect.width() - 2.0f * cornersize, cornersize, texture.textureSize.x, texture.textureSize.y);
+		tex = math::buildTexture(texture.rect.top, texture.rect.left + cornersize, w, cornersize, texture.textureSize.x, texture.textureSize.y);
 		p.x = center.x;
 		p.y = center.y + ch * 0.5f + hcz;
 		draw(p, tex, 0.0f, v2(sx, 1.0f), color);
 		// bottom
-		tex = math::buildTexture(texture.rect.bottom - cornersize, texture.rect.left + cornersize, texture.rect.width() - 2.0f * cornersize, cornersize, texture.textureSize.x, texture.textureSize.y);
+		tex = math::buildTexture(texture.rect.bottom - cornersize, texture.rect.left + cornersize, w, cornersize, texture.textureSize.x, texture.textureSize.y);
 		p.x = center.x;
 		p.y = center.y - ch * 0.5f - hcz;
 		draw(p, tex, 0.0f, v2(sx, 1.0f), color);
 		// left
-		tex = math::buildTexture(texture.rect.top + cornersize, texture.rect.left, cornersize, texture.rect.height() - 2.0f *cornersize, texture.textureSize.x, texture.textureSize.y);
+		tex = math::buildTexture(texture.rect.top + cornersize, texture.rect.left, cornersize, h, texture.textureSize.x, texture.textureSize.y);
 		p.x = center.x - cw * 0.5f - hcz;
 		p.y = center.y;
 		draw(p, tex, 0.0f, v2(1.0f, sy), color);
 		// right
-		tex = math::buildTexture(texture.rect.top + cornersize, texture.rect.right - cornersize, cornersize, texture.rect.height() - 2.0f *cornersize, texture.textureSize.x, texture.textureSize.y);
+		tex = math::buildTexture(texture.rect.top + cornersize, texture.rect.right - cornersize, cornersize, h, texture.textureSize.x, texture.textureSize.y);
 		p.x = center.x + cw * 0.5f + hcz;
 		p.y = center.y;
 		draw(p, tex, 0.0f, v2(1.0f, sy), color);
 		// center
-		tex = math::buildTexture(texture.rect.top + cornersize, texture.rect.left + cornersize, texture.rect.width() - 2.0f * cornersize, texture.rect.height() - 2.0f * cornersize, texture.textureSize.x, texture.textureSize.y);
+		tex = math::buildTexture(texture.rect.top + cornersize, texture.rect.left + cornersize, w, h, texture.textureSize.x, texture.textureSize.y);
 		p.x = center.x;
 		p.y = center.y;
 		draw(p, tex, 0.0f, v2(sx, sy), color);
@@ -153,7 +168,15 @@ namespace ds {
 		center.x += width * 0.5f;
 		float cw = width - 2.0f * cornersize;
 		float hcz = cornersize * 0.5f;
-		float sx = (width - 2.0f * cornersize) / (texture.dim.x - 2.0f * cornersize);
+		float innerX = width - 2.0f * cornersize;
+		float sx = (innerX) / (texture.dim.x - 2.0f * cornersize);
+		if (sx < 1.0f) {
+			sx = 1.0f;
+		}
+		float w = innerX;
+		if (w >(texture.dim.x - 2.0f * cornersize)) {
+			w = texture.dim.x - 2.0f * cornersize;
+		}
 		// left 
 		v2 p = center;
 		ds::Texture tex = math::buildTexture(texture.rect.top, texture.rect.left, cornersize, cornersize, texture.textureSize.x, texture.textureSize.y);
@@ -164,7 +187,7 @@ namespace ds {
 		p.x = center.x + cw * 0.5f + hcz;
 		draw(p, tex, 0.0f, v2(1.0f, 1.0f), color);
 		// center
-		tex = math::buildTexture(texture.rect.top, texture.rect.left + cornersize, texture.rect.width() - 2.0f * cornersize, texture.rect.height(), texture.textureSize.x, texture.textureSize.y);
+		tex = math::buildTexture(texture.rect.top, texture.rect.left + cornersize, w, texture.rect.height(), texture.textureSize.x, texture.textureSize.y);
 		p.x = center.x;
 		p.y = center.y;
 		draw(p, tex, 0.0f, v2(sx, 1.0f), color);

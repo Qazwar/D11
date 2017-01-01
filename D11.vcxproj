@@ -13,19 +13,20 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{06303B62-8BCD-4AC5-BE6C-26B56D7144EA}</ProjectGuid>
     <RootNamespace>D11</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -45,8 +46,8 @@
     <IntDir>$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(IncludePath);$(DXSDK_DIR)Include;..\math</IncludePath>
-    <LibraryPath>$(LibraryPath);$(DXSDK_DIR)Lib\x86</LibraryPath>
+    <IncludePath>$(IncludePath);C:\devtools\DirectX_SDK\Include;..\math;..\DieselCore</IncludePath>
+    <LibraryPath>$(LibraryPath);C:\devtools\DirectX_SDK\Lib\x86;..\DieselCore\Release</LibraryPath>
     <OutDir>$(Configuration)\</OutDir>
     <IntDir />
     <TargetExt>.lib</TargetExt>
@@ -69,11 +70,13 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <MinimalRebuild>true</MinimalRebuild>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -81,6 +84,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>d3d11.lib;d3dx11.lib;dxerr.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <Lib>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="audio\AudioManager.cpp" />
@@ -88,6 +94,8 @@
     <ClCompile Include="base\InputSystem.cpp" />
     <ClCompile Include="base\WindowMain.cpp" />
     <ClCompile Include="dialogs\GUIDialog.cpp" />
+    <ClCompile Include="editor\GameEditor.cpp" />
+    <ClCompile Include="effects\BaseEffect.cpp" />
     <ClCompile Include="gamestates\GameStateMachine.cpp" />
     <ClCompile Include="gen\MeshGen.cpp" />
     <ClCompile Include="gen\MeshGenCommand.cpp" />
@@ -110,6 +118,7 @@
     <ClCompile Include="particles\ParticleSystemRenderer.cpp" />
     <ClCompile Include="physics\ColliderArray.cpp" />
     <ClCompile Include="physics\PhysicalWorld.cpp" />
+    <ClCompile Include="plugins\PerfHUDPlugin.cpp" />
     <ClCompile Include="postprocess\GrayFadePostProcess.cpp" />
     <ClCompile Include="postprocess\PostProcess.cpp" />
     <ClCompile Include="postprocess\ScreenShakePostProcess.cpp" />
@@ -164,6 +173,9 @@
     <ClInclude Include="base\InputSystem.h" />
     <ClInclude Include="base\Settings.h" />
     <ClInclude Include="dialogs\GUIDialog.h" />
+    <ClInclude Include="editor\EditorPlugin.h" />
+    <ClInclude Include="editor\GameEditor.h" />
+    <ClInclude Include="effects\BaseEffect.h" />
     <ClInclude Include="gamestates\GameState.h" />
     <ClInclude Include="gamestates\GameStateMachine.h" />
     <ClInclude Include="gen\MeshGen.h" />
@@ -190,6 +202,7 @@
     <ClInclude Include="particles\ParticleSystemRenderer.h" />
     <ClInclude Include="physics\ColliderArray.h" />
     <ClInclude Include="physics\PhysicalWorld.h" />
+    <ClInclude Include="plugins\PerfHUDPlugin.h" />
     <ClInclude Include="postprocess\GrayFadePostProcess.h" />
     <ClInclude Include="postprocess\PostProcess.h" />
     <ClInclude Include="postprocess\ScreenShakePostProcess.h" />
@@ -264,21 +277,27 @@
     <None Include="shaders\ScreenQuad.fx">
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </None>
     <FxCompile Include="shaders\postprocess\BasicPostProcess.fx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="shaders\postprocess\GrayFade.fx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="shaders\postprocess\ScreenShake.fx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="shaders\Quad.fx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="shaders\Sprite.fx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

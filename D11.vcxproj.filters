@@ -68,6 +68,15 @@
     <Filter Include="resources\parser">
       <UniqueIdentifier>{24f6efef-d508-47ae-a204-dfbb5bbe8929}</UniqueIdentifier>
     </Filter>
+    <Filter Include="plugins">
+      <UniqueIdentifier>{2e9760f4-1f2a-4dff-ac87-c3b7684830f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="editor">
+      <UniqueIdentifier>{74714e76-7c05-43e4-b265-79cfa2ccad83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="effects">
+      <UniqueIdentifier>{95575ecb-19d0-4ffa-8008-1df6eeee57e5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="renderer\sprites.cpp">
@@ -288,6 +297,15 @@
     </ClCompile>
     <ClCompile Include="resources\parser\MeshBufferParser.cpp">
       <Filter>resources\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="plugins\PerfHUDPlugin.cpp">
+      <Filter>plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\GameEditor.cpp">
+      <Filter>editor</Filter>
+    </ClCompile>
+    <ClCompile Include="effects\BaseEffect.cpp">
+      <Filter>effects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -539,6 +557,18 @@
     </ClInclude>
     <ClInclude Include="resources\parser\MeshBufferParser.h">
       <Filter>resources\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="plugins\PerfHUDPlugin.h">
+      <Filter>plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\EditorPlugin.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\GameEditor.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="effects\BaseEffect.h">
+      <Filter>effects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

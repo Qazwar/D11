@@ -141,7 +141,7 @@ namespace ds {
 
 	void GameStateMachine::connect(const char* firstStateName, int outcome, const char* secondStateName) {
 		XASSERT(outcome != 0, "You need to define an outcome");
-		FSMConnection connection;
+		GameStateConnection connection;
 		connection.firstStateIndex = find(firstStateName);
 		XASSERT(connection.firstStateIndex != -1,"Cannot find matching first state");
 		connection.secondStateIndex = find(secondStateName);
@@ -153,7 +153,7 @@ namespace ds {
 	void GameStateMachine::handleStateTransition(int outcome) {
 		if (outcome != 0) {
 			for (size_t i = 0; i < _connections.size(); ++i) {
-				const FSMConnection& con = _connections[i];
+				const GameStateConnection& con = _connections[i];
 				if (con.firstStateIndex == _currentIndex && con.outcome == outcome) {
 					switchState(con.secondStateIndex);
 					break;

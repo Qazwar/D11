@@ -38,8 +38,8 @@ namespace ds {
 			colorMapDesc.AddressW = TEXTURE_ADDRESS_MODES[descriptor.addressW].mode;
 			colorMapDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 			//colorMapDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-			//colorMapDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-			colorMapDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+			colorMapDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+			//colorMapDesc.Filter = D3D11_FILTER_ANISOTROPIC;
 			colorMapDesc.MaxLOD = D3D11_FLOAT32_MAX;
 			ID3D11SamplerState* sampler;
 			HRESULT d3dResult = _resCtx->device->CreateSamplerState(&colorMapDesc, &sampler);

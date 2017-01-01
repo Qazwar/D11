@@ -7,14 +7,15 @@ namespace ds {
 
 class GameStateMachine {
 
-struct FSMConnection {
+struct GameStateConnection {
 	int firstStateIndex;
 	int secondStateIndex;
 	int outcome;
 };
 
 typedef Array<GameState*> GameStates;
-typedef Array<FSMConnection> Connections;
+typedef Array<GameStateConnection> Connections;
+typedef Stack<GameState*> GameStatesStack;
 
 public:
 	GameStateMachine();
@@ -58,6 +59,7 @@ private:
 	v2 _dialogPos;
 	int _dialogState;
 	int _offset;
+	GameStatesStack _stack;
 };
 
 }

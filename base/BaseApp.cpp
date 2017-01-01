@@ -11,6 +11,7 @@
 #include "..\stats\DrawCounter.h"
 #include <thread>
 #include "..\audio\AudioManager.h"
+#include "..\plugins\PerfHUDPlugin.h"
 
 void ErrorExit(LPTSTR lpszFunction)
 {
@@ -65,7 +66,6 @@ namespace ds {
 		_loading = true;
 		_debugInfo.createReport = false;
 		_debugInfo.updated = false;
-		_debugInfo.showPerfHud = false;
 		_debugInfo.showGameStateDialog = false;
 		_running = true;
 		
@@ -75,10 +75,12 @@ namespace ds {
 
 		gDefaultMemory = new DefaultAllocator(_settings.initialMemorySize * 1024 * 1024);
 		gStringBuffer = new CharBuffer();
+		plugins::init();
 	}
 
 
 	BaseApp::~BaseApp() {
+		delete _editor;
 		audio::shutdown();
 		repository::shutdown();
 		perf::shutdown();		
@@ -88,6 +90,7 @@ namespace ds {
 		delete _shortcuts;
 		delete gDrawCounter;
 		delete _stateMachine;
+		plugins::shutdown();
 		graphics::shutdown();
 		//gDefaultMemory->printOpenAllocations();		
 		delete gStringBuffer;
@@ -152,6 +155,8 @@ namespace ds {
 		perf::init();
 		repository::initialize(_settings.repositoryMode);		
 		_shortcuts = new ShortcutsHandler();
+		_editor = new GameEditor();
+		_editor->addPlugin("F5", VK_F5, new PerfHUDPlugin());
 		events::init();
 		math::init_random(GetTickCount());
 		audio::initialize(m_hWnd);		
@@ -184,8 +189,9 @@ namespace ds {
 			LOG << "Total RAM : " << _systemInfo.total_memory_MB;
 			LOG << "Free  RAM : " << _systemInfo.free_memory_MB;
 			LOG << "---------- Keys ------------------------";
+			_editor->print();
 			LOG << "F1 = Save report";
-			LOG << "F2 = toggle perf HUD";
+			LOG << "F2 = toggle Editor";
 			LOG << "F3 = toggle game state dialog";
 			LOG << "F4 = toggle update";
 			_shortcuts->debug();
@@ -262,22 +268,24 @@ namespace ds {
 	void BaseApp::sendKeyUp(WPARAM virtualKey) {
 		_keyStates.keyUp = true;
 		_keyStates.keyReleased = virtualKey;
-		gui::sendSpecialKey(virtualKey);
-//#ifdef DEBUG
-		if (virtualKey == VK_F1) {
-			_debugInfo.createReport = true;
-		}		
-		else if (virtualKey == VK_F2) {
-			_debugInfo.showPerfHud = !_debugInfo.showPerfHud;
+		if (!_editor->onKey(virtualKey)) {
+			gui::sendSpecialKey(virtualKey);
+			//#ifdef DEBUG
+			if (virtualKey == VK_F1) {
+				_debugInfo.createReport = true;
+			}
+			else if (virtualKey == VK_F2) {
+				_editor->toggle();
+			}
+			else if (virtualKey == VK_F3) {
+				_debugInfo.showGameStateDialog = !_debugInfo.showGameStateDialog;
+			}
+			else if (virtualKey == VK_F4) {
+				_running = !_running;
+				LOG << "toggle running: " << _running;
+			}
+			//#endif
 		}
-		else if (virtualKey == VK_F3) {
-			_debugInfo.showGameStateDialog = !_debugInfo.showGameStateDialog;
-		}
-		else if (virtualKey == VK_F4) {
-			_running = !_running;
-			LOG << "toggle running: " << _running;
-		}
-//#endif
 	}
 
 	// -------------------------------------------------------
@@ -302,6 +310,7 @@ namespace ds {
 		{
 			ZoneTracker z("INPUT");
 			if (_running) {
+				plugins::handleInput(_keyStates,_buttonState);
 				if (_keyStates.onChar) {
 					_keyStates.onChar = false;
 					_stateMachine->onChar(_keyStates.ascii);
@@ -333,6 +342,7 @@ namespace ds {
 						ZoneTracker u2("UPDATE::main");
 						update(_dt);
 					}
+					plugins::tick(_dt);
 					_stateMachine->update(_dt);
 					// updating particles
 					ParticleManager* pm = res::getParticleManager();
@@ -390,37 +400,18 @@ namespace ds {
 		{
 			ZoneTracker("Render::render");
 			render();
-		}				
+		}	
+		plugins::preRender();
 		{
 			ZoneTracker("Render::stateMachine");
 			_stateMachine->render();
 		}
-		if (_debugInfo.showPerfHud) {			
-			v2 p(10, graphics::getScreenHeight() - 10.0f);
-			gui::start(1, &p);
-			int state = 1;
-			gui::begin("Perf HUD",&state);
-			float values[16];
-			int num = perf::getTimerValues("Duration",values, 16);
-			float min = 100000.0f;
-			float max = 0.0f;
-			for (int i = 0; i < num; ++i) {
-				if (values[i] > max) {
-					max = values[i];
-				}
-				if (values[i] < min) {
-					min = values[i];
-				}
-			}
-			float tickSpacing = 0.1f;
-			float niceMin = std::floor(min);
-			float niceMax = std::ceil(max);
-			gui::Histogram(values, num, niceMin, niceMax, tickSpacing);
-			gui::end();
-		}
+		plugins::postRender();
 		if (_debugInfo.showGameStateDialog) {
 			_stateMachine->showDialog();
 		}
+		_editor->render();
+		_editor->showDialog();
 		{
 			ZoneTracker("Render::endFrame");
 			gui::endFrame();
