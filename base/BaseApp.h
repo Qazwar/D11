@@ -47,8 +47,9 @@ namespace ds {
 		void addShortcut(const char* label, char key, uint32_t eventType);
 	protected:
 		void addGameState(GameState* gameState);
-		void activate(const char* name);
-		void deactivate(const char* name);
+		void pushState(const char* name);
+		void popState();
+		//void deactivate(const char* name);
 		void connectGameStates(const char* firstStateName, int outcome, const char* secondStateName);
 		virtual void prepare(Settings* settings) = 0;
 		virtual const char* getTitle() = 0;

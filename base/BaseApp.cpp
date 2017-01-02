@@ -439,16 +439,20 @@ namespace ds {
 	// -------------------------------------------------------
 	// activate game state
 	// -------------------------------------------------------
-	void BaseApp::activate(const char* name) {
-		_stateMachine->activate(name);
+	void BaseApp::pushState(const char* name) {
+		_stateMachine->push(name);
+	}
+
+	void BaseApp::popState() {
+		_stateMachine->pop();
 	}
 
 	// -------------------------------------------------------
 	// deactivate game state
 	// -------------------------------------------------------
-	void BaseApp::deactivate(const char* name) {
-		_stateMachine->deactivate(name);
-	}
+	//void BaseApp::deactivate(const char* name) {
+		//_stateMachine->deactivate(name);
+	//}
 
 
 	// -------------------------------------------------------

@@ -1,6 +1,7 @@
 #include "BaseEffect.h"
 
 void ds::FullScreenEffect::end() {
+	/*
 	ZoneTracker("FullScreenEffect::render");
 	if (_target != INVALID_RID) {
 		// set render target
@@ -21,4 +22,5 @@ void ds::FullScreenEffect::end() {
 		// restore back buffer
 		graphics::restoreBackbuffer();
 	}
+	*/
 }

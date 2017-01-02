@@ -8,8 +8,8 @@ namespace ds {
 class GameStateMachine {
 
 struct GameStateConnection {
-	int firstStateIndex;
-	int secondStateIndex;
+	StaticHash firstState;
+	StaticHash secondState;
 	int outcome;
 };
 
@@ -29,30 +29,33 @@ public:
 	}
 	void add(GameState* gameState);
 	void initializeStates();
-	void activate(const char* name);
-	void deactivate(const char* name);
+	//void activate(const char* name);
+	//void deactivate(const char* name);
 	bool contains(const char* name) const;
 	void update(float dt);
 	void render();
 	void onButtonDown(int button, int x, int y);
-	void onKeyDown(WPARAM virtualKey);
-	void onKeyUp(WPARAM virtualKey);
+	//void onKeyDown(WPARAM virtualKey);
+	//void onKeyUp(WPARAM virtualKey);
 	void onButtonUp(int button, int x, int y);
 	void onChar(int ascii);
 	void connect(const char* firstStateName, int outcome, const char* secondStateName);
 	void showDialog();
 	//void processEvents(const EventStream& events);
-	void init() {}
-	const char* getShortcut() const {
-		return "GSM";
-	}
+	//void init() {}
+	//const char* getShortcut() const {
+		//return "GSM";
+	//}
+	void push(const char* name);
+	void pop();
 private:
 	void handleStateTransition(int outcome);
 	int find(const char* name) const;
+	int find(const StaticHash& hash) const;
 	void switchState(int newIndex);
-	int _currentIndex;
-	GameState* _activeModalState;
-	GameState* _activeState;
+	//int _currentIndex;
+	//GameState* _activeModalState;
+	//GameState* _activeState;
 	GameStates _gameStates;
 	Connections _connections;
 	gui::ComponentModel<GameState*> _model;
