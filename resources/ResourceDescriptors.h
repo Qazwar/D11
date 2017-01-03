@@ -71,9 +71,13 @@ namespace ds {
 	};
 
 	struct SamplerStateDescriptor {
-		uint16_t addressU;
-		uint16_t addressV;
-		uint16_t addressW;
+		//uint16_t addressU;
+		//uint16_t addressV;
+		//uint16_t addressW;
+		const char* addressU;
+		const char* addressV;
+		const char* addressW;
+		const char* filter;
 	};
 
 	struct Shader {

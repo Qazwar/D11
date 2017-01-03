@@ -4,8 +4,8 @@
 namespace ds {
 
 	Scene::Scene(const SceneDescriptor& descriptor) : _descriptor(descriptor) , _active(false) {
-		//_meshBuffer = res::getMeshBuffer(descriptor.meshBuffer);
-		//_camera = graphics::getFPSCamera();
+		_meshBuffer = res::getMeshBuffer(descriptor.meshBuffer);
+		_camera = graphics::getFPSCamera();
 		_depthEnabled = descriptor.depthEnabled;
 
 

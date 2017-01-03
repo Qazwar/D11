@@ -236,9 +236,11 @@ namespace graphics {
 		}
 
 		ds::SamplerStateDescriptor ssDesc;
-		ssDesc.addressU = 2;
-		ssDesc.addressV = 2;
-		ssDesc.addressW = 2;
+		ssDesc.addressU = "CLAMP";
+		ssDesc.addressV = "CLAMP";
+		ssDesc.addressW = "CLAMP";
+		ssDesc.filter = "LINEAR";
+
 		RID ss_id = ds::res::createSamplerState("SpriteSampler", ssDesc);
 
 		RID shader_id = ds::res::createEmptyShader("SpriteShader");
@@ -295,9 +297,10 @@ namespace graphics {
 		
 		// FIXME: use SpriteSampler
 		ds::SamplerStateDescriptor ssDesc;
-		ssDesc.addressU = 2;
-		ssDesc.addressV = 2;
-		ssDesc.addressW = 2;
+		ssDesc.addressU = "CLAMP";
+		ssDesc.addressV = "CLAMP";
+		ssDesc.addressW = "CLAMP";
+		ssDesc.filter = "LINEAR";
 		RID ss_id = ds::res::createSamplerState("SquareSampler", ssDesc);
 		RID il_id = INVALID_ID;
 		if (ds::res::contains(SID("SquareInputLayout"), ds::ResourceType::INPUTLAYOUT)) {

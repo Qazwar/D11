@@ -40,6 +40,7 @@
 #include "parser\InputLayoutParser.h"
 #include "parser\MeshParser.h"
 #include "parser\MeshBufferParser.h"
+#include "parser\SceneParser.h"
 
 namespace ds {
 
@@ -286,9 +287,9 @@ namespace ds {
 			nparsers[SID("input_layout")] = new InputLayoutParser(_resCtx);
 			nparsers[SID("mesh")] = new MeshParser(_resCtx);
 			nparsers[SID("mesh_buffer")] = new MeshBufferParser(_resCtx);
+			nparsers[SID("scene")] = new SceneParser(_resCtx);
 
 			//parsers[SID("quad_buffer")] = parseQuadBuffer;
-			//parsers[SID("scene")] = parseScene;
 			//parsers[SID("texture_cube")] = parseTextureCube;
 			//parsers[SID("skybox")] = parseSkyBox;									
 			
