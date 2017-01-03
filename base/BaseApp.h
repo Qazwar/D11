@@ -77,10 +77,13 @@ namespace ds {
 		GameEditor* _editor;
 		KeyStates _keyStates;
 		ButtonState _buttonState;		
-		std::chrono::steady_clock::time_point _start, _now;
+		LARGE_INTEGER _start, _now;
 		std::thread _thread;
 		SystemInfo _systemInfo;
 		DebugInfo _debugInfo;
+
+		LARGE_INTEGER _frequency;
+		LONGLONG _overhead;
 	};
 
 }

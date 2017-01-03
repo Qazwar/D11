@@ -1639,7 +1639,7 @@ namespace gui {
 			if (v > maxValue) {
 				v = maxValue;
 			}
-			float current = v / delta;
+			float current = (v - minValue) / delta;
 			float yp = current * height;
 			p = guiContext->position;
 			p.y -= ( height - yp * 0.5f);

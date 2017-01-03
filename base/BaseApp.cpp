@@ -71,8 +71,15 @@ namespace ds {
 		
 		gDrawCounter = new DrawCounter;
 		_buttonState.processed = true;
-		_start = std::chrono::steady_clock::now();
-
+		// prepare timing
+		QueryPerformanceFrequency(&_frequency);
+		LARGE_INTEGER start;
+		LARGE_INTEGER stop;
+		QueryPerformanceCounter(&start);
+		QueryPerformanceCounter(&stop);
+		_overhead = stop.QuadPart - start.QuadPart;
+		QueryPerformanceCounter(&_start);
+		timer::init_timing();
 		gDefaultMemory = new DefaultAllocator(_settings.initialMemorySize * 1024 * 1024);
 		gStringBuffer = new CharBuffer();
 		plugins::init();
@@ -87,6 +94,7 @@ namespace ds {
 		events::shutdown();
 		input::shutdown();
 		res::shutdown();
+		timer::shutdown_timing();
 		delete _shortcuts;
 		delete gDrawCounter;
 		delete _stateMachine;
@@ -139,6 +147,8 @@ namespace ds {
 
 
 	bool BaseApp::prepare() {
+		
+
 		//gDefaultMemory = new DefaultAllocator(_settings.initialMemorySize * 1024 * 1024);
 		// let the actual app define the settings
 		prepare(&_settings);
@@ -174,9 +184,7 @@ namespace ds {
 			init();
 			LOG << "------------------ end load content ------------------";
 			res::debug();
-			_loading = false;
-			_start = std::chrono::steady_clock::now();
-
+			_loading = false;			
 			// FIXME: will handle repository reloading - can we do it like this?
 			if (_settings.reloading) {
 				_thread = std::thread(repoReloading, 2);
@@ -196,6 +204,7 @@ namespace ds {
 			LOG << "F4 = toggle update";
 			_shortcuts->debug();
 			events::reset();
+			QueryPerformanceCounter(&_start);
 			return true;
 		}			
 		
@@ -207,15 +216,13 @@ namespace ds {
 
 	void BaseApp::buildFrame() {
 		if (_alive) {
-			gDrawCounter->reset();
-			perf::reset();
+			gDrawCounter->reset();			
 			_debugInfo.updated = false;
-			_now = std::chrono::steady_clock::now();
-			auto duration = _now - _start;
-			auto time_span = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
-			double elapsed = static_cast<double>(time_span) / 1000.0f / 1000.0f;
+			QueryPerformanceCounter(&_now);
+			double elapsed = ((_now.QuadPart - _start.QuadPart) * 1000.0 / _frequency.QuadPart) * 0.001;
+			//perf::addTimerValue("Elapsed", elapsed);
 			_start = _now;
-			//events::reset();
+			perf::reset();
 			tick(elapsed);
 			{
 				ZoneTracker az("Audio:mix");
@@ -410,8 +417,11 @@ namespace ds {
 		if (_debugInfo.showGameStateDialog) {
 			_stateMachine->showDialog();
 		}
-		_editor->render();
-		_editor->showDialog();
+		{
+			ZoneTracker("Render::editor");
+			_editor->render();
+			_editor->showDialog();
+		}
 		{
 			ZoneTracker("Render::endFrame");
 			gui::endFrame();
