@@ -17,6 +17,7 @@ namespace ds {
 		PostProcess(const PostProcessDescriptor& descriptor);
 		virtual ~PostProcess() {}
 		virtual void init() {}
+		void begin();
 		void render();
 		virtual void tick(float dt) = 0;
 		virtual void onActivate() {}

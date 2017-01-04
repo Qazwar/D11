@@ -42,6 +42,9 @@ namespace ds {
 	void GrayFadePostProcess::tick(float dt) {
 		if (_active) {
 			_timer += dt;
+			if (_timer > _descriptor.ttl) {
+				_timer = _descriptor.ttl;
+			}
 
 		}
 	}

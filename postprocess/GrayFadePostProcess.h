@@ -17,7 +17,6 @@ namespace ds {
 	public:
 		GrayFadePostProcess(const GrayFadePostProcessDescriptor& descriptor);
 		virtual ~GrayFadePostProcess();
-		void render();
 		void tick(float dt);
 		void onActivate() {
 			_timer = 0.0f;
