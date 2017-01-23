@@ -11,6 +11,7 @@
 #include "core\plugin\Plugin.h"
 #include <core\base\InputStates.h>
 #include "..\editor\GameEditor.h"
+#include "StepTimer.h"
 
 namespace ds {
 
@@ -67,8 +68,6 @@ namespace ds {
 		Settings _settings;
 		HINSTANCE hInstance;
 		HWND m_hWnd;
-		float _dt;
-		float _accu;
 		bool _loading;
 		bool _running;
 		bool _alive;
@@ -77,13 +76,10 @@ namespace ds {
 		GameEditor* _editor;
 		KeyStates _keyStates;
 		ButtonState _buttonState;		
-		LARGE_INTEGER _start, _now;
 		std::thread _thread;
 		SystemInfo _systemInfo;
 		DebugInfo _debugInfo;
-
-		LARGE_INTEGER _frequency;
-		LONGLONG _overhead;
+		StepTimer _stepTimer;
 	};
 
 }

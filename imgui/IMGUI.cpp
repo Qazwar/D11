@@ -1042,6 +1042,8 @@ namespace gui {
 	void InputInt(const char* label, int* v,int minValue,int maxValue,int step) {
 		HashedId id = HashPointer(v);
 		v2 p = guiContext->position;
+		guiContext->addText(p, label);
+		p.x += guiContext->settings[GS_LABELSIZE];
 		guiContext->addImage(p, guiContext->textures[ICN_MINUS], BOX_HEIGHT*0.5f);
 		if (isBoxSelected(id, p, v2(BOX_HEIGHT, BOX_HEIGHT))) {
 			*v -= step;			
@@ -1063,11 +1065,8 @@ namespace gui {
 		sprintf_s(guiContext->tempBuffer, 64, "%d", *v);
 		v2 dim = getTextSize(guiContext->tempBuffer);
 		p = guiContext->position;
-		p.x += BOX_HEIGHT + (INPUT_BOX_WIDTH - dim.x) * 0.5f;
+		p.x += guiContext->settings[GS_LABELSIZE] + BOX_HEIGHT + (INPUT_BOX_WIDTH - dim.x) * 0.5f;
 		guiContext->addText(p, guiContext->tempBuffer);
-		p = guiContext->position;
-		p.x += INPUT_BOX_WIDTH + BOX_HEIGHT * 2.0f + 10.0f;
-		guiContext->addText(p, label);
 		guiContext->nextPosition();
 	}
 

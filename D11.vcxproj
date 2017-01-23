@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -149,6 +149,7 @@
     <ClCompile Include="resources\parser\RenderTargetParser.cpp" />
     <ClCompile Include="resources\parser\ResourceParser.cpp" />
     <ClCompile Include="resources\parser\SamplerStateParser.cpp" />
+    <ClCompile Include="resources\parser\SceneParser.cpp" />
     <ClCompile Include="resources\parser\ScriptParser.cpp" />
     <ClCompile Include="resources\parser\ShaderParser.cpp" />
     <ClCompile Include="resources\parser\SoundParser.cpp" />
@@ -172,6 +173,7 @@
     <ClInclude Include="base\BaseApp.h" />
     <ClInclude Include="base\InputSystem.h" />
     <ClInclude Include="base\Settings.h" />
+    <ClInclude Include="base\StepTimer.h" />
     <ClInclude Include="dialogs\GUIDialog.h" />
     <ClInclude Include="editor\EditorPlugin.h" />
     <ClInclude Include="editor\GameEditor.h" />
@@ -235,6 +237,7 @@
     <ClInclude Include="resources\parser\RenderTargetParser.h" />
     <ClInclude Include="resources\parser\ResourceParser.h" />
     <ClInclude Include="resources\parser\SamplerStateParser.h" />
+    <ClInclude Include="resources\parser\SceneParser.h" />
     <ClInclude Include="resources\parser\ScriptParser.h" />
     <ClInclude Include="resources\parser\ShaderParser.h" />
     <ClInclude Include="resources\parser\SoundParser.h" />

@@ -60,9 +60,9 @@ namespace ds {
 	}
 
 	BaseApp::BaseApp() {
-		_alive = true;
-		_dt = 1.0f / 60.0f;
-		_accu = 0.0f;
+		//_alive = true;
+		//_dt = 1.0f / 60.0f;
+		//_accu = 0.0f;
 		_loading = true;
 		_debugInfo.createReport = false;
 		_debugInfo.updated = false;
@@ -72,17 +72,19 @@ namespace ds {
 		gDrawCounter = new DrawCounter;
 		_buttonState.processed = true;
 		// prepare timing
-		QueryPerformanceFrequency(&_frequency);
-		LARGE_INTEGER start;
-		LARGE_INTEGER stop;
-		QueryPerformanceCounter(&start);
-		QueryPerformanceCounter(&stop);
-		_overhead = stop.QuadPart - start.QuadPart;
-		QueryPerformanceCounter(&_start);
+		//QueryPerformanceFrequency(&_frequency);
+		//LARGE_INTEGER start;
+		//LARGE_INTEGER stop;
+		//QueryPerformanceCounter(&start);
+		//QueryPerformanceCounter(&stop);
+		//_overhead = stop.QuadPart - start.QuadPart;
+		//QueryPerformanceCounter(&_start);
 		timer::init_timing();
 		gDefaultMemory = new DefaultAllocator(_settings.initialMemorySize * 1024 * 1024);
 		gStringBuffer = new CharBuffer();
 		plugins::init();
+		_stepTimer.SetFixedTimeStep(true);
+		_stepTimer.SetTargetElapsedSeconds(1.0 / 60.0);
 	}
 
 
@@ -204,7 +206,7 @@ namespace ds {
 			LOG << "F4 = toggle update";
 			_shortcuts->debug();
 			events::reset();
-			QueryPerformanceCounter(&_start);
+			//QueryPerformanceCounter(&_start);
 			return true;
 		}			
 		
@@ -218,12 +220,15 @@ namespace ds {
 		if (_alive) {
 			gDrawCounter->reset();			
 			_debugInfo.updated = false;
-			QueryPerformanceCounter(&_now);
-			double elapsed = ((_now.QuadPart - _start.QuadPart) * 1000.0 / _frequency.QuadPart) * 0.001;
+			//QueryPerformanceCounter(&_now);
+			//double elapsed = ((_now.QuadPart - _start.QuadPart) * 1000.0 / _frequency.QuadPart) * 0.001;
 			//perf::addTimerValue("Elapsed", elapsed);
-			_start = _now;
+			//_start = _now;
 			perf::reset();
-			tick(elapsed);
+			_stepTimer.Tick([&]() {
+				tick(_stepTimer.GetElapsedSeconds());
+			});
+			//tick(elapsed);
 			{
 				ZoneTracker az("Audio:mix");
 				audio::mix();
@@ -338,32 +343,33 @@ namespace ds {
 			}
 		}
 		
-		_accu += elapsed;
+		//_accu += elapsed;
 		perf::tickFPS(elapsed);
 		{
 			ZoneTracker u1("UPDATE");
+			
 			int uc = 0;
-			while (_accu >= _dt) {
+			//while (_accu >= _dt) {
 				if (_running) {
 					{
 						ZoneTracker u2("UPDATE::main");
-						update(_dt);
+						update(elapsed);
 					}
-					plugins::tick(_dt);
-					_stateMachine->update(_dt);
+					plugins::tick(elapsed);
+					_stateMachine->update(elapsed);
 					// updating particles
 					ParticleManager* pm = res::getParticleManager();
 					if (pm != 0) {
-						pm->update(_dt);
+						pm->update(elapsed);
 					}
 				}
-				_accu -= _dt;
+				//_accu -= _dt;
 				_debugInfo.updated = true;
 				++uc;
-			}		
-			if (uc > 2) {
-				LOG << "uc: " << uc;
-			}
+			//}		
+			//if (uc > 2) {
+				//LOG << "uc: " << uc;
+			//}
 		}		
 		if (_debugInfo.updated) {
 			events::reset();

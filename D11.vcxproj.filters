@@ -307,6 +307,9 @@
     <ClCompile Include="effects\BaseEffect.cpp">
       <Filter>effects</Filter>
     </ClCompile>
+    <ClCompile Include="resources\parser\SceneParser.cpp">
+      <Filter>resources\parser</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="renderer\render_types.h">
@@ -569,6 +572,12 @@
     </ClInclude>
     <ClInclude Include="effects\BaseEffect.h">
       <Filter>effects</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\parser\SceneParser.h">
+      <Filter>resources\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="base\StepTimer.h">
+      <Filter>base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
