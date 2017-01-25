@@ -81,7 +81,7 @@ public:
 		int ret = _dialog->onButton(button, x, y, true);
 		if (ret != -1) {
 			if (ret == 666) {
-				events::send(InternalEvents::ENGINE_SHUTDOWN);
+				events::send(events::SE_SHUTDOWN_SYSTEM);
 				return 0;
 			}
 			int tmp = onGUIButton(ret);
@@ -129,7 +129,7 @@ public:
 		int ret = _dialog->onButton(button, x, y, true);
 		if (ret != -1) {
 			if (ret == 666) {
-				events::send(InternalEvents::ENGINE_SHUTDOWN);
+				events::send(events::SE_SHUTDOWN_SYSTEM);
 				return 0;
 			}
 			int tmp = onGUIButton(ret);

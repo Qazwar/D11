@@ -12,6 +12,7 @@
 #include <thread>
 #include "..\audio\AudioManager.h"
 #include "..\plugins\PerfHUDPlugin.h"
+#include <core\base\GameObject.h>
 
 void ErrorExit(LPTSTR lpszFunction)
 {
@@ -85,6 +86,7 @@ namespace ds {
 		plugins::init();
 		_stepTimer.SetFixedTimeStep(true);
 		_stepTimer.SetTargetElapsedSeconds(1.0 / 60.0);
+		game::init();
 	}
 
 
@@ -102,6 +104,7 @@ namespace ds {
 		delete _stateMachine;
 		plugins::shutdown();
 		graphics::shutdown();
+		game::shutdown();
 		//gDefaultMemory->printOpenAllocations();		
 		delete gStringBuffer;
 		delete gDefaultMemory;		
@@ -220,15 +223,10 @@ namespace ds {
 		if (_alive) {
 			gDrawCounter->reset();			
 			_debugInfo.updated = false;
-			//QueryPerformanceCounter(&_now);
-			//double elapsed = ((_now.QuadPart - _start.QuadPart) * 1000.0 / _frequency.QuadPart) * 0.001;
-			//perf::addTimerValue("Elapsed", elapsed);
-			//_start = _now;
 			perf::reset();
 			_stepTimer.Tick([&]() {
 				tick(_stepTimer.GetElapsedSeconds());
 			});
-			//tick(elapsed);
 			{
 				ZoneTracker az("Audio:mix");
 				audio::mix();
@@ -242,7 +240,7 @@ namespace ds {
 			// check for internal events
 			if (events::num() > 0) {
 				for (uint32_t i = 0; i < events::num(); ++i) {
-					if (events::getType(i) == InternalEvents::ENGINE_SHUTDOWN) {
+					if (events::getType(i) == events::SE_SHUTDOWN_SYSTEM) {
 						shutdown();
 					}
 				}
@@ -250,6 +248,9 @@ namespace ds {
 			if (_debugInfo.updated && _debugInfo.createReport) {
 				saveReport();
 				_debugInfo.createReport = false;
+			}
+			if (_debugInfo.updated) {
+				events::reset();
 			}
 		}
 	}
@@ -341,39 +342,27 @@ namespace ds {
 					}
 				}
 			}
-		}
-		
-		//_accu += elapsed;
+		}		
 		perf::tickFPS(elapsed);
 		{
 			ZoneTracker u1("UPDATE");
-			
-			int uc = 0;
-			//while (_accu >= _dt) {
-				if (_running) {
-					{
-						ZoneTracker u2("UPDATE::main");
-						update(elapsed);
-					}
-					plugins::tick(elapsed);
-					_stateMachine->update(elapsed);
-					// updating particles
-					ParticleManager* pm = res::getParticleManager();
-					if (pm != 0) {
-						pm->update(elapsed);
-					}
+			if (_running) {
+				game::update_game_objects(elapsed);
+				{
+					ZoneTracker u2("UPDATE::main");
+					update(elapsed);
 				}
-				//_accu -= _dt;
-				_debugInfo.updated = true;
-				++uc;
-			//}		
-			//if (uc > 2) {
-				//LOG << "uc: " << uc;
-			//}
+				plugins::tick(elapsed);
+				_stateMachine->update(elapsed);
+				// updating particles
+				ParticleManager* pm = res::getParticleManager();
+				if (pm != 0) {
+					pm->update(elapsed);
+				}
+			}
+			_debugInfo.updated = true;
 		}		
-		if (_debugInfo.updated) {
-			events::reset();
-		}
+		
 	}
 
 	// -------------------------------------------------------
@@ -415,6 +404,10 @@ namespace ds {
 			render();
 		}	
 		plugins::preRender();
+		{
+			ZoneTracker("Render::GameObjects");
+			game::render_game_objects();
+		}
 		{
 			ZoneTracker("Render::stateMachine");
 			_stateMachine->render();

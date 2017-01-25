@@ -1,6 +1,7 @@
 #include "InputSystem.h"
 #include <Windows.h>
 #include "core\log\Log.h"
+#include "core\base\EventStream.h"
 
 namespace ds {
 
@@ -53,9 +54,11 @@ namespace ds {
 						//LOG << "flags: " << raw->data.mouse.usFlags << " buttons: " << raw->data.mouse.ulButtons << " button flags: " << raw->data.mouse.usButtonFlags << " button data: " << raw->data.mouse.usButtonData << " button raw: " << raw->data.mouse.ulRawButtons << " button lastX: " << raw->data.mouse.lLastX << " button lastY: " << raw->data.mouse.lLastY;
 					//}
 					if (raw->data.mouse.ulButtons == 1) {
+						events::send(events::SE_BUTTON_ONE_DOWN);
 						inputContext->mouseButtonState[0] = 1;
 					}
 					if (raw->data.mouse.ulButtons == 2) {
+						events::send(events::SE_BUTTON_ONE_UP);
 						inputContext->mouseButtonState[0] = 0;
 					}
 					if (raw->data.mouse.ulButtons == 4) {
