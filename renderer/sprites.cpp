@@ -90,6 +90,24 @@ namespace ds {
 		}
 	}
 
+	v2 SpriteBuffer::getTextSize(RID fontID, const char* text, int padding, float scaleX, float scaleY) {
+		ds::Bitmapfont* font = ds::res::getFont(fontID);
+		v2 ret;
+		int x = 0;
+		int len = strlen(text);
+		for (int cnt = 0; cnt < len; ++cnt) {
+			char c = text[cnt];
+			const ds::Texture& t = font->get(c);
+			float dimX = t.dim.x * scaleX;
+			float dimY = t.dim.y * scaleY;
+			if (dimY > ret.y) {
+				ret.y = dimY;
+			}
+			ret.x += dimX + padding;
+		}
+		return ret;
+	}
+
 	void SpriteBuffer::drawTiledXY(const v2& position, const v2& size, const Texture& texture, float cornersize, const Color& color) {
 		v2 center = position;
 		center.x += size.x * 0.5f;

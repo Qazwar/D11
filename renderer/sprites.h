@@ -26,7 +26,7 @@ namespace ds {
 		void drawLine(const v2& start, const v2& end, const ds::Texture& texture, const Color& color = Color(255, 255, 255, 255), RID material = INVALID_RID);
 		void begin();
 		void end();
-
+		v2 getTextSize(RID fontID, const char* text, int padding = 4, float scaleX = 1.0f, float scaleY = 1.0f);
 		void drawScreenQuad(RID material);
 		RID getCurrentMaterial() const {
 			return _currentMtrl;
